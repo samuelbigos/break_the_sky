@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://src/BoidAlly.gd" type="Script" id=2]
+[ext_resource path="res://src/boids/BoidAlly.gd" type="Script" id=2]
 [ext_resource path="res://scenes/Bullet.tscn" type="PackedScene" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
@@ -13,8 +13,6 @@ SlowingRadius = 25.0
 AlignmentRadius = 10.0
 SeparationRadius = 7.0
 BulletScene = ExtResource( 3 )
-ShootCooldown = 1.5
-BulletSpeed = 800.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )

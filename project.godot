@@ -12,17 +12,32 @@ _global_script_classes=[ {
 "base": "BoidBase",
 "class": "BoidAlly",
 "language": "GDScript",
-"path": "res://src/BoidAlly.gd"
+"path": "res://src/boids/BoidAlly.gd"
 }, {
 "base": "Area2D",
 "class": "BoidBase",
 "language": "GDScript",
-"path": "res://src/BoidBase.gd"
+"path": "res://src/boids/BoidBase.gd"
 }, {
 "base": "BoidBase",
 "class": "BoidEnemyBase",
 "language": "GDScript",
-"path": "res://src/BoidEnemyBase.gd"
+"path": "res://src/boids/BoidEnemyBase.gd"
+}, {
+"base": "BoidEnemyBase",
+"class": "BoidEnemyBeacon",
+"language": "GDScript",
+"path": "res://src/boids/BoidEnemyBeacon.gd"
+}, {
+"base": "BoidEnemyBase",
+"class": "BoidEnemyDriller",
+"language": "GDScript",
+"path": "res://src/boids/BoidEnemyDriller.gd"
+}, {
+"base": "BoidEnemyBase",
+"class": "BoidEnemyLaser",
+"language": "GDScript",
+"path": "res://src/boids/BoidEnemyLaser.gd"
 }, {
 "base": "Node2D",
 "class": "Game",
@@ -38,6 +53,9 @@ _global_script_class_icons={
 "BoidAlly": "",
 "BoidBase": "",
 "BoidEnemyBase": "",
+"BoidEnemyBeacon": "",
+"BoidEnemyDriller": "",
+"BoidEnemyLaser": "",
 "Game": "",
 "Leader": ""
 }
@@ -50,8 +68,8 @@ config/icon="res://icon.png"
 
 [display]
 
-window/size/width=640
-window/size/height=360
+window/size/width=960
+window/size/height=540
 window/size/test_width=1280
 window/size/test_height=720
 window/stretch/mode="viewport"
@@ -96,6 +114,11 @@ formation_2={
 formation_3={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":51,"unicode":0,"echo":false,"script":null)
+ ]
+}
+boids_align={
+"deadzone": 0.5,
+"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
 

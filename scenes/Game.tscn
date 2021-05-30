@@ -1,46 +1,320 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scenes/Leader.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/PickupAdd.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scenes/BoidAlly.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/Game.gd" type="Script" id=4]
 [ext_resource path="res://scenes/BoidEnemyDriller.tscn" type="PackedScene" id=5]
-[ext_resource path="res://font/newsgeek.tres" type="DynamicFont" id=6]
+[ext_resource path="res://scenes/BoidEnemyBeacon.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/GUI.gd" type="Script" id=7]
+[ext_resource path="res://scenes/BoidEnemyLaser.tscn" type="PackedScene" id=8]
+[ext_resource path="res://src/Perk.gd" type="Script" id=9]
+[ext_resource path="res://src/PerkManager.gd" type="Script" id=10]
+[ext_resource path="res://assets/1px.png" type="Texture" id=11]
+[ext_resource path="res://font/fibberish.tres" type="DynamicFont" id=12]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 4 )
-Debug = true
 BoidScene = ExtResource( 3 )
 PickupAddScene = ExtResource( 2 )
-EnemyDrillerScene = ExtResource( 5 )
+InitialPickupAddCount = 5
 InitialBoidCount = 0
-BoidSpacing = 15
-PlayRadius = 500.0
+PlayRadius = 750.0
+EnemyDrillerScene = ExtResource( 5 )
+DrillerSpawnRate = 2.5
+EnemyLaserScene = ExtResource( 8 )
+EnemyBeaconScene = ExtResource( 6 )
 
 [node name="Leader" parent="." instance=ExtResource( 1 )]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+pause_mode = 2
 script = ExtResource( 7 )
 
+[node name="Perks" type="CenterContainer" parent="CanvasLayer"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -200.0
+margin_top = -155.0
+margin_right = 200.0
+margin_bottom = 155.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Perks"]
+margin_right = 400.0
+margin_bottom = 310.0
+mouse_filter = 2
+custom_constants/separation = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Perk1" type="Button" parent="CanvasLayer/Perks/VBoxContainer"]
+margin_right = 400.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 400, 100 )
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Perks/VBoxContainer/Perk1"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk1/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = -30.0
+margin_right = 48.0
+margin_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Desc" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk1/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = 2.0
+margin_right = 48.0
+margin_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Perk2" type="Button" parent="CanvasLayer/Perks/VBoxContainer"]
+margin_top = 105.0
+margin_right = 400.0
+margin_bottom = 205.0
+rect_min_size = Vector2( 300, 100 )
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Perks/VBoxContainer/Perk2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Label" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk2/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = -30.0
+margin_right = 48.0
+margin_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Desc" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk2/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = 2.0
+margin_right = 48.0
+margin_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Perk3" type="Button" parent="CanvasLayer/Perks/VBoxContainer"]
+margin_top = 210.0
+margin_right = 400.0
+margin_bottom = 310.0
+rect_min_size = Vector2( 300, 100 )
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Perks/VBoxContainer/Perk3"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Label" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk3/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = -30.0
+margin_right = 48.0
+margin_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Desc" type="Label" parent="CanvasLayer/Perks/VBoxContainer/Perk3/TextureRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -48.0
+margin_top = 2.0
+margin_right = 48.0
+margin_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Score" type="Label" parent="CanvasLayer"]
-margin_left = 564.978
-margin_top = 14.1421
-margin_right = 624.978
-margin_bottom = 30.1421
-custom_fonts/font = ExtResource( 6 )
+margin_left = 136.0
+margin_top = 48.0
+margin_right = 220.0
+margin_bottom = 76.0
+custom_fonts/font = ExtResource( 12 )
 text = "000000"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ScoreMulti" type="Label" parent="CanvasLayer"]
-margin_left = 564.978
-margin_top = 29.1421
-margin_right = 624.978
-margin_bottom = 45.1421
-custom_fonts/font = ExtResource( 6 )
+margin_left = 136.0
+margin_top = 24.0
+margin_right = 196.0
+margin_bottom = 56.0
+custom_fonts/font = ExtResource( 12 )
 text = "x1"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="PerkIn" type="Label" parent="CanvasLayer"]
+margin_left = 16.0
+margin_top = 72.0
+margin_right = 124.0
+margin_bottom = 104.0
+custom_fonts/font = ExtResource( 12 )
+text = "Perk At:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NextPerk" type="Label" parent="CanvasLayer"]
+margin_left = 136.0
+margin_top = 72.0
+margin_right = 262.0
+margin_bottom = 106.0
+custom_fonts/font = ExtResource( 12 )
+text = "000000"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PerkManager" type="Node" parent="."]
+script = ExtResource( 10 )
+
+[node name="Reload" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Reload"
+displayName = "Heat Reservoirs"
+displayDesc = "[-Reload]"
+reloadMod = 0.75
+
+[node name="Reinforce" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Reinforce"
+displayName = "Reinforcements"
+displayDesc = "[+Drones]"
+reinforceMod = 1
+
+[node name="Grouping" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Grouping"
+displayName = "Kinematics"
+displayDesc = "[+Grouping]"
+groupingMod = -2.0
+
+[node name="Damage" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Damage"
+displayName = "Armour Piercing"
+displayDesc = "[+Damage]"
+damageMod = 0.5
+
+[node name="Slowmo" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Damage"
+displayName = "Chrono Warp"
+displayDesc = "[+Slowmo] [Press F]"
+slowmoMod = 0.8
+
+[node name="Nuke" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Nuke"
+displayName = "Nuke"
+displayDesc = "[+Nuke] [Press Spacebar]"
+nukeMod = 0.8
+
+[node name="Speed" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Speed"
+displayName = "Orion Drive"
+displayDesc = "[+Speed]"
+boidSpeedMod = 250.0
+playerSpeedMod = 1.0
+
+[node name="Accuracy" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Accuracy"
+displayName = "Ballistics"
+displayDesc = "[+Accuracy]"
+spreadMod = 0.8
+
+[node name="Bullet" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Bullet"
+displayName = "Extended Barrels"
+displayDesc = "[+Bullet Speed]"
+bulletSpeedMod = 125.0
+
+[connection signal="button_up" from="CanvasLayer/Perks/VBoxContainer/Perk1" to="CanvasLayer" method="_on_Perk1_button_up"]
+[connection signal="button_up" from="CanvasLayer/Perks/VBoxContainer/Perk2" to="CanvasLayer" method="_on_Perk2_button_up"]
+[connection signal="button_up" from="CanvasLayer/Perks/VBoxContainer/Perk3" to="CanvasLayer" method="_on_Perk3_button_up"]

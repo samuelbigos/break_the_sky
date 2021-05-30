@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://src/boids/BoidEnemyBeacon.gd" type="Script" id=1]
+[ext_resource path="res://scenes/BulletBeacon.tscn" type="PackedScene" id=2]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 8.68022
+
+[node name="EnemyBeacon" type="Area2D" groups=[
+"enemy",
+]]
+script = ExtResource( 1 )
+MaxVelocity = 500.0
+PickupDropRate = 1.0
+Points = 100
+MaxHealth = 25.0
+BulletScene = ExtResource( 2 )
+BulletSpeed = 200.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )

@@ -8,8 +8,6 @@ radius = 5.98726
 [node name="Leader" type="Area2D"]
 rotation = 2.05929
 script = ExtResource( 1 )
-ForwardAccel = 4.0
-StrafeAccel = 4.0
 Damping = 0.05
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

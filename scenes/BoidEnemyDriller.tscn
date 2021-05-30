@@ -1,17 +1,16 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://src/BoidEnemyBase.gd" type="Script" id=1]
+[ext_resource path="res://src/boids/BoidEnemyDriller.gd" type="Script" id=1]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 8.68022
 
-[node name="BoidEnemyDriller" type="Area2D" groups=[
+[node name="EnemyDriller" type="Area2D" groups=[
 "enemy",
 ]]
 script = ExtResource( 1 )
-MaxVelocity = 750.0
+PickupDropRate = 0.1
+MaxHealth = 3.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
-
-[connection signal="area_entered" from="." to="." method="_on_BoidEnemyDriller_area_entered"]

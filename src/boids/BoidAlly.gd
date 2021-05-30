@@ -5,11 +5,9 @@ export var SlowingRadius = 100.0
 export var AlignmentRadius = 20.0
 export var SeparationRadius = 5.0
 export var CohesionRadius = 50.0
+export var HitDamage = 3.0
 
 export var BulletScene: PackedScene
-export var ShootCooldown = 2.0
-export var BulletSpeed = 200.0
-export var BulletSpread = 0.1
 
 var _game: Object = null
 var _target: Node2D
@@ -32,6 +30,8 @@ func setOffset(targetOffset: Vector2):
 func getVelocity():	return _velocity
 
 func _process(delta: float):
+	
+	MaxVelocity = _game.BaseBoidSpeed
 	
 	var targetPos = _target.global_position + (_target.transform.basis_xform(_targetOffset) / _target.scale)
 	var shootDir = (get_global_mouse_position() - global_position).normalized()
@@ -59,10 +59,12 @@ func _process(delta: float):
 			_shoot(shootDir)
 		
 func _shoot(dir: Vector2):
-	_shootCooldown = ShootCooldown
+	_shootCooldown = _game.BaseBoidReload
 	var bullet = BulletScene.instance()
-	dir += Vector2(-dir.y, dir.x) * rand_range(-BulletSpread, BulletSpread)
-	bullet.init(dir * BulletSpeed, 0, _game.PlayRadius)
+	var spread = _game.BaseBoidSpread
+	dir += Vector2(-dir.y, dir.x) * rand_range(-spread, spread)
+	bullet.init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius)
+	bullet._damage = _game.BaseBoidDamage
 	bullet.global_position = global_position
 	_game.add_child(bullet)
 	_game.pushBack(self)
@@ -89,5 +91,11 @@ func _destroy():
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy"):
-		area.destroy(false)
+		area.onHit(HitDamage)
+		_destroy()
+	
+	if area.is_in_group("laser"):
+		_destroy()
+		
+	if area.is_in_group("bullet") and area._alignment == 1:
 		_destroy()

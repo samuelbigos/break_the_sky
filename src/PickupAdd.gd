@@ -1,6 +1,8 @@
 extends Node2D
 
 export var Lifetime = 5.0
+export var AttractRange = 75.0
+var _player = null
 
 
 func _ready():
@@ -15,6 +17,11 @@ func _process(delta):
 	Lifetime -= delta
 	if Lifetime < 0.0:
 		queue_free()
+		
+	# attract
+	var dist = (_player.global_position - global_position).length()
+	if dist < AttractRange:
+		global_position += (_player.global_position - global_position).normalized() * (1.0 - (dist / AttractRange)) * delta * 150.0
 	
 func _draw():
 	drawArc(Vector2(0.0, 0.0), 8.0, 0.0, 360.0, Color.white, 2.0)

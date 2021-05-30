@@ -3,9 +3,16 @@ class_name BoidEnemyBase
 
 export var PickupDropRate = 0.25
 export var Points = 10
+export var MaxHealth = 1.0
 
 var _target: Node2D
 var _game: Object
+var _health
+
+
+func _ready():
+	connect("area_entered", self, "_on_BoidBase_area_entered")
+	_health = MaxHealth
 
 func init(game, target):
 	_game = game
@@ -32,30 +39,19 @@ func _process(delta: float):
 	
 func destroy(score: bool):
 	if is_queued_for_deletion():
-		return		
+		return
 	if score:
 		_game.addScore(Points)
 		if rand_range(0.0, 1.0) < PickupDropRate:
 			_game.spawnPickupAdd(global_position, false)	
 	queue_free()
 	
-func _draw():
-	var s = 3.0
-	var points = PoolVector2Array()
-	points.push_back(Vector2(-1.0, -2.0) * s)
-	points.push_back(Vector2(0.0, 2.0) * s)
-	points.push_back(Vector2(1.0, -2.0) * s)
-	var colours = PoolColorArray()
-	colours.push_back(Color.white)
-	colours.push_back(Color.white)
-	colours.push_back(Color.white)
-	draw_polygon(points, colours)
-	
-func onHit():
-	destroy(true)
+func onHit(damage: float):
+	_health -= damage
+	if _health <= 0.0:
+		destroy(true)
 
-func _on_BoidEnemyDriller_area_entered(area):
+func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0:
+		onHit(area._damage)
 		area.queue_free()
-		onHit()
-		
