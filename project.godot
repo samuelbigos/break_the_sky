@@ -9,17 +9,35 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "BoidBase",
+"class": "BoidAlly",
+"language": "GDScript",
+"path": "res://src/BoidAlly.gd"
+}, {
+"base": "Area2D",
+"class": "BoidBase",
+"language": "GDScript",
+"path": "res://src/BoidBase.gd"
+}, {
+"base": "BoidBase",
+"class": "BoidEnemyBase",
+"language": "GDScript",
+"path": "res://src/BoidEnemyBase.gd"
+}, {
 "base": "Node2D",
 "class": "Game",
 "language": "GDScript",
 "path": "res://src/Game.gd"
 }, {
-"base": "Sprite",
+"base": "Node2D",
 "class": "Leader",
 "language": "GDScript",
 "path": "res://src/Leader.gd"
 } ]
 _global_script_class_icons={
+"BoidAlly": "",
+"BoidBase": "",
+"BoidEnemyBase": "",
 "Game": "",
 "Leader": ""
 }
@@ -32,8 +50,8 @@ config/icon="res://icon.png"
 
 [display]
 
-window/size/width=1280
-window/size/height=720
+window/size/width=640
+window/size/height=360
 window/size/test_width=1280
 window/size/test_height=720
 window/stretch/mode="viewport"

@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://src/BoidAlly.gd" type="Script" id=2]
+[ext_resource path="res://scenes/Bullet.tscn" type="PackedScene" id=3]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 4.27867
+
+[node name="BoidAlly" type="Area2D"]
+script = ExtResource( 2 )
+MaxVelocity = 1500.0
+SlowingRadius = 25.0
+AlignmentRadius = 10.0
+SeparationRadius = 7.0
+BulletScene = ExtResource( 3 )
+ShootCooldown = 1.5
+BulletSpeed = 800.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[connection signal="area_entered" from="." to="." method="_on_BoidAlly_area_entered"]

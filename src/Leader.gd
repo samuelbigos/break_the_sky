@@ -1,4 +1,4 @@
-extends Sprite
+extends Node2D
 class_name Leader
 
 export var ForwardAccel = 1.0
@@ -29,6 +29,9 @@ func _process(delta):
 	if Input.is_action_pressed("d"):
 		_velocity += -left * ForwardAccel * delta
 
+	if (global_position + _velocity).length() > _game.PlayRadius - 5.0:
+		_velocity *= 0.0
+		
 	global_position += _velocity
 	_velocity *= pow(1.0 - clamp(Damping, 0.0, 1.0), delta * 60.0)
 	
@@ -38,3 +41,17 @@ func _process(delta):
 		_game.changeFormation(1, false)
 	if Input.is_action_just_pressed("formation_3"):
 		_game.changeFormation(2, false)
+		
+func addBoid(pos: Vector2):
+	_game.addBoid(pos);
+
+func _draw():
+	draw_circle(Vector2(0.0, 0.0), 5.0, Color.white)
+
+func _on_Leader_area_entered(area):
+	if area.is_in_group("pickupAdd"):
+		area.queue_free()
+		addBoid(area.global_position)
+		
+	if area.is_in_group("enemy"):
+		_game.lose()
