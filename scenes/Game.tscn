@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/1px.png" type="Texture" id=1]
+[ext_resource path="res://src/Leader.gd" type="Script" id=2]
+[ext_resource path="res://scenes/Boid.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/Game.gd" type="Script" id=4]
+
+[node name="Game" type="Node2D"]
+script = ExtResource( 4 )
+BoidScene = ExtResource( 3 )
+
+[node name="Leader" type="Sprite" parent="."]
+position = Vector2( 467.763, 342.092 )
+scale = Vector2( 10, 10 )
+texture = ExtResource( 1 )
+script = ExtResource( 2 )
+ForwardAccel = 10.0
+StrafeAccel = 10.0
+Damping = 0.05
