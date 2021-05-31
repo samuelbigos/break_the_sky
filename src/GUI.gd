@@ -11,10 +11,28 @@ onready var _perkButton1 = get_node("Perks/VBoxContainer/Perk1")
 onready var _perkButton2 = get_node("Perks/VBoxContainer/Perk2")
 onready var _perkButton3 = get_node("Perks/VBoxContainer/Perk3")
 
+onready var _perkAt = get_node("PerkIn")
+onready var _score = get_node("Score")
+onready var _scoreMulti = get_node("ScoreMulti")
+onready var _nextPerk = get_node("NextPerk")
+
 var _perkSelections = []
 
 signal onPerkSelected
 
+
+func _ready():
+	var fontCol = Colours.Secondary
+	_perkLabel1.add_color_override("font_color", fontCol)
+	_perkLabel2.add_color_override("font_color", fontCol)
+	_perkLabel3.add_color_override("font_color", fontCol)
+	_perkLabel1Desc.add_color_override("font_color", fontCol)
+	_perkLabel2Desc.add_color_override("font_color", fontCol)
+	_perkLabel3Desc.add_color_override("font_color", fontCol)
+	_score.add_color_override("font_color", fontCol)
+	_scoreMulti.add_color_override("font_color", fontCol)
+	_nextPerk.add_color_override("font_color", fontCol)
+	_perkAt.add_color_override("font_color", fontCol)
 
 func setScore(var score: int, var multi: float, threshold: int):
 	$Score.text = "%06d" % score

@@ -6,12 +6,14 @@ var state = BoidEnemyLaser.LaserState.Inactive
 func _draw():
 	if state == BoidEnemyLaser.LaserState.Inactive:
 		return
-			
-	var size = Vector2($CollisionShape2D.shape.extents.x * 2.0, $CollisionShape2D.shape.extents.y * 2.0)
-	var rect = Rect2(-size * 0.5, size)
 		
 	if state == BoidEnemyLaser.LaserState.Charging:
-		draw_rect(rect, Color.red, false, 2.0)
+		if OS.get_system_time_msecs() % 100 > 50:
+			var size = Vector2($CollisionShape2D.shape.extents.x * 1.0, $CollisionShape2D.shape.extents.y * 2.0)
+			var rect = Rect2(-size * 0.5, size)
+			draw_rect(rect, Colours.Accent, false, 4.0)
 			
 	if state == BoidEnemyLaser.LaserState.Firing:
-		draw_rect(rect, Color.white, true, 2.0)
+		var size = Vector2($CollisionShape2D.shape.extents.x * 2.0, $CollisionShape2D.shape.extents.y * 2.0)
+		var rect = Rect2(-size * 0.5, size)
+		draw_rect(rect, Colours.White, true, 2.0)

@@ -11,7 +11,7 @@
 [ext_resource path="res://src/Perk.gd" type="Script" id=9]
 [ext_resource path="res://src/PerkManager.gd" type="Script" id=10]
 [ext_resource path="res://assets/1px.png" type="Texture" id=11]
-[ext_resource path="res://font/fibberish.tres" type="DynamicFont" id=12]
+[ext_resource path="res://assets/font/fibberish.tres" type="DynamicFont" id=12]
 [ext_resource path="res://src/Background.gd" type="Script" id=13]
 [ext_resource path="res://assets/clouds/cloud1.png" type="Texture" id=14]
 [ext_resource path="res://assets/clouds/cloud3.png" type="Texture" id=15]
@@ -22,6 +22,7 @@
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 4 )
+Debug = true
 BoidScene = ExtResource( 3 )
 PickupAddScene = ExtResource( 2 )
 InitialPickupAddCount = 5
@@ -33,6 +34,7 @@ EnemyLaserScene = ExtResource( 8 )
 EnemyBeaconScene = ExtResource( 6 )
 
 [node name="Background" type="Node2D" parent="."]
+z_index = -2
 script = ExtResource( 13 )
 Clouds = [ ExtResource( 14 ), ExtResource( 16 ), ExtResource( 15 ), ExtResource( 17 ), ExtResource( 19 ), ExtResource( 18 ) ]
 
@@ -216,10 +218,10 @@ __meta__ = {
 }
 
 [node name="Score" type="Label" parent="CanvasLayer"]
-margin_left = 136.0
-margin_top = 48.0
-margin_right = 220.0
-margin_bottom = 76.0
+margin_left = 64.0
+margin_top = 56.0
+margin_right = 148.0
+margin_bottom = 84.0
 custom_fonts/font = ExtResource( 12 )
 text = "000000"
 __meta__ = {
@@ -227,17 +229,19 @@ __meta__ = {
 }
 
 [node name="ScoreMulti" type="Label" parent="CanvasLayer"]
-margin_left = 136.0
-margin_top = 24.0
-margin_right = 196.0
-margin_bottom = 56.0
+margin_left = 64.0
+margin_top = 80.0
+margin_right = 148.0
+margin_bottom = 112.0
 custom_fonts/font = ExtResource( 12 )
 text = "x1"
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PerkIn" type="Label" parent="CanvasLayer"]
+visible = false
 margin_left = 16.0
 margin_top = 72.0
 margin_right = 124.0
@@ -249,6 +253,7 @@ __meta__ = {
 }
 
 [node name="NextPerk" type="Label" parent="CanvasLayer"]
+visible = false
 margin_left = 136.0
 margin_top = 72.0
 margin_right = 262.0

@@ -25,7 +25,7 @@ var _pulses: int
 
 
 func _ready():
-	pass
+	$Sprite.modulate = Colours.Secondary
 
 func _process(delta: float):
 	var distToTarget = (global_position - _target.global_position).length()
@@ -55,16 +55,16 @@ func _process(delta: float):
 				firePulse()
 				_beaconDuration = BeaconPulseDuration
 				
+	rotation = -atan2(_velocity.x, _velocity.y)
+				
 func firePulse():
 	for i in range(0, BulletsPerPulse):
 		var bullet = BulletScene.instance()
 		var f = float(i) * PI * 2.0 / float(BulletsPerPulse)
-		bullet.init(Vector2(sin(f), -cos(f)).normalized() * BulletSpeed, 1, _game.PlayRadius)
-		bullet.global_position = global_position
+		var dir = Vector2(sin(f), -cos(f)).normalized()
+		bullet.init(dir * BulletSpeed, 1, _game.PlayRadius)
+		bullet.global_position = global_position + dir * 32.0
 		_game.add_child(bullet)
 	
 func destroy(score: bool):
 	.destroy(score)
-	
-func _draw():
-	draw_circle(Vector2(0.0, 0.0), 10.0, Colours.Secondary)

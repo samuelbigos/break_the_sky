@@ -28,6 +28,7 @@ func init():
 			cloud.modulate = Colours.White
 			var s = rand_range(0.5, 0.75)
 			cloud.scale = Vector2(s, s)
+			cloud.z_as_relative = false
 			cloud.z_index = 1
 			_closeClouds.append(cloud)
 			_closeCloudSpeeds.append(rand_range(CloudSpeed - CloudSpeed * 0.25, CloudSpeed + CloudSpeed * 0.25))
@@ -35,8 +36,10 @@ func init():
 			cloud.modulate = Colours.Tertiary
 			var s = rand_range(1.0, 1.5)
 			cloud.scale = Vector2(s, s)
+			cloud.z_as_relative = false
+			cloud.z_index = -1
 			_farClouds.append(cloud)
-			_farCloudSpeeds.append(rand_range(CloudSpeed - CloudSpeed * 0.25, CloudSpeed + CloudSpeed * 0.25) * 0.5)
+			_farCloudSpeeds.append(rand_range(CloudSpeed - CloudSpeed * 0.25, CloudSpeed + CloudSpeed * 0.25) * 0.66)
 			
 		add_child(cloud)
 		

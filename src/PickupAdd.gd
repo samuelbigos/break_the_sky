@@ -24,9 +24,9 @@ func _process(delta):
 		global_position += (_player.global_position - global_position).normalized() * (1.0 - (dist / AttractRange)) * delta * 150.0
 	
 func _draw():
-	drawArc(Vector2(0.0, 0.0), 8.0, 0.0, 360.0, Color.white, 2.0)
-	draw_line(Vector2(-3.0, 0.0), Vector2(3.0, 0.0), Color.white, 2.0)
-	draw_line(Vector2(0.0, -3.0), Vector2(0.0, 3.0), Color.white, 2.0)
+	drawArc(Vector2(0.0, 0.0), 10.0, 0.0, 360.0, Colours.Secondary, 3.0)
+	draw_line(Vector2(-5.0, 0.0), Vector2(5.0, 0.0), Colours.Secondary, 3.0)
+	draw_line(Vector2(0.0, -5.0), Vector2(0.0, 5.0), Colours.Secondary, 3.0)
 	
 func drawArc(center, radius, angleTo, angleFrom, color, thickness):
 	var pointNum = 8

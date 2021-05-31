@@ -23,6 +23,8 @@ var _maxVelBase: float
 func _ready():
 	_maxVelBase = MaxVelocity
 	$LaserArea.monitorable = false
+	$Sprite.modulate = Colours.Secondary
+	$Rotor.modulate = Colours.Secondary
 
 func _process(delta: float):
 	var distToTarget = (global_position - _target.global_position).length()
@@ -40,6 +42,7 @@ func _process(delta: float):
 			laserCharging()
 			
 	if _laserState == LaserState.Charging:
+		$LaserArea.update()
 		_laserCharge -= delta
 		if _laserCharge < 0.0:
 			_laserState = LaserState.Firing
@@ -52,8 +55,11 @@ func _process(delta: float):
 			_laserState = LaserState.Inactive
 			_laserCooldown = LaserCooldown
 			laserInactive()
-			
+	
 	$LaserArea.state = _laserState
+	$Rotor.rotation = fmod($Rotor.rotation + 50.0 * delta, PI * 2.0)
+	
+	rotation = -atan2(_velocity.x, _velocity.y)
 	
 func laserCharging():
 	$LaserArea.update()
@@ -76,16 +82,3 @@ func _steeringPursuit(targetPos: Vector2, targetVel: Vector2):
 	
 func destroy(score: bool):
 	.destroy(score)
-	
-func _draw():
-	var s = 7.0
-	var points = PoolVector2Array()
-	points.push_back(Vector2(-1.0, -2.0) * s)
-	points.push_back(Vector2(0.0, 2.0) * s)
-	points.push_back(Vector2(1.0, -2.0) * s)
-	var colours = PoolColorArray()
-	var col = Colours.Secondary
-	colours.push_back(col)
-	colours.push_back(col)
-	colours.push_back(col)
-	draw_polygon(points, colours)

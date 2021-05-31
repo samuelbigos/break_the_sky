@@ -3,9 +3,23 @@ class_name BoidBase
 
 export var MaxVelocity = 1000.0
 export var Damping = 0.05
+export var TrailLength = 5
+export var TrailPeriod = 0.05
+export var HitParticles: PackedScene
 
 var _velocity: Vector2
+var _trailPoints = []
+var _trailTimer = 0.0
 
+
+func _process(delta):
+	if TrailLength > 0:
+		_trailTimer -= delta
+		if _trailTimer < 0.0:
+			_trailTimer = TrailPeriod
+			_trailPoints.append(global_position)
+			if _trailPoints.size() > TrailLength:
+				_trailPoints.remove(0)
 
 func _steeringPursuit(targetPos: Vector2, targetVel: Vector2):
 	var desiredVelocity = (targetPos - global_position).normalized() * MaxVelocity

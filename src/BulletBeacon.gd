@@ -5,6 +5,7 @@ var _alignment: int
 var _playRadius: float
 var _radius = 5.0
 var _damage = 1.0
+var _health = 1.0
 
 func getAlignment(): return _alignment
 
@@ -22,6 +23,12 @@ func _process(delta):
 	global_position += _velocity * delta
 	if global_position.length() > _playRadius:
 		queue_free()
+		
+func onHit():
+	_health -= 1.0
+	if (_health <= 0.0):
+		queue_free()
 
 func _draw():
-	draw_circle(Vector2(0.0, 0.0), _radius, Color.white)
+	draw_circle(Vector2(0.0, 0.0), _radius, Colours.Secondary)
+	draw_circle(Vector2(0.0, 0.0), _radius - 2.0, Colours.White)

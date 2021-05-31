@@ -1,10 +1,13 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyLaser.gd" type="Script" id=1]
 [ext_resource path="res://src/Laser.gd" type="Script" id=2]
+[ext_resource path="res://assets/enemy-laser.png" type="Texture" id=3]
+[ext_resource path="res://assets/enemy-laser-rotor.png" type="Texture" id=4]
+[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CircleShape2D" id=1]
-radius = 8.68022
+radius = 24.7316
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 10, 1000 )
@@ -14,6 +17,7 @@ extents = Vector2( 10, 1000 )
 ]]
 script = ExtResource( 1 )
 MaxVelocity = 250.0
+TrailLength = 0
 PickupDropRate = 0.33
 Points = 30
 MaxHealth = 8.0
@@ -28,8 +32,19 @@ shape = SubResource( 1 )
 [node name="LaserArea" type="Area2D" parent="." groups=[
 "laser",
 ]]
-position = Vector2( 0, 1000 )
+position = Vector2( 0, 1012 )
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserArea"]
 shape = SubResource( 2 )
+
+[node name="Damaged" parent="." instance=ExtResource( 5 )]
+
+[node name="Rotor" type="Sprite" parent="."]
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 0, 10 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 3 )

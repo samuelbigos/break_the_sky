@@ -6,18 +6,28 @@ export var AlignmentRadius = 20.0
 export var SeparationRadius = 5.0
 export var CohesionRadius = 50.0
 export var HitDamage = 3.0
+export var DestroyTime = 3.0
 
 export var BulletScene: PackedScene
+
+onready var _sprite = get_node("Sprite")
 
 var _game: Object = null
 var _target: Node2D
 var _targetOffset: Vector2
-
 var _shootCooldown: float
+var _destroyed = false
+var _destroyedTimer: float
+var _baseScale: Vector2
+var _destroyRot: float
 
 
-func _ready():
-	$Sprite.modulate = Colours.Secondary
+func isDestroyed(): return _destroyed
+
+func _ready():	
+	$Trail.boid = self
+	_sprite.modulate = Colours.Secondary
+	_baseScale = _sprite.scale
 	
 func init(target: Node2D, game: Object):
 	_target = target;
@@ -37,17 +47,15 @@ func _process(delta: float):
 	
 	# steering
 	var steering = Vector2(0.0, 0.0)
-	steering = _steeringArrive(targetPos, SlowingRadius)
-	#steering += _steeringAlignment(_game.getBoids(), AlignmentRadius) * 0.5
-	#steering += _steeringCohesion(_game.getBoids(), CohesionRadius) * 0.5
-	steering += _steeringSeparation(_game.getBoids(), SeparationRadius)
-	steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
-	
-	steering = truncate(steering, MaxVelocity)
-	_velocity = truncate(_velocity + steering * delta, MaxVelocity)
+	if not _destroyed:
+		steering = _steeringArrive(targetPos, SlowingRadius)
+		steering += _steeringSeparation(_game.getBoids(), SeparationRadius)
+		steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
+		steering = truncate(steering, MaxVelocity)
+		_velocity = truncate(_velocity + steering * delta, MaxVelocity)
 		
 	global_position += _velocity * delta
-	rotation = -atan2(_velocity.x, _velocity.y)
+	_sprite.rotation = -atan2(_velocity.x, _velocity.y)
 	
 	# damping
 	_velocity *= pow(1.0 - clamp(Damping, 0.0, 1.0), delta * 60.0)
@@ -56,6 +64,17 @@ func _process(delta: float):
 	if Input.is_action_pressed("shoot") and _shootCooldown <= 0.0:
 		if _canShoot(shootDir):
 			_shoot(shootDir)
+			
+	# update trail
+	$Trail.update()
+	
+	if _destroyed:
+		_destroyedTimer -= delta
+		var t = 1.0 - clamp(_destroyedTimer / DestroyTime, 0.0, 1.0)
+		_sprite.scale = lerp(_baseScale, Vector2(0.0, 0.0), t)
+		_destroyRot += PI * 2.0 * delta
+		if _destroyedTimer < 0.0:
+			queue_free()
 		
 func _shoot(dir: Vector2):
 	_shootCooldown = _game.BaseBoidReload
@@ -69,10 +88,11 @@ func _shoot(dir: Vector2):
 	_game.pushBack(self)
 	
 func _canShoot(dir: Vector2):
+	if _destroyed: return false
 	# can shoot if there are no other boids in the shoot direction
 	var blocked = false
 	for boid in _game.getBoids():
-		if boid == self:
+		if boid == self or boid.isDestroyed():
 			continue
 			
 		if (boid.global_position - global_position).normalized().dot(dir.normalized()) > 0.9:
@@ -82,11 +102,15 @@ func _canShoot(dir: Vector2):
 	return not blocked
 	
 func _destroy():
-	_game.removeBoid(self)
-	queue_free()
+	if not _destroyed:
+		_game.removeBoid(self)	
+		_destroyed = true
+		_sprite.modulate = Colours.White
+		_destroyedTimer = DestroyTime
+		_sprite.z_index = -1
 
 func _on_BoidAlly_area_entered(area):
-	if area.is_in_group("enemy"):
+	if area.is_in_group("enemy") and not area.isDestroyed():
 		area.onHit(HitDamage)
 		_destroy()
 	
@@ -94,4 +118,5 @@ func _on_BoidAlly_area_entered(area):
 		_destroy()
 		
 	if area.is_in_group("bullet") and area._alignment == 1:
+		area.onHit()
 		_destroy()

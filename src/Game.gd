@@ -94,9 +94,9 @@ func _ready():
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		DrillerFirstSpawn = 999.0
-		LaserSpawnScore = 0.0
-		BeaconSpawnScore = 0.0
+		#DrillerFirstSpawn = 999.0
+		#LaserSpawnScore = 0.0
+		#BeaconSpawnScore = 0.0
 		
 	addScore(0)
 	randomize()

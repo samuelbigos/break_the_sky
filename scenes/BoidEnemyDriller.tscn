@@ -1,6 +1,10 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyDriller.gd" type="Script" id=1]
+[ext_resource path="res://assets/enemy-driller.png" type="Texture" id=2]
+[ext_resource path="res://src/Trail.gd" type="Script" id=3]
+[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 8.68022
@@ -9,8 +13,19 @@ radius = 8.68022
 "enemy",
 ]]
 script = ExtResource( 1 )
+TrailLength = 20
+TrailPeriod = 0.1
+HitParticles = ExtResource( 4 )
 PickupDropRate = 0.1
 MaxHealth = 3.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
+
+[node name="Damaged" parent="." instance=ExtResource( 5 )]
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+
+[node name="Trail" type="Node2D" parent="."]
+script = ExtResource( 3 )
