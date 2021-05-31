@@ -12,13 +12,12 @@ export var BulletScene: PackedScene
 var _game: Object = null
 var _target: Node2D
 var _targetOffset: Vector2
-var _colour: Color
 
 var _shootCooldown: float
 
 
 func _ready():
-	pass
+	$Sprite.modulate = Colours.Secondary
 	
 func init(target: Node2D, game: Object):
 	_target = target;
@@ -48,7 +47,7 @@ func _process(delta: float):
 	_velocity = truncate(_velocity + steering * delta, MaxVelocity)
 		
 	global_position += _velocity * delta
-	update()
+	rotation = -atan2(_velocity.x, _velocity.y)
 	
 	# damping
 	_velocity *= pow(1.0 - clamp(Damping, 0.0, 1.0), delta * 60.0)
@@ -81,9 +80,6 @@ func _canShoot(dir: Vector2):
 			break
 			
 	return not blocked
-	
-func _draw():
-	draw_circle(Vector2(0.0, 0.0), 2.0, Color.white)
 	
 func _destroy():
 	_game.removeBoid(self)

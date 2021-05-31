@@ -66,6 +66,10 @@ config/name="AI And Games Jam 2021"
 run/main_scene="res://scenes/Game.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Colours="*res://scenes/Colours.tscn"
+
 [display]
 
 window/size/width=960

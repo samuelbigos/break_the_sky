@@ -67,4 +67,4 @@ func destroy(score: bool):
 	.destroy(score)
 	
 func _draw():
-	draw_circle(Vector2(0.0, 0.0), 10.0, Color.white)
+	draw_circle(Vector2(0.0, 0.0), 10.0, Colours.Secondary)

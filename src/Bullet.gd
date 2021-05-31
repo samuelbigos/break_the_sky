@@ -25,4 +25,4 @@ func _process(delta):
 		queue_free()
 
 func _draw():
-	draw_line(Vector2(0.0, -_length * 0.5), Vector2(0.0, _length * 0.5), Color.white, _damage * 2.0)
+	draw_line(Vector2(0.0, -_length * 0.5), Vector2(0.0, _length * 0.5), Colours.White, _damage * 2.0)

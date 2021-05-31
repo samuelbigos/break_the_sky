@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://scenes/Leader.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/PickupAdd.tscn" type="PackedScene" id=2]
@@ -12,6 +12,13 @@
 [ext_resource path="res://src/PerkManager.gd" type="Script" id=10]
 [ext_resource path="res://assets/1px.png" type="Texture" id=11]
 [ext_resource path="res://font/fibberish.tres" type="DynamicFont" id=12]
+[ext_resource path="res://src/Background.gd" type="Script" id=13]
+[ext_resource path="res://assets/clouds/cloud1.png" type="Texture" id=14]
+[ext_resource path="res://assets/clouds/cloud3.png" type="Texture" id=15]
+[ext_resource path="res://assets/clouds/cloud2.png" type="Texture" id=16]
+[ext_resource path="res://assets/clouds/cloud4.png" type="Texture" id=17]
+[ext_resource path="res://assets/clouds/cloud6.png" type="Texture" id=18]
+[ext_resource path="res://assets/clouds/cloud5.png" type="Texture" id=19]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 4 )
@@ -24,6 +31,10 @@ EnemyDrillerScene = ExtResource( 5 )
 DrillerSpawnRate = 2.5
 EnemyLaserScene = ExtResource( 8 )
 EnemyBeaconScene = ExtResource( 6 )
+
+[node name="Background" type="Node2D" parent="."]
+script = ExtResource( 13 )
+Clouds = [ ExtResource( 14 ), ExtResource( 16 ), ExtResource( 15 ), ExtResource( 17 ), ExtResource( 19 ), ExtResource( 18 ) ]
 
 [node name="Leader" parent="." instance=ExtResource( 1 )]
 

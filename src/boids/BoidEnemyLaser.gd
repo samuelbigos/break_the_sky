@@ -84,7 +84,8 @@ func _draw():
 	points.push_back(Vector2(0.0, 2.0) * s)
 	points.push_back(Vector2(1.0, -2.0) * s)
 	var colours = PoolColorArray()
-	colours.push_back(Color.white)
-	colours.push_back(Color.white)
-	colours.push_back(Color.white)
+	var col = Colours.Secondary
+	colours.push_back(col)
+	colours.push_back(col)
+	colours.push_back(col)
 	draw_polygon(points, colours)
