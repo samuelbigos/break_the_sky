@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyBeacon.gd" type="Script" id=1]
 [ext_resource path="res://scenes/BulletBeacon.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/enemy-beacon.png" type="Texture" id=3]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.5924
@@ -14,9 +15,11 @@ radius = 32.5924
 script = ExtResource( 1 )
 MaxVelocity = 400.0
 TrailLength = 0
+HitParticles = ExtResource( 5 )
 PickupDropRate = 1.0
 Points = 100
 MaxHealth = 25.0
+DestroyTrauma = 0.5
 BulletScene = ExtResource( 2 )
 BulletsPerPulse = 16
 BulletSpeed = 200.0

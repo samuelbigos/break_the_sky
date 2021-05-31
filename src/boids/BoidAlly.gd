@@ -7,6 +7,9 @@ export var SeparationRadius = 5.0
 export var CohesionRadius = 50.0
 export var HitDamage = 3.0
 export var DestroyTime = 3.0
+export var ShootSize = 1.5
+export var ShootTrauma = 0.05
+export var DestroyTrauma = 0.1
 
 export var BulletScene: PackedScene
 
@@ -65,6 +68,11 @@ func _process(delta: float):
 		if _canShoot(shootDir):
 			_shoot(shootDir)
 			
+	if _shootCooldown > 0.0:
+		var t = _shootCooldown / _game.BaseBoidReload
+		t = pow(clamp(t, 0.0, 1.0), 5.0)
+		_sprite.scale = lerp(_baseScale * 2.0, _baseScale, 1.0 - t)
+			
 	# update trail
 	$Trail.update()
 	
@@ -86,6 +94,7 @@ func _shoot(dir: Vector2):
 	bullet.global_position = global_position
 	_game.add_child(bullet)
 	_game.pushBack(self)
+	GlobalCamera.addTrauma(ShootTrauma)
 	
 func _canShoot(dir: Vector2):
 	if _destroyed: return false
@@ -108,6 +117,7 @@ func _destroy():
 		_sprite.modulate = Colours.White
 		_destroyedTimer = DestroyTime
 		_sprite.z_index = -1
+		GlobalCamera.addTrauma(DestroyTrauma)
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy") and not area.isDestroyed():

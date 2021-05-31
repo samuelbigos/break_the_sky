@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyLaser.gd" type="Script" id=1]
 [ext_resource path="res://src/Laser.gd" type="Script" id=2]
 [ext_resource path="res://assets/enemy-laser.png" type="Texture" id=3]
 [ext_resource path="res://assets/enemy-laser-rotor.png" type="Texture" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=6]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 24.7316
@@ -18,9 +19,11 @@ extents = Vector2( 10, 1000 )
 script = ExtResource( 1 )
 MaxVelocity = 250.0
 TrailLength = 0
+HitParticles = ExtResource( 6 )
 PickupDropRate = 0.33
 Points = 30
-MaxHealth = 8.0
+MaxHealth = 10.0
+DestroyTrauma = 0.25
 TargetLaserDist = 300.0
 LaserCooldown = 4.0
 LaserCharge = 1.5

@@ -6,6 +6,8 @@ export var Points = 10
 export var MaxHealth = 1.0
 export var HitFlashTime = 1.0 / 30.0
 export var DestroyTime = 3.0
+export var DestroyTrauma = 0.1
+export var HitTrauma = 0.05
 
 onready var _sprite = get_node("Sprite")
 onready var _damagedParticles = get_node("Damaged")
@@ -74,6 +76,7 @@ func destroy(score: bool):
 	_sprite.z_index = -1
 	if _damagedParticles:
 		_damagedParticles.emitting = false
+	GlobalCamera.addTrauma(DestroyTrauma)
 	
 func onHit(damage: float):
 	_health -= damage
@@ -87,6 +90,8 @@ func onHit(damage: float):
 		_damagedParticles.emitting = true
 	if _health <= 0.0:
 		destroy(true)
+	PauseManager.pauseFlash()
+	GlobalCamera.addTrauma(HitTrauma)
 
 func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0 and not _destroyed:

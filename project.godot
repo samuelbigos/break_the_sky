@@ -69,6 +69,8 @@ config/icon="res://icon.png"
 [autoload]
 
 Colours="*res://scenes/Colours.tscn"
+PauseManager="*res://scenes/PauseManager.tscn"
+GlobalCamera="*res://scenes/Camera.tscn"
 
 [display]
 

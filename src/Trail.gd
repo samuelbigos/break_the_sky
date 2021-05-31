@@ -15,7 +15,7 @@ func _draw():
 	for i in range(0, numPoints):
 		pointArray.push_back(boid._trailPoints[i] - global_position)
 		var col = Colours.White
-		col.a = float(i) / numPoints
+		col.a = 0.25 + (float(i) / numPoints) * 0.75
 		colourArray.push_back(col)
 	pointArray.push_back(Vector2(0.0, 0.0))
 	colourArray.push_back(Colours.White)

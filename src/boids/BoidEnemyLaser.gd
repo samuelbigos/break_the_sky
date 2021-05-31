@@ -6,6 +6,9 @@ export var LaserCooldown = 5.0
 export var LaserCharge = 1.0
 export var LaserDuration = 2.0
 
+onready var _laser = get_node("LaserArea")
+onready var _rotor = get_node("Rotor")
+
 enum LaserState {
 	Inactive,
 	Charging,
@@ -22,9 +25,9 @@ var _maxVelBase: float
 
 func _ready():
 	_maxVelBase = MaxVelocity
-	$LaserArea.monitorable = false
-	$Sprite.modulate = Colours.Secondary
-	$Rotor.modulate = Colours.Secondary
+	_laser.monitorable = false
+	_sprite.modulate = Colours.Secondary
+	_rotor.modulate = Colours.Secondary
 
 func _process(delta: float):
 	var distToTarget = (global_position - _target.global_position).length()
@@ -34,43 +37,44 @@ func _process(delta: float):
 		MaxVelocity = _maxVelBase
 
 	# firin' mah lazor
-	if _laserState == LaserState.Inactive:
-		_laserCooldown -= delta
-		if distToTarget < TargetLaserDist and _laserCooldown < 0.0:
-			_laserState = LaserState.Charging
-			_laserCharge = LaserCharge
-			laserCharging()
-			
-	if _laserState == LaserState.Charging:
-		$LaserArea.update()
-		_laserCharge -= delta
-		if _laserCharge < 0.0:
-			_laserState = LaserState.Firing
-			_laserDuration = LaserDuration
-			laserFiring()
-			
-	if _laserState == LaserState.Firing:
-		_laserDuration -= delta
-		if _laserDuration < 0.0:
-			_laserState = LaserState.Inactive
-			_laserCooldown = LaserCooldown
-			laserInactive()
+	if not _destroyed:
+		if _laserState == LaserState.Inactive:
+			_laserCooldown -= delta
+			if distToTarget < TargetLaserDist and _laserCooldown < 0.0:
+				_laserState = LaserState.Charging
+				_laserCharge = LaserCharge
+				laserCharging()
+				
+		if _laserState == LaserState.Charging:
+			_laser.update()
+			_laserCharge -= delta
+			if _laserCharge < 0.0:
+				_laserState = LaserState.Firing
+				_laserDuration = LaserDuration
+				laserFiring()
+				
+		if _laserState == LaserState.Firing:
+			_laserDuration -= delta
+			if _laserDuration < 0.0:
+				_laserState = LaserState.Inactive
+				_laserCooldown = LaserCooldown
+				laserInactive()
 	
-	$LaserArea.state = _laserState
-	$Rotor.rotation = fmod($Rotor.rotation + 50.0 * delta, PI * 2.0)
+		_laser.state = _laserState
+		_rotor.rotation = fmod(_rotor.rotation + 50.0 * delta, PI * 2.0)
 	
 	rotation = -atan2(_velocity.x, _velocity.y)
 	
 func laserCharging():
-	$LaserArea.update()
+	_laser.update()
 	
 func laserFiring():
-	$LaserArea.update()
-	$LaserArea.monitorable = true
+	_laser.update()
+	_laser.monitorable = true
 	
 func laserInactive():
-	$LaserArea.update()
-	$LaserArea.monitorable = false
+	_laser.update()
+	_laser.monitorable = false
 	
 func _steeringPursuit(targetPos: Vector2, targetVel: Vector2):
 	if _laserState == LaserState.Charging or _laserState == LaserState.Firing:
@@ -82,3 +86,5 @@ func _steeringPursuit(targetPos: Vector2, targetVel: Vector2):
 	
 func destroy(score: bool):
 	.destroy(score)
+	_laser.queue_free()
+	_rotor.queue_free()

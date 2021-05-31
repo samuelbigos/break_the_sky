@@ -14,7 +14,6 @@ radius = 8.68022
 ]]
 script = ExtResource( 1 )
 TrailLength = 20
-TrailPeriod = 0.1
 HitParticles = ExtResource( 4 )
 PickupDropRate = 0.1
 MaxHealth = 3.0

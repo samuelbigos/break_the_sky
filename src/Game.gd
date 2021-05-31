@@ -94,8 +94,8 @@ func _ready():
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		#DrillerFirstSpawn = 999.0
-		#LaserSpawnScore = 0.0
+		DrillerFirstSpawn = 999.0
+		LaserSpawnScore = 0.0
 		#BeaconSpawnScore = 0.0
 		
 	addScore(0)
@@ -103,6 +103,7 @@ func _ready():
 	
 	$Background._game = self
 	$Background.init()
+	GlobalCamera._player = _player
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -179,12 +180,6 @@ func getOffset(column: int, columnIndex: int):
 	return offset
 	
 func _process(delta: float):
-	# camera
-	var camera_mouse_offset = get_global_mouse_position() - _player.global_position
-	var camera_offset = -_player.global_position + get_viewport().size * 0.5 - camera_mouse_offset * 0.25	
-	var camera_transform = Transform2D(Vector2(1.0, 0.0), Vector2(0.0, 1.0), camera_offset)
-	get_viewport().canvas_transform = camera_transform
-	
 	_scoreMultiTimer -= delta
 	if _scoreMultiTimer < 0.0:
 		_scoreMulti = 1
