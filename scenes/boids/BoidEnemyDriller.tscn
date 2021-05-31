@@ -17,6 +17,9 @@ TrailLength = 20
 HitParticles = ExtResource( 4 )
 PickupDropRate = 0.1
 MaxHealth = 3.0
+HitFlashTime = 0.025
+DestroyTrauma = 0.075
+HitTrauma = 0.033
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )

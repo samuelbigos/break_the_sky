@@ -29,7 +29,7 @@ func init():
 			var s = rand_range(0.5, 0.75)
 			cloud.scale = Vector2(s, s)
 			cloud.z_as_relative = false
-			cloud.z_index = 1
+			cloud.z_index = 2
 			_closeClouds.append(cloud)
 			_closeCloudSpeeds.append(rand_range(CloudSpeed - CloudSpeed * 0.25, CloudSpeed + CloudSpeed * 0.25))
 		else:

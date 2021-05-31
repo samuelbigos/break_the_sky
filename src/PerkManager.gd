@@ -9,7 +9,8 @@ var _perks = []
 
 func _ready():
 	for perk in get_children():
-		_perks.append(perk)
+		if perk.enabled:
+			_perks.append(perk)
 		
 func thresholdReached(score: int):
 	if score >= getNextThreshold():

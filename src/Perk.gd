@@ -1,6 +1,7 @@
 extends Node
 
 export var id = ""
+export var enabled = true
 export var displayName = ""
 export var displayDesc = ""
 export var maximum = 5

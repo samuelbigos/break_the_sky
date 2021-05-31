@@ -94,8 +94,8 @@ func _ready():
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		DrillerFirstSpawn = 999.0
-		LaserSpawnScore = 0.0
+		#DrillerFirstSpawn = 999.0
+		#LaserSpawnScore = 0.0
 		#BeaconSpawnScore = 0.0
 		
 	addScore(0)
@@ -104,6 +104,7 @@ func _ready():
 	$Background._game = self
 	$Background.init()
 	GlobalCamera._player = _player
+	PauseManager._game = self
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -225,7 +226,7 @@ func _process(delta: float):
 				
 func addScore(var score: int):
 	_score += score * _scoreMulti
-	_scoreMulti = clamp(_scoreMulti + 0.2, 0, ScoreMultiMax)
+	_scoreMulti = clamp(_scoreMulti + 0.1, 0, ScoreMultiMax)
 	_scoreMultiTimer = ScoreMultiTimeout
 	
 	if _perks.thresholdReached(_score):

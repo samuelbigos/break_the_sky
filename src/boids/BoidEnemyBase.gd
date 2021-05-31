@@ -78,7 +78,7 @@ func destroy(score: bool):
 		_damagedParticles.emitting = false
 	GlobalCamera.addTrauma(DestroyTrauma)
 	
-func onHit(damage: float):
+func onHit(damage: float, score: bool):
 	_health -= damage
 	_sprite.modulate = Colours.White
 	_hitFlashTimer = HitFlashTime
@@ -89,11 +89,11 @@ func onHit(damage: float):
 	if _damagedParticles:
 		_damagedParticles.emitting = true
 	if _health <= 0.0:
-		destroy(true)
+		destroy(score)
 	PauseManager.pauseFlash()
 	GlobalCamera.addTrauma(HitTrauma)
 
 func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0 and not _destroyed:
-		onHit(area._damage)
+		onHit(area._damage, true)
 		area.queue_free()

@@ -1,8 +1,8 @@
 extends Node2D
 
-export var Decay = 0.8  # How quickly the shaking stops [0, 1].
-export var MaxOffset = Vector2(0.03, 0.03)  # Maximum hor/ver shake in pixels.
-export var MaxRoll = 0.25  # Maximum rotation in radians (use sparingly).
+export var Decay = 1.0  # How quickly the shaking stops [0, 1].
+export var MaxOffset = Vector2(0.025, 0.025)  # Maximum hor/ver shake in pixels.
+export var MaxRoll = 0.2  # Maximum rotation in radians (use sparingly).
 export var TraumaPower = 2 # Trauma exponent. Use [2, 3].
 
 onready var _noise = OpenSimplexNoise.new()

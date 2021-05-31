@@ -1,7 +1,8 @@
 extends Node
 
+var _game = null
 var _pauseTimer: float
-var _paused = true
+var _paused = false
 var _pauseFlashTime = 1.0 / 25.0
 
 
@@ -11,7 +12,8 @@ func pauseFlash():
 	_paused = true
 	
 func _process(delta):
-	if _paused:
+	if _paused and not _game._gui.showingPerks():
 		_pauseTimer -= delta
 		if _pauseTimer < 0.0:
 			get_tree().paused = false
+			_paused = false

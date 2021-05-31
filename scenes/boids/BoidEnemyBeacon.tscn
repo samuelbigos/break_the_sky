@@ -18,11 +18,12 @@ TrailLength = 0
 HitParticles = ExtResource( 5 )
 PickupDropRate = 1.0
 Points = 100
-MaxHealth = 25.0
-DestroyTrauma = 0.5
+MaxHealth = 30.0
+DestroyTrauma = 0.33
+HitTrauma = 0.025
 BulletScene = ExtResource( 2 )
 BulletsPerPulse = 16
-BulletSpeed = 200.0
+BulletSpeed = 175.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )

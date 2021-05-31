@@ -31,29 +31,30 @@ func _process(delta: float):
 	var distToTarget = (global_position - _target.global_position).length()
 
 	# firin' mah lazor
-	if _beaconState == BeaconState.Inactive:
-		_beaconCooldown -= delta
-		if distToTarget < TargetBeaconDist and _beaconCooldown < 0.0:
-			_beaconState = BeaconState.Charging
-			_beaconCharge = BeaconCharge
-			
-	if _beaconState == BeaconState.Charging:
-		_beaconCharge -= delta
-		if _beaconCharge < 0.0:
-			_beaconState = BeaconState.Firing
-			_beaconDuration = 0.0
-			_pulses = Pulses
-			
-	if _beaconState == BeaconState.Firing:
-		_beaconDuration -= delta
-		if _beaconDuration < 0.0:
-			_pulses -= 1
-			if _pulses == 0:
-				_beaconState = BeaconState.Inactive
-				_beaconCooldown = BeaconCooldown
-			else:
-				firePulse()
-				_beaconDuration = BeaconPulseDuration
+	if not _destroyed:
+		if _beaconState == BeaconState.Inactive:
+			_beaconCooldown -= delta
+			if distToTarget < TargetBeaconDist and _beaconCooldown < 0.0:
+				_beaconState = BeaconState.Charging
+				_beaconCharge = BeaconCharge
+				
+		if _beaconState == BeaconState.Charging:
+			_beaconCharge -= delta
+			if _beaconCharge < 0.0:
+				_beaconState = BeaconState.Firing
+				_beaconDuration = 0.0
+				_pulses = Pulses
+				
+		if _beaconState == BeaconState.Firing:
+			_beaconDuration -= delta
+			if _beaconDuration < 0.0:
+				_pulses -= 1
+				if _pulses == 0:
+					_beaconState = BeaconState.Inactive
+					_beaconCooldown = BeaconCooldown
+				else:
+					firePulse()
+					_beaconDuration = BeaconPulseDuration
 				
 	rotation = -atan2(_velocity.x, _velocity.y)
 				

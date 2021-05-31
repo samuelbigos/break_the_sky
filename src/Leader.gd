@@ -58,8 +58,8 @@ func _on_Leader_area_entered(area):
 		area.queue_free()
 		addBoids(area.global_position)
 		
-	if area.is_in_group("enemy") and not area.isDestroyed():
-		_game.lose()
+	#if area.is_in_group("enemy") and not area.isDestroyed():
+	#	_game.lose()
 		
 	#if area.is_in_group("bullet") and area._alignment == 1:
 	#	_game.lose()

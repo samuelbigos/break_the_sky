@@ -121,7 +121,7 @@ func _destroy():
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy") and not area.isDestroyed():
-		area.onHit(HitDamage)
+		area.onHit(HitDamage, false)
 		_destroy()
 	
 	if area.is_in_group("laser"):
