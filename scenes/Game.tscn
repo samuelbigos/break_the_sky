@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://scenes/Leader.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/PickupAdd.tscn" type="PackedScene" id=2]
@@ -25,6 +25,7 @@
 [ext_resource path="res://assets/gui/perk2_outline.png" type="Texture" id=23]
 [ext_resource path="res://assets/gui/perk3_outline.png" type="Texture" id=24]
 [ext_resource path="res://assets/music/Metre - Taranis.mp3" type="AudioStream" id=25]
+[ext_resource path="res://assets/gui/icons/accuracy.png" type="Texture" id=26]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 4 )
@@ -323,6 +324,82 @@ __meta__ = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="CanvasLayer/GridContainer"]
+margin_right = 32.0
+margin_bottom = 32.0
+texture = ExtResource( 26 )
+
+[node name="LoseScreen" type="CenterContainer" parent="CanvasLayer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/LoseScreen"]
+margin_left = 280.0
+margin_top = 30.0
+margin_right = 680.0
+margin_bottom = 509.0
+
+[node name="Control" type="Control" parent="CanvasLayer/LoseScreen/VBoxContainer"]
+margin_right = 400.0
+margin_bottom = 350.0
+rect_min_size = Vector2( 0, 350 )
+
+[node name="MenuButton" type="Button" parent="CanvasLayer/LoseScreen/VBoxContainer"]
+margin_top = 354.0
+margin_right = 400.0
+margin_bottom = 479.0
+rect_min_size = Vector2( 400, 125 )
+focus_mode = 0
+enabled_focus_mode = 0
+flat = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/LoseScreen/VBoxContainer/MenuButton"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -200.0
+margin_top = -62.5
+margin_right = 200.0
+margin_bottom = 62.5
+mouse_filter = 2
+texture = ExtResource( 20 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Outline" type="TextureRect" parent="CanvasLayer/LoseScreen/VBoxContainer/MenuButton"]
+margin_right = 400.0
+margin_bottom = 125.0
+texture = ExtResource( 21 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/LoseScreen/VBoxContainer/MenuButton/Outline"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -67.0
+margin_top = -14.0
+margin_right = 67.0
+margin_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = ExtResource( 12 )
+text = "Menu"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="PerkManager" type="Node" parent="."]
 script = ExtResource( 10 )
@@ -376,7 +453,7 @@ script = ExtResource( 9 )
 id = "Speed"
 displayName = "Orion Drive"
 displayDesc = "[+Speed]"
-boidSpeedMod = 250.0
+boidSpeedMod = 150.0
 playerSpeedMod = 1.0
 
 [node name="Accuracy" type="Node" parent="PerkManager"]
@@ -394,6 +471,7 @@ displayDesc = "[+Bullet Speed]"
 bulletSpeedMod = 125.0
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+pause_mode = 2
 stream = ExtResource( 25 )
 
 [connection signal="button_up" from="CanvasLayer/Perks/VBoxContainer/Perk1" to="CanvasLayer" method="_on_Perk1_button_up"]
@@ -405,3 +483,6 @@ stream = ExtResource( 25 )
 [connection signal="button_up" from="CanvasLayer/Perks/VBoxContainer/Perk3" to="CanvasLayer" method="_on_Perk3_button_up"]
 [connection signal="mouse_entered" from="CanvasLayer/Perks/VBoxContainer/Perk3" to="CanvasLayer" method="_on_Perk3_mouse_entered"]
 [connection signal="mouse_exited" from="CanvasLayer/Perks/VBoxContainer/Perk3" to="CanvasLayer" method="_on_Perk3_mouse_exited"]
+[connection signal="button_up" from="CanvasLayer/LoseScreen/VBoxContainer/MenuButton" to="CanvasLayer" method="_on_Perk1_button_up"]
+[connection signal="mouse_entered" from="CanvasLayer/LoseScreen/VBoxContainer/MenuButton" to="CanvasLayer" method="_on_Perk1_mouse_entered"]
+[connection signal="mouse_exited" from="CanvasLayer/LoseScreen/VBoxContainer/MenuButton" to="CanvasLayer" method="_on_Perk1_mouse_exited"]

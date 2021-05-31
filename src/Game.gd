@@ -43,7 +43,13 @@ export var BeaconSpawnRateMulti = 0.95
 
 export var ScoreMultiTimeout = 10.0
 export var ScoreMultiMax = 10
-export var ScoreMultiIncrement = 0.2
+export var ScoreMultiIncrement = 0.1
+
+enum WindowScale {
+	Medium,
+	Large,
+	Full
+}
 
 var _boidColCount: int
 var _boidColumns = []
@@ -65,6 +71,8 @@ var _time := 0.0
 var _drillerSpawn: float
 var _laserSpawn: float
 var _beaconSpawn: float
+
+var _windowScale = WindowScale.Full
 
 onready var _gui = get_node("CanvasLayer")
 onready var _perks = get_node("PerkManager")
@@ -97,9 +105,9 @@ func _ready():
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		DrillerFirstSpawn = 999.0
-		#LaserSpawnScore = 0.0
-		BeaconSpawnScore = 0.0
+		#DrillerFirstSpawn = 999.0
+		LaserSpawnScore = 0.0
+		#BeaconSpawnScore = 0.0
 	
 	_scoreMulti -= ScoreMultiIncrement
 	addScore(0)
@@ -235,6 +243,23 @@ func _process(delta: float):
 		if _perkDelay < 0.0 and _perks.thresholdReached(_score):
 			doPerk()
 			_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+			
+	if Input.is_action_just_released("fullscreen"):
+		match _windowScale:
+			WindowScale.Medium:
+				_windowScale = WindowScale.Large
+				OS.window_fullscreen = false
+				OS.window_borderless = false
+				OS.set_window_size(Vector2(1920, 1080))
+			WindowScale.Large:
+				_windowScale = WindowScale.Full
+				OS.window_fullscreen = true
+				OS.window_borderless = true
+			WindowScale.Full:
+				_windowScale = WindowScale.Medium
+				OS.window_fullscreen = false
+				OS.window_borderless = false
+				OS.set_window_size(Vector2(960, 540))
 				
 func addScore(var score: int):
 	_score += score * _scoreMulti
@@ -260,7 +285,7 @@ func onPerkSelected(perk):
 	BasePlayerSpeed += perk.playerSpeedMod
 	BaseBoidSpread *= perk.spreadMod
 	BaseBulletSpeed += perk.bulletSpeedMod
-	changeFormation(_formation, false)
+	changeFormation(Formation.Balanced, false)
 	
 func pushBack(boid: Object):
 	for i in range(0, _boidColCount):
@@ -272,4 +297,9 @@ func pushBack(boid: Object):
 			break
 
 func lose():
-	get_tree().reload_current_scene()
+	get_tree().paused = true
+	get_viewport().size = OS.get_window_size()
+	var camerOffset = -_player.global_position + get_viewport().size * 0.5
+	var cameraTransform = Transform2D(Vector2(1.0, 0.0), Vector2(0.0, 1.0), camerOffset)
+	get_viewport().canvas_transform = cameraTransform
+	#get_tree().reload_current_scene()

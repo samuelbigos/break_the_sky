@@ -76,8 +76,10 @@ GlobalCamera="*res://scenes/Camera.tscn"
 
 window/size/width=960
 window/size/height=540
-window/size/test_width=1280
-window/size/test_height=720
+window/size/borderless=true
+window/size/fullscreen=true
+window/size/test_width=1920
+window/size/test_height=1080
 window/stretch/mode="viewport"
 
 [input]
@@ -125,6 +127,11 @@ formation_3={
 boids_align={
 "deadzone": 0.5,
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
+fullscreen={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":75,"unicode":0,"echo":false,"script":null)
  ]
 }
 
