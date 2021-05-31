@@ -1,9 +1,10 @@
 extends Node2D
 
 export var Decay = 1.0  # How quickly the shaking stops [0, 1].
-export var MaxOffset = Vector2(0.025, 0.025)  # Maximum hor/ver shake in pixels.
-export var MaxRoll = 0.2  # Maximum rotation in radians (use sparingly).
+export var MaxOffset = Vector2(0.02, 0.02)  # Maximum hor/ver shake in pixels.
+export var MaxRoll = 0.175  # Maximum rotation in radians (use sparingly).
 export var TraumaPower = 2 # Trauma exponent. Use [2, 3].
+export var MaxTrauma = 0.75
 
 onready var _noise = OpenSimplexNoise.new()
 
@@ -13,7 +14,7 @@ var _noiseY = 0
 
 
 func addTrauma(trauma: float):
-	_trauma = min(_trauma + trauma, 1.0)
+	_trauma = min(_trauma + trauma, MaxTrauma)
 	
 func _ready():
 	MaxOffset = MaxOffset * get_viewport_rect().size

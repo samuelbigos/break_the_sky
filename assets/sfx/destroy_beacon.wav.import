@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample"
+
+[deps]
+
+source_file="res://assets/sfx/destroy_beacon.wav"
+dest_files=[ "res://.import/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

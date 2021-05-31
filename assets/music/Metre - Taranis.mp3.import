@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Metre - Taranis.mp3-c067925793430a14df02096cc41f9ac0.mp3str"
+
+[deps]
+
+source_file="res://assets/music/Metre - Taranis.mp3"
+dest_files=[ "res://.import/Metre - Taranis.mp3-c067925793430a14df02096cc41f9ac0.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

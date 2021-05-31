@@ -3,6 +3,8 @@ class_name Leader
 
 export var Damping = 0.5
 
+onready var _sfxPickup = get_node("SFXPickup")
+
 var _game = null
 
 var _velocity: Vector2
@@ -57,6 +59,7 @@ func _on_Leader_area_entered(area):
 	if area.is_in_group("pickupAdd"):
 		area.queue_free()
 		addBoids(area.global_position)
+		_sfxPickup.play()
 		
 	#if area.is_in_group("enemy") and not area.isDestroyed():
 	#	_game.lose()

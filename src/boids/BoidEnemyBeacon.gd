@@ -17,6 +17,9 @@ enum BeaconState {
 	Firing
 }
 
+onready var _sfxBeaconFire = get_node("SFXBeaconFire")
+onready var _sfxDestroy = get_node("SFXDestroy")
+
 var _beaconState = BeaconState.Inactive
 var _beaconCooldown: float
 var _beaconCharge: float
@@ -49,7 +52,7 @@ func _process(delta: float):
 			_beaconDuration -= delta
 			if _beaconDuration < 0.0:
 				_pulses -= 1
-				if _pulses == 0:
+				if _pulses < 0:
 					_beaconState = BeaconState.Inactive
 					_beaconCooldown = BeaconCooldown
 				else:
@@ -66,6 +69,8 @@ func firePulse():
 		bullet.init(dir * BulletSpeed, 1, _game.PlayRadius)
 		bullet.global_position = global_position + dir * 32.0
 		_game.add_child(bullet)
+		_sfxBeaconFire.play()
 	
 func destroy(score: bool):
 	.destroy(score)
+	_sfxDestroy.play()

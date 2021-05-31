@@ -1,7 +1,7 @@
 extends Node
 
-export var PerkThreshold = 300
-export var PerkThresholdMulti = 1.25
+export var PerkThreshold = 350
+export var PerkThresholdMulti = 1.33
 
 var _perkLevel = 1
 var _perks = []

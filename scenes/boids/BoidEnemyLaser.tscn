@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyLaser.gd" type="Script" id=1]
 [ext_resource path="res://src/Laser.gd" type="Script" id=2]
@@ -6,6 +6,9 @@
 [ext_resource path="res://assets/enemy-laser-rotor.png" type="Texture" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=6]
+[ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=7]
+[ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=8]
+[ext_resource path="res://assets/sfx/destroy_laser.wav" type="AudioStream" id=9]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 24.7316
@@ -23,9 +26,9 @@ HitParticles = ExtResource( 6 )
 PickupDropRate = 0.33
 Points = 30
 MaxHealth = 12.0
-DestroyTrauma = 0.2
-HitTrauma = 0.025
-TargetLaserDist = 300.0
+DestroyTrauma = 0.15
+HitTrauma = 0.02
+TargetLaserDist = 400.0
 LaserCooldown = 4.0
 LaserCharge = 1.5
 LaserDuration = 1.0
@@ -52,3 +55,12 @@ texture = ExtResource( 4 )
 position = Vector2( 0, 10 )
 scale = Vector2( 2, 2 )
 texture = ExtResource( 3 )
+
+[node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )
+
+[node name="SFXLaserFire" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 8 )
+
+[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 9 )

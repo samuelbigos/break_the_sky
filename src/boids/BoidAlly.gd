@@ -14,6 +14,8 @@ export var DestroyTrauma = 0.1
 export var BulletScene: PackedScene
 
 onready var _sprite = get_node("Sprite")
+onready var _sfxShot = get_node("SFXShot")
+onready var _sfxHit = get_node("SFXHit")#
 
 var _game: Object = null
 var _target: Node2D
@@ -95,6 +97,7 @@ func _shoot(dir: Vector2):
 	_game.add_child(bullet)
 	_game.pushBack(self)
 	GlobalCamera.addTrauma(ShootTrauma)
+	_sfxShot.play()
 	
 func _canShoot(dir: Vector2):
 	if _destroyed: return false
@@ -118,6 +121,7 @@ func _destroy():
 		_destroyedTimer = DestroyTime
 		_sprite.z_index = -1
 		GlobalCamera.addTrauma(DestroyTrauma)
+		_sfxHit.play()
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy") and not area.isDestroyed():

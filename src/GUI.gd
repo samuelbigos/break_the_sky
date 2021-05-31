@@ -82,9 +82,12 @@ func _process(delta):
 			outline.rect_scale = Vector2(1.0, 1.0)
 			outline.rect_rotation = 0.0
 			
-func setScore(var score: int, var multi: float, threshold: int):
-	$Score.text = "%06d" % score
-	$ScoreMulti.text = "x" + "%.1f" % multi
+func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
+	if isMax:
+		$ScoreMulti.text = "MAX x" + "%.1f" % multi
+	else:
+		$ScoreMulti.text = "x" + "%.1f" % multi
+	$Score.text = "%06d" % score	
 	$NextPerk.text = "%d" % threshold
 
 func showPerks(perks):

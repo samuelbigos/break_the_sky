@@ -42,7 +42,8 @@ export var BeaconSpawnRate = 20.0
 export var BeaconSpawnRateMulti = 0.95
 
 export var ScoreMultiTimeout = 10.0
-export var ScoreMultiMax = 25
+export var ScoreMultiMax = 10
+export var ScoreMultiIncrement = 0.2
 
 var _boidColCount: int
 var _boidColumns = []
@@ -53,8 +54,9 @@ var _pickups = []
 var _spawnPickups = 0
 var _started = false
 var _score = 0
-var _scoreMulti = 0.8
+var _scoreMulti = 1.0
 var _scoreMultiTimer: float
+var _perkDelay: float
 
 var _hasSlowmo = false
 var _hasNuke = false
@@ -66,6 +68,7 @@ var _beaconSpawn: float
 
 onready var _gui = get_node("CanvasLayer")
 onready var _perks = get_node("PerkManager")
+onready var _musicPlayer = get_node("MusicPlayer")
 
 func getBoids(): return _allBoids
 func getPlayer(): return _player
@@ -94,10 +97,11 @@ func _ready():
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		#DrillerFirstSpawn = 999.0
+		DrillerFirstSpawn = 999.0
 		#LaserSpawnScore = 0.0
-		#BeaconSpawnScore = 0.0
-		
+		BeaconSpawnScore = 0.0
+	
+	_scoreMulti -= ScoreMultiIncrement
 	addScore(0)
 	randomize()
 	
@@ -105,6 +109,8 @@ func _ready():
 	$Background.init()
 	GlobalCamera._player = _player
 	PauseManager._game = self
+	
+	_musicPlayer.play()
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -183,7 +189,7 @@ func getOffset(column: int, columnIndex: int):
 func _process(delta: float):
 	_scoreMultiTimer -= delta
 	if _scoreMultiTimer < 0.0:
-		_scoreMulti = 1
+		_scoreMulti = 1.0
 			
 	# enemy spawn
 	_time += delta
@@ -224,15 +230,18 @@ func _process(delta: float):
 				_beaconSpawn = BeaconSpawnRate
 				BeaconSpawnRate *= BeaconSpawnRateMulti
 				
+		# check perks
+		_perkDelay -= delta
+		if _perkDelay < 0.0 and _perks.thresholdReached(_score):
+			doPerk()
+			_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+				
 func addScore(var score: int):
 	_score += score * _scoreMulti
-	_scoreMulti = clamp(_scoreMulti + 0.1, 0, ScoreMultiMax)
+	_scoreMulti = clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax)
 	_scoreMultiTimer = ScoreMultiTimeout
-	
-	if _perks.thresholdReached(_score):
-		doPerk()
-		
-	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold())
+	_perkDelay = 2.0		
+	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
 	
 func doPerk():
 	get_tree().paused = true

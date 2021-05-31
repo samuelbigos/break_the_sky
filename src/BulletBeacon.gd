@@ -3,7 +3,7 @@ extends Node2D
 var _velocity: Vector2
 var _alignment: int
 var _playRadius: float
-var _radius = 5.0
+var _radius = 7.0
 var _damage = 1.0
 var _health = 1.0
 
@@ -31,4 +31,4 @@ func onHit():
 
 func _draw():
 	draw_circle(Vector2(0.0, 0.0), _radius, Colours.Secondary)
-	draw_circle(Vector2(0.0, 0.0), _radius - 2.0, Colours.White)
+	draw_circle(Vector2(0.0, 0.0), _radius - 3.0, Colours.White)

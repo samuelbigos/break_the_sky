@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyBeacon.gd" type="Script" id=1]
 [ext_resource path="res://scenes/BulletBeacon.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/enemy-beacon.png" type="Texture" id=3]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
+[ext_resource path="res://assets/sfx/beacon_fire.wav" type="AudioStream" id=6]
+[ext_resource path="res://assets/sfx/destroy_beacon.wav" type="AudioStream" id=7]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.5924
@@ -19,11 +21,13 @@ HitParticles = ExtResource( 5 )
 PickupDropRate = 1.0
 Points = 100
 MaxHealth = 30.0
-DestroyTrauma = 0.33
-HitTrauma = 0.025
+DestroyTrauma = 0.2
+HitTrauma = 0.01
 BulletScene = ExtResource( 2 )
+TargetBeaconDist = 450.0
+BeaconCooldown = 3.5
 BulletsPerPulse = 16
-BulletSpeed = 175.0
+BulletSpeed = 150.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
@@ -33,3 +37,9 @@ shape = SubResource( 1 )
 [node name="Sprite" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 3 )
+
+[node name="SFXBeaconFire" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 6 )
+
+[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )

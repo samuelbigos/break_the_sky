@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyDriller.gd" type="Script" id=1]
 [ext_resource path="res://assets/enemy-driller.png" type="Texture" id=2]
 [ext_resource path="res://src/Trail.gd" type="Script" id=3]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
+[ext_resource path="res://assets/sfx/destroy_driller2.wav" type="AudioStream" id=6]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 8.68022
@@ -31,3 +32,6 @@ texture = ExtResource( 2 )
 
 [node name="Trail" type="Node2D" parent="."]
 script = ExtResource( 3 )
+
+[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 6 )

@@ -8,6 +8,9 @@ export var LaserDuration = 2.0
 
 onready var _laser = get_node("LaserArea")
 onready var _rotor = get_node("Rotor")
+onready var _sfxLaserCharge = get_node("SFXLaserCharge")
+onready var _sfxLaserFire = get_node("SFXLaserFire")
+onready var _sfxDestroy = get_node("SFXDestroy")
 
 enum LaserState {
 	Inactive,
@@ -28,6 +31,7 @@ func _ready():
 	_laser.monitorable = false
 	_sprite.modulate = Colours.Secondary
 	_rotor.modulate = Colours.Secondary
+	_laserCooldown = LaserCooldown * 0.5
 
 func _process(delta: float):
 	var distToTarget = (global_position - _target.global_position).length()
@@ -67,10 +71,12 @@ func _process(delta: float):
 	
 func laserCharging():
 	_laser.update()
+	_sfxLaserCharge.play()
 	
 func laserFiring():
 	_laser.update()
 	_laser.monitorable = true
+	_sfxLaserFire.play()
 	
 func laserInactive():
 	_laser.update()
@@ -88,3 +94,4 @@ func destroy(score: bool):
 	.destroy(score)
 	_laser.queue_free()
 	_rotor.queue_free()
+	_sfxDestroy.play()

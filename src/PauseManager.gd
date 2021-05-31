@@ -3,7 +3,7 @@ extends Node
 var _game = null
 var _pauseTimer: float
 var _paused = false
-var _pauseFlashTime = 1.0 / 25.0
+var _pauseFlashTime = 1.0 / 60.0
 
 
 func pauseFlash():

@@ -55,8 +55,8 @@ func _process(delta):
 		_reposition(cloud)
 		
 func _reposition(cloud: Sprite):
-	if cloud.global_position.y > _game.PlayRadius * 0.5 + get_viewport().size.y:
-		cloud.global_position.y = -_game.PlayRadius * 0.5 - get_viewport().size.y
+	if cloud.global_position.y > _game.PlayRadius * 0.5 + get_viewport().size.y * 2.0:
+		cloud.global_position.y = -_game.PlayRadius * 0.5 - get_viewport().size.y * 2.0
 		var x = (_game.PlayRadius + get_viewport().size.x) * 0.5
 		cloud.global_position.x = rand_range(-x, x)
 

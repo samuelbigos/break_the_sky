@@ -2,9 +2,8 @@
 
 [ext_resource path="res://src/BulletBeacon.gd" type="Script" id=1]
 
-[sub_resource type="CapsuleShape2D" id=1]
-radius = 2.34744
-height = 15.7183
+[sub_resource type="CircleShape2D" id=1]
+radius = 6.0
 
 [node name="Bullet" type="Area2D" groups=[
 "bullet",

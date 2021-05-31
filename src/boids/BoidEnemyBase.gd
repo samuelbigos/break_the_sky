@@ -4,7 +4,7 @@ class_name BoidEnemyBase
 export var PickupDropRate = 0.25
 export var Points = 10
 export var MaxHealth = 1.0
-export var HitFlashTime = 1.0 / 30.0
+export var HitFlashTime = 1.0 / 60.0
 export var DestroyTime = 3.0
 export var DestroyTrauma = 0.1
 export var HitTrauma = 0.05
@@ -12,6 +12,7 @@ export var HitTrauma = 0.05
 onready var _sprite = get_node("Sprite")
 onready var _damagedParticles = get_node("Damaged")
 
+var _sfxHit: AudioStreamPlayer2D
 var _target: Node2D
 var _game: Object
 var _health: float
@@ -27,6 +28,9 @@ func _ready():
 	connect("area_entered", self, "_on_BoidBase_area_entered")
 	_health = MaxHealth
 	_baseScale = _sprite.scale
+	_sfxHit = AudioStreamPlayer2D.new()
+	add_child(_sfxHit)
+	_sfxHit.stream = load("res://assets/sfx/hit3.wav")
 
 func init(game, target):
 	_game = game
@@ -92,6 +96,7 @@ func onHit(damage: float, score: bool):
 		destroy(score)
 	PauseManager.pauseFlash()
 	GlobalCamera.addTrauma(HitTrauma)
+	_sfxHit.play()
 
 func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0 and not _destroyed:
