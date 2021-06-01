@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/cloud6.png-1f8ba6569c3f9c72ffde194be1d555ab.stex"
+path="res://.import/enemy-laser-rotor.png-69ecff743aa7bc7de640aa09b519f5f1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/clouds/cloud6.png"
-dest_files=[ "res://.import/cloud6.png-1f8ba6569c3f9c72ffde194be1d555ab.stex" ]
+source_file="res://assets/textures/enemy-laser-rotor.png"
+dest_files=[ "res://.import/enemy-laser-rotor.png-69ecff743aa7bc7de640aa09b519f5f1.stex" ]
 
 [params]
 

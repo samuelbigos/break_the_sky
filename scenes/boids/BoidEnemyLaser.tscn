@@ -2,8 +2,8 @@
 
 [ext_resource path="res://src/boids/BoidEnemyLaser.gd" type="Script" id=1]
 [ext_resource path="res://src/Laser.gd" type="Script" id=2]
-[ext_resource path="res://assets/enemy-laser.png" type="Texture" id=3]
-[ext_resource path="res://assets/enemy-laser-rotor.png" type="Texture" id=4]
+[ext_resource path="res://assets/textures/enemy-laser.png" type="Texture" id=3]
+[ext_resource path="res://assets/textures/enemy-laser-rotor.png" type="Texture" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=7]

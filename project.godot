@@ -48,6 +48,11 @@ _global_script_classes=[ {
 "class": "Leader",
 "language": "GDScript",
 "path": "res://src/Leader.gd"
+}, {
+"base": "Resource",
+"class": "SaveGame",
+"language": "GDScript",
+"path": "res://src/SaveGame.gd"
 } ]
 _global_script_class_icons={
 "BoidAlly": "",
@@ -57,7 +62,8 @@ _global_script_class_icons={
 "BoidEnemyDriller": "",
 "BoidEnemyLaser": "",
 "Game": "",
-"Leader": ""
+"Leader": "",
+"SaveGame": ""
 }
 
 [application]
@@ -65,19 +71,23 @@ _global_script_class_icons={
 config/name="AI And Games Jam 2021"
 run/main_scene="res://scenes/Game.tscn"
 config/icon="res://icon.png"
+config/save_version=0
 
 [autoload]
 
 Colours="*res://scenes/Colours.tscn"
 PauseManager="*res://scenes/PauseManager.tscn"
 GlobalCamera="*res://scenes/Camera.tscn"
+PlayerData="*res://src/singletons/PlayerData.gd"
+SaveManager="*res://src/singletons/SaveManager.gd"
+Levels="*res://src/singletons/Levels.gd"
 
 [display]
 
 window/size/width=960
 window/size/height=540
-window/size/test_width=1440
-window/size/test_height=810
+window/size/test_width=960
+window/size/test_height=540
 window/stretch/mode="viewport"
 
 [input]
@@ -136,3 +146,7 @@ fullscreen={
 [physics]
 
 common/enable_pause_aware_picking=true
+
+[rendering]
+
+environment/default_clear_color=Color( 1, 0.831373, 0.639216, 1 )

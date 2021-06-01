@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/drone-friendly.png-6d9640c928f8bf7b3572ba3fe53b1459.stex"
+path="res://.import/enemy-laser.png-7fc2ed7472b49f9ed7c162068ffc871a.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/drone-friendly.png"
-dest_files=[ "res://.import/drone-friendly.png-6d9640c928f8bf7b3572ba3fe53b1459.stex" ]
+source_file="res://assets/textures/enemy-laser.png"
+dest_files=[ "res://.import/enemy-laser.png-7fc2ed7472b49f9ed7c162068ffc871a.stex" ]
 
 [params]
 

@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/boids/BoidEnemyBeacon.gd" type="Script" id=1]
 [ext_resource path="res://scenes/BulletBeacon.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/enemy-beacon.png" type="Texture" id=3]
+[ext_resource path="res://assets/textures/enemy-beacon.png" type="Texture" id=3]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/sfx/beacon_fire.wav" type="AudioStream" id=6]

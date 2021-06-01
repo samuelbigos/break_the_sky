@@ -45,5 +45,4 @@ func drawArc(center, radius, angleTo, angleFrom, color, thickness):
 	for i in range(pointNum + 1):
 		var angle = deg2rad(angleFrom + i * (angleTo - angleFrom) / pointNum - 90)
 		points.push_back(center + Vector2(cos(angle), sin(angle)) * radius)
-	for i in range(pointNum):
-		draw_line(points[i], points[i + 1], color, thickness)
+	draw_polyline(points, color, thickness)

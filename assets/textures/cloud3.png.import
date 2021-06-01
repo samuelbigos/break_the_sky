@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/enemy-beacon.png-9b5146fe8c83423a3e53f7152cdc6a1d.stex"
+path="res://.import/cloud3.png-1f812502a98f88a917598da2878bb675.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemy-beacon.png"
-dest_files=[ "res://.import/enemy-beacon.png-9b5146fe8c83423a3e53f7152cdc6a1d.stex" ]
+source_file="res://assets/textures/cloud3.png"
+dest_files=[ "res://.import/cloud3.png-1f812502a98f88a917598da2878bb675.stex" ]
 
 [params]
 

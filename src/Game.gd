@@ -4,16 +4,26 @@ class_name Game
 enum Formation {
 	Balanced,
 	Wide,
-	Narrow,	
+	Narrow,
 }
 
-export var Debug = false
+enum WaveState {
+	Wave,
+	Cooldown
+}
+
+export var DebugWave = -1
 
 export var BoidScene : PackedScene
 export var PickupAddScene: PackedScene
+export var EnemyDrillerScene: PackedScene
+export var EnemyLaserScene: PackedScene
+export var EnemyBeaconScene: PackedScene
+
 export var InitialPickupAddCount := 20
 export var InitialBoidCount = 100
 export var PlayRadius = 1000.0
+export var WaveCooldown = 5.0
 
 export var BaseBoidReload = 1.75
 export var BaseBoidReinforce = 3
@@ -25,21 +35,6 @@ export var BaseBoidSpeed = 1500.0
 export var BasePlayerSpeed = 4.0
 export var BaseBoidSpread = 0.1
 export var BaseBulletSpeed = 500.0
-
-export var EnemyDrillerScene : PackedScene
-export var DrillerFirstSpawn = 0.0
-export var DrillerSpawnRate = 2.0
-export var DrlllerSpawnRateMulti = 0.99
-
-export var EnemyLaserScene: PackedScene
-export var LaserSpawnScore = 300.0
-export var LaserSpawnRate = 8.0
-export var LaserSpawnRateMulti = 0.97
-
-export var EnemyBeaconScene: PackedScene
-export var BeaconSpawnScore = 1500.0
-export var BeaconSpawnRate = 20.0
-export var BeaconSpawnRateMulti = 0.95
 
 export var ScoreMultiTimeout = 10.0
 export var ScoreMultiMax = 10
@@ -62,21 +57,22 @@ var _started = false
 var _score = 0
 var _scoreMulti = 1.0
 var _scoreMultiTimer: float
-var _perkDelay: float
 var _loseTimer: float
 var _pendingLose = false
+var _enemies = []
 
 var _hasSlowmo = false
 var _hasNuke = false
 
-var _time := 0.0
-var _drillerSpawn: float
-var _laserSpawn: float
-var _beaconSpawn: float
+var _waveState = WaveState.Cooldown
+var _waveTimer := 0.0
+var _currentWave := -1
+var _currentSubWave := 0
+var _prevSubwaveTime: float
 
 var _windowScale = WindowScale.Full
 
-onready var _gui = get_node("CanvasLayer")
+onready var _gui = get_node("HUD")
 onready var _perks = get_node("PerkManager")
 onready var _musicPlayer = get_node("MusicPlayer")
 
@@ -101,22 +97,17 @@ func _ready():
 		var f = float(i) * PI * 2.0 / float(InitialPickupAddCount)
 		spawnPickupAdd(Vector2(sin(f), -cos(f)).normalized() * 80.0, true)
 		
-	_drillerSpawn = DrillerFirstSpawn
-	if Debug:
+	if DebugWave >= 0:
+		_currentWave = DebugWave
 		_started = true
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
-		#DrillerFirstSpawn = 999.0
-		LaserSpawnScore = 0.0
-		#BeaconSpawnScore = 0.0
 	
 	_scoreMulti -= ScoreMultiIncrement
 	addScore(0)
 	randomize()
 	
-	$Background._game = self
-	$Background.init()
 	GlobalCamera._player = _player
 	PauseManager._game = self
 	
@@ -208,52 +199,35 @@ func _process(delta: float):
 	_scoreMultiTimer -= delta
 	if _scoreMultiTimer < 0.0:
 		_scoreMulti = 1.0
-			
-	# enemy spawn
-	_time += delta
-	if _started:
-		# driller
-		if _time > DrillerFirstSpawn:
-			_drillerSpawn -= delta
-			if _drillerSpawn < 0.0:
-				var driller = EnemyDrillerScene.instance()
-				var f = rand_range(0.0, PI * 2.0)
-				driller.global_position = Vector2(sin(f), -cos(f)).normalized() * PlayRadius
-				add_child(driller)
-				driller.init(self, _player)
-				_drillerSpawn = DrillerSpawnRate
-				DrillerSpawnRate *= DrlllerSpawnRateMulti
 		
-		# laser
-		if _score >= LaserSpawnScore:
-			_laserSpawn -= delta
-			if _laserSpawn < 0.0:
-				var laser = EnemyLaserScene.instance()
-				var f = rand_range(0.0, PI * 2.0)
-				laser.global_position = Vector2(sin(f), -cos(f)).normalized() * PlayRadius
-				add_child(laser)
-				laser.init(self, _player)
-				_laserSpawn = LaserSpawnRate
-				LaserSpawnRate *= LaserSpawnRateMulti
-				
-		# beacon
-		if _score >= BeaconSpawnScore:
-			_beaconSpawn -= delta
-			if _beaconSpawn < 0.0:
-				var beacon = EnemyBeaconScene.instance()
-				var f = rand_range(0.0, PI * 2.0)
-				beacon.global_position = Vector2(sin(f), -cos(f)).normalized() * PlayRadius
-				add_child(beacon)
-				beacon.init(self, _player)
-				_beaconSpawn = BeaconSpawnRate
-				BeaconSpawnRate *= BeaconSpawnRateMulti
-				
-		# check perks
-		_perkDelay -= delta
-		if _perkDelay < 0.0 and _perks.thresholdReached(_score):
-			doPerk()
-			_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+	for i in range(_enemies.size(), 0, -1):
+		if not is_instance_valid(_enemies[i - 1]):
+			_enemies.remove(i - 1)
 			
+	# waves
+	var enemyCount = _enemies.size()
+	_waveTimer -= delta
+	if _started:
+		match _waveState:
+			WaveState.Cooldown:
+				if _waveTimer < 0.0 and enemyCount == 0:
+					enterWave()
+					
+			WaveState.Wave:
+				if _waveTimer < 0.0:
+					_gui.setWave(_currentWave, _currentSubWave)
+					for spawn in Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["spawns"]:
+						_spawn(spawn)
+					
+					_currentSubWave += 1
+					var subwaveCount = Levels.Levels[0]["waves"][_currentWave].size()
+					if _currentSubWave >= subwaveCount:
+						enterWaveCooldown()
+					else:
+						var subwaveTime = Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
+						_waveTimer = subwaveTime - _prevSubwaveTime
+						_prevSubwaveTime = subwaveTime
+							
 	if Input.is_action_just_released("fullscreen"):
 		match _windowScale:
 			WindowScale.Medium:
@@ -271,11 +245,41 @@ func _process(delta: float):
 				OS.window_borderless = false
 				OS.set_window_size(Vector2(960, 540))
 				
+func enterWaveCooldown():
+	_waveTimer = WaveCooldown
+	_waveState = WaveState.Cooldown
+	
+func enterWave():
+	_waveState = WaveState.Wave
+	if _currentWave != -1:
+		doPerk()
+	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)	
+	_currentWave += 1
+	if _currentWave >= Levels.Levels[0]["waves"].size():
+		# add more waves!
+		lose()
+		
+	_currentSubWave = 0
+	_waveTimer = Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
+	_gui.setWave(_currentWave, _currentSubWave)
+		
+func _spawn(id: int):
+	var enemy = null
+	match (id):
+		0: enemy = EnemyDrillerScene.instance()
+		1: enemy = EnemyLaserScene.instance()
+		2: enemy = EnemyBeaconScene.instance()
+	
+	var f = rand_range(0.0, PI * 2.0)
+	enemy.global_position = Vector2(sin(f), -cos(f)).normalized() * PlayRadius
+	add_child(enemy)
+	enemy.init(self, _player)
+	_enemies.append(enemy)
+				
 func addScore(var score: int):
 	_score += score * _scoreMulti
 	_scoreMulti = clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax)
 	_scoreMultiTimer = ScoreMultiTimeout
-	_perkDelay = 2.0		
 	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
 	
 func doPerk():

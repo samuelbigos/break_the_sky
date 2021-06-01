@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/enemy-laser-rotor.png-840aac486f72f093b3719cb94ea077f3.stex"
+path="res://.import/circle.png-be50cbe02cfb57fcc59ddc4663489f4e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemy-laser-rotor.png"
-dest_files=[ "res://.import/enemy-laser-rotor.png-840aac486f72f093b3719cb94ea077f3.stex" ]
+source_file="res://assets/gui/circle.png"
+dest_files=[ "res://.import/circle.png-be50cbe02cfb57fcc59ddc4663489f4e.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

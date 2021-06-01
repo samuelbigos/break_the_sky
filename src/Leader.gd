@@ -21,17 +21,24 @@ func _process(delta):
 		var lookAt = mousePos - global_position
 		rotation = -atan2(lookAt.x, lookAt.y);
 		
-		var forward = Vector2(0.0, -1.0) * 120.0
-		var left = Vector2(-1.0, 0.0) * 120.0
+		var forward = Vector2(0.0, -1.0)
+		var left = Vector2(-1.0, 0.0)
 		var accel = _game.BasePlayerSpeed
+		
+		var dir = Vector2(0.0, 0.0)
 		if Input.is_action_pressed("w"):
-			_velocity += forward * accel * delta
+			dir += forward
 		if Input.is_action_pressed("s"):
-			_velocity += -forward * accel * delta
+			dir += -forward
 		if Input.is_action_pressed("a"):
-			_velocity += left * accel * delta
+			dir += left 
 		if Input.is_action_pressed("d"):
-			_velocity += -left * accel * delta
+			dir += -left
+		
+		if dir != Vector2(0.0, 0.0):
+			dir = dir.normalized()
+			dir *= 100.0 * accel * delta
+			_velocity += dir
 
 		if (global_position + _velocity * delta).length() > _game.PlayRadius - 5.0:
 			_velocity *= 0.0

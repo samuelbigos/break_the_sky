@@ -21,7 +21,8 @@ onready var _perkOutline3 = get_node("Perks/VBoxContainer/Perk3/Outline")
 onready var _perkAt = get_node("PerkIn")
 onready var _score = get_node("Score")
 onready var _scoreMulti = get_node("ScoreMulti")
-onready var _nextPerk = get_node("NextPerk")
+onready var _wave = get_node("Wave")
+onready var _subWave = get_node("Subwave")
 
 onready var _loseScreen = get_node("LoseScreen")
 onready var _loseButton = get_node("LoseScreen/VBoxContainer/MenuButton")
@@ -35,6 +36,7 @@ var _perkSelections = []
 var _buttons = []
 var _buttonSelected = null
 var _animTime: float
+var _game = null
 
 signal onPerkSelected
 
@@ -54,8 +56,8 @@ func _ready():
 	fontCol = Colours.Secondary
 	_score.add_color_override("font_color", fontCol)
 	_scoreMulti.add_color_override("font_color", fontCol)
-	_nextPerk.add_color_override("font_color", fontCol)
-	_perkAt.add_color_override("font_color", fontCol)
+	_wave.add_color_override("font_color", fontCol)
+	_subWave.add_color_override("font_color", fontCol)
 	
 	var bgCol = Colours.Secondary
 	var outlineCol = Colours.Tertiary
@@ -109,8 +111,12 @@ func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 	else:
 		$ScoreMulti.text = "x" + "%.1f" % multi
 	$Score.text = "%06d" % score	
-	$NextPerk.text = "%d" % threshold
 	_scoreLabel.text = "%06d" % score
+	
+func setWave(wave: int, subwave: int):
+	_wave.text = "Wave %d" % wave
+	_subWave.text = "SubWave %d" % subwave
+	_wave.visible = true
 
 func showPerks(perks):
 	_perks.visible = true
@@ -159,6 +165,7 @@ func _on_Perk3_mouse_exited():
 	_buttonSelected = null
 
 func _on_MenuButton_button_up():
+	get_tree().paused = false
 	get_tree().reload_current_scene()
 	
 func _on_MenuButton_mouse_entered():

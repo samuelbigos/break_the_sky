@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/enemy-driller.png-a23b199530faefe7724b58c1d006118e.stex"
+path="res://.import/cloud4.png-35db7337189da360545a7c97865c02b3.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemy-driller.png"
-dest_files=[ "res://.import/enemy-driller.png-a23b199530faefe7724b58c1d006118e.stex" ]
+source_file="res://assets/textures/cloud4.png"
+dest_files=[ "res://.import/cloud4.png-35db7337189da360545a7c97865c02b3.stex" ]
 
 [params]
 
