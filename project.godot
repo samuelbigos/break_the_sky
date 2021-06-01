@@ -76,10 +76,8 @@ GlobalCamera="*res://scenes/Camera.tscn"
 
 window/size/width=960
 window/size/height=540
-window/size/borderless=true
-window/size/fullscreen=true
-window/size/test_width=1920
-window/size/test_height=1080
+window/size/test_width=1440
+window/size/test_height=810
 window/stretch/mode="viewport"
 
 [input]

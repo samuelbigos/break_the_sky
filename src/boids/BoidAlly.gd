@@ -16,6 +16,7 @@ export var BulletScene: PackedScene
 onready var _sprite = get_node("Sprite")
 onready var _sfxShot = get_node("SFXShot")
 onready var _sfxHit = get_node("SFXHit")#
+onready var _damagedParticles = get_node("Damaged")
 
 var _game: Object = null
 var _target: Node2D
@@ -122,6 +123,7 @@ func _destroy():
 		_sprite.z_index = -1
 		GlobalCamera.addTrauma(DestroyTrauma)
 		_sfxHit.play()
+		_damagedParticles.emitting = true
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy") and not area.isDestroyed():

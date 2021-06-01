@@ -23,8 +23,16 @@ onready var _score = get_node("Score")
 onready var _scoreMulti = get_node("ScoreMulti")
 onready var _nextPerk = get_node("NextPerk")
 
+onready var _loseScreen = get_node("LoseScreen")
+onready var _loseButton = get_node("LoseScreen/VBoxContainer/MenuButton")
+onready var _loseLabel = get_node("LoseScreen/VBoxContainer/MenuButton/Outline/Label")
+onready var _loseOutline = get_node("LoseScreen/VBoxContainer/MenuButton/Outline")
+onready var _loseBG = get_node("LoseScreen/VBoxContainer/MenuButton/TextureRect")
+
+onready var _scoreLabel = get_node("LoseScreen/VBoxContainer/Score")
+
 var _perkSelections = []
-var _perkButtons = []
+var _buttons = []
 var _buttonSelected = null
 var _animTime: float
 
@@ -41,6 +49,7 @@ func _ready():
 	_perkLabel1Desc.add_color_override("font_color", fontCol)
 	_perkLabel2Desc.add_color_override("font_color", fontCol)
 	_perkLabel3Desc.add_color_override("font_color", fontCol)
+	_loseLabel.add_color_override("font_color", fontCol)
 	
 	fontCol = Colours.Secondary
 	_score.add_color_override("font_color", fontCol)
@@ -57,13 +66,17 @@ func _ready():
 	_perkBG3.modulate = bgCol
 	_perkOutline3.modulate = outlineCol
 	
-	_perkButtons.append(_perkButton1)
-	_perkButtons.append(_perkButton2)
-	_perkButtons.append(_perkButton3)
+	_loseBG.modulate = bgCol
+	_loseOutline.modulate = outlineCol
+	
+	_buttons.append(_perkButton1)
+	_buttons.append(_perkButton2)
+	_buttons.append(_perkButton3)
+	_buttons.append(_loseButton)
 	
 func _process(delta):
 	_animTime += delta
-	for button in _perkButtons:
+	for button in _buttons:
 		var bg = button.get_node("TextureRect")
 		var outline = button.get_node("Outline")
 		if button == _buttonSelected:
@@ -82,6 +95,14 @@ func _process(delta):
 			outline.rect_scale = Vector2(1.0, 1.0)
 			outline.rect_rotation = 0.0
 			
+	if _loseScreen.visible:
+		var time = _animTime / 0.1
+		var s = 1.0 + cos(time) * 0.25
+		var r = sin(time) * 2.0
+		_scoreLabel.rect_pivot_offset = _scoreLabel.rect_size / 2.0
+		_scoreLabel.rect_rotation = r
+		_scoreLabel.rect_scale = Vector2(s, s)
+			
 func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 	if isMax:
 		$ScoreMulti.text = "MAX x" + "%.1f" % multi
@@ -89,6 +110,7 @@ func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 		$ScoreMulti.text = "x" + "%.1f" % multi
 	$Score.text = "%06d" % score	
 	$NextPerk.text = "%d" % threshold
+	_scoreLabel.text = "%06d" % score
 
 func showPerks(perks):
 	_perks.visible = true
@@ -99,6 +121,9 @@ func showPerks(perks):
 	_perkLabel1Desc.text = _perkSelections[0].displayDesc
 	_perkLabel2Desc.text = _perkSelections[1].displayDesc
 	_perkLabel3Desc.text = _perkSelections[2].displayDesc
+	
+func showLoseScreen():
+	_loseScreen.visible = true
 
 func _on_Perk1_button_up():
 	_perks.visible = false
@@ -131,4 +156,13 @@ func _on_Perk3_mouse_entered():
 	_buttonSelected = _perkButton3
 
 func _on_Perk3_mouse_exited():
+	_buttonSelected = null
+
+func _on_MenuButton_button_up():
+	get_tree().reload_current_scene()
+	
+func _on_MenuButton_mouse_entered():
+	_buttonSelected = _loseButton
+
+func _on_MenuButton_mouse_exited():
 	_buttonSelected = null

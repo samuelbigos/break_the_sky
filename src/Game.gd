@@ -63,6 +63,8 @@ var _score = 0
 var _scoreMulti = 1.0
 var _scoreMultiTimer: float
 var _perkDelay: float
+var _loseTimer: float
+var _pendingLose = false
 
 var _hasSlowmo = false
 var _hasNuke = false
@@ -118,7 +120,7 @@ func _ready():
 	GlobalCamera._player = _player
 	PauseManager._game = self
 	
-	_musicPlayer.play()
+	#_musicPlayer.play()
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -170,7 +172,9 @@ func addBoids(pos: Vector2):
 func removeBoid(boid: Object):
 	_allBoids.erase(boid)
 	if _allBoids.size() == 0:
-		lose()
+		_loseTimer = 2.0
+		_pendingLose = true
+		_player.destroy()
 		
 	changeFormation(_formation, false)
 	
@@ -195,6 +199,12 @@ func getOffset(column: int, columnIndex: int):
 	return offset
 	
 func _process(delta: float):
+	if _pendingLose:
+		_loseTimer -= delta
+		if _loseTimer < 0.0:
+			lose()
+		return
+	
 	_scoreMultiTimer -= delta
 	if _scoreMultiTimer < 0.0:
 		_scoreMulti = 1.0
@@ -302,4 +312,4 @@ func lose():
 	var camerOffset = -_player.global_position + get_viewport().size * 0.5
 	var cameraTransform = Transform2D(Vector2(1.0, 0.0), Vector2(0.0, 1.0), camerOffset)
 	get_viewport().canvas_transform = cameraTransform
-	#get_tree().reload_current_scene()
+	_gui.showLoseScreen()
