@@ -1,13 +1,14 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://assets/textures/drone-friendly.png" type="Texture" id=1]
 [ext_resource path="res://src/boids/BoidAlly.gd" type="Script" id=2]
-[ext_resource path="res://scenes/Bullet.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/Trail.gd" type="Script" id=4]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=8]
+[ext_resource path="res://scenes/bullets/MicroBullet.tscn" type="PackedScene" id=9]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 4.27867
@@ -19,8 +20,8 @@ HitParticles = ExtResource( 5 )
 SlowingRadius = 25.0
 AlignmentRadius = 10.0
 SeparationRadius = 7.0
-ShootTrauma = 0.033
 BulletScene = ExtResource( 3 )
+MicoBulletScene = ExtResource( 9 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
@@ -40,6 +41,9 @@ volume_db = -5.0
 pitch_scale = 0.8
 
 [node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )
+
+[node name="SFXHitMicro" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
 
 [connection signal="area_entered" from="." to="." method="_on_BoidAlly_area_entered"]

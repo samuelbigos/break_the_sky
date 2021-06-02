@@ -15,7 +15,7 @@ var _velocity: Vector2
 func _ready():
 	_colour = Colours.Secondary
 
-func _process(delta):	
+func _process(delta):
 	if not _destroyed:
 		var mousePos = get_global_mouse_position()
 		var lookAt = mousePos - global_position

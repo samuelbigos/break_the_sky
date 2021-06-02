@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://scenes/Leader.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/PickupAdd.tscn" type="PackedScene" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://scenes/boids/BoidEnemyLaser.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Perk.gd" type="Script" id=9]
 [ext_resource path="res://src/PerkManager.gd" type="Script" id=10]
+[ext_resource path="res://scenes/gui/FloatingScore.tscn" type="PackedScene" id=11]
 [ext_resource path="res://scenes/Background.tscn" type="PackedScene" id=13]
 [ext_resource path="res://assets/music/Metre - Taranis.mp3" type="AudioStream" id=25]
 
@@ -27,8 +28,10 @@ BasePlayerSpeed = 5.0
 [node name="Background" parent="." instance=ExtResource( 13 )]
 
 [node name="Leader" parent="." instance=ExtResource( 1 )]
+rotation = 0.0
 
 [node name="HUD" parent="." instance=ExtResource( 7 )]
+FloatingScoreScene = ExtResource( 11 )
 
 [node name="PerkManager" type="Node" parent="."]
 script = ExtResource( 10 )
@@ -52,6 +55,7 @@ script = ExtResource( 9 )
 id = "Grouping"
 displayName = "Kinematics"
 displayDesc = "[+Grouping]"
+maximum = 5
 groupingMod = -2.0
 
 [node name="Damage" type="Node" parent="PerkManager"]
@@ -82,6 +86,7 @@ script = ExtResource( 9 )
 id = "Speed"
 displayName = "Orion Drive"
 displayDesc = "[+Speed]"
+maximum = 5
 boidSpeedMod = 150.0
 playerSpeedMod = 1.0
 
@@ -90,14 +95,23 @@ script = ExtResource( 9 )
 id = "Accuracy"
 displayName = "Ballistics"
 displayDesc = "[+Accuracy]"
-spreadMod = 0.8
+spreadMod = 0.75
 
 [node name="Bullet" type="Node" parent="PerkManager"]
 script = ExtResource( 9 )
 id = "Bullet"
 displayName = "Extended Barrels"
 displayDesc = "[+Bullet Speed]"
+maximum = 5
 bulletSpeedMod = 125.0
+
+[node name="Microturrets" type="Node" parent="PerkManager"]
+script = ExtResource( 9 )
+id = "Microturrets"
+displayName = "Microturrets"
+displayDesc = "[+Passive Fire]"
+maximum = 1
+microturrets = true
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
 pause_mode = 2

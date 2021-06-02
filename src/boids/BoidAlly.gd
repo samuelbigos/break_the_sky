@@ -10,8 +10,12 @@ export var DestroyTime = 3.0
 export var ShootSize = 1.5
 export var ShootTrauma = 0.05
 export var DestroyTrauma = 0.1
+export var MicroBulletCD = 1.0
+export var MicroBulletRange = 400.0
+export var MicroBulletDamageMod = 0.25
 
 export var BulletScene: PackedScene
+export var MicoBulletScene: PackedScene
 
 onready var _sprite = get_node("Sprite")
 onready var _sfxShot = get_node("SFXShot")
@@ -26,6 +30,9 @@ var _destroyed = false
 var _destroyedTimer: float
 var _baseScale: Vector2
 var _destroyRot: float
+var _microBulletTargetSearchTimer: float
+var _microBulletTarget = null
+var _microBulletCD: float
 
 
 func isDestroyed(): return _destroyed
@@ -70,11 +77,42 @@ func _process(delta: float):
 	if Input.is_action_pressed("shoot") and _shootCooldown <= 0.0:
 		if _canShoot(shootDir):
 			_shoot(shootDir)
-			
+	
+	# shooting
 	if _shootCooldown > 0.0:
 		var t = _shootCooldown / _game.BaseBoidReload
 		t = pow(clamp(t, 0.0, 1.0), 5.0)
 		_sprite.scale = lerp(_baseScale * 2.0, _baseScale, 1.0 - t)
+		
+	# microbullets
+	if _game.BaseMicroturrets and not _destroyed:
+		if not is_instance_valid(_microBulletTarget) or _microBulletTarget.isDestroyed():
+			_microBulletTarget = null
+			
+		_microBulletTargetSearchTimer -= delta
+		if _microBulletTarget == null and _microBulletTargetSearchTimer < 0.0:
+			_microBulletTargetSearchTimer = 0.1
+			for enemy in _game._enemies:
+				if (enemy.global_position - global_position).length() < MicroBulletRange:
+					_microBulletTarget = enemy
+					_microBulletCD = rand_range(MicroBulletCD * 0.5, MicroBulletCD * 1.5)
+		
+		if _microBulletTarget:
+			if (_microBulletTarget.global_position - global_position).length() > MicroBulletRange:
+				_microBulletTarget = null
+				_microBulletTargetSearchTimer = 0.1
+			else:
+				_microBulletCD -= delta
+				if _microBulletCD < 0.0:
+					_microBulletCD = rand_range(MicroBulletCD * 0.5, MicroBulletCD * 1.5)
+					var mb = MicoBulletScene.instance()
+					var spread = _game.BaseBoidSpread
+					var dir = (_microBulletTarget.global_position - global_position).normalized()
+					dir += Vector2(-dir.y, dir.x) * rand_range(-spread, spread)
+					mb.init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius)
+					mb.global_position = global_position
+					mb._damage = _game.BaseBoidDamage * MicroBulletDamageMod
+					_game.add_child(mb)
 			
 	# update trail
 	$Trail.update()
@@ -97,7 +135,8 @@ func _shoot(dir: Vector2):
 	bullet.global_position = global_position
 	_game.add_child(bullet)
 	_game.pushBack(self)
-	GlobalCamera.addTrauma(ShootTrauma)
+	var traumaMod = 1.0 - clamp(_game.getNumBoids() / 100.0, 0.0, 0.75)
+	GlobalCamera.addTrauma(ShootTrauma * traumaMod)
 	_sfxShot.play()
 	
 func _canShoot(dir: Vector2):
@@ -116,7 +155,7 @@ func _canShoot(dir: Vector2):
 	
 func _destroy():
 	if not _destroyed:
-		_game.removeBoid(self)	
+		_game.removeBoid(self)
 		_destroyed = true
 		_sprite.modulate = Colours.White
 		_destroyedTimer = DestroyTime
@@ -127,7 +166,7 @@ func _destroy():
 
 func _on_BoidAlly_area_entered(area):
 	if area.is_in_group("enemy") and not area.isDestroyed():
-		area.onHit(HitDamage, false)
+		area.onHit(HitDamage, false, _velocity, false)
 		_destroy()
 	
 	if area.is_in_group("laser"):

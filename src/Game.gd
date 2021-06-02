@@ -24,6 +24,7 @@ export var InitialPickupAddCount := 20
 export var InitialBoidCount = 100
 export var PlayRadius = 1000.0
 export var WaveCooldown = 5.0
+export var MaxDrones = 100
 
 export var BaseBoidReload = 1.75
 export var BaseBoidReinforce = 3
@@ -35,6 +36,7 @@ export var BaseBoidSpeed = 1500.0
 export var BasePlayerSpeed = 4.0
 export var BaseBoidSpread = 0.1
 export var BaseBulletSpeed = 500.0
+export var BaseMicroturrets = false
 
 export var ScoreMultiTimeout = 10.0
 export var ScoreMultiMax = 10
@@ -60,6 +62,7 @@ var _scoreMultiTimer: float
 var _loseTimer: float
 var _pendingLose = false
 var _enemies = []
+var _numBoids: int
 
 var _hasSlowmo = false
 var _hasNuke = false
@@ -68,6 +71,7 @@ var _waveState = WaveState.Cooldown
 var _waveTimer := 0.0
 var _currentWave := -1
 var _currentSubWave := 0
+var _numWaves := 0
 var _prevSubwaveTime: float
 
 var _windowScale = WindowScale.Full
@@ -78,6 +82,8 @@ onready var _musicPlayer = get_node("MusicPlayer")
 
 func getBoids(): return _allBoids
 func getPlayer(): return _player
+func getNumBoids(): return _numBoids
+func getEnemies(): return _enemies
 
 func _ready():
 	_player = get_node("Leader")
@@ -98,15 +104,17 @@ func _ready():
 		spawnPickupAdd(Vector2(sin(f), -cos(f)).normalized() * 80.0, true)
 		
 	if DebugWave >= 0:
-		_currentWave = DebugWave
+		_currentWave = DebugWave - 1
 		_started = true
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
 	
 	_scoreMulti -= ScoreMultiIncrement
-	addScore(0)
+	addScore(0, _player.global_position, false)
 	randomize()
+	
+	_numWaves = Levels.Levels[0]["waves"].size()
 	
 	GlobalCamera._player = _player
 	PauseManager._game = self
@@ -147,18 +155,25 @@ func setColumns(numCols: int, setPos: bool):
 			boid.global_position = _player.global_position + offset
 			
 func addBoids(pos: Vector2):
+	var addedBoid = false
 	for i in range(0, BaseBoidReinforce):
+		if _allBoids.size() > MaxDrones:
+			break
+			
 		var boid = BoidScene.instance()
 		add_child(boid)
 		_allBoids.append(boid)
 		boid.init($Leader, self)
 		boid.global_position = pos
+		addedBoid = true
 		
 	InitialPickupAddCount -= 1
 	if InitialPickupAddCount == 0:
 		start()
-		
-	changeFormation(_formation, false)
+	
+	if addedBoid:
+		changeFormation(_formation, false)
+		_numBoids = _allBoids.size()
 		
 func removeBoid(boid: Object):
 	_allBoids.erase(boid)
@@ -168,6 +183,7 @@ func removeBoid(boid: Object):
 		_player.destroy()
 		
 	changeFormation(_formation, false)
+	_numBoids = _allBoids.size()
 	
 func spawnPickupAdd(pos: Vector2, persistent: bool):
 	var pickup = PickupAddScene.instance()
@@ -215,8 +231,8 @@ func _process(delta: float):
 					
 			WaveState.Wave:
 				if _waveTimer < 0.0:
-					_gui.setWave(_currentWave, _currentSubWave)
-					for spawn in Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["spawns"]:
+					#_gui.setWave(_currentWave, _currentSubWave)
+					for spawn in getNextSubwaveSpawn():
 						_spawn(spawn)
 					
 					_currentSubWave += 1
@@ -224,7 +240,7 @@ func _process(delta: float):
 					if _currentSubWave >= subwaveCount:
 						enterWaveCooldown()
 					else:
-						var subwaveTime = Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
+						var subwaveTime = getNextSubwaveTime()
 						_waveTimer = subwaveTime - _prevSubwaveTime
 						_prevSubwaveTime = subwaveTime
 							
@@ -253,15 +269,53 @@ func enterWave():
 	_waveState = WaveState.Wave
 	if _currentWave != -1:
 		doPerk()
-	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)	
-	_currentWave += 1
-	if _currentWave >= Levels.Levels[0]["waves"].size():
-		# add more waves!
-		lose()
-		
+	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+	
 	_currentSubWave = 0
-	_waveTimer = Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
-	_gui.setWave(_currentWave, _currentSubWave)
+	_currentWave += 1
+	if _currentWave >= _numWaves:
+		generateNewWave()
+	
+	_prevSubwaveTime = 0.0
+	_waveTimer = getNextSubwaveTime()
+	
+func getNextSubwaveTime():
+	return Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
+	
+func getNextSubwaveSpawn():
+	return Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["spawns"]
+	
+func generateNewWave():
+	var wave = []
+	# generate a new wave by combining two previous waves together
+	var metaWave = int(_currentWave) / int(_numWaves)
+	var waveId1 = randi() % _numWaves
+	var waveId2 = _numWaves - waveId1 - 1
+	if metaWave > 1:
+		waveId2 = randi() % _numWaves
+		
+	var timeMod = pow(0.75, max(0, int(_currentWave) / int(_numWaves) - 1))
+	for subWave in Levels.Levels[0]["waves"][waveId1]:
+		var newSubWave = {
+			"time": subWave["time"] * timeMod,
+			"spawns": subWave["spawns"].duplicate() 
+		}
+		wave.append(newSubWave)
+	for subWave in Levels.Levels[0]["waves"][waveId2]:
+		var newSubWave = {
+			"time": subWave["time"] * timeMod,
+			"spawns": subWave["spawns"].duplicate() 
+		}
+		wave.append(newSubWave)
+		
+	wave.sort_custom(MyCustomSorter, "sort_ascending")
+	Levels.Levels[0]["waves"].append(wave)
+	
+class MyCustomSorter:
+	static func sort_ascending(a, b):
+		if a["time"] < b["time"]:
+			return true
+		return false
 		
 func _spawn(id: int):
 	var enemy = null
@@ -276,11 +330,13 @@ func _spawn(id: int):
 	enemy.init(self, _player)
 	_enemies.append(enemy)
 				
-func addScore(var score: int):
+func addScore(score: int, pos: Vector2, show: bool):
+	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+	if show:
+		_gui.showFloatingScore(score * _scoreMulti, pos, self)
 	_score += score * _scoreMulti
 	_scoreMulti = clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax)
-	_scoreMultiTimer = ScoreMultiTimeout
-	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
+	_scoreMultiTimer = ScoreMultiTimeout	
 	
 func doPerk():
 	get_tree().paused = true
@@ -288,6 +344,7 @@ func doPerk():
 	_gui.connect("onPerkSelected", self, "onPerkSelected")
 	
 func onPerkSelected(perk):
+	_perks.pickPerk(perk)
 	get_tree().paused = false
 	BaseBoidReload *= perk.reloadMod
 	BaseBoidReinforce += perk.reinforceMod
@@ -299,7 +356,10 @@ func onPerkSelected(perk):
 	BasePlayerSpeed += perk.playerSpeedMod
 	BaseBoidSpread *= perk.spreadMod
 	BaseBulletSpeed += perk.bulletSpeedMod
+	if perk.microturrets:
+		BaseMicroturrets = true
 	changeFormation(Formation.Balanced, false)
+	_gui.setWave(_currentWave, _currentSubWave)
 	
 func pushBack(boid: Object):
 	for i in range(0, _boidColCount):

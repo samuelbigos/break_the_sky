@@ -32,11 +32,14 @@ onready var _loseBG = get_node("LoseScreen/VBoxContainer/MenuButton/TextureRect"
 
 onready var _scoreLabel = get_node("LoseScreen/VBoxContainer/Score")
 
+export var FloatingScoreScene: PackedScene
+
 var _perkSelections = []
 var _buttons = []
 var _buttonSelected = null
 var _animTime: float
 var _game = null
+var _waveShowTimer: float
 
 signal onPerkSelected
 
@@ -56,7 +59,7 @@ func _ready():
 	fontCol = Colours.Secondary
 	_score.add_color_override("font_color", fontCol)
 	_scoreMulti.add_color_override("font_color", fontCol)
-	_wave.add_color_override("font_color", fontCol)
+	_wave.add_color_override("font_color", Colours.White)
 	_subWave.add_color_override("font_color", fontCol)
 	
 	var bgCol = Colours.Secondary
@@ -104,6 +107,16 @@ func _process(delta):
 		_scoreLabel.rect_pivot_offset = _scoreLabel.rect_size / 2.0
 		_scoreLabel.rect_rotation = r
 		_scoreLabel.rect_scale = Vector2(s, s)
+		
+	_waveShowTimer -= delta
+	if _waveShowTimer < 0.0:
+		_wave.visible = false
+		
+func showFloatingScore(score: int, worldPos: Vector2, game):
+	var floatingScore = FloatingScoreScene.instance()
+	floatingScore.setScore(score)
+	floatingScore.worldPos = worldPos
+	game.add_child(floatingScore)
 			
 func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 	if isMax:
@@ -114,9 +127,10 @@ func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 	_scoreLabel.text = "%06d" % score
 	
 func setWave(wave: int, subwave: int):
-	_wave.text = "Wave %d" % wave
-	_subWave.text = "SubWave %d" % subwave
+	_wave.text = "Wave %d" % (wave + 1)
+	_waveShowTimer = 2.0
 	_wave.visible = true
+	#_subWave.text = "SubWave %d" % subwave	
 
 func showPerks(perks):
 	_perks.visible = true

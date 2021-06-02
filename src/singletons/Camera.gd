@@ -42,3 +42,5 @@ func _process(delta):
 			cameraTransform = cameraTransform.translated(offset)
 			
 		get_viewport().canvas_transform = cameraTransform
+		
+	$CanvasLayer/Label.text = "%f" % _trauma

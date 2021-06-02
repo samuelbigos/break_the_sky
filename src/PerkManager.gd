@@ -23,9 +23,16 @@ func getNextThreshold():
 	for i in range(0, _perkLevel):
 		threshold += PerkThreshold * pow(PerkThresholdMulti, i)
 	return threshold
+	
+func pickPerk(perk):
+	perk.maximum -= 1
 		
 func getRandomPerks(count: int):
-	var perks = _perks.duplicate()
+	var perks = []
+	for perk in _perks:
+		if perk.maximum > 0:
+			perks.append(perk)
+			
 	var ret = []
 	while (ret.size() < count):
 		var rand = randi() % perks.size()

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://src/BulletBeacon.gd" type="Script" id=1]
+[ext_resource path="res://src/bullets/BulletBeacon.gd" type="Script" id=1]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 6.0

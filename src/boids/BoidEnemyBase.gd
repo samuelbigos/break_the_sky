@@ -11,8 +11,10 @@ export var HitTrauma = 0.05
 
 onready var _sprite = get_node("Sprite")
 onready var _damagedParticles = get_node("Damaged")
+onready var _shockwave = get_node("Shockwave")
 
 var _sfxHit: AudioStreamPlayer2D
+var _sfxHitMicro: AudioStreamPlayer2D
 var _target: Node2D
 var _game: Object
 var _health: float
@@ -29,8 +31,12 @@ func _ready():
 	_health = MaxHealth
 	_baseScale = _sprite.scale
 	_sfxHit = AudioStreamPlayer2D.new()
+	_sfxHitMicro = AudioStreamPlayer2D.new()
 	add_child(_sfxHit)
-	_sfxHit.stream = load("res://assets/sfx/hit3.wav")
+	add_child(_sfxHitMicro)
+	_sfxHit.stream = load("res://assets/sfx/hit2.wav")
+	_sfxHitMicro.stream = load("res://assets/sfx/hit3.wav")
+	_sfxHitMicro.volume_db = -5
 
 func init(game, target):
 	_game = game
@@ -56,8 +62,10 @@ func _process(delta: float):
 	
 	# hit flash
 	_hitFlashTimer -= delta
-	if _hitFlashTimer < 0.0 and not _destroyed:
-		_sprite.modulate = Colours.Secondary
+	if _hitFlashTimer < 0.0:
+		if not _destroyed:
+			_sprite.modulate = Colours.Secondary
+		_shockwave.visible = false
 		
 	if _destroyed:
 		_destroyedTimer -= delta
@@ -70,7 +78,7 @@ func _process(delta: float):
 func destroy(score: bool):
 	if not _destroyed:
 		if score and not _destroyed:
-			_game.addScore(Points)
+			_game.addScore(Points, global_position, true)
 			if rand_range(0.0, 1.0) < PickupDropRate:
 				_game.spawnPickupAdd(global_position, false)
 				
@@ -82,9 +90,11 @@ func destroy(score: bool):
 		_damagedParticles.emitting = false
 	GlobalCamera.addTrauma(DestroyTrauma)
 	
-func onHit(damage: float, score: bool):
+func onHit(damage: float, score: bool, bulletVel: Vector2, microbullet: bool):
 	_health -= damage
 	_sprite.modulate = Colours.White
+	#_shockwave.visible = true
+	#_shockwave.rotation = atan2(bulletVel.y, bulletVel.x) + rotation + PI * 0.5
 	_hitFlashTimer = HitFlashTime
 	var hitParticles = HitParticles.instance()
 	hitParticles.position = global_position
@@ -94,11 +104,14 @@ func onHit(damage: float, score: bool):
 		_damagedParticles.emitting = true
 	if _health <= 0.0:
 		destroy(score)
-	PauseManager.pauseFlash()
-	GlobalCamera.addTrauma(HitTrauma)
-	_sfxHit.play()
+	if not microbullet:
+		PauseManager.pauseFlash()
+		GlobalCamera.addTrauma(HitTrauma)
+		_sfxHit.play()
+	else:
+		_sfxHitMicro.play()
 
 func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0 and not _destroyed:
-		onHit(area._damage, true)
+		onHit(area._damage, true, area._velocity, area._microbullet)
 		area.queue_free()

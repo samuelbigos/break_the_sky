@@ -3,8 +3,9 @@ extends Node2D
 var _velocity: Vector2
 var _alignment: int
 var _playRadius: float
-var _length = 6.0
-var _damage = 1.0
+var _length = 5.0
+var _damage = 0.25
+var _microbullet = true
 
 func getAlignment(): return _alignment
 
@@ -26,10 +27,4 @@ func _process(delta):
 
 func _draw():
 	# outer
-	var length = _length + _damage * 2.0 + 4.0
-	var width = _damage * 2.0 + 4.0
-	draw_line(Vector2(0.0, -length * 0.5 + 2.0), Vector2(0.0, length * 0.5), Colours.Secondary, width)	
-	# inner
-	length = _length + _damage * 2.0
-	width = _damage * 2.0
-	draw_line(Vector2(0.0, -length * 0.5), Vector2(0.0, length * 0.5), Colours.White, width)
+	draw_line(Vector2(0.0, -_length * 0.5), Vector2(0.0, _length * 0.5), Colours.Secondary, _damage * 8.0)

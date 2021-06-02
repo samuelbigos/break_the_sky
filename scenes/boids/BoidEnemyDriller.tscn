@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/boids/BoidEnemyDriller.gd" type="Script" id=1]
 [ext_resource path="res://assets/textures/enemy-driller.png" type="Texture" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/sfx/destroy_driller2.wav" type="AudioStream" id=6]
+[ext_resource path="res://assets/textures/shockwave.png" type="Texture" id=7]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 8.68022
@@ -26,6 +27,9 @@ HitTrauma = 0.033
 shape = SubResource( 1 )
 
 [node name="Damaged" parent="." instance=ExtResource( 5 )]
+
+[node name="Shockwave" type="Sprite" parent="."]
+texture = ExtResource( 7 )
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 2 )
