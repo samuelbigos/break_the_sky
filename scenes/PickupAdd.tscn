@@ -9,6 +9,7 @@ radius = 9.92323
 "pickupAdd",
 ]]
 script = ExtResource( 1 )
+Lifetime = 10.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )

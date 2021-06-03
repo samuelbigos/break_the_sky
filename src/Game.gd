@@ -111,6 +111,10 @@ func _ready():
 	PauseManager._game = self
 	
 	MusicPlayer.playGame()
+	
+	_score += 10000
+	addScore(10000, Vector2(0.0, 0.0), false)
+	lose()
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:

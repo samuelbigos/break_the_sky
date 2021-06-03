@@ -15,6 +15,7 @@ radius = 8.68022
 "enemy",
 ]]
 script = ExtResource( 1 )
+MaxVelocity = 800.0
 TrailLength = 125
 HitParticles = ExtResource( 4 )
 PickupDropRate = 0.1
@@ -22,8 +23,8 @@ MaxHealth = 3.0
 HitFlashTime = 0.025
 DestroyTrauma = 0.075
 HitTrauma = 0.033
-MinVelocity = 500.0
-MaxAngularVelocity = 50.0
+MinVelocity = 400.0
+MaxAngularVelocity = 40.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )

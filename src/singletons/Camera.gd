@@ -30,6 +30,8 @@ func _ready():
 	_noise.seed = randi()
 	_noise.period = 4
 	_noise.octaves = 2
+	
+	get_viewport().canvas_transform = Transform2D(Vector2(1.0, 0.0), Vector2(0.0, 1.0), get_viewport().size * 0.5)
 
 func _process(delta):
 	if _player:

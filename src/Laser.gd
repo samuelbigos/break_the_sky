@@ -16,4 +16,4 @@ func _draw():
 	if state == BoidEnemyLaser.LaserState.Firing:
 		var size = Vector2($CollisionShape2D.shape.extents.x * 2.0, $CollisionShape2D.shape.extents.y * 2.0)
 		var rect = Rect2(-size * 0.5, size)
-		draw_rect(rect, Colours.White, true, 2.0)
+		draw_rect(rect, Color.white, true, 2.0)

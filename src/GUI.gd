@@ -30,9 +30,21 @@ onready var _loseLabel = get_node("LoseScreen/VBoxContainer/MenuButton/Outline/L
 onready var _loseOutline = get_node("LoseScreen/VBoxContainer/MenuButton/Outline")
 onready var _loseBG = get_node("LoseScreen/VBoxContainer/MenuButton/TextureRect")
 
+onready var _star1 = get_node("LoseScreen/Stars/Star/StarInner")
+onready var _star2 = get_node("LoseScreen/Stars/Star2/StarInner")
+onready var _star3 = get_node("LoseScreen/Stars/Star3/StarInner")
+onready var _star4 = get_node("LoseScreen/Stars/Star4/StarInner")
+onready var _star5 = get_node("LoseScreen/Stars/Star5/StarInner")
+
 onready var _scoreLabel = get_node("LoseScreen/VBoxContainer/Score")
 
 export var FloatingScoreScene: PackedScene
+export var ScoreCountTime = 5.0
+export var StarThreshold1 = 1000
+export var StarThreshold2 = 3000
+export var StarThreshold3 = 8000
+export var StarThreshold4 = 15000
+export var StarThreshold5 = 25000
 
 var _perkSelections = []
 var _buttons = []
@@ -40,6 +52,8 @@ var _buttonSelected = null
 var _animTime: float
 var _game = null
 var _waveShowTimer: float
+var _resultsScore: int
+var _scoreCountTimer: float
 
 signal onPerkSelected
 
@@ -104,9 +118,33 @@ func _process(delta):
 		var time = _animTime / 0.1
 		var s = 1.0 + cos(time) * 0.25
 		var r = sin(time) * 2.0
-		_scoreLabel.rect_pivot_offset = _scoreLabel.rect_size / 2.0
-		_scoreLabel.rect_rotation = r
-		_scoreLabel.rect_scale = Vector2(s, s)
+		#_scoreLabel.rect_pivot_offset = _scoreLabel.rect_size / 2.0
+		#_scoreLabel.rect_rotation = r
+		#_scoreLabel.rect_scale = Vector2(s, s)
+		
+		_scoreCountTimer -= delta
+		var score = clamp(lerp(_resultsScore, 0, _scoreCountTimer / ScoreCountTime), 0, _resultsScore)
+		_scoreLabel.text = "%06d" % score
+		
+		if not _star1.visible and score > StarThreshold1:
+			$PerkSelect.play()
+			_star1.visible = true
+			
+		if not _star2.visible and score > StarThreshold2:
+			$PerkSelect.play()
+			_star2.visible = true
+			
+		if not _star3.visible and score > StarThreshold3:
+			$PerkSelect.play()
+			_star3.visible = true
+			
+		if not _star4.visible and score > StarThreshold4:
+			$PerkSelect.play()
+			_star4.visible = true
+			
+		if not _star5.visible and score > StarThreshold5:
+			$PerkSelect.play()
+			_star5.visible = true
 		
 	_waveShowTimer -= delta
 	if _waveShowTimer < 0.0:
@@ -123,8 +161,8 @@ func setScore(var score: int, var multi: float, threshold: int, isMax: bool):
 		$ScoreMulti.text = "MAX x" + "%.1f" % multi
 	else:
 		$ScoreMulti.text = "x" + "%.1f" % multi
-	$Score.text = "%06d" % score	
-	_scoreLabel.text = "%06d" % score
+	$Score.text = "%06d" % score
+	_resultsScore = score
 	
 func setWave(wave: int, subwave: int):
 	_wave.text = "Wave %d" % (wave + 1)
@@ -144,6 +182,8 @@ func showPerks(perks):
 	
 func showLoseScreen():
 	_loseScreen.visible = true
+	_scoreLabel.text = "%06d" % 000000
+	_scoreCountTimer = ScoreCountTime
 
 func _on_Perk1_button_up():
 	_perks.visible = false

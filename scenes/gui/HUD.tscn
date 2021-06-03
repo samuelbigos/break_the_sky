@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://assets/gui/perk2.png" type="Texture" id=1]
 [ext_resource path="res://assets/gui/perk2_outline.png" type="Texture" id=2]
@@ -12,6 +12,8 @@
 [ext_resource path="res://assets/font/fibberish_large.tres" type="DynamicFont" id=10]
 [ext_resource path="res://src/GUI.gd" type="Script" id=11]
 [ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=12]
+[ext_resource path="res://assets/gui/star_outline.png" type="Texture" id=13]
+[ext_resource path="res://assets/gui/star.png" type="Texture" id=14]
 
 [node name="CanvasLayer" type="CanvasLayer"]
 pause_mode = 2
@@ -283,7 +285,6 @@ __meta__ = {
 }
 
 [node name="LoseScreen" type="CenterContainer" parent="."]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
@@ -377,6 +378,106 @@ margin_left = 480.0
 margin_top = 270.0
 margin_right = 480.0
 margin_bottom = 270.0
+
+[node name="Stars" type="HBoxContainer" parent="LoseScreen"]
+margin_left = 337.0
+margin_top = 243.0
+margin_right = 623.0
+margin_bottom = 296.0
+
+[node name="Star" type="TextureRect" parent="LoseScreen/Stars"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_right = 54.0
+margin_bottom = 53.0
+texture = ExtResource( 13 )
+
+[node name="StarInner" type="TextureRect" parent="LoseScreen/Stars/Star"]
+visible = false
+self_modulate = Color( 1, 0.92549, 0.839216, 1 )
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 51.0
+margin_bottom = 50.0
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Star2" type="TextureRect" parent="LoseScreen/Stars"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_left = 58.0
+margin_right = 112.0
+margin_bottom = 53.0
+texture = ExtResource( 13 )
+
+[node name="StarInner" type="TextureRect" parent="LoseScreen/Stars/Star2"]
+visible = false
+self_modulate = Color( 1, 0.92549, 0.839216, 1 )
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 51.0
+margin_bottom = 50.0
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Star3" type="TextureRect" parent="LoseScreen/Stars"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_left = 116.0
+margin_right = 170.0
+margin_bottom = 53.0
+texture = ExtResource( 13 )
+
+[node name="StarInner" type="TextureRect" parent="LoseScreen/Stars/Star3"]
+visible = false
+self_modulate = Color( 1, 0.92549, 0.839216, 1 )
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 51.0
+margin_bottom = 50.0
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Star4" type="TextureRect" parent="LoseScreen/Stars"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_left = 174.0
+margin_right = 228.0
+margin_bottom = 53.0
+texture = ExtResource( 13 )
+
+[node name="StarInner" type="TextureRect" parent="LoseScreen/Stars/Star4"]
+visible = false
+self_modulate = Color( 1, 0.92549, 0.839216, 1 )
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 51.0
+margin_bottom = 50.0
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Star5" type="TextureRect" parent="LoseScreen/Stars"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_left = 232.0
+margin_right = 286.0
+margin_bottom = 53.0
+texture = ExtResource( 13 )
+
+[node name="StarInner" type="TextureRect" parent="LoseScreen/Stars/Star5"]
+visible = false
+self_modulate = Color( 1, 0.92549, 0.839216, 1 )
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 51.0
+margin_bottom = 50.0
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="PerkSelect" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 12 )
