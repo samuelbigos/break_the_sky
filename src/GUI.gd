@@ -148,14 +148,17 @@ func showLoseScreen():
 func _on_Perk1_button_up():
 	_perks.visible = false
 	emit_signal("onPerkSelected", _perkSelections[0])
+	$PerkSelect.play()
 
 func _on_Perk2_button_up():
 	_perks.visible = false
 	emit_signal("onPerkSelected", _perkSelections[1])
+	$PerkSelect.play()
 
 func _on_Perk3_button_up():
 	_perks.visible = false
 	emit_signal("onPerkSelected", _perkSelections[2])
+	$PerkSelect.play()
 
 func _on_Perk1_mouse_entered():
 	_animTime = 0.0

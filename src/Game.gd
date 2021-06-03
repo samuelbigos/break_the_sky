@@ -40,13 +40,7 @@ export var BaseMicroturrets = false
 
 export var ScoreMultiTimeout = 10.0
 export var ScoreMultiMax = 10
-export var ScoreMultiIncrement = 0.1
-
-enum WindowScale {
-	Medium,
-	Large,
-	Full
-}
+export var ScoreMultiIncrement = 0.5
 
 var _boidColCount: int
 var _boidColumns = []
@@ -74,11 +68,8 @@ var _currentSubWave := 0
 var _numWaves := 0
 var _prevSubwaveTime: float
 
-var _windowScale = WindowScale.Full
-
 onready var _gui = get_node("HUD")
 onready var _perks = get_node("PerkManager")
-onready var _musicPlayer = get_node("MusicPlayer")
 
 func getBoids(): return _allBoids
 func getPlayer(): return _player
@@ -119,7 +110,7 @@ func _ready():
 	GlobalCamera._player = _player
 	PauseManager._game = self
 	
-	#_musicPlayer.play()
+	MusicPlayer.playGame()
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -184,6 +175,8 @@ func removeBoid(boid: Object):
 		
 	changeFormation(_formation, false)
 	_numBoids = _allBoids.size()
+	_scoreMulti = max(1.0, _scoreMulti * 0.5)
+	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
 	
 func spawnPickupAdd(pos: Vector2, persistent: bool):
 	var pickup = PickupAddScene.instance()
@@ -243,23 +236,6 @@ func _process(delta: float):
 						var subwaveTime = getNextSubwaveTime()
 						_waveTimer = subwaveTime - _prevSubwaveTime
 						_prevSubwaveTime = subwaveTime
-							
-	if Input.is_action_just_released("fullscreen"):
-		match _windowScale:
-			WindowScale.Medium:
-				_windowScale = WindowScale.Large
-				OS.window_fullscreen = false
-				OS.window_borderless = false
-				OS.set_window_size(Vector2(1920, 1080))
-			WindowScale.Large:
-				_windowScale = WindowScale.Full
-				OS.window_fullscreen = true
-				OS.window_borderless = true
-			WindowScale.Full:
-				_windowScale = WindowScale.Medium
-				OS.window_fullscreen = false
-				OS.window_borderless = false
-				OS.set_window_size(Vector2(960, 540))
 				
 func enterWaveCooldown():
 	_waveTimer = WaveCooldown
@@ -372,8 +348,4 @@ func pushBack(boid: Object):
 
 func lose():
 	get_tree().paused = true
-	get_viewport().size = OS.get_window_size()
-	var camerOffset = -_player.global_position + get_viewport().size * 0.5
-	var cameraTransform = Transform2D(Vector2(1.0, 0.0), Vector2(0.0, 1.0), camerOffset)
-	get_viewport().canvas_transform = cameraTransform
 	_gui.showLoseScreen()

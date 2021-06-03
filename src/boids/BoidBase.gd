@@ -112,3 +112,11 @@ func truncate(vector: Vector2, v_max: float):
 	var i = v_max / vector.length()
 	i = min(i, 1.0)
 	return vector * i
+	
+func clampVec(vector: Vector2, v_min: float, v_max: float):
+	var length = vector.length()
+	if length == 0.0:
+		return vector
+	var i = vector.length()
+	i = clamp(i, v_min, v_max)
+	return vector.normalized() * i

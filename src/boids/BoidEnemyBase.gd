@@ -8,10 +8,13 @@ export var HitFlashTime = 1.0 / 60.0
 export var DestroyTime = 3.0
 export var DestroyTrauma = 0.1
 export var HitTrauma = 0.05
+export var MinVelocity = 0.0
+export var MaxAngularVelocity = 1000.0
 
 onready var _sprite = get_node("Sprite")
 onready var _damagedParticles = get_node("Damaged")
 onready var _shockwave = get_node("Shockwave")
+onready var _trail = get_node("Trail")
 
 var _sfxHit: AudioStreamPlayer2D
 var _sfxHitMicro: AudioStreamPlayer2D
@@ -37,6 +40,8 @@ func _ready():
 	_sfxHit.stream = load("res://assets/sfx/hit2.wav")
 	_sfxHitMicro.stream = load("res://assets/sfx/hit3.wav")
 	_sfxHitMicro.volume_db = -5
+	if not is_instance_valid(_trail):
+		_trail = null
 
 func init(game, target):
 	_game = game
@@ -51,7 +56,14 @@ func _process(delta: float):
 		steering += _steeringPursuit(_target.global_position, _target._velocity)
 		steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
 		
-		steering = truncate(steering, MaxVelocity)
+		# limit angular velocity
+		if _velocity.length_squared() > 0:
+			var linearComp = _velocity.normalized() * steering.length() * steering.normalized().dot(_velocity.normalized())
+			var tangent = Vector2(_velocity.y, -_velocity.x)
+			var angularComp = tangent.normalized() * steering.length() * steering.normalized().dot(tangent.normalized())
+			steering = linearComp + angularComp.normalized() * clamp(angularComp.length(), 0.0, MaxAngularVelocity)
+		
+		steering = clampVec(steering, MinVelocity, MaxVelocity)
 		_velocity = truncate(_velocity + steering * delta, MaxVelocity)
 		
 	global_position += _velocity * delta
@@ -71,6 +83,8 @@ func _process(delta: float):
 		_destroyedTimer -= delta
 		var t = 1.0 - clamp(_destroyedTimer / DestroyTime, 0.0, 1.0)
 		_sprite.scale = lerp(_baseScale, Vector2(0.0, 0.0), t)
+		if _trail:
+			_trail.alpha = lerp(1.0, 0.0, t)
 		_destroyRot += PI * 2.0 * delta
 		if _destroyedTimer < 0.0:
 			queue_free()

@@ -2,6 +2,7 @@ extends Node2D
 
 export var Width = 2.0
 
+var alpha = 1.0
 var boid = null
 
 func _ready():
@@ -16,6 +17,7 @@ func _draw():
 		pointArray.push_back(boid._trailPoints[i] - global_position)
 		var col = Colours.White
 		col.a = 0.25 + (float(i) / numPoints) * 0.75
+		col.a *= alpha
 		colourArray.push_back(col)
 	pointArray.push_back(Vector2(0.0, 0.0))
 	colourArray.push_back(Colours.White)

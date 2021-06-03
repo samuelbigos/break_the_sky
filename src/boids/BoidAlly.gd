@@ -3,7 +3,7 @@ class_name BoidAlly
 
 export var SlowingRadius = 100.0
 export var AlignmentRadius = 20.0
-export var SeparationRadius = 5.0
+export var SeparationRadius = 10.0
 export var CohesionRadius = 50.0
 export var HitDamage = 3.0
 export var DestroyTime = 3.0
@@ -13,13 +13,15 @@ export var DestroyTrauma = 0.1
 export var MicroBulletCD = 1.0
 export var MicroBulletRange = 400.0
 export var MicroBulletDamageMod = 0.25
+export var MaxAngularVelocity = 500.0
 
 export var BulletScene: PackedScene
 export var MicoBulletScene: PackedScene
 
 onready var _sprite = get_node("Sprite")
 onready var _sfxShot = get_node("SFXShot")
-onready var _sfxHit = get_node("SFXHit")#
+onready var _sfxHit = get_node("SFXHit")
+onready var _sfxHitMicro = get_node("SFXHitMicro")
 onready var _damagedParticles = get_node("Damaged")
 
 var _game: Object = null
@@ -62,8 +64,16 @@ func _process(delta: float):
 	var steering = Vector2(0.0, 0.0)
 	if not _destroyed:
 		steering = _steeringArrive(targetPos, SlowingRadius)
-		steering += _steeringSeparation(_game.getBoids(), SeparationRadius)
+		steering += _steeringSeparation(_game.getBoids(), _game.BaseBoidGrouping * 0.66)
 		steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
+		
+		# limit angular velocity
+		if _velocity.length_squared() > 0:
+			var linearComp = _velocity.normalized() * steering.length() * steering.normalized().dot(_velocity.normalized())
+			var tangent = Vector2(_velocity.y, -_velocity.x)
+			var angularComp = tangent.normalized() * steering.length() * steering.normalized().dot(tangent.normalized())
+			steering = linearComp + angularComp.normalized() * clamp(angularComp.length(), 0.0, MaxAngularVelocity)
+
 		steering = truncate(steering, MaxVelocity)
 		_velocity = truncate(_velocity + steering * delta, MaxVelocity)
 		
@@ -77,6 +87,8 @@ func _process(delta: float):
 	if Input.is_action_pressed("shoot") and _shootCooldown <= 0.0:
 		if _canShoot(shootDir):
 			_shoot(shootDir)
+#	if _shootCooldown < 0.0:
+#		_sprite.modulate = Colours.Secondary
 	
 	# shooting
 	if _shootCooldown > 0.0:
@@ -113,6 +125,7 @@ func _process(delta: float):
 					mb.global_position = global_position
 					mb._damage = _game.BaseBoidDamage * MicroBulletDamageMod
 					_game.add_child(mb)
+					_sfxHitMicro.play()
 			
 	# update trail
 	$Trail.update()
@@ -135,9 +148,10 @@ func _shoot(dir: Vector2):
 	bullet.global_position = global_position
 	_game.add_child(bullet)
 	_game.pushBack(self)
-	var traumaMod = 1.0 - clamp(_game.getNumBoids() / 100.0, 0.0, 0.75)
+	var traumaMod = 1.0 - clamp(_game.getNumBoids() / 100.0, 0.0, 0.5)
 	GlobalCamera.addTrauma(ShootTrauma * traumaMod)
 	_sfxShot.play()
+	#_sprite.modulate = Colours.Grey
 	
 func _canShoot(dir: Vector2):
 	if _destroyed: return false

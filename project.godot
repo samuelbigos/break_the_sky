@@ -69,7 +69,7 @@ _global_script_class_icons={
 [application]
 
 config/name="AI And Games Jam 2021"
-run/main_scene="res://scenes/Game.tscn"
+run/main_scene="res://scenes/gui/screens/TitleScreen.tscn"
 config/icon="res://icon.png"
 config/save_version=0
 
@@ -81,11 +81,14 @@ GlobalCamera="*res://scenes/Camera.tscn"
 PlayerData="*res://src/singletons/PlayerData.gd"
 SaveManager="*res://src/singletons/SaveManager.gd"
 Levels="*res://src/singletons/Levels.gd"
+MusicPlayer="*res://src/singletons/MusicPlayer.gd"
 
 [display]
 
 window/size/width=960
 window/size/height=540
+window/size/borderless=true
+window/size/fullscreen=true
 window/size/test_width=960
 window/size/test_height=540
 window/stretch/mode="viewport"

@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str"
+
+[deps]
+
+source_file="res://assets/music/Visager - The Great Tree [Loop].mp3"
+dest_files=[ "res://.import/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0
