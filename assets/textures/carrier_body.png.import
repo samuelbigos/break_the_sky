@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/shockwave.png-ed9a87df0599bd005879ce91e7763575.stex"
+path="res://.import/carrier_body.png-ea3c3c45de4de2e93476be8f87895248.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/shockwave.png"
-dest_files=[ "res://.import/shockwave.png-ed9a87df0599bd005879ce91e7763575.stex" ]
+source_file="res://assets/textures/carrier_body.png"
+dest_files=[ "res://.import/carrier_body.png-ea3c3c45de4de2e93476be8f87895248.stex" ]
 
 [params]
 

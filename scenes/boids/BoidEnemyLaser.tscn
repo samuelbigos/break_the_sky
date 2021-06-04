@@ -9,7 +9,7 @@
 [ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=7]
 [ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=8]
 [ext_resource path="res://assets/sfx/destroy_laser.wav" type="AudioStream" id=9]
-[ext_resource path="res://assets/textures/shockwave.png" type="Texture" id=10]
+[ext_resource path="res://src/Trail.gd" type="Script" id=10]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 24.7316
@@ -46,10 +46,6 @@ script = ExtResource( 2 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserArea"]
 shape = SubResource( 2 )
 
-[node name="Shockwave" type="Sprite" parent="."]
-scale = Vector2( 1.5, 1.5 )
-texture = ExtResource( 10 )
-
 [node name="Damaged" parent="." instance=ExtResource( 5 )]
 
 [node name="Rotor" type="Sprite" parent="."]
@@ -69,3 +65,6 @@ stream = ExtResource( 8 )
 
 [node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 9 )
+
+[node name="Trail" type="Node2D" parent="."]
+script = ExtResource( 10 )

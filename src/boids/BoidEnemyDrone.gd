@@ -1,5 +1,5 @@
 extends BoidEnemyBase
-class_name BoidEnemyDrone
+class_name BoidEnemyDriller
 
 onready var _sfxDestroy = get_node("SFXDestroy")
 

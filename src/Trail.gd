@@ -13,6 +13,9 @@ func _draw():
 	var pointArray = PoolVector2Array()
 	var colourArray = PoolColorArray()
 	var numPoints = boid._trailPoints.size()
+	if numPoints < 2:
+		return
+		
 	for i in range(0, numPoints):
 		pointArray.push_back(boid._trailPoints[i] - global_position)
 		var col = Colours.White

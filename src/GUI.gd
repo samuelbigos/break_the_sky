@@ -18,7 +18,6 @@ onready var _perkOutline2 = get_node("Perks/VBoxContainer/Perk2/Outline")
 onready var _perkBG3 = get_node("Perks/VBoxContainer/Perk3/TextureRect")
 onready var _perkOutline3 = get_node("Perks/VBoxContainer/Perk3/Outline")
 
-onready var _perkAt = get_node("PerkIn")
 onready var _score = get_node("Score")
 onready var _scoreMulti = get_node("ScoreMulti")
 onready var _wave = get_node("Wave")

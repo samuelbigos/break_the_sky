@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/palette.png-5e168fc1955abb9f1812a1a3173bcbd7.stex"
+path="res://.import/carrier_body.png-9aa9c784d1d499daf9ac6dce26d70cb3.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/palette.png"
-dest_files=[ "res://.import/palette.png-5e168fc1955abb9f1812a1a3173bcbd7.stex" ]
+source_file="res://promo/carrier_body.png"
+dest_files=[ "res://.import/carrier_body.png-9aa9c784d1d499daf9ac6dce26d70cb3.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

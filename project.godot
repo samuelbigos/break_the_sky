@@ -30,7 +30,17 @@ _global_script_classes=[ {
 "path": "res://src/boids/BoidEnemyBeacon.gd"
 }, {
 "base": "BoidEnemyBase",
+"class": "BoidEnemyCarrier",
+"language": "GDScript",
+"path": "res://src/boids/BoidEnemyCarrier.gd"
+}, {
+"base": "BoidEnemyBase",
 "class": "BoidEnemyDriller",
+"language": "GDScript",
+"path": "res://src/boids/BoidEnemyDrone.gd"
+}, {
+"base": "BoidEnemyBase",
+"class": "BoidEnemyDrone",
 "language": "GDScript",
 "path": "res://src/boids/BoidEnemyDriller.gd"
 }, {
@@ -38,6 +48,11 @@ _global_script_classes=[ {
 "class": "BoidEnemyLaser",
 "language": "GDScript",
 "path": "res://src/boids/BoidEnemyLaser.gd"
+}, {
+"base": "BoidEnemyBase",
+"class": "CarrierRotorgun",
+"language": "GDScript",
+"path": "res://src/boids/CarrierRotorgun.gd"
 }, {
 "base": "Node2D",
 "class": "Game",
@@ -59,8 +74,11 @@ _global_script_class_icons={
 "BoidBase": "",
 "BoidEnemyBase": "",
 "BoidEnemyBeacon": "",
+"BoidEnemyCarrier": "",
 "BoidEnemyDriller": "",
+"BoidEnemyDrone": "",
 "BoidEnemyLaser": "",
+"CarrierRotorgun": "",
 "Game": "",
 "Leader": "",
 "SaveGame": ""
@@ -68,7 +86,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="AI And Games Jam 2021"
+config/name="Break The Sky"
 run/main_scene="res://scenes/gui/screens/TitleScreen.tscn"
 config/icon="res://icon.png"
 config/save_version=0
@@ -91,6 +109,7 @@ window/size/borderless=true
 window/size/fullscreen=true
 window/size/test_width=960
 window/size/test_height=540
+mouse_cursor/custom_image="res://assets/textures/cursor.png"
 window/stretch/mode="viewport"
 
 [input]

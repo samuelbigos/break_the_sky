@@ -20,6 +20,8 @@ MaxVelocity = 1500.0
 HitParticles = ExtResource( 5 )
 SlowingRadius = 25.0
 AlignmentRadius = 10.0
+MicroBulletCD = 1.5
+MicroBulletDamageMod = 0.1
 BulletScene = ExtResource( 3 )
 MicoBulletScene = ExtResource( 9 )
 

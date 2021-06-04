@@ -10,6 +10,7 @@ var _game = null
 var _colour: Color
 var _destroyed = false
 var _velocity: Vector2
+var _queueAddBoids = false
 
 
 func _ready():
@@ -57,6 +58,10 @@ func _process(delta):
 			_game.changeFormation(1, false)
 		if Input.is_action_just_released("boids_align"):
 			_game.changeFormation(0, false)
+			
+	if _queueAddBoids:
+		addBoids(global_position)
+		_queueAddBoids = false
 		
 func addBoids(pos: Vector2):
 	_game.addBoids(pos);
@@ -74,7 +79,7 @@ func _draw():
 func _on_Leader_area_entered(area):
 	if area.is_in_group("pickupAdd"):
 		area.queue_free()
-		addBoids(area.global_position)
+		_queueAddBoids = true
 		_sfxPickup.play()
 		
 	#if area.is_in_group("enemy") and not area.isDestroyed():

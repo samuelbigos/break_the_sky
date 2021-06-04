@@ -4,7 +4,7 @@ class_name BoidEnemyBase
 export var PickupDropRate = 0.25
 export var Points = 10
 export var MaxHealth = 1.0
-export var HitFlashTime = 1.0 / 60.0
+export var HitFlashTime = 1.0 / 30.0
 export var DestroyTime = 3.0
 export var DestroyTrauma = 0.1
 export var HitTrauma = 0.05
@@ -13,8 +13,9 @@ export var MaxAngularVelocity = 1000.0
 
 onready var _sprite = get_node("Sprite")
 onready var _damagedParticles = get_node("Damaged")
-onready var _shockwave = get_node("Shockwave")
 onready var _trail = get_node("Trail")
+onready var _hitSfx2 = load("res://assets/sfx/hit2.wav")
+onready var _hitSfx3 = load("res://assets/sfx/hit3.wav")
 
 var _sfxHit: AudioStreamPlayer2D
 var _sfxHitMicro: AudioStreamPlayer2D
@@ -26,6 +27,8 @@ var _destroyed = false
 var _destroyedTimer: float
 var _baseScale: Vector2
 var _destroyRot: float
+var _move: bool = true
+var _destroyScore: bool
 
 func isDestroyed(): return _destroyed
 
@@ -37,11 +40,13 @@ func _ready():
 	_sfxHitMicro = AudioStreamPlayer2D.new()
 	add_child(_sfxHit)
 	add_child(_sfxHitMicro)
-	_sfxHit.stream = load("res://assets/sfx/hit2.wav")
-	_sfxHitMicro.stream = load("res://assets/sfx/hit3.wav")
+	_sfxHit.stream = _hitSfx2
+	_sfxHitMicro.stream = _hitSfx3
 	_sfxHitMicro.volume_db = -5
 	if not is_instance_valid(_trail):
 		_trail = null
+	if _trail:
+		_trail.boid = self
 
 func init(game, target):
 	_game = game
@@ -53,8 +58,9 @@ func setTarget(target: Object):
 func _process(delta: float):
 	var steering = Vector2(0.0, 0.0)
 	if not _destroyed:
-		steering += _steeringPursuit(_target.global_position, _target._velocity)
-		steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
+		if _move:
+			steering += _steeringPursuit(_target.global_position, _target._velocity)
+			steering += _steeringEdgeRepulsion(_game.PlayRadius) * 2.0
 		
 		# limit angular velocity
 		if _velocity.length_squared() > 0:
@@ -64,10 +70,17 @@ func _process(delta: float):
 			steering = linearComp + angularComp.normalized() * clamp(angularComp.length(), 0.0, MaxAngularVelocity)
 		
 		steering = clampVec(steering, MinVelocity, MaxVelocity)
-		_velocity = truncate(_velocity + steering * delta, MaxVelocity)
+		
+		if MinVelocity > 0.0:
+			_velocity = clampVec(_velocity + steering * delta, MinVelocity, MaxVelocity)
+		else:
+			_velocity = truncate(_velocity + steering * delta, MaxVelocity)
 		
 	global_position += _velocity * delta
 	update()
+	
+	if _trail and TrailLength > 0:
+		_trail.update()
 	
 	# damping
 	_velocity *= pow(1.0 - clamp(Damping, 0.0, 1.0), delta * 60.0)
@@ -77,7 +90,6 @@ func _process(delta: float):
 	if _hitFlashTimer < 0.0:
 		if not _destroyed:
 			_sprite.modulate = Colours.Secondary
-		_shockwave.visible = false
 		
 	if _destroyed:
 		_destroyedTimer -= delta
@@ -88,6 +100,9 @@ func _process(delta: float):
 		_destroyRot += PI * 2.0 * delta
 		if _destroyedTimer < 0.0:
 			queue_free()
+			
+	if _health < 0.0 and not _destroyed:
+		destroy(_destroyScore)
 	
 func destroy(score: bool):
 	if not _destroyed:
@@ -104,28 +119,25 @@ func destroy(score: bool):
 		_damagedParticles.emitting = false
 	GlobalCamera.addTrauma(DestroyTrauma)
 	
-func onHit(damage: float, score: bool, bulletVel: Vector2, microbullet: bool):
+func onHit(damage: float, score: bool, bulletVel: Vector2, microbullet: bool, pos: Vector2):
 	_health -= damage
 	_sprite.modulate = Colours.White
-	#_shockwave.visible = true
-	#_shockwave.rotation = atan2(bulletVel.y, bulletVel.x) + rotation + PI * 0.5
 	_hitFlashTimer = HitFlashTime
 	var hitParticles = HitParticles.instance()
-	hitParticles.position = global_position
+	hitParticles.position = pos
 	hitParticles.emitting = true
 	_game.add_child(hitParticles)
 	if _damagedParticles:
 		_damagedParticles.emitting = true
-	if _health <= 0.0:
-		destroy(score)
 	if not microbullet:
 		PauseManager.pauseFlash()
 		GlobalCamera.addTrauma(HitTrauma)
 		_sfxHit.play()
 	else:
 		_sfxHitMicro.play()
+	_destroyScore = score
 
 func _on_BoidBase_area_entered(area):
 	if area.is_in_group("bullet") and area.getAlignment() == 0 and not _destroyed:
-		onHit(area._damage, true, area._velocity, area._microbullet)
+		onHit(area._damage, true, area._velocity, area._microbullet, area.global_position)
 		area.queue_free()

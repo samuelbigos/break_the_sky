@@ -7,7 +7,7 @@
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/sfx/beacon_fire.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/destroy_beacon.wav" type="AudioStream" id=7]
-[ext_resource path="res://assets/textures/shockwave.png" type="Texture" id=8]
+[ext_resource path="res://src/Trail.gd" type="Script" id=8]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.5924
@@ -16,7 +16,7 @@ radius = 32.5924
 "enemy",
 ]]
 script = ExtResource( 1 )
-MaxVelocity = 400.0
+MaxVelocity = 300.0
 TrailLength = 0
 HitParticles = ExtResource( 5 )
 PickupDropRate = 1.0
@@ -27,17 +27,14 @@ HitTrauma = 0.01
 BulletScene = ExtResource( 2 )
 TargetBeaconDist = 450.0
 BeaconCooldown = 3.5
+BeaconPulseDuration = 0.33
 BulletsPerPulse = 16
-BulletSpeed = 150.0
+BulletSpeed = 100.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
 [node name="Damaged" parent="." instance=ExtResource( 4 )]
-
-[node name="Shockwave" type="Sprite" parent="."]
-scale = Vector2( 2, 2 )
-texture = ExtResource( 8 )
 
 [node name="Sprite" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
@@ -48,3 +45,6 @@ stream = ExtResource( 6 )
 
 [node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
+
+[node name="Trail" type="Node2D" parent="."]
+script = ExtResource( 8 )

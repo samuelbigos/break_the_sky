@@ -19,6 +19,7 @@ export var PickupAddScene: PackedScene
 export var EnemyDrillerScene: PackedScene
 export var EnemyLaserScene: PackedScene
 export var EnemyBeaconScene: PackedScene
+export var EnemyCarrierScene: PackedScene
 
 export var InitialPickupAddCount := 20
 export var InitialBoidCount = 100
@@ -42,6 +43,7 @@ export var ScoreMultiTimeout = 10.0
 export var ScoreMultiMax = 10
 export var ScoreMultiIncrement = 0.5
 
+var _levels
 var _boidColCount: int
 var _boidColumns = []
 var _allBoids = []
@@ -94,27 +96,28 @@ func _ready():
 		var f = float(i) * PI * 2.0 / float(InitialPickupAddCount)
 		spawnPickupAdd(Vector2(sin(f), -cos(f)).normalized() * 80.0, true)
 		
+	_levels = Levels.Levels
 	if DebugWave >= 0:
+		_levels = Levels.Levels
 		_currentWave = DebugWave - 1
 		_started = true
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))
 	
-	_scoreMulti -= ScoreMultiIncrement
 	addScore(0, _player.global_position, false)
 	randomize()
 	
-	_numWaves = Levels.Levels[0]["waves"].size()
+	_numWaves = _levels[0]["waves"].size()
 	
 	GlobalCamera._player = _player
 	PauseManager._game = self
 	
 	MusicPlayer.playGame()
 	
-	_score += 10000
-	addScore(10000, Vector2(0.0, 0.0), false)
-	lose()
+	#_score += 10000
+	#addScore(10000, Vector2(0.0, 0.0), false)
+	#lose()
 		
 func changeFormation(formation: int, setPos: bool):
 	if _allBoids.size() == 0:
@@ -188,7 +191,7 @@ func spawnPickupAdd(pos: Vector2, persistent: bool):
 	pickup._player = _player
 	if persistent:
 		pickup.Lifetime = 9999999.0
-	add_child(pickup)
+	call_deferred("add_child", pickup)
 	_pickups.append(pickup)
 		
 func start():
@@ -233,7 +236,7 @@ func _process(delta: float):
 						_spawn(spawn)
 					
 					_currentSubWave += 1
-					var subwaveCount = Levels.Levels[0]["waves"][_currentWave].size()
+					var subwaveCount = _levels[0]["waves"][_currentWave].size()
 					if _currentSubWave >= subwaveCount:
 						enterWaveCooldown()
 					else:
@@ -260,10 +263,10 @@ func enterWave():
 	_waveTimer = getNextSubwaveTime()
 	
 func getNextSubwaveTime():
-	return Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["time"]
+	return _levels[0]["waves"][_currentWave][_currentSubWave]["time"]
 	
 func getNextSubwaveSpawn():
-	return Levels.Levels[0]["waves"][_currentWave][_currentSubWave]["spawns"]
+	return _levels[0]["waves"][_currentWave][_currentSubWave]["spawns"]
 	
 func generateNewWave():
 	var wave = []
@@ -275,13 +278,13 @@ func generateNewWave():
 		waveId2 = randi() % _numWaves
 		
 	var timeMod = pow(0.75, max(0, int(_currentWave) / int(_numWaves) - 1))
-	for subWave in Levels.Levels[0]["waves"][waveId1]:
+	for subWave in _levels[0]["waves"][waveId1]:
 		var newSubWave = {
 			"time": subWave["time"] * timeMod,
 			"spawns": subWave["spawns"].duplicate() 
 		}
 		wave.append(newSubWave)
-	for subWave in Levels.Levels[0]["waves"][waveId2]:
+	for subWave in _levels[0]["waves"][waveId2]:
 		var newSubWave = {
 			"time": subWave["time"] * timeMod,
 			"spawns": subWave["spawns"].duplicate() 
@@ -289,7 +292,7 @@ func generateNewWave():
 		wave.append(newSubWave)
 		
 	wave.sort_custom(MyCustomSorter, "sort_ascending")
-	Levels.Levels[0]["waves"].append(wave)
+	_levels[0]["waves"].append(wave)
 	
 class MyCustomSorter:
 	static func sort_ascending(a, b):
@@ -303,25 +306,28 @@ func _spawn(id: int):
 		0: enemy = EnemyDrillerScene.instance()
 		1: enemy = EnemyLaserScene.instance()
 		2: enemy = EnemyBeaconScene.instance()
+		3: enemy = EnemyCarrierScene.instance()
 	
 	var f = rand_range(0.0, PI * 2.0)
 	enemy.global_position = Vector2(sin(f), -cos(f)).normalized() * PlayRadius
-	add_child(enemy)
+	#enemy.global_position = Vector2(100.0, 0.0)
 	enemy.init(self, _player)
+	add_child(enemy)	
 	_enemies.append(enemy)
 				
 func addScore(score: int, pos: Vector2, show: bool):
 	_gui.setScore(_score, _scoreMulti, _perks.getNextThreshold(), _scoreMulti == ScoreMultiMax)
 	if show:
 		_gui.showFloatingScore(score * _scoreMulti, pos, self)
-	_score += score * _scoreMulti
-	_scoreMulti = clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax)
-	_scoreMultiTimer = ScoreMultiTimeout	
+		_score += score * _scoreMulti
+		_scoreMulti = clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax)
+		_scoreMultiTimer = ScoreMultiTimeout
 	
 func doPerk():
 	get_tree().paused = true
 	_gui.showPerks(_perks.getRandomPerks(3))
-	_gui.connect("onPerkSelected", self, "onPerkSelected")
+	if not _gui.is_connected("onPerkSelected", self, "onPerkSelected"):
+		_gui.connect("onPerkSelected", self, "onPerkSelected")
 	
 func onPerkSelected(perk):
 	_perks.pickPerk(perk)

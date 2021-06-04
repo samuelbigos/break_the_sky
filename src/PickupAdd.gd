@@ -40,7 +40,7 @@ func _draw():
 	draw_line(Vector2(0.0, -5.0), Vector2(0.0, 5.0), _colour, 3.0)
 	
 func drawArc(center, radius, angleTo, angleFrom, color, thickness):
-	var pointNum = 8
+	var pointNum = 16
 	var points = PoolVector2Array()
 	for i in range(pointNum + 1):
 		var angle = deg2rad(angleFrom + i * (angleTo - angleFrom) / pointNum - 90)
