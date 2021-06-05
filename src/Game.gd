@@ -101,6 +101,11 @@ func _ready():
 		_levels = Levels.Levels
 		_currentWave = DebugWave - 1
 		_started = true
+		BaseBoidDamage = 5.0
+		BaseBoidReload = 1.0
+		BaseBoidSpeed = 1000.0
+		BasePlayerSpeed = 10.0
+		BaseMicroturrets = true
 		for pickup in _pickups:
 			pickup.queue_free()
 			addBoids(Vector2(0.0, 0.0))

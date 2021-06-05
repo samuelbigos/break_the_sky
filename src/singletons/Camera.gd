@@ -18,7 +18,7 @@ enum WindowScale {
 	Full
 }
 
-var _windowScale = WindowScale.Full
+var _windowScale = WindowScale.Medium
 
 
 func addTrauma(trauma: float):
@@ -59,15 +59,14 @@ func _process(delta):
 		match _windowScale:
 			WindowScale.Medium:
 				_windowScale = WindowScale.Large
-				OS.window_fullscreen = false
 				OS.window_borderless = false
 				OS.set_window_size(Vector2(1920, 1080))
 			WindowScale.Large:
 				_windowScale = WindowScale.Full
-				OS.window_fullscreen = true
 				OS.window_borderless = true
+				OS.set_window_size(OS.get_screen_size())
+				OS.set_window_position(Vector2(0, 0))
 			WindowScale.Full:
 				_windowScale = WindowScale.Medium
-				OS.window_fullscreen = false
 				OS.window_borderless = false
 				OS.set_window_size(Vector2(960, 540))

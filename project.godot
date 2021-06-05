@@ -106,9 +106,9 @@ MusicPlayer="*res://src/singletons/MusicPlayer.gd"
 window/size/width=960
 window/size/height=540
 window/size/borderless=true
-window/size/fullscreen=true
 window/size/test_width=960
 window/size/test_height=540
+window/vsync/use_vsync=false
 mouse_cursor/custom_image="res://assets/textures/cursor.png"
 window/stretch/mode="viewport"
 
