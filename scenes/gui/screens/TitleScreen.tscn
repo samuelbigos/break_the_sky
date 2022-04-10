@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://scenes/Background.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/font/fibberish_large.tres" type="DynamicFont" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://scenes/gui/Button.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/font/fibberish_small.tres" type="DynamicFont" id=7]
 [ext_resource path="res://assets/sfx/button.wav" type="AudioStream" id=8]
+[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=9]
 
 [node name="Title" type="CanvasLayer"]
 script = ExtResource( 4 )
@@ -22,8 +23,8 @@ margin_left = 296.0
 margin_top = 33.0
 margin_right = 680.0
 margin_bottom = 89.0
-custom_fonts/font = ExtResource( 2 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 2 )
 text = "Break The Sky"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -43,9 +44,6 @@ __meta__ = {
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 margin_left = 129.0
@@ -60,8 +58,8 @@ __meta__ = {
 [node name="Label2" type="Label" parent="CenterContainer/VBoxContainer"]
 margin_right = 702.0
 margin_bottom = 21.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "1749"
 align = 1
 
@@ -69,8 +67,8 @@ align = 1
 margin_top = 33.0
 margin_right = 702.0
 margin_bottom = 61.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.0509804, 0.168627, 0.270588, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "An outer colony of the human resistance on Venus"
 align = 1
 
@@ -78,8 +76,8 @@ align = 1
 margin_top = 73.0
 margin_right = 702.0
 margin_bottom = 94.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "where"
 align = 1
 
@@ -87,8 +85,8 @@ align = 1
 margin_top = 106.0
 margin_right = 702.0
 margin_bottom = 165.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.0509804, 0.168627, 0.270588, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "Our titular hero leads a ragtag pocket of scientists,
 engineers, and wizards"
 align = 1
@@ -97,8 +95,8 @@ align = 1
 margin_top = 177.0
 margin_right = 702.0
 margin_bottom = 198.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "against"
 align = 1
 
@@ -106,8 +104,8 @@ align = 1
 margin_top = 210.0
 margin_right = 702.0
 margin_bottom = 238.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.0509804, 0.168627, 0.270588, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "The full force of the invading Martian horde"
 align = 1
 
@@ -115,8 +113,8 @@ align = 1
 margin_top = 250.0
 margin_right = 702.0
 margin_bottom = 271.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "and"
 align = 1
 
@@ -124,8 +122,8 @@ align = 1
 margin_top = 283.0
 margin_right = 702.0
 margin_bottom = 311.0
-custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.0509804, 0.168627, 0.270588, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "Defeat seems inevitable and all hope is lost"
 align = 1
 
@@ -133,8 +131,8 @@ align = 1
 margin_top = 323.0
 margin_right = 702.0
 margin_bottom = 344.0
-custom_fonts/font = ExtResource( 7 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 7 )
 text = "unless..."
 align = 1
 
@@ -152,5 +150,65 @@ align = 0
 
 [node name="SFXButton" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 8 )
+
+[node name="Damaged" parent="." instance=ExtResource( 9 )]
+position = Vector2( 24, 32 )
+
+[node name="Damaged2" parent="." instance=ExtResource( 9 )]
+position = Vector2( 48, 32 )
+
+[node name="Damaged3" parent="." instance=ExtResource( 9 )]
+position = Vector2( 72, 32 )
+
+[node name="Damaged4" parent="." instance=ExtResource( 9 )]
+position = Vector2( 96, 32 )
+
+[node name="Damaged5" parent="." instance=ExtResource( 9 )]
+position = Vector2( 120, 32 )
+
+[node name="Damaged6" parent="." instance=ExtResource( 9 )]
+position = Vector2( 144, 32 )
+
+[node name="Damaged7" parent="." instance=ExtResource( 9 )]
+position = Vector2( 168, 32 )
+
+[node name="Damaged8" parent="." instance=ExtResource( 9 )]
+position = Vector2( 192, 32 )
+
+[node name="Damaged9" parent="." instance=ExtResource( 9 )]
+position = Vector2( 216, 32 )
+
+[node name="Damaged10" parent="." instance=ExtResource( 9 )]
+position = Vector2( 240, 32 )
+
+[node name="Damaged11" parent="." instance=ExtResource( 9 )]
+position = Vector2( 24, 56 )
+
+[node name="Damaged12" parent="." instance=ExtResource( 9 )]
+position = Vector2( 48, 56 )
+
+[node name="Damaged13" parent="." instance=ExtResource( 9 )]
+position = Vector2( 72, 56 )
+
+[node name="Damaged14" parent="." instance=ExtResource( 9 )]
+position = Vector2( 96, 56 )
+
+[node name="Damaged15" parent="." instance=ExtResource( 9 )]
+position = Vector2( 120, 56 )
+
+[node name="Damaged16" parent="." instance=ExtResource( 9 )]
+position = Vector2( 144, 56 )
+
+[node name="Damaged17" parent="." instance=ExtResource( 9 )]
+position = Vector2( 168, 56 )
+
+[node name="Damaged18" parent="." instance=ExtResource( 9 )]
+position = Vector2( 192, 56 )
+
+[node name="Damaged19" parent="." instance=ExtResource( 9 )]
+position = Vector2( 216, 56 )
+
+[node name="Damaged20" parent="." instance=ExtResource( 9 )]
+position = Vector2( 240, 56 )
 
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

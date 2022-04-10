@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/itch_bg2.png-7c17063f88645b8c4c9f6e3bfe48de23.stex"
+path="res://.import/devlog_1_3.PNG-20da6e2df3aaef378f7c58281a18ce2b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://promo/itch_bg2.png"
-dest_files=[ "res://.import/itch_bg2.png-7c17063f88645b8c4c9f6e3bfe48de23.stex" ]
+source_file="res://promo/devlog/devlog_1_3.PNG"
+dest_files=[ "res://.import/devlog_1_3.PNG-20da6e2df3aaef378f7c58281a18ce2b.stex" ]
 
 [params]
 
