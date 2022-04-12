@@ -12,9 +12,7 @@
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.5924
 
-[node name="EnemyBeacon" type="Area2D" groups=[
-"enemy",
-]]
+[node name="EnemyBeacon" type="Area2D" groups=["enemy"]]
 script = ExtResource( 1 )
 MaxVelocity = 300.0
 TrailLength = 0

@@ -10,9 +10,7 @@
 [sub_resource type="CircleShape2D" id=1]
 radius = 8.68022
 
-[node name="EnemyDriller" type="Area2D" groups=[
-"enemy",
-]]
+[node name="EnemyDriller" type="Area2D" groups=["enemy"]]
 script = ExtResource( 1 )
 MaxVelocity = 800.0
 TrailLength = 125

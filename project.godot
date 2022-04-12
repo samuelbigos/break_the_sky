@@ -94,12 +94,12 @@ config/save_version=0
 [autoload]
 
 PauseManager="*res://scenes/PauseManager.tscn"
-GlobalCamera="*res://scenes/Camera.tscn"
+GlobalCamera="*res://scenes/GlobalCamera.tscn"
 PlayerData="*res://src/singletons/PlayerData.gd"
 SaveManager="*res://src/singletons/SaveManager.gd"
-Levels="*res://src/singletons/Levels.gd"
-MusicPlayer="*res://src/singletons/MusicPlayer.gd"
 Colours="*res://scenes/Colours.tscn"
+MusicPlayer="*res://src/singletons/MusicPlayer.cs"
+Levels="*res://src/singletons/Levels.cs"
 
 [display]
 

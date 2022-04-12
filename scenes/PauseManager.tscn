@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://src/singletons/PauseManager.gd" type="Script" id=1]
+[ext_resource path="res://src/singletons/PauseManager.cs" type="Script" id=1]
 
 [node name="PauseManager" type="Node"]
 pause_mode = 2

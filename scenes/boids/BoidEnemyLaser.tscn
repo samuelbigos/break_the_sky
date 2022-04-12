@@ -17,9 +17,7 @@ radius = 24.7316
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 10, 1000 )
 
-[node name="EnemyLaser" type="Area2D" groups=[
-"enemy",
-]]
+[node name="EnemyLaser" type="Area2D" groups=["enemy"]]
 script = ExtResource( 1 )
 MaxVelocity = 250.0
 TrailLength = 0
@@ -37,9 +35,7 @@ LaserDuration = 1.0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
-[node name="LaserArea" type="Area2D" parent="." groups=[
-"laser",
-]]
+[node name="LaserArea" type="Area2D" parent="." groups=["laser"]]
 position = Vector2( 0, 1012 )
 script = ExtResource( 2 )
 

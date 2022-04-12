@@ -14,9 +14,7 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 46.5146, 78.6476 )
 
-[node name="EnemyCarrier" type="Area2D" groups=[
-"enemy",
-]]
+[node name="EnemyCarrier" type="Area2D" groups=["enemy"]]
 script = ExtResource( 3 )
 MaxVelocity = 200.0
 TrailLength = 0
@@ -46,35 +44,27 @@ stream = ExtResource( 7 )
 [node name="Lock1" type="Node2D" parent="."]
 position = Vector2( -75, -92 )
 
-[node name="Rotorgun1" parent="." groups=[
-"enemy",
-] instance=ExtResource( 2 )]
+[node name="Rotorgun1" parent="." groups=["enemy"] instance=ExtResource( 2 )]
 MaxHealth = 30.0
 
 [node name="Lock2" type="Node2D" parent="."]
 position = Vector2( 72, -93 )
 
-[node name="Rotorgun2" parent="." groups=[
-"enemy",
-] instance=ExtResource( 2 )]
+[node name="Rotorgun2" parent="." groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( 43, -74 )
 MaxHealth = 30.0
 
 [node name="Lock3" type="Node2D" parent="."]
 position = Vector2( -74, 92 )
 
-[node name="Rotorgun3" parent="." groups=[
-"enemy",
-] instance=ExtResource( 2 )]
+[node name="Rotorgun3" parent="." groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( -45, 75 )
 MaxHealth = 30.0
 
 [node name="Lock4" type="Node2D" parent="."]
 position = Vector2( 71, 92 )
 
-[node name="Rotorgun4" parent="." groups=[
-"enemy",
-] instance=ExtResource( 2 )]
+[node name="Rotorgun4" parent="." groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( 42, 75 )
 MaxHealth = 30.0
 
