@@ -1,29 +1,26 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://assets/font/fibberish.tres" type="DynamicFont" id=1]
-[ext_resource path="res://assets/gui/button.png" type="Texture" id=2]
-[ext_resource path="res://src/screens/Button.gd" type="Script" id=3]
+[ext_resource path="res://assets/gui/button.png" type="Texture" id=1]
+[ext_resource path="res://src/screens/Button.cs" type="Script" id=2]
+[ext_resource path="res://assets/font/fibberish.tres" type="DynamicFont" id=3]
 
-[node name="Button" type="Button"]
+[node name="MenuButton" type="Button"]
 self_modulate = Color( 0.12549, 0.235294, 0.337255, 1 )
 margin_top = 310.0
 margin_right = 214.0
 margin_bottom = 344.0
 focus_mode = 0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color_disabled = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 3 )
 enabled_focus_mode = 0
 flat = true
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource( 2 )
 
 [node name="TextureRect" type="TextureRect" parent="."]
 self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
 margin_right = 200.0
 margin_bottom = 66.0
-texture = ExtResource( 2 )
+texture = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -31,8 +28,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="TextureRect"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 3 )
 text = "Survive"
 align = 1
 valign = 1

@@ -9,7 +9,7 @@
 [ext_resource path="res://scenes/gui/HUD.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/boids/BoidEnemyLaser.tscn" type="PackedScene" id=8]
 [ext_resource path="res://src/Perk.gd" type="Script" id=9]
-[ext_resource path="res://src/PerkManager.gd" type="Script" id=10]
+[ext_resource path="res://src/PerkManager.cs" type="Script" id=10]
 [ext_resource path="res://scenes/gui/FloatingScore.tscn" type="PackedScene" id=11]
 [ext_resource path="res://scenes/boids/BoidEnemyCarrier.tscn" type="PackedScene" id=12]
 [ext_resource path="res://scenes/Background.tscn" type="PackedScene" id=13]
@@ -31,7 +31,7 @@ BasePlayerSpeed = 5.0
 [node name="Leader" parent="." instance=ExtResource( 1 )]
 rotation = 0.0
 
-[node name="HUD" parent="." instance=ExtResource( 7 )]
+[node name="Hud" parent="." instance=ExtResource( 7 )]
 FloatingScoreScene = ExtResource( 11 )
 
 [node name="PerkManager" type="Node" parent="."]

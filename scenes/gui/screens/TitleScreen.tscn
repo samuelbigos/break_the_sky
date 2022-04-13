@@ -1,14 +1,15 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://scenes/Background.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/font/fibberish_large.tres" type="DynamicFont" id=2]
 [ext_resource path="res://assets/font/fibberish.tres" type="DynamicFont" id=3]
-[ext_resource path="res://src/screens/TitleScreen.gd" type="Script" id=4]
+[ext_resource path="res://src/screens/TitleScreen.cs" type="Script" id=4]
 [ext_resource path="res://scenes/gui/screens/ContolsScreen.tscn" type="PackedScene" id=5]
-[ext_resource path="res://scenes/gui/Button.tscn" type="PackedScene" id=6]
+[ext_resource path="res://assets/gui/button.png" type="Texture" id=6]
 [ext_resource path="res://assets/font/fibberish_small.tres" type="DynamicFont" id=7]
 [ext_resource path="res://assets/sfx/button.wav" type="AudioStream" id=8]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=9]
+[ext_resource path="res://src/screens/MenuButton.cs" type="Script" id=10]
 
 [node name="Title" type="CanvasLayer"]
 script = ExtResource( 4 )
@@ -37,9 +38,6 @@ margin_right = 672.0
 margin_bottom = 81.0
 custom_fonts/font = ExtResource( 2 )
 text = "Break The Sky"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchor_right = 1.0
@@ -136,8 +134,8 @@ custom_fonts/font = ExtResource( 7 )
 text = "unless..."
 align = 1
 
-[node name="Button" parent="." instance=ExtResource( 6 )]
-visible = false
+[node name="Button" type="Button" parent="."]
+self_modulate = Color( 0.12549, 0.235294, 0.337255, 1 )
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -146,7 +144,34 @@ margin_left = -100.5
 margin_top = -82.0
 margin_right = 100.5
 margin_bottom = -16.0
+focus_mode = 0
+custom_colors/font_color_disabled = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 3 )
+enabled_focus_mode = 0
+flat = true
 align = 0
+script = ExtResource( 10 )
+
+[node name="TextureRect" type="TextureRect" parent="Button"]
+self_modulate = Color( 0.0509804, 0.168627, 0.270588, 1 )
+margin_right = 200.0
+margin_bottom = 66.0
+texture = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Button/TextureRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_colors/font_color = Color( 1, 0.92549, 0.839216, 1 )
+custom_fonts/font = ExtResource( 3 )
+text = "Survive"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="SFXButton" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 8 )
@@ -210,5 +235,3 @@ position = Vector2( 216, 56 )
 
 [node name="Damaged20" parent="." instance=ExtResource( 9 )]
 position = Vector2( 240, 56 )
-
-[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

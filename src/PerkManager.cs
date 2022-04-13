@@ -11,9 +11,10 @@ public class PerkManager : Node
 
 	public override void _Ready()
 	{  
-		foreach(Perk perk in GetChildren())
+		foreach(Node child in GetChildren())
 		{
-			if(perk.enabled)
+			Perk perk = child as Perk;;
+			if (perk != null && perk.enabled)
 			{
 				_perks.Add(perk);
 			}

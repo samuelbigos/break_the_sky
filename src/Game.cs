@@ -76,7 +76,7 @@ public class Game : Node2D
     public int _numWaves = 0;
     public float _prevSubwaveTime;
 
-    public Node _gui;
+    public Node _Hud;
     public PerkManager _perks;
 
     public List<BoidBase> GetBoids()
@@ -101,7 +101,7 @@ public class Game : Node2D
 
     public override void _Ready()
     {
-        _gui = GetNode("HUD");
+        _Hud = GetNode("Hud");
         _perks = GetNode("PerkManager") as PerkManager;
 
         _player = GetNode("Leader") as Leader;

@@ -4,51 +4,51 @@ public class MusicPlayer : Node
 {
     public static MusicPlayer Instance;
     
-    public AudioStreamPlayer player;
-    private bool _musicEnabled = true;
+    public AudioStreamPlayer Player;
+    public bool MusicEnabled = true;
 
     public override void _Ready()
     {
         Instance = this;
         
-        player = new AudioStreamPlayer();
-        AddChild(player);
+        Player = new AudioStreamPlayer();
+        AddChild(Player);
         PauseMode = PauseModeEnum.Process;
     }
 
     public void PlayMenu()
     {
-        if (_musicEnabled)
+        if (MusicEnabled)
         {
-            player.Stream = (AudioStream) GD.Load("res://assets/music/Visager - The Great Tree [Loop].mp3");
-            player.VolumeDb = -5;
-            player.Play();
+            Player.Stream = (AudioStream) GD.Load("res://assets/music/Visager - The Great Tree [Loop].mp3");
+            Player.VolumeDb = -5;
+            Player.Play();
         }
     }
 
     public void PlayGame()
     {
-        if (_musicEnabled)
+        if (MusicEnabled)
         {
-            player.Stream = (AudioStream) GD.Load("res://assets/music/Metre - Taranis.mp3");
-            player.VolumeDb = 5;
-            player.Play();
+            Player.Stream = (AudioStream) GD.Load("res://assets/music/Metre - Taranis.mp3");
+            Player.VolumeDb = 5;
+            Player.Play();
         }
     }
 
     public void SetMusicEnabled(bool enabled, bool game)
     {
-        if (_musicEnabled == enabled)
+        if (MusicEnabled == enabled)
         {
             return;
         }
 
         if (!enabled)
         {
-            player.Stop();
+            Player.Stop();
         }
 
-        _musicEnabled = enabled;
+        MusicEnabled = enabled;
         if (enabled)
         {
             if (game)

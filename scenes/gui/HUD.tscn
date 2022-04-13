@@ -10,14 +10,16 @@
 [ext_resource path="res://assets/gui/perk3_outline.png" type="Texture" id=8]
 [ext_resource path="res://assets/font/fibberish.tres" type="DynamicFont" id=9]
 [ext_resource path="res://assets/font/fibberish_large.tres" type="DynamicFont" id=10]
-[ext_resource path="res://src/GUI.gd" type="Script" id=11]
+[ext_resource path="res://src/HUD.cs" type="Script" id=11]
 [ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=12]
 [ext_resource path="res://assets/gui/star_outline.png" type="Texture" id=13]
 [ext_resource path="res://assets/gui/star.png" type="Texture" id=14]
 
-[node name="CanvasLayer" type="CanvasLayer"]
+[node name="Hud" type="CanvasLayer"]
 pause_mode = 2
 script = ExtResource( 11 )
+PerkButtonPaths = [ NodePath("Perks/VBoxContainer/Perk1"), NodePath("Perks/VBoxContainer/Perk2"), NodePath("Perks/VBoxContainer/Perk3") ]
+MenuButtonPath = NodePath("LoseScreen/VBoxContainer/MenuButton")
 
 [node name="Perks" type="CenterContainer" parent="."]
 visible = false
@@ -30,9 +32,6 @@ margin_top = -192.5
 margin_right = 200.0
 margin_bottom = 192.5
 mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Perks"]
 margin_right = 400.0
@@ -56,9 +55,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 texture = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Outline" type="TextureRect" parent="Perks/VBoxContainer/Perk1"]
 margin_right = 400.0
@@ -301,8 +297,8 @@ margin_bottom = 465.0
 [node name="Label" type="Label" parent="LoseScreen/VBoxContainer"]
 margin_right = 212.0
 margin_bottom = 28.0
-custom_fonts/font = ExtResource( 9 )
 custom_colors/font_color = Color( 0.0509804, 0.168627, 0.270588, 1 )
+custom_fonts/font = ExtResource( 9 )
 text = "You scored:"
 align = 1
 
@@ -482,16 +478,3 @@ __meta__ = {
 
 [node name="PerkSelect" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 12 )
-
-[connection signal="button_up" from="Perks/VBoxContainer/Perk1" to="." method="_on_Perk1_button_up"]
-[connection signal="mouse_entered" from="Perks/VBoxContainer/Perk1" to="." method="_on_Perk1_mouse_entered"]
-[connection signal="mouse_exited" from="Perks/VBoxContainer/Perk1" to="." method="_on_Perk1_mouse_exited"]
-[connection signal="button_up" from="Perks/VBoxContainer/Perk2" to="." method="_on_Perk2_button_up"]
-[connection signal="mouse_entered" from="Perks/VBoxContainer/Perk2" to="." method="_on_Perk2_mouse_entered"]
-[connection signal="mouse_exited" from="Perks/VBoxContainer/Perk2" to="." method="_on_Perk2_mouse_exited"]
-[connection signal="button_up" from="Perks/VBoxContainer/Perk3" to="." method="_on_Perk3_button_up"]
-[connection signal="mouse_entered" from="Perks/VBoxContainer/Perk3" to="." method="_on_Perk3_mouse_entered"]
-[connection signal="mouse_exited" from="Perks/VBoxContainer/Perk3" to="." method="_on_Perk3_mouse_exited"]
-[connection signal="button_up" from="LoseScreen/VBoxContainer/MenuButton" to="." method="_on_MenuButton_button_up"]
-[connection signal="mouse_entered" from="LoseScreen/VBoxContainer/MenuButton" to="." method="_on_MenuButton_mouse_entered"]
-[connection signal="mouse_exited" from="LoseScreen/VBoxContainer/MenuButton" to="." method="_on_MenuButton_mouse_exited"]
