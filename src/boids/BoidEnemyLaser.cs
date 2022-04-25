@@ -9,8 +9,8 @@ public class BoidEnemyLaser : BoidEnemyBase
 
     public Laser _laser;
     public Sprite _rotor;
-    public AudioStreamPlayer _sfxLaserCharge;
-    public AudioStreamPlayer _sfxLaserFire;
+    public AudioStreamPlayer2D _sfxLaserCharge;
+    public AudioStreamPlayer2D _sfxLaserFire;
 
     public enum LaserState
     {
@@ -32,8 +32,8 @@ public class BoidEnemyLaser : BoidEnemyBase
 
         _laser = GetNode("LaserArea") as Laser;
         _rotor = GetNode("Rotor") as Sprite;
-        _sfxLaserCharge = GetNode("SFXLaserCharge") as AudioStreamPlayer;
-        _sfxLaserFire = GetNode("SFXLaserFire") as AudioStreamPlayer;
+        _sfxLaserCharge = GetNode("SFXLaserCharge") as AudioStreamPlayer2D;
+        _sfxLaserFire = GetNode("SFXLaserFire") as AudioStreamPlayer2D;
 
         _maxVelBase = MaxVelocity;
         _laser.Monitorable = false;

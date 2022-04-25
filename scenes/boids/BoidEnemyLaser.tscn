@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://src/boids/BoidEnemyLaser.gd" type="Script" id=1]
-[ext_resource path="res://src/Laser.gd" type="Script" id=2]
+[ext_resource path="res://src/Trail.cs" type="Script" id=1]
+[ext_resource path="res://src/boids/BoidEnemyLaser.cs" type="Script" id=2]
 [ext_resource path="res://assets/textures/enemy-laser.png" type="Texture" id=3]
 [ext_resource path="res://assets/textures/enemy-laser-rotor.png" type="Texture" id=4]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=5]
@@ -9,7 +9,7 @@
 [ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=7]
 [ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=8]
 [ext_resource path="res://assets/sfx/destroy_laser.wav" type="AudioStream" id=9]
-[ext_resource path="res://src/Trail.gd" type="Script" id=10]
+[ext_resource path="res://src/Laser.cs" type="Script" id=10]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 24.7316
@@ -18,7 +18,7 @@ radius = 24.7316
 extents = Vector2( 10, 1000 )
 
 [node name="EnemyLaser" type="Area2D" groups=["enemy"]]
-script = ExtResource( 1 )
+script = ExtResource( 2 )
 MaxVelocity = 250.0
 TrailLength = 0
 HitParticles = ExtResource( 6 )
@@ -37,7 +37,7 @@ shape = SubResource( 1 )
 
 [node name="LaserArea" type="Area2D" parent="." groups=["laser"]]
 position = Vector2( 0, 1012 )
-script = ExtResource( 2 )
+script = ExtResource( 10 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserArea"]
 shape = SubResource( 2 )
@@ -63,4 +63,4 @@ stream = ExtResource( 8 )
 stream = ExtResource( 9 )
 
 [node name="Trail" type="Node2D" parent="."]
-script = ExtResource( 10 )
+script = ExtResource( 1 )

@@ -8,7 +8,7 @@ public class CarrierRotorgun : BoidEnemyBase
     [Export] public float BulletCooldown = 1.0f;
 
     public Sprite _blade;
-    public AudioStreamPlayer _sfxFire;
+    public AudioStreamPlayer2D _sfxFire;
 
     public Node2D Lock;
     private float _rotVel = Mathf.Pi * 2.0f;
@@ -23,7 +23,7 @@ public class CarrierRotorgun : BoidEnemyBase
         base._Ready();
 
         _blade = GetNode("Blade") as Sprite;
-        _sfxFire = GetNode("SFXFire") as AudioStreamPlayer;
+        _sfxFire = GetNode("SFXFire") as AudioStreamPlayer2D;
         _blade.Modulate = ColourManager.Instance.Secondary;
 
         _damaged = GetNode("Damaged") as Particles2D;

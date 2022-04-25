@@ -19,8 +19,8 @@ public class BoidEnemyBeacon : BoidEnemyBase
         Firing
     }
 
-    public AudioStreamPlayer _sfxBeaconFire;
-    public AudioStreamPlayer _sfxDestroy;
+    public AudioStreamPlayer2D _sfxBeaconFire;
+    public AudioStreamPlayer2D _sfxDestroy;
 
     private BeaconState _beaconState = BeaconState.Inactive;
     public float _beaconCooldown;
@@ -33,7 +33,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
     {
         base._Ready();
         
-        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer;
+        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
         _sprite.Modulate = ColourManager.Instance.Secondary;
     }
 

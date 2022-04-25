@@ -9,6 +9,8 @@ public class BoidEnemyDriller : BoidEnemyBase
 
     public override void _Process(float delta)
     {
+        base._Process(delta);
+        
         // update trail
         _sprite.Rotation = -Mathf.Atan2(_velocity.x, _velocity.y);
     }

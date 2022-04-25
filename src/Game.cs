@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using ImGuiNET;
 using Dictionary = Godot.Collections.Dictionary;
 
 public class Game : Node2D
@@ -15,8 +16,12 @@ public class Game : Node2D
     enum WaveState
     {
         Wave,
-        Cooldown
+        Cooldown,
+        Finished
     }
+
+    [Export] public NodePath ImGuiNodePath;
+    private ImGuiNode _imGuiNode;
 
     [Export] public int DebugWave = -1;
 
@@ -75,6 +80,9 @@ public class Game : Node2D
     public int _currentSubWave = 0;
     public int _numWaves = 0;
     public float _prevSubwaveTime;
+    private float _fps = 0.0f;
+
+    private int _pendingBoidSpawn;
 
     public Node _Hud;
     public PerkManager _perks;
@@ -105,14 +113,14 @@ public class Game : Node2D
         _perks = GetNode("PerkManager") as PerkManager;
 
         _player = GetNode("Leader") as Leader;
-        _player.Init(this);
+        _player.Init(_player, this, null);
 
-        foreach (var i in GD.Range(0, InitialBoidCount))
+        foreach (int i in GD.Range(0, InitialBoidCount))
         {
             BoidBase boid = BoidScene.Instance() as BoidBase;
             AddChild(boid);
             _allBoids.Add(boid);
-            boid.Init(_player, this);
+            boid.Init(_player, this, _player);
         }
 
         if (_allBoids.Count > 0)
@@ -159,6 +167,48 @@ public class Game : Node2D
         //_score += 10000;
         //addScore(10000, new Vector2(0.0, 0.0), false)
         //lose()
+
+        _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
+        _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
+    }
+
+    private void _OnImGuiLayout()
+    {
+        if (ImGui.Begin("Debug Menu", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            ImGui.Text($"FPS: {_fps:F0}");
+            ImGui.BeginTabBar("Debug Menu#left_tabs_bar");
+            if (ImGui.BeginTabItem("Spawning"))
+            {
+                if (ImGui.Button("Spawn 1"))
+                {
+                    _Spawn(0);
+                }
+                if (ImGui.Button("Spawn 2"))
+                {
+                    _Spawn(1);
+                }
+                if (ImGui.Button("Spawn 3"))
+                {
+                    _Spawn(2);
+                }
+                if (ImGui.Button("Spawn 4"))
+                {
+                    _Spawn(3);
+                }
+                if (ImGui.Button("Spawn 5"))
+                {
+                    _Spawn(4);
+                }
+                if (ImGui.Button("Spawn 6"))
+                {
+                    _Spawn(5);
+                }
+                ImGui.EndTabItem();
+            }
+            ImGui.EndTabBar();
+            ImGui.End();
+        }
     }
 
     public void ChangeFormation(Formation formation, bool setPos)
@@ -220,6 +270,11 @@ public class Game : Node2D
 
     public void AddBoids(Vector2 pos)
     {
+        _pendingBoidSpawn++;
+    }
+
+    private void AddBoidsInternal()
+    {
         bool addedBoid = false;
         foreach (var i in GD.Range(0, BaseBoidReinforce))
         {
@@ -231,8 +286,8 @@ public class Game : Node2D
             BoidBase boid = BoidScene.Instance() as BoidBase;
             AddChild(boid);
             _allBoids.Add(boid);
-            boid.Init(GetNode("Leader") as Leader, this);
-            boid.GlobalPosition = pos;
+            boid.Init(_player, this, _player);
+            boid.GlobalPosition = _player.GlobalPosition;
             addedBoid = true;
         }
 
@@ -275,7 +330,7 @@ public class Game : Node2D
             pickup.Lifetime = 9999999.0f;
         }
 
-        CallDeferred("add_child", pickup);
+        AddChild(pickup);
         _pickups.Add(pickup);
     }
 
@@ -296,6 +351,15 @@ public class Game : Node2D
 
     public override void _Process(float delta)
     {
+        float fps = 1.0f / delta;
+        _fps = 0.033f * fps + 0.966f * _fps;
+        
+        while (_pendingBoidSpawn > 0)
+        {
+            AddBoidsInternal();
+            _pendingBoidSpawn--;
+        }
+        
         if (_pendingLose)
         {
             _loseTimer -= delta;
@@ -341,6 +405,9 @@ public class Game : Node2D
                     {
                         //_gui.SetWave(_currentWave, _currentSubWave)
                         List<int> spawns = GetNextSubwaveSpawn();
+                        if (spawns.Count == 0)
+                            _waveState = WaveState.Finished;
+                        
                         foreach (int t in spawns)
                         {
                             _Spawn(t);
@@ -359,7 +426,9 @@ public class Game : Node2D
                             _prevSubwaveTime = subwaveTime;
                         }
                     }
-
+                    break;
+                case WaveState.Finished:
+                    _started = false;
                     break;
             }
         }
@@ -393,11 +462,23 @@ public class Game : Node2D
 
     private float GetNextSubwaveTime()
     {
+        if (_currentWave >= _levels.Count)
+            return 0.0f;
+        
+        if (_currentSubWave >= _levels[_currentWave].SpawnSets.Count)
+            return 0.0f;
+        
         return _levels[_currentWave].SpawnSets[_currentSubWave].Time;
     }
 
     private List<int> GetNextSubwaveSpawn()
     {
+        if (_currentWave >= _levels.Count)
+            return new List<int>();
+        
+        if (_currentSubWave >= _levels[_currentWave].SpawnSets.Count)
+            return new List<int>();
+        
         return _levels[_currentWave].SpawnSets[_currentSubWave].Spawns;
     }
 
@@ -475,7 +556,7 @@ public class Game : Node2D
         float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
         enemy.GlobalPosition = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * PlayRadius;
         //enemy.global_position = new Vector2(100.0, 0.0);
-        enemy.Init(_player, this);
+        enemy.Init(_player, this, _player);
         AddChild(enemy);
         Enemies.Add(enemy);
     }

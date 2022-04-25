@@ -14,17 +14,20 @@ public class BoidBase : Area2D
     public List<Vector2> _trailPoints = new List<Vector2>();
     private float _trailTimer = 0.0f;
 
-    private Leader _player;
-    private Game _game;
-    public Vector2 _targetOffset;
+    protected Leader _player;
+    protected Game _game;
+    protected BoidBase _target;
+    protected Vector2 _targetOffset;
     protected bool _destroyed = false;
     protected float _destroyedTimer;
     protected Sprite _sprite;
+    protected Trail _trail;
 
-    public void Init(Leader player, Game game)
+    public virtual void Init(Leader player, Game game, BoidBase target)
     {
         _player = player;
         _game = game;
+        _target = target;
     }
 
     public override void _Ready()
@@ -32,6 +35,7 @@ public class BoidBase : Area2D
         base._Ready();
         
         _sprite = GetNode("Sprite") as Sprite;
+        _trail = GetNode<Trail>("Trail");
     }
 
     public bool IsDestroyed()

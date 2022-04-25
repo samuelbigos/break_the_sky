@@ -23,13 +23,12 @@ public class Levels : Node
 		{
 			SpawnSets = new List<SpawnSet>()
 			{
-				new SpawnSet() {Time = 0.0f, Spawns = new List<int> {0}},
-				new SpawnSet() {Time = 2.0f, Spawns = new List<int> {0, 0, 0}},
-				new SpawnSet() {Time = 4.0f, Spawns = new List<int> {0, 0, 0}},
-				new SpawnSet() {Time = 6.0f, Spawns = new List<int> {0, 0, 0, 0}},
-				new SpawnSet() {Time = 8.0f, Spawns = new List<int> {0, 0, 0, 0}},
-				new SpawnSet() {Time = 11.0f, Spawns = new List<int> {0, 0, 0, 0}},
-				new SpawnSet() {Time = 14.0f, Spawns = new List<int> {0, 0, 0, 0, 0, 0}},
+				// new SpawnSet() {Time = 0.0f, Spawns = new List<int> {0,0,0,0,0}},
+				// new SpawnSet() {Time = 10.0f, Spawns = new List<int> {1,1}},
+				// new SpawnSet() {Time = 20.0f, Spawns = new List<int> {2}},
+				// new SpawnSet() {Time = 30.0f, Spawns = new List<int> {3}},
+				// new SpawnSet() {Time = 40.0f, Spawns = new List<int> {4}},
+				// new SpawnSet() {Time = 50.0f, Spawns = new List<int> {5}},
 			}
 		}
 	};

@@ -1,14 +1,14 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/Leader.cs" type="Script" id=1]
 [ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=2]
 [ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/textures/1px.png" type="Texture" id=4]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 5.98726
 
 [node name="Leader" type="Area2D"]
-rotation = 2.05929
 script = ExtResource( 1 )
 Damping = 0.05
 
@@ -20,4 +20,6 @@ shape = SubResource( 1 )
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 2 )
 
-[connection signal="area_entered" from="." to="." method="_on_Leader_area_entered"]
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 11.4881, 11.4881 )
+texture = ExtResource( 4 )

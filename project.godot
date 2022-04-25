@@ -8,95 +8,21 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "BoidBase",
-"class": "BoidAlly",
-"language": "GDScript",
-"path": "res://src/boids/BoidAlly.gd"
-}, {
-"base": "Area2D",
-"class": "BoidBase",
-"language": "GDScript",
-"path": "res://src/boids/BoidBase.gd"
-}, {
-"base": "BoidBase",
-"class": "BoidEnemyBase",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyBase.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "BoidEnemyBeacon",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyBeacon.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "BoidEnemyCarrier",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyCarrier.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "BoidEnemyDriller",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyDrone.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "BoidEnemyDrone",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyDriller.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "BoidEnemyLaser",
-"language": "GDScript",
-"path": "res://src/boids/BoidEnemyLaser.gd"
-}, {
-"base": "BoidEnemyBase",
-"class": "CarrierRotorgun",
-"language": "GDScript",
-"path": "res://src/boids/CarrierRotorgun.gd"
-}, {
-"base": "Node2D",
-"class": "Game",
-"language": "GDScript",
-"path": "res://src/Game.gd"
-}, {
-"base": "Node2D",
-"class": "Leader",
-"language": "GDScript",
-"path": "res://src/Leader.gd"
-}, {
-"base": "Resource",
-"class": "SaveGame",
-"language": "GDScript",
-"path": "res://src/SaveGame.gd"
-} ]
-_global_script_class_icons={
-"BoidAlly": "",
-"BoidBase": "",
-"BoidEnemyBase": "",
-"BoidEnemyBeacon": "",
-"BoidEnemyCarrier": "",
-"BoidEnemyDriller": "",
-"BoidEnemyDrone": "",
-"BoidEnemyLaser": "",
-"CarrierRotorgun": "",
-"Game": "",
-"Leader": "",
-"SaveGame": ""
-}
-
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/gui/screens/TitleScreen.tscn"
+run/main_scene="res://scenes/Game.tscn"
 config/icon="res://icon.png"
 config/save_version=0
+
+[audio]
+
+default_bus_layout="res://assets/sfx/default_bus_layout.tres"
 
 [autoload]
 
 PauseManager="*res://scenes/PauseManager.tscn"
 GlobalCamera="*res://scenes/GlobalCamera.tscn"
-PlayerData="*res://src/singletons/PlayerData.gd"
-SaveManager="*res://src/singletons/SaveManager.gd"
 Colours="*res://scenes/Colours.tscn"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 Levels="*res://src/singletons/Levels.cs"
@@ -109,12 +35,11 @@ window/size/borderless=true
 window/size/test_width=960
 window/size/test_height=540
 window/vsync/use_vsync=false
-mouse_cursor/custom_image="res://assets/textures/cursor.png"
 window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/gd2cs.py/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 

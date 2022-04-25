@@ -1,9 +1,9 @@
 [gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://assets/textures/drone-friendly.png" type="Texture" id=1]
-[ext_resource path="res://src/boids/BoidAlly.gd" type="Script" id=2]
+[ext_resource path="res://src/boids/BoidAlly.cs" type="Script" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
-[ext_resource path="res://src/Trail.gd" type="Script" id=4]
+[ext_resource path="res://src/Trail.cs" type="Script" id=4]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
@@ -20,7 +20,6 @@ MaxVelocity = 1500.0
 HitParticles = ExtResource( 5 )
 SlowingRadius = 25.0
 AlignmentRadius = 10.0
-MicroBulletCD = 1.5
 MicroBulletDamageMod = 0.1
 BulletScene = ExtResource( 3 )
 MicoBulletScene = ExtResource( 9 )
@@ -52,5 +51,3 @@ stream = ExtResource( 7 )
 
 [node name="SFXHitMicro" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
-
-[connection signal="area_entered" from="." to="." method="_on_BoidAlly_area_entered"]

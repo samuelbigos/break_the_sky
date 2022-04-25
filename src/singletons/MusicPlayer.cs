@@ -4,14 +4,14 @@ public class MusicPlayer : Node
 {
     public static MusicPlayer Instance;
     
-    public AudioStreamPlayer Player;
+    public AudioStreamPlayer2D Player;
     public bool MusicEnabled = true;
 
     public override void _Ready()
     {
         Instance = this;
         
-        Player = new AudioStreamPlayer();
+        Player = new AudioStreamPlayer2D();
         AddChild(Player);
         PauseMode = PauseModeEnum.Process;
     }

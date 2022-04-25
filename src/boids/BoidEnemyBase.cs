@@ -12,8 +12,7 @@ public class BoidEnemyBase : BoidBase
     [Export] public float MinVelocity = 0.0f;
     [Export] public float MaxAngularVelocity = 1000.0f;
     
-    public AudioStreamPlayer _sfxDestroy;
-    public Sprite _sprite;
+    public AudioStreamPlayer2D _sfxDestroy;
     public Particles2D _damagedParticles;
     public Trail _trail;
     public AudioStream _hitSfx2;
@@ -21,8 +20,6 @@ public class BoidEnemyBase : BoidBase
 
     public AudioStreamPlayer2D _sfxHit;
     public AudioStreamPlayer2D _sfxHitMicro;
-    public BoidBase _target;
-    public Game _game;
     public float _health;
     public float _hitFlashTimer;
     public Vector2 _baseScale;
@@ -34,7 +31,7 @@ public class BoidEnemyBase : BoidBase
     {
         base._Ready();
 
-        _sfxDestroy = GetNode("SFXDestroy") as AudioStreamPlayer;
+        _sfxDestroy = GetNode("SFXDestroy") as AudioStreamPlayer2D;
         _sprite.Modulate = ColourManager.Instance.Secondary;
         
         _damagedParticles = GetNode("Damaged") as Particles2D;
@@ -42,7 +39,7 @@ public class BoidEnemyBase : BoidBase
         _hitSfx2 = GD.Load("res://assets/sfx/hit2.wav") as AudioStream;
         _hitSfx3 = GD.Load("res://assets/sfx/hit3.wav") as AudioStream;
 
-        Connect("area_entered", this, "_on_BoidBase_area_entered");
+        Connect("area_entered", this, nameof(_OnBoidBaseAreaEntered));
         _health = MaxHealth;
         _baseScale = _sprite.Scale;
         _sfxHit = new AudioStreamPlayer2D();
@@ -59,29 +56,20 @@ public class BoidEnemyBase : BoidBase
 
         if (_trail != null)
         {
-            _trail.boid = this;
+            _trail.Init(this);
         }
     }
-
-    public void Init(Game game, BoidBase target)
-    {
-        _game = game;
-        SetTarget(target);
-    }
-
-    public void SetTarget(BoidBase target)
-    {
-        _target = target;
-    }
-
+    
     public override void _Process(float delta)
     {
+        base._Process(delta);
+        
         Vector2 steering = new Vector2(0.0f, 0.0f);
         if (!_destroyed)
         {
             if (_move)
             {
-                steering += _SteeringPursuit(_target.GlobalPosition, _target._velocity);
+                steering += _SteeringPursuit(_target.GlobalPosition, (_target as BoidBase)._velocity);
                 steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
 
                 // limit angular velocity
@@ -136,7 +124,7 @@ public class BoidEnemyBase : BoidBase
         {
             _destroyedTimer -= delta;
             float t = 1.0f - Mathf.Clamp(_destroyedTimer / DestroyTime, 0.0f, 1.0f);
-            _sprite.Scale = _baseScale.Slerp(new Vector2(0.0f, 0.0f), t);
+            _sprite.Scale = _baseScale.LinearInterpolate(new Vector2(0.0f, 0.0f), t);
             if (_trail != null)
             {
                 Color mod = _trail.Modulate;
@@ -192,7 +180,7 @@ public class BoidEnemyBase : BoidBase
         _health -= damage;
         _sprite.Modulate = ColourManager.Instance.White;
         _hitFlashTimer = HitFlashTime;
-        Particles2D hitParticles = HitParticles.Instance() as Particles2D;
+        CPUParticles2D hitParticles = HitParticles.Instance() as CPUParticles2D;
         hitParticles.Position = pos;
         hitParticles.Emitting = true;
         _game.AddChild(hitParticles);

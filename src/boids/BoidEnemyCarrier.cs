@@ -13,8 +13,8 @@ public class BoidEnemyCarrier : BoidEnemyBase
     [Export] public int DronePulseCount = 10;
     [Export] public float DroneSpawnRange = 750.0f;
 
-    public AudioStreamPlayer _sfxBeaconFire;
-    public AudioStreamPlayer _sfxDestroy;
+    public AudioStreamPlayer2D _sfxBeaconFire;
+    public AudioStreamPlayer2D _sfxDestroy;
     public AudioStream _rocochetSfx;
 
     private List<CarrierRotorgun> _rotorguns = new List<CarrierRotorgun>();
@@ -32,8 +32,8 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
     public override void _Ready()
     {
-        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer;
-        _sfxDestroy = GetNode("SFXDestroy") as AudioStreamPlayer;
+        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
+        _sfxDestroy = GetNode("SFXDestroy") as AudioStreamPlayer2D;
         _rocochetSfx = GD.Load("res://assets/sfx/ricochet.wav") as AudioStream;
 
         _sprite.Modulate = ColourManager.Instance.Secondary;
@@ -42,7 +42,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
         {
             _rotorguns.Add(GetNode($"Rotorgun{i}") as CarrierRotorgun);
             _rotorguns[_rotorguns.Count - 1].Lock = GetNode($"Lock{i}") as Node2D;
-            _rotorguns[i].Init(_game, _target);
+            _rotorguns[i].Init(_player, _game, _target);
         }
     }
 
@@ -123,7 +123,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
             enemy.GlobalPosition = (GetNode("SpawnRight") as Node2D).GlobalPosition;
         }
 
-        enemy.Init(_game, _target);
+        enemy.Init(_player, _game, _target);
         _game.AddChild(enemy);
         _game.Enemies.Append(enemy);
         enemy._velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized();

@@ -1,29 +1,25 @@
 using Godot;
 
-public class Leader : Node2D
+public class Leader : BoidBase
 {
     [Export] public float Damping = 0.5f;
 
     public AudioStreamPlayer2D _sfxPickup;
     public Node2D _damagedParticles;
 
-    private Game _game = null;
     public Color _colour;
     private bool _destroyed = false;
     public Vector2 _velocity;
     private bool _queueAddBoids = false;
-
-    public void Init(Game game)
-    {
-        _game = game;
-    }
-
+    
     public override void _Ready()
     {
         _colour = ColourManager.Instance.Secondary;
 
         _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer2D;
         _damagedParticles = GetNode("Damaged") as Node2D;
+
+        Connect("area_entered", this, nameof(OnAreaEntered));
     }
 
     public override void _Process(float delta)
@@ -66,7 +62,7 @@ public class Leader : Node2D
                 _velocity += dir;
             }
 
-            if ((GlobalPosition + _velocity * delta).Length() > _game.PlayRadius - 5.0f) ;
+            if ((GlobalPosition + _velocity * delta).Length() > _game.PlayRadius - 5.0f)
             {
                 _velocity *= 0.0f;
             }
@@ -98,7 +94,7 @@ public class Leader : Node2D
         }
     }
 
-    public void AddBoids(Vector2 pos)
+    private void AddBoids(Vector2 pos)
     {
         _game.AddBoids(pos);
     }
@@ -111,15 +107,9 @@ public class Leader : Node2D
         Update();
     }
 
-    public override void _Draw()
+    public void OnAreaEntered(Node2D area)
     {
-        DrawCircle(new Vector2(0.0f, 0.0f), 6.0f, _colour);
-        DrawCircle(new Vector2(0.0f, 0.0f), 2.0f, ColourManager.Instance.Primary);
-    }
-
-    public void _OnLeaderAreaEntered(Area area)
-    {
-        if (area.IsInGroup("pickupAdd"))
+        if (area is PickupAdd)
         {
             area.QueueFree();
             _queueAddBoids = true;
