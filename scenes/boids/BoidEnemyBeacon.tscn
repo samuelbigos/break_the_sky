@@ -1,22 +1,18 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/bullets/BulletBeacon.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/BoidEnemyBeacon.cs" type="Script" id=2]
 [ext_resource path="res://assets/textures/enemy-beacon.png" type="Texture" id=3]
-[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/sfx/beacon_fire.wav" type="AudioStream" id=6]
-[ext_resource path="res://assets/sfx/destroy_beacon.wav" type="AudioStream" id=7]
-[ext_resource path="res://src/Trail.cs" type="Script" id=8]
 
 [sub_resource type="CircleShape2D" id=1]
-radius = 32.5924
+radius = 32.5698
 
-[node name="EnemyBeacon" type="Area2D" groups=["enemy"]]
+[node name="BoidEnemyBeacon" instance=ExtResource( 4 )]
 script = ExtResource( 2 )
 MaxVelocity = 300.0
 TrailLength = 0
-HitParticles = ExtResource( 5 )
 PickupDropRate = 1.0
 Points = 100
 MaxHealth = 30.0
@@ -29,20 +25,12 @@ BeaconPulseDuration = 0.33
 BulletsPerPulse = 16
 BulletSpeed = 100.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" parent="." index="0"]
 shape = SubResource( 1 )
 
-[node name="Damaged" parent="." instance=ExtResource( 4 )]
-
-[node name="Sprite" type="Sprite" parent="."]
+[node name="Sprite" parent="." index="2"]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 3 )
 
-[node name="SFXBeaconFire" type="AudioStreamPlayer2D" parent="."]
+[node name="SFXBeaconFire" type="AudioStreamPlayer2D" parent="." index="8"]
 stream = ExtResource( 6 )
-
-[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )
-
-[node name="Trail" type="Node2D" parent="."]
-script = ExtResource( 8 )

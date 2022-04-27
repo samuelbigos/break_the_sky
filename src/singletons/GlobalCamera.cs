@@ -56,16 +56,16 @@ public class GlobalCamera : Node2D
     {
         if (_player != null)
         {
-            var cameraMouseOffset = GetGlobalMousePosition() - _player.GlobalPosition;
-            var camerOffset = -_player.GlobalPosition + GetViewport().Size * 0.5f - cameraMouseOffset * 0.33f;
+            Vector2 cameraMouseOffset = GetGlobalMousePosition() - _player.GlobalPosition;
+            Vector2 camerOffset = -_player.GlobalPosition + GetViewport().Size * 0.5f - cameraMouseOffset * 0.33f;
             Transform2D cameraTransform =
                 new Transform2D(new Vector2(1.0f, 0.0f), new Vector2(0.0f, 1.0f), camerOffset);
 
             if (_trauma > 0.0f)
             {
                 _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
-                var amount = Mathf.Pow(_trauma, TraumaPower);
-                var rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
+                float amount = Mathf.Pow(_trauma, TraumaPower);
+                float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
                 Vector2 offset = new Vector2(0.0f, 0.0f);
                 offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
                 offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);

@@ -26,9 +26,11 @@ EnemyBeaconScene = ExtResource( 6 )
 EnemyCarrierScene = ExtResource( 12 )
 InitialPickupAddCount = 5
 InitialBoidCount = 0
+PlayRadius = 500.0
 BasePlayerSpeed = 5.0
 
 [node name="Background" parent="." instance=ExtResource( 13 )]
+GameNodePath = NodePath("..")
 
 [node name="Leader" parent="." instance=ExtResource( 1 )]
 

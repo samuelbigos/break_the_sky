@@ -51,7 +51,7 @@ public class PickupAdd : Node2D
             // attract
         }
 
-        var dist = (_player.GlobalPosition - GlobalPosition).Length();
+        float dist = (_player.GlobalPosition - GlobalPosition).Length();
         if (dist < AttractRange)
         {
             GlobalPosition += (_player.GlobalPosition - GlobalPosition).Normalized() * (1.0f - (dist / AttractRange)) *
@@ -70,9 +70,9 @@ public class PickupAdd : Node2D
     {
         int pointNum = 16;
         List<Vector2> points = new List<Vector2>();
-        foreach (var i in GD.Range(pointNum + 1))
+        foreach (int i in GD.Range(pointNum + 1))
         {
-            var angle = Mathf.Deg2Rad(angleFrom + i * (angleTo - angleFrom) / pointNum - 90);
+            float angle = Mathf.Deg2Rad(angleFrom + i * (angleTo - angleFrom) / pointNum - 90);
             points.Add(center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius);
         }
 

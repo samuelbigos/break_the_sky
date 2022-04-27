@@ -18,11 +18,16 @@ public class Trail : Node2D
         ZIndex = -1;
     }
 
+    public override void _Process(float delta)
+    {
+        Update();
+    }
+
     public override void _Draw()
     {
         List<Vector2> pointArray = new List<Vector2>();
         List<Color> colourArray = new List<Color>();
-        int numPoints = _boid._trailPoints.Count;
+        int numPoints = _boid.TrailPoints.Count;
         if (numPoints < 2)
         {
             return;
@@ -30,8 +35,8 @@ public class Trail : Node2D
 
         foreach (int i in GD.Range(0, numPoints))
         {
-            pointArray.Add(_boid._trailPoints[i] - GlobalPosition);
-            var col = ColourManager.Instance.White;
+            pointArray.Add(_boid.TrailPoints[i] - GlobalPosition);
+            Color col = ColourManager.Instance.White;
             col.a = 0.25f + ((float) (i) / numPoints) * 0.75f;
             col.a *= _alpha;
             colourArray.Add(col);

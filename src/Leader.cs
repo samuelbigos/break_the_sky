@@ -26,13 +26,13 @@ public class Leader : BoidBase
     {
         if (!_destroyed)
         {
-            var mousePos = GetGlobalMousePosition();
-            var lookAt = mousePos - GlobalPosition;
+            Vector2 mousePos = GetGlobalMousePosition();
+            Vector2 lookAt = mousePos - GlobalPosition;
             Rotation = -Mathf.Atan2(lookAt.x, lookAt.y);
 
             Vector2 forward = new Vector2(0.0f, -1.0f);
             Vector2 left = new Vector2(-1.0f, 0.0f);
-            var accel = _game.BasePlayerSpeed;
+            float accel = _game.BasePlayerSpeed;
 
             Vector2 dir = new Vector2(0.0f, 0.0f);
             if (Input.IsActionPressed("w"))

@@ -147,7 +147,7 @@ public class Game : Node2D
             BaseBoidSpeed = 1000.0f;
             BasePlayerSpeed = 10.0f;
             BaseMicroturrets = true;
-            foreach (var pickup in _pickups)
+            foreach (Node2D pickup in _pickups)
             {
                 pickup.QueueFree();
                 AddBoids(new Vector2(0.0f, 0.0f));
@@ -196,14 +196,6 @@ public class Game : Node2D
                 {
                     _Spawn(3);
                 }
-                if (ImGui.Button("Spawn 5"))
-                {
-                    _Spawn(4);
-                }
-                if (ImGui.Button("Spawn 6"))
-                {
-                    _Spawn(5);
-                }
                 ImGui.EndTabItem();
             }
             ImGui.EndTabBar();
@@ -240,13 +232,13 @@ public class Game : Node2D
     {
         _boidColCount = Mathf.Clamp(numCols, 0, _allBoids.Count);
         _boidColumns = new List<List<BoidBase>>();
-        foreach (var i in GD.Range(0, _boidColCount))
+        foreach (int i in GD.Range(0, _boidColCount))
         {
             _boidColumns.Add(new List<BoidBase>());
         }
 
-        var perCol = _allBoids.Count / _boidColCount;
-        foreach (var i in GD.Range(0, _allBoids.Count))
+        int perCol = _allBoids.Count / _boidColCount;
+        foreach (int i in GD.Range(0, _allBoids.Count))
         {
             BoidBase boid = _allBoids[i];
             int column = i / perCol;
@@ -258,7 +250,7 @@ public class Game : Node2D
 
             _boidColumns[colIdx].Add(boid);
             int columnIndex = _boidColumns[colIdx].IndexOf(boid);
-            var offset = GetOffset(colIdx, columnIndex);
+            Vector2 offset = GetOffset(colIdx, columnIndex);
             boid.SetOffset(offset);
 
             if (setPos)
@@ -276,7 +268,7 @@ public class Game : Node2D
     private void AddBoidsInternal()
     {
         bool addedBoid = false;
-        foreach (var i in GD.Range(0, BaseBoidReinforce))
+        foreach (int i in GD.Range(0, BaseBoidReinforce))
         {
             if (_allBoids.Count > MaxDrones)
             {
@@ -377,7 +369,7 @@ public class Game : Node2D
             _scoreMulti = 1.0f;
         }
 
-        foreach (var i in GD.Range(Enemies.Count, 0, -1))
+        foreach (int i in GD.Range(Enemies.Count, 0, -1))
         {
             if (!IsInstanceValid(Enemies[i - 1]))
             {
@@ -387,7 +379,7 @@ public class Game : Node2D
             }
         }
 
-        var enemyCount = Enemies.Count;
+        int enemyCount = Enemies.Count;
         _waveTimer -= delta;
         if (_started)
         {
@@ -414,7 +406,7 @@ public class Game : Node2D
                         }
 
                         _currentSubWave += 1;
-                        var subwaveCount = _levels[0].SpawnSets.Count;
+                        int subwaveCount = _levels[0].SpawnSets.Count;
                         if (_currentSubWave >= subwaveCount)
                         {
                             EnterWaveCooldown();
@@ -615,7 +607,7 @@ public class Game : Node2D
             {
                 _boidColumns[i].Remove(boid);
                 _boidColumns[i].Insert(0, boid);
-                foreach (var j in GD.Range(0, _boidColumns[i].Count))
+                foreach (int j in GD.Range(0, _boidColumns[i].Count))
                 {
                     _boidColumns[i][j].SetOffset(GetOffset(i, j));
                 }

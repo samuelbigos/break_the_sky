@@ -1,53 +1,28 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://assets/textures/drone-friendly.png" type="Texture" id=1]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/BoidAlly.cs" type="Script" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
-[ext_resource path="res://src/Trail.cs" type="Script" id=4]
-[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=6]
-[ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
-[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=8]
 [ext_resource path="res://scenes/bullets/MicroBullet.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/sfx/shot_micro.wav" type="AudioStream" id=10]
 
 [sub_resource type="CircleShape2D" id=1]
-radius = 4.27867
+radius = 6.20361
 
-[node name="BoidAlly" type="Area2D"]
+[node name="BoidAlly" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
-MaxVelocity = 1500.0
-HitParticles = ExtResource( 5 )
 SlowingRadius = 25.0
 AlignmentRadius = 10.0
 MicroBulletDamageMod = 0.1
+_sfxHitMicroPlayerNode = NodePath("SFXShootMicro")
 BulletScene = ExtResource( 3 )
 MicoBulletScene = ExtResource( 9 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" parent="." index="0"]
 shape = SubResource( 1 )
 
-[node name="Damaged" parent="." instance=ExtResource( 8 )]
-
-[node name="Sprite" type="Sprite" parent="."]
+[node name="Sprite" parent="." index="2"]
 scale = Vector2( 0.33, 0.33 )
-texture = ExtResource( 1 )
 
-[node name="Trail" type="Node2D" parent="."]
-script = ExtResource( 4 )
-
-[node name="SFXShot" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 6 )
-volume_db = -5.0
-pitch_scale = 0.8
-
-[node name="SFXShotMicro" type="AudioStreamPlayer2D" parent="."]
+[node name="SFXShootMicro" type="AudioStreamPlayer2D" parent="." index="7"]
 stream = ExtResource( 10 )
-volume_db = -10.0
-pitch_scale = 0.8
-
-[node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )
-
-[node name="SFXHitMicro" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )

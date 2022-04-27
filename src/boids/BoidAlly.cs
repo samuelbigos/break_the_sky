@@ -16,18 +16,14 @@ public class BoidAlly : BoidBase
     [Export] public float MicroBulletDamageMod = 0.25f;
     [Export] public float MaxAngularVelocity = 500.0f;
 
+    [Export] private NodePath _sfxHitMicroPlayerNode;
+
     [Export] public PackedScene BulletScene;
     [Export] public PackedScene MicoBulletScene;
 
-    private AudioStreamPlayer2D _sfxShot;
-    private AudioStreamPlayer2D _sfxHit;
-    private AudioStreamPlayer2D _sfxHitMicro;
-    private Particles2D _damagedParticles;
-    
+    private AudioStreamPlayer2D _sfxHitMicroPlayer;
 
-    private float _shootCooldown;
-    private Vector2 _baseScale;
-    private float _destroyRot;
+    private float _shootCooldown; 
     private float _microBulletTargetSearchTimer;
     private BoidBase _microBulletTarget;
     private float _microBulletCd;
@@ -36,13 +32,8 @@ public class BoidAlly : BoidBase
     {
         base._Ready();
 
-        _sfxShot = GetNode("SFXShot") as AudioStreamPlayer2D;
-        _sfxHit = GetNode("SFXHit") as AudioStreamPlayer2D;
-        _sfxHitMicro = GetNode("SFXHitMicro") as AudioStreamPlayer2D;
-        _damagedParticles = GetNode("Damaged") as Particles2D;
-        
+        _sfxHitMicroPlayer = GetNode<AudioStreamPlayer2D>(_sfxHitMicroPlayerNode);
 
-        _trail.Init(this);
         _sprite.Modulate = ColourManager.Instance.Secondary;
         _baseScale = _sprite.Scale;
     }
@@ -57,10 +48,9 @@ public class BoidAlly : BoidBase
         Vector2 shootDir = (GetGlobalMousePosition() - GlobalPosition).Normalized();
 
         // steering
-        Vector2 steering = new Vector2(0.0f, 0.0f);
         if (!_destroyed)
         {
-            steering = _SteeringArrive(targetPos, SlowingRadius);
+            Vector2 steering = _SteeringArrive(targetPos, SlowingRadius);
             steering += _SteeringSeparation(_game.GetBoids(), _game.BaseBoidGrouping * 0.66f);
             steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
 
@@ -81,7 +71,6 @@ public class BoidAlly : BoidBase
         }
 
         GlobalPosition += _velocity * delta;
-        _sprite.Rotation = -Mathf.Atan2(_velocity.x, _velocity.y);
 
         // damping
         _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
@@ -147,38 +136,23 @@ public class BoidAlly : BoidBase
                         float spread = _game.BaseBoidSpread;
                         Vector2 dir = (_microBulletTarget.GlobalPosition - GlobalPosition).Normalized();
                         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
-                        mb.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius);
-                        mb.GlobalPosition = GlobalPosition;
-                        mb.Damage = _game.BaseBoidDamage * MicroBulletDamageMod;
+                        float damage = _game.BaseBoidDamage * MicroBulletDamageMod;
+                        mb.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, damage);
                         _game.AddChild(mb);
-                        _sfxHitMicro.Play();
-
-                        // update trail
+                        _sfxHitMicroPlayer.Play();
                     }
                 }
             }
         }
-
-        (GetNode("Trail") as Trail).Update();
-
-        if (_destroyed)
-        {
-            _destroyedTimer -= delta;
-            float t = 1.0f - Mathf.Clamp(_destroyedTimer / DestroyTime, 0.0f, 1.0f);
-            _sprite.Scale = _baseScale.Slerp(new Vector2(0.0f, 0.0f), t);
-            _destroyRot += Mathf.Pi * 2.0f * delta;
-            if (_destroyedTimer < 0.0)
-            {
-                QueueFree();
-            }
-        }
     }
 
-    public void _Shoot(Vector2 dir)
+    protected override void _Shoot(Vector2 dir)
     {
+        base._Shoot(dir);
+        
         _shootCooldown = _game.BaseBoidReload;
         Bullet bullet = BulletScene.Instance() as Bullet;
-        var spread = _game.BaseBoidSpread;
+        float spread = _game.BaseBoidSpread;
         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
         bullet.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, _game.BaseBoidDamage);
         bullet.GlobalPosition = GlobalPosition;
@@ -186,7 +160,6 @@ public class BoidAlly : BoidBase
         _game.PushBack(this);
         float traumaMod = 1.0f - Mathf.Clamp(_game.GetNumBoids() / 100.0f, 0.0f, 0.5f);
         GlobalCamera.Instance.AddTrauma(ShootTrauma * traumaMod);
-        _sfxShot.Play();
         //_sprite.modulate = Colours.Grey;
     }
 
@@ -196,7 +169,7 @@ public class BoidAlly : BoidBase
             return false;
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (var boid in _game.GetBoids())
+        foreach (BoidBase boid in _game.GetBoids())
         {
             if (boid == this || boid.IsDestroyed())
             {
@@ -213,43 +186,36 @@ public class BoidAlly : BoidBase
         return !blocked;
     }
 
-    public void _Destroy()
+    protected override void _Destroy(bool score)
     {
-        if (!_destroyed)
-        {
-            _game.RemoveBoid(this);
-            _destroyed = true;
-            _sprite.Modulate = ColourManager.Instance.White;
-            _destroyedTimer = DestroyTime;
-            _sprite.ZIndex = -1;
-            GlobalCamera.Instance.AddTrauma(DestroyTrauma);
-            _sfxHit.Play();
-            _damagedParticles.Emitting = true;
-        }
+        base._Destroy(score);
     }
 
-    public void _OnBoidAllyAreaEntered(Area2D area)
+    public override void _OnBoidAreaEntered(Area2D area)
     {
         BoidBase boid = area as BoidBase;
+        if (boid is BoidAlly || boid is Leader)
+            return;
+        
         if (boid != null && !boid.IsDestroyed())
         {
             boid.OnHit(HitDamage, false, _velocity, false, GlobalPosition);
-            _Destroy();
+            _Destroy(false);
             return;
         }
 
-        BoidBase laser = area as BoidEnemyLaser;
+        Laser laser = area as Laser;
         if (laser != null)
         {
-            _Destroy();
+            _Destroy(false);
             return;
         }
 
         Bullet bullet = area as Bullet;
         if (bullet != null && bullet.Alignment == 1)
         {
-            //bullet.OnHit(HitDamage, false, _velocity, false, GlobalPosition);
-            _Destroy();
+            bullet.OnHit();
+            _Destroy(false);
             return;
         }
     }

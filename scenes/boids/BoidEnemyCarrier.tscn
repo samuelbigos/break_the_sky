@@ -1,81 +1,52 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://assets/textures/carrier_body.png" type="Texture" id=1]
-[ext_resource path="res://scenes/boids/CarrierRotorgun.tscn" type="PackedScene" id=2]
-[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
-[ext_resource path="res://scenes/particles/Damaged.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/sfx/beacon_fire.wav" type="AudioStream" id=6]
-[ext_resource path="res://assets/sfx/destroy_beacon.wav" type="AudioStream" id=7]
+[ext_resource path="res://scenes/boids/BoidEnemyDriller.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/boids/BoidEnemyCarrierRotorgun.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/bullets/BulletBeacon.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=4]
+[ext_resource path="res://assets/textures/carrier_body.png" type="Texture" id=5]
 [ext_resource path="res://src/boids/BoidEnemyCarrier.cs" type="Script" id=8]
-[ext_resource path="res://scenes/boids/BoidEnemyDrone.tscn" type="PackedScene" id=9]
-[ext_resource path="res://src/Trail.cs" type="Script" id=10]
 
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 46.5146, 78.6476 )
-
-[node name="EnemyCarrier" type="Area2D" groups=["enemy"]]
+[node name="BoidEnemyCarrier" instance=ExtResource( 4 )]
 script = ExtResource( 8 )
 MaxVelocity = 200.0
 TrailLength = 0
-HitParticles = ExtResource( 5 )
 Points = 200
-BulletScene = ExtResource( 3 )
-DroneScene = ExtResource( 9 )
-DronePulseCooldown = 3.0
-DronePulseCount = 6
+_bulletScene = ExtResource( 3 )
+_droneScene = ExtResource( 1 )
+_dronePulseCooldown = 3.0
+_dronePulseCount = 6
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource( 1 )
-
-[node name="Damaged" parent="." instance=ExtResource( 4 )]
-
-[node name="Sprite" type="Sprite" parent="."]
+[node name="Sprite" parent="." index="2"]
 scale = Vector2( 2, 2 )
-texture = ExtResource( 1 )
+texture = ExtResource( 5 )
 
-[node name="SFXBeaconFire" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 6 )
-
-[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )
-
-[node name="Lock1" type="Node2D" parent="."]
+[node name="Lock1" type="Node2D" parent="." index="7"]
 position = Vector2( -75, -92 )
 
-[node name="Rotorgun1" parent="." groups=["enemy"] instance=ExtResource( 2 )]
-MaxHealth = 30.0
-BulletCooldown = 1.0
+[node name="Rotorgun1" parent="." index="8" groups=["enemy"] instance=ExtResource( 2 )]
+position = Vector2( -46, -75 )
 
-[node name="Lock2" type="Node2D" parent="."]
+[node name="Lock2" type="Node2D" parent="." index="9"]
 position = Vector2( 72, -93 )
 
-[node name="Rotorgun2" parent="." groups=["enemy"] instance=ExtResource( 2 )]
+[node name="Rotorgun2" parent="." index="10" groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( 46, -74 )
-MaxHealth = 30.0
-BulletCooldown = 1.0
 
-[node name="Lock3" type="Node2D" parent="."]
+[node name="Lock3" type="Node2D" parent="." index="11"]
 position = Vector2( -74, 92 )
 
-[node name="Rotorgun3" parent="." groups=["enemy"] instance=ExtResource( 2 )]
+[node name="Rotorgun3" parent="." index="12" groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( -45, 78 )
-MaxHealth = 30.0
-BulletCooldown = 1.0
 
-[node name="Lock4" type="Node2D" parent="."]
+[node name="Lock4" type="Node2D" parent="." index="13"]
 position = Vector2( 71, 92 )
 
-[node name="Rotorgun4" parent="." groups=["enemy"] instance=ExtResource( 2 )]
+[node name="Rotorgun4" parent="." index="14" groups=["enemy"] instance=ExtResource( 2 )]
 position = Vector2( 46, 78 )
-MaxHealth = 30.0
-BulletCooldown = 1.0
 
-[node name="SpawnLeft" type="Node2D" parent="."]
+[node name="SpawnLeft" type="Node2D" parent="." index="15"]
 position = Vector2( -56, 0 )
 
-[node name="SpawnRight" type="Node2D" parent="."]
+[node name="SpawnRight" type="Node2D" parent="." index="16"]
 position = Vector2( 53, 0 )
-
-[node name="Trail" type="Node2D" parent="."]
-script = ExtResource( 10 )

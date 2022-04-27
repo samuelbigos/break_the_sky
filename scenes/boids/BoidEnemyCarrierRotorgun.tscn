@@ -1,0 +1,27 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://src/boids/BoidEnemyCarrierRotorgun.cs" type="Script" id=1]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/bullets/BulletBeacon.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/textures/carrier_rotor_blade.png" type="Texture" id=4]
+[ext_resource path="res://assets/textures/carrier_rotorgun.png" type="Texture" id=5]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 50.01
+
+[node name="BoidEnemyCarrierRotorgun" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+MaxVelocity = 0.0
+TrailLength = 0
+_bulletScene = ExtResource( 3 )
+
+[node name="CollisionShape2D" parent="." index="0"]
+shape = SubResource( 1 )
+
+[node name="Sprite" parent="." index="2"]
+scale = Vector2( 2, 2 )
+texture = ExtResource( 5 )
+
+[node name="Blade" type="Sprite" parent="." index="7"]
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )

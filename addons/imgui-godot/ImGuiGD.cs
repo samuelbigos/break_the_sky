@@ -3,6 +3,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Array = Godot.Collections.Array;
 
 public class ImGuiGD
 {
@@ -15,7 +16,7 @@ public class ImGuiGD
     public static IntPtr BindTexture(Texture tex)
     {
         // decided not to add duplicate prevention, could cause problems
-        var id = new IntPtr(_textureId++);
+        IntPtr id = new IntPtr(_textureId++);
         _loadedTextures.Add(id, tex);
         return id;
     }
@@ -41,7 +42,7 @@ public class ImGuiGD
         ImFontPtr rv = null;
 
         Godot.File fi = new File();
-        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
+        Error err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
         byte[] buf = fi.GetBuffer((int)fi.GetLen());
         fi.Close();
 
@@ -57,7 +58,7 @@ public class ImGuiGD
 
     public static unsafe void RebuildFontAtlas()
     {
-        var io = ImGui.GetIO();
+        ImGuiIOPtr io = ImGui.GetIO();
         io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
 
         byte[] pixels = new byte[width * height * bytesPerPixel];
@@ -66,7 +67,7 @@ public class ImGuiGD
         Image img = new Image();
         img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
-        var imgtex = new ImageTexture();
+        ImageTexture imgtex = new ImageTexture();
         imgtex.CreateFromImage(img, 0);
 
         if (_fontTextureId.HasValue) UnbindTexture(_fontTextureId.Value);
@@ -78,10 +79,10 @@ public class ImGuiGD
 
     public static void Init(Viewport vp)
     {
-        var context = ImGui.CreateContext();
+        IntPtr context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
 
-        var io = ImGui.GetIO();
+        ImGuiIOPtr io = ImGui.GetIO();
 
         io.BackendFlags = 0;
         io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
@@ -117,7 +118,7 @@ public class ImGuiGD
 
     private static void UpdateJoypads()
     {
-        var io = ImGui.GetIO();
+        ImGuiIOPtr io = ImGui.GetIO();
         if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
             return;
 
@@ -155,7 +156,7 @@ public class ImGuiGD
 
     public static void Update(float delta, Viewport vp)
     {
-        var io = ImGui.GetIO();
+        ImGuiIOPtr io = ImGui.GetIO();
         io.DisplaySize = new System.Numerics.Vector2(vp.Size.x, vp.Size.y);
         io.DeltaTime = delta;
 
@@ -191,7 +192,7 @@ public class ImGuiGD
 
     public static bool ProcessInput(InputEvent evt)
     {
-        var io = ImGui.GetIO();
+        ImGuiIOPtr io = ImGui.GetIO();
         bool consumed = false;
 
         if (evt is InputEventMouseMotion mm)
@@ -312,7 +313,7 @@ public class ImGuiGD
 
             for (int i = 0; i < cmdList.VtxBuffer.Size; i++)
             {
-                var v = cmdList.VtxBuffer[i];
+                ImDrawVertPtr v = cmdList.VtxBuffer[i];
                 vertices[i] = new Godot.Vector2(v.pos.X, v.pos.Y);
                 // need to reverse the color bytes
                 byte[] col = BitConverter.GetBytes(v.col);
@@ -330,14 +331,14 @@ public class ImGuiGD
                     indices[j] = cmdList.IdxBuffer[i];
                 }
 
-                var arrays = new Godot.Collections.Array();
+                Array arrays = new Godot.Collections.Array();
                 arrays.Resize((int)ArrayMesh.ArrayType.Max);
                 arrays[(int)ArrayMesh.ArrayType.Vertex] = vertices;
                 arrays[(int)ArrayMesh.ArrayType.Color] = colors;
                 arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs;
                 arrays[(int)ArrayMesh.ArrayType.Index] = indices;
 
-                var mesh = _meshes[nodeN];
+                ArrayMesh mesh = _meshes[nodeN];
                 while (mesh.GetSurfaceCount() > 0)
                 {
                     mesh.SurfaceRemove(0);

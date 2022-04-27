@@ -2,11 +2,16 @@ using Godot;
 
 public class BoidEnemyLaser : BoidEnemyBase
 {
-    [Export] public float TargetLaserDist = 250.0f;
-    [Export] public float LaserCooldown = 5.0f;
-    [Export] public float LaserCharge = 1.0f;
-    [Export] public float LaserDuration = 2.0f;
+    [Export] private float _targetLaserDist = 250.0f;
+    [Export] private float _laserCooldown = 5.0f;
+    [Export] private float _laserCharge = 1.0f;
+    [Export] private float _laserDuration = 2.0f;
 
+    [Export] private NodePath _sfxLaserChargeNode;
+    [Export] private NodePath _sfxLaserFireNode;
+    [Export] private NodePath _laserNode;
+    [Export] private NodePath _rotorNode;
+    
     public Laser _laser;
     public Sprite _rotor;
     public AudioStreamPlayer2D _sfxLaserCharge;
@@ -20,33 +25,32 @@ public class BoidEnemyLaser : BoidEnemyBase
     }
 
     private LaserState _laserState = LaserState.Inactive;
-    public float _laserCooldown;
-    public float _laserCharge;
-    public float _laserDuration;
-    public float _maxVelBase;
-
+    private float _laserCooldownTimer;
+    private float _laserChargeTimer;
+    private float _laserDurationTimer;
+    private float _maxVelBase;
 
     public override void _Ready()
     {
         base._Ready();
 
-        _laser = GetNode("LaserArea") as Laser;
-        _rotor = GetNode("Rotor") as Sprite;
-        _sfxLaserCharge = GetNode("SFXLaserCharge") as AudioStreamPlayer2D;
-        _sfxLaserFire = GetNode("SFXLaserFire") as AudioStreamPlayer2D;
+        _laser = GetNode<Laser>(_laserNode);
+        _rotor = GetNode<Sprite>(_rotorNode);
+        _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
+        _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
         _maxVelBase = MaxVelocity;
         _laser.Monitorable = false;
         _rotor.Modulate = ColourManager.Instance.Secondary;
-        _laserCooldown = LaserCooldown * 0.5f;
+        _laserCooldownTimer = _laserCooldown * 0.5f;
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
 
-        var distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
-        if (distToTarget < TargetLaserDist && _laserState == LaserState.Inactive)
+        float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
+        if (distToTarget < _targetLaserDist && _laserState == LaserState.Inactive)
         {
             MaxVelocity = 50.0f;
         }
@@ -61,11 +65,11 @@ public class BoidEnemyLaser : BoidEnemyBase
         {
             if (_laserState == LaserState.Inactive)
             {
-                _laserCooldown -= delta;
-                if (distToTarget < TargetLaserDist && _laserCooldown < 0.0f)
+                _laserCooldownTimer -= delta;
+                if (distToTarget < _targetLaserDist && _laserCooldownTimer < 0.0f)
                 {
                     _laserState = LaserState.Charging;
-                    _laserCharge = LaserCharge;
+                    _laserChargeTimer = _laserCharge;
                     LaserCharging();
                 }
             }
@@ -73,22 +77,22 @@ public class BoidEnemyLaser : BoidEnemyBase
             if (_laserState == LaserState.Charging)
             {
                 _laser.Update();
-                _laserCharge -= delta;
-                if (_laserCharge < 0.0f)
+                _laserChargeTimer -= delta;
+                if (_laserChargeTimer < 0.0f)
                 {
                     _laserState = LaserState.Firing;
-                    _laserDuration = LaserDuration;
+                    _laserDurationTimer = _laserDuration;
                     LaserFiring();
                 }
             }
 
             if (_laserState == LaserState.Firing)
             {
-                _laserDuration -= delta;
-                if (_laserDuration < 0.0f)
+                _laserDurationTimer -= delta;
+                if (_laserDurationTimer < 0.0f)
                 {
                     _laserState = LaserState.Inactive;
-                    _laserCooldown = LaserCooldown;
+                    _laserCooldownTimer = _laserCooldown;
                     LaserInactive();
                 }
             }
@@ -96,8 +100,6 @@ public class BoidEnemyLaser : BoidEnemyBase
             _laser.state = _laserState;
             _rotor.Rotation = Mathf.PosMod(_rotor.Rotation + 50.0f * delta, Mathf.Pi * 2.0f);
         }
-
-        Rotation = -Mathf.Atan2(_velocity.x, _velocity.y);
     }
 
     public void LaserCharging()
@@ -126,17 +128,8 @@ public class BoidEnemyLaser : BoidEnemyBase
             return new Vector2(0.0f, 0.0f);
         }
 
-        var desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
-        var steering = desiredVelocity - _velocity;
+        Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
+        Vector2 steering = desiredVelocity - _velocity;
         return steering;
-    }
-
-    protected override void Destroy(bool score)
-    {
-        base.Destroy(score);
-        
-        _laser.QueueFree();
-        _rotor.QueueFree();
-        _sfxDestroy.Play();
     }
 }

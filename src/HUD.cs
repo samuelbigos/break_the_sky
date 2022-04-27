@@ -119,7 +119,7 @@ public class HUD : CanvasLayer
 
         _scoreLabel = GetNode<Label>("LoseScreen/VBoxContainer/Score");
 
-        var fontCol = ColourManager.Instance.White;
+        Color fontCol = ColourManager.Instance.White;
         _perkLabel1.AddColorOverride("font_color", fontCol);
         _perkLabel2.AddColorOverride("font_color", fontCol);
         _perkLabel3.AddColorOverride("font_color", fontCol);
@@ -134,8 +134,8 @@ public class HUD : CanvasLayer
         _wave.AddColorOverride("font_color", ColourManager.Instance.White);
         _subWave.AddColorOverride("font_color", fontCol);
 
-        var bgCol = ColourManager.Instance.Secondary;
-        var outlineCol = ColourManager.Instance.Tertiary;
+        Color bgCol = ColourManager.Instance.Secondary;
+        Color outlineCol = ColourManager.Instance.Tertiary;
         _perkBG1.Modulate = bgCol;
         _perkOutline1.Modulate = outlineCol;
         _perkBG2.Modulate = bgCol;
@@ -218,9 +218,9 @@ public class HUD : CanvasLayer
             TextureRect outline = button.GetNode<TextureRect>("Outline");
             if (button == _buttonSelected)
             {
-                var time = _animTime / 0.1f;
+                float time = _animTime / 0.1f;
                 float s = 1.0f + Mathf.Cos(time) * 0.05f;
-                var r = Mathf.Sin(time) * 0.5f;
+                float r = Mathf.Sin(time) * 0.5f;
                 bg.RectPivotOffset = bg.RectSize / 2.0f;
                 bg.RectScale = new Vector2(s, s);
                 bg.RectRotation = r;
@@ -247,7 +247,7 @@ public class HUD : CanvasLayer
             //_scoreLabel.rect_scale = new Vector2(s, s);
 
             _scoreCountTimer -= delta;
-            var score = Mathf.Clamp(Mathf.Lerp(_resultsScore, 0, _scoreCountTimer / ScoreCountTime), 0, _resultsScore);
+            float score = Mathf.Clamp(Mathf.Lerp(_resultsScore, 0, _scoreCountTimer / ScoreCountTime), 0, _resultsScore);
             _scoreLabel.Text = $"{score}";
 
             if (!_star1.Visible && score > StarThreshold1)

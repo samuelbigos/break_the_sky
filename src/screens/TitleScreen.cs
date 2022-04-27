@@ -57,7 +57,7 @@ public class TitleScreen : CanvasLayer
 
         if (Input.IsActionJustReleased("shoot"))
         {
-            foreach (var label in _text)
+            foreach (Label label in _text)
             {
                 label.Visible = true;
                 Color mod = label.Modulate;

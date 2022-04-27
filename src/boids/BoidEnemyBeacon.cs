@@ -20,26 +20,25 @@ public class BoidEnemyBeacon : BoidEnemyBase
     }
 
     public AudioStreamPlayer2D _sfxBeaconFire;
-    public AudioStreamPlayer2D _sfxDestroy;
 
     private BeaconState _beaconState = BeaconState.Inactive;
     public float _beaconCooldown;
     public float _beaconCharge;
     public float _beaconDuration;
     public int _pulses;
-    private Sprite _sprite;
 
     public override void _Ready()
     {
         base._Ready();
         
         _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
-        _sprite.Modulate = ColourManager.Instance.Secondary;
     }
 
     public override void _Process(float delta)
     {
-        var distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
+        base._Process(delta);
+        
+        float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
 
         // firin' mah lazor
         if (!_destroyed)
@@ -84,27 +83,19 @@ public class BoidEnemyBeacon : BoidEnemyBase
                 }
             }
         }
-
-        Rotation = -Mathf.Atan2(_velocity.x, _velocity.y);
     }
 
     public void FirePulse()
     {
-        foreach (var i in GD.Range(0, BulletsPerPulse))
+        foreach (int i in GD.Range(0, BulletsPerPulse))
         {
             BulletBeacon bullet = BulletScene.Instance() as BulletBeacon;
             float f = (float) (i) * Mathf.Pi * 2.0f / (float) (BulletsPerPulse);
             Vector2 dir = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized();
-            bullet.Init(dir * BulletSpeed, 1, _game.PlayRadius);
+            bullet.Init(dir * BulletSpeed, 1, _game.PlayRadius, 1.0f);
             bullet.GlobalPosition = GlobalPosition + dir * 32.0f;
             _game.AddChild(bullet);
             _sfxBeaconFire.Play();
         }
-    }
-
-    protected override void Destroy(bool score)
-    {
-        base.Destroy(score);
-        _sfxDestroy.Play();
     }
 }

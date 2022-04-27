@@ -50,7 +50,7 @@ public class PerkManager : Node
 	public List<Perk> GetRandomPerks(int count)
 	{
 		List<Perk> perks = new List<Perk>();
-		foreach(var perk in _perks)
+		foreach(Perk perk in _perks)
 		{
 			if(perk.maximum > 0)
 			{
