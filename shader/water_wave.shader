@@ -4,7 +4,10 @@ uniform sampler2D u_prev_wave;
 
 void fragment() 
 {
-	float texelSize = 1.0 / 1024.0;
+	vec2 texSize;
+	texSize.x = float(textureSize(TEXTURE, 0).x);
+	texSize.y = float(textureSize(TEXTURE, 0).y);
+	vec2 texelSize = 1.0 / texSize;
 	
 	vec2 dirs[] = {
 		normalize(vec2(-1.0, -1.0)), 
@@ -33,7 +36,7 @@ void fragment()
 
 	diff = 1.0 - clamp(diff / 4.0, 0.0, 1.0);
 	
-	float falloff = (0.05 * diff) + 0.0025;
+	float falloff = (0.1 * diff);
 	float val = 0.0;
 	for (int i = 0; i < 9; i++)
 	{

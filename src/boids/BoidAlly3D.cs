@@ -40,7 +40,7 @@ public class BoidAlly3D : BoidBase3D
         base._Process(delta);
 
         Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
-        targetPos += Vector3.Forward * 10.0f;
+        //targetPos += Vector3.Forward * 10.0f;
         
         Vector2 shootDir = (GlobalCamera3D.Instance.MousePosition() - GlobalPosition).Normalized();
         

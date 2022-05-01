@@ -16,7 +16,6 @@ AlignmentRadius = 5.0
 BulletScene = ExtResource( 4 )
 
 [node name="Mesh" parent="." index="1"]
-layers = 0
 material_override = null
 mesh = ExtResource( 3 )
 material/0 = SubResource( 2 )

@@ -26,16 +26,21 @@ Colours="*res://scenes/Colours.tscn"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 Levels="*res://src/singletons/Levels.cs"
 GlobalCamera="*res://scenes/GlobalCamera.tscn"
+ReflectMaterialManager="*res://addons/Silicon.vfx.planar_reflection/reflect_material_manager.gd"
 
 [display]
 
+window/size/width=1280
+window/size/height=720
 window/size/always_on_top=true
+window/size/test_width=1280
+window/size/test_height=720
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/Silicon.vfx.planar_reflection/plugin.cfg", "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 
