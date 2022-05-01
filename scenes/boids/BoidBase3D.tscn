@@ -1,0 +1,47 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://src/boids/BoidBase3D.cs" type="Script" id=1]
+[ext_resource path="res://src/Trail3D.cs" type="Script" id=2]
+[ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=4]
+[ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
+[ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=7]
+[ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=8]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 2.472, 1, 2.241 )
+
+[sub_resource type="SpatialMaterial" id=2]
+flags_unshaded = true
+
+[node name="BoidBase3D" type="Area"]
+script = ExtResource( 1 )
+HitParticles = ExtResource( 8 )
+_hitSfx = [ ExtResource( 6 ) ]
+_trailPath = NodePath("Trail")
+_damagedParticlesPath = NodePath("DamagedParticles")
+_meshPath = NodePath("Mesh")
+_sfxDestroyPath = NodePath("SFXDestroy")
+_sfxHitPlayerPath = NodePath("SFXHit")
+_sfxShootPlayerPath = NodePath("SFXShoot")
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="Mesh" type="MeshInstance" parent="."]
+material_override = SubResource( 2 )
+
+[node name="Trail" type="Spatial" parent="."]
+script = ExtResource( 2 )
+
+[node name="SFXShoot" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 7 )
+volume_db = -5.0
+pitch_scale = 0.8
+
+[node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 4 )
+
+[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 4 )
+
+[node name="DamagedParticles" type="Particles" parent="."]

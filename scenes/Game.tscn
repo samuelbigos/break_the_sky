@@ -1,7 +1,7 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://scenes/Leader.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/PickupAdd.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/pickups/PickupAdd.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scenes/boids/BoidAlly.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/Game.cs" type="Script" id=4]
 [ext_resource path="res://scenes/boids/BoidEnemyDriller.tscn" type="PackedScene" id=5]
@@ -9,11 +9,10 @@
 [ext_resource path="res://scenes/gui/HUD.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/boids/BoidEnemyLaser.tscn" type="PackedScene" id=8]
 [ext_resource path="res://addons/imgui-godot/ImGuiNode.cs" type="Script" id=9]
-[ext_resource path="res://src/PerkManager.cs" type="Script" id=10]
+[ext_resource path="res://scenes/PerkManager.tscn" type="PackedScene" id=10]
 [ext_resource path="res://scenes/gui/FloatingScore.tscn" type="PackedScene" id=11]
 [ext_resource path="res://scenes/boids/BoidEnemyCarrier.tscn" type="PackedScene" id=12]
 [ext_resource path="res://scenes/Background.tscn" type="PackedScene" id=13]
-[ext_resource path="res://src/Perk.cs" type="Script" id=14]
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 4 )
@@ -37,89 +36,7 @@ GameNodePath = NodePath("..")
 [node name="Hud" parent="." instance=ExtResource( 7 )]
 FloatingScoreScene = ExtResource( 11 )
 
-[node name="PerkManager" type="Node" parent="."]
-script = ExtResource( 10 )
-
-[node name="Reload" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Reload"
-displayName = "Heat Reservoirs"
-displayDesc = "[-Reload]"
-reloadMod = 0.75
-
-[node name="Reinforce" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Reinforce"
-displayName = "Reinforcements"
-displayDesc = "[+Drones]"
-reinforceMod = 1
-
-[node name="Grouping" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Grouping"
-displayName = "Kinematics"
-displayDesc = "[+Grouping]"
-maximum = 5
-groupingMod = -2.0
-
-[node name="Damage" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Damage"
-displayName = "Armour Piercing"
-displayDesc = "[+Damage]"
-damageMod = 0.5
-
-[node name="Slowmo" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Slowmo"
-displayName = "Chrono Warp"
-displayDesc = "[+Slowmo] [Press F]"
-slowmoMod = 0.8
-
-[node name="Nuke" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Nuke"
-enabled = false
-displayName = "Nuke"
-displayDesc = "[+Nuke] [Press Spacebar]"
-nukeMod = 0.8
-
-[node name="Speed" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Speed"
-displayName = "Orion Drive"
-displayDesc = "[+Speed]"
-maximum = 5
-boidSpeedMod = 150.0
-playerSpeedMod = 1.0
-
-[node name="Accuracy" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Accuracy"
-displayName = "Ballistics"
-displayDesc = "[+Accuracy]"
-spreadMod = 0.75
-
-[node name="Bullet" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Bullet"
-displayName = "Extended Barrels"
-displayDesc = "[+Bullet Speed]"
-maximum = 5
-bulletSpeedMod = 125.0
-
-[node name="Microturrets" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Microturrets"
-displayName = "Microturrets"
-
-[node name="Microturrets2" type="Node" parent="PerkManager"]
-script = ExtResource( 14 )
-id = "Microturrets"
-displayName = "Microturrets"
-displayDesc = "[+Passive Fire]"
-maximum = 1
-microturrets = true
+[node name="PerkManager" parent="." instance=ExtResource( 10 )]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

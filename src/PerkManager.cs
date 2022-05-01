@@ -3,6 +3,8 @@ using Godot;
 
 public class PerkManager : Node
 {
+	public static PerkManager Instance;
+	
 	[Export] public int PerkThreshold = 350;
 	[Export] public float PerkThresholdMulti = 1.33f;
 	
@@ -10,7 +12,9 @@ public class PerkManager : Node
 	private List<Perk> _perks = new List<Perk>();
 
 	public override void _Ready()
-	{  
+	{
+		Instance = this;
+		
 		foreach(Node child in GetChildren())
 		{
 			Perk perk = child as Perk;;

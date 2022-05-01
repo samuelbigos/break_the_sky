@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/boids/BoidAlly3D.cs" type="Script" id=2]
+[ext_resource path="res://assets/mesh/drone.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://scenes/bullets/Bullet3D.tscn" type="PackedScene" id=4]
+
+[node name="BoidAlly3D" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+Damping = 0.05
+SlowingRadius = 10.0
+AlignmentRadius = 5.0
+BulletScene = ExtResource( 4 )
+
+[node name="Mesh" parent="." index="1"]
+layers = 3
+mesh = ExtResource( 3 )
+material/0 = null

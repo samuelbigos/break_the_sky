@@ -5,7 +5,7 @@ public class MusicPlayer : Node
     public static MusicPlayer Instance;
     
     public AudioStreamPlayer2D Player;
-    public bool MusicEnabled = true;
+    public bool MusicEnabled = false;
 
     public override void _Ready()
     {
