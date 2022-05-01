@@ -1,0 +1,16 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+
+varying vec3 some_color;
+
+void vertex() 
+{
+    some_color = vec3(1.0, 0.0, 0.0); // Make the normal the color.
+}
+
+void fragment() 
+{
+    ALBEDO = some_color;
+}"

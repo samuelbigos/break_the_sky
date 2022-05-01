@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/drone.obj-1a5fcbb524a16855c19257f0d5a1e606.mesh"
+
+[deps]
+
+files=[ "res://.import/drone.obj-1a5fcbb524a16855c19257f0d5a1e606.mesh" ]
+
+source_file="res://assets/meshes/drone.obj"
+dest_files=[ "res://.import/drone.obj-1a5fcbb524a16855c19257f0d5a1e606.mesh", "res://.import/drone.obj-1a5fcbb524a16855c19257f0d5a1e606.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
