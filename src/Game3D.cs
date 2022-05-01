@@ -19,8 +19,6 @@ public class Game3D : Node
         Cooldown,
         Finished
     }
-    
-    
 
     [Export] public NodePath ImGuiNodePath;
     private ImGuiNode _imGuiNode;
@@ -33,10 +31,20 @@ public class Game3D : Node
     
     [Export] private NodePath _waterPath;
     private MeshInstance _water;
-
-    [Export] private NodePath _waveMapViewportPath;
-    private Viewport _waveMapViewport;
     
+#region Water Rendering
+
+    [Export] private NodePath _boidVelocityMapPath;
+    private Viewport _boidVelocityMap;
+    [Export] private List<NodePath> _waveMapPaths;
+    private List<Viewport> _waveMaps = new List<Viewport>();
+    [Export] private List<NodePath> _waveTextureRectPaths;
+    private List<TextureRect> _waveTextureRects = new List<TextureRect>();
+
+    private int _currentWaveMap = 0;
+    
+#endregion
+
     [Export] public int DebugWave = -1;
 
     [Export] private PackedScene BoidScene;
@@ -88,13 +96,13 @@ public class Game3D : Node
     private bool _hasNuke = false;
 
     private WaveState _waveState = WaveState.Cooldown;
-    public float _waveTimer = 0.0f;
-    public int _currentWave = -1;
-    public int _currentSubWave = 0;
-    public int _numWaves = 0;
-    public float _prevSubwaveTime;
+    private float _waveTimer = 0.0f;
+    private int _currentWave = -1;
+    private int _currentSubWave = 0;
+    private int _numWaves = 0;
+    private float _prevSubwaveTime;
     private float _fps = 0.0f;
-
+    private float _waterWaveUpdateTimer;
     private int _pendingBoidSpawn;
 
     public List<BoidBase3D> Boids => _allBoids;
@@ -108,7 +116,12 @@ public class Game3D : Node
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
         _water = GetNode<MeshInstance>(_waterPath);
-        _waveMapViewport = GetNode<Viewport>(_waveMapViewportPath);
+        
+        _boidVelocityMap = GetNode<Viewport>(_boidVelocityMapPath);
+        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[0]));
+        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[1]));
+        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[0]));
+        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[1]));
         
         _player.Init(_player, this, null);
         _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
@@ -165,16 +178,34 @@ public class Game3D : Node
         //_score += 10000;
         //addScore(10000, new Vector2(0.0, 0.0), false)
         //lose()
+        
+        (_waveTextureRects[0].Material as ShaderMaterial).SetShaderParam("u_draw_white", true);
     }
     
     public override void _Process(float delta)
     {
         float fps = 1.0f / delta;
         _fps = 0.033f * fps + 0.966f * _fps;
-        
-        ShaderMaterial mat = _water.GetActiveMaterial(0) as ShaderMaterial;
-        mat.SetShaderParam("u_texture_to_draw", _waveMapViewport.GetTexture());
 
+        //if (Input.IsActionJustReleased("spacebar"))
+        if (_waterWaveUpdateTimer <= 0.0f)
+        {
+            int nextWaveMap = (_currentWaveMap + 1) % 2;
+            
+            ShaderMaterial mat = _waveTextureRects[_currentWaveMap].Material as ShaderMaterial;
+            mat?.SetShaderParam("u_prev_wave", _waveMaps[nextWaveMap].GetTexture());
+            
+            _waveMaps[_currentWaveMap].RenderTargetUpdateMode = Viewport.UpdateMode.Once;
+            _currentWaveMap = nextWaveMap;
+            
+            mat = _water.GetActiveMaterial(0) as ShaderMaterial;
+            mat?.SetShaderParam("u_texture_to_draw", _waveMaps[_currentWaveMap].GetTexture());
+
+            _waterWaveUpdateTimer = 1.0f / 60.0f;
+        }
+
+        _waterWaveUpdateTimer -= delta;
+        
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera3D.Instance.MousePosition().To3D());
         
         while (_pendingBoidSpawn > 0)

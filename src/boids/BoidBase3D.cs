@@ -31,7 +31,7 @@ public class BoidBase3D : Area
 
     private Trail3D _trail;
     protected Particles _damagedParticles;
-    protected MeshInstance _mesh;
+    protected MultiViewportMeshInstance _mesh;
     private AudioStreamPlayer2D _sfxDestroyPlayer;
     protected AudioStreamPlayer2D _sfxHitPlayer;
     protected AudioStreamPlayer2D _sfxShootPlayer;
@@ -56,7 +56,7 @@ public class BoidBase3D : Area
     {
         base._Ready();
 
-        _mesh = GetNode<MeshInstance>(_meshPath); 
+        _mesh = GetNode<MultiViewportMeshInstance>(_meshPath); 
         _trail = GetNode<Trail3D>(_trailPath);
         _damagedParticles = GetNode<Particles>(_damagedParticlesPath);
         _sfxDestroyPlayer = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
@@ -101,6 +101,13 @@ public class BoidBase3D : Area
             {
                 QueueFree();
             }
+        }
+
+        List<MeshInstance> altMeshes = _mesh.AltMeshes;
+        if (altMeshes.Count > 0)
+        {
+            ShaderMaterial mat = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
+            mat?.SetShaderParam("u_velocity", _velocity);
         }
     }
 
