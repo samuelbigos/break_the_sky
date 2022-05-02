@@ -3,11 +3,27 @@ using Godot;
 
 public class BoidBase3D : Area
 {
+    private enum SteeringBehaviours
+    {
+        Arrive = 1,
+        Separation = 2,
+        EdgeRepulsion = 4,
+        Pursuit = 8
+    }
+    [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit")] private int _behaviours;
+
+    [Export] public float MaxVelocity = 500.0f;
     [Export] public float Damping = 0.05f;
     [Export] public int TrailLength = 5;
     [Export] public float TrailPeriod = 0.05f;
     [Export] public float DestroyTime = 3.0f;
     [Export] public PackedScene HitParticles;
+    [Export] public float SlowingRadius = 100.0f;
+    [Export] public float AlignmentRadius = 20.0f;
+    [Export] public float SeparationRadius = 10.0f;
+    [Export] public float CohesionRadius = 50.0f;
+    [Export] public float MaxAngularVelocity = 500.0f;
+    
     [Export] private List<AudioStream> _hitSfx;
 
     [Export] private NodePath _trailPath;
@@ -17,12 +33,11 @@ public class BoidBase3D : Area
     [Export] private NodePath _sfxHitPlayerPath;
     [Export] private NodePath _sfxShootPlayerPath;
 
-    protected float _maxVelocity;
     protected Vector3 _velocity;
     private List<Vector3> _trailPoints = new List<Vector3>();
     private float _trailTimer;
     protected Player3D _player;
-    protected Game3D _game;
+    protected Game _game;
     protected BoidBase3D _target;
     protected Vector2 _targetOffset;
     protected bool _destroyed = false;
@@ -45,7 +60,7 @@ public class BoidBase3D : Area
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
 
-    public virtual void Init(Player3D player, Game3D game, BoidBase3D target)
+    public virtual void Init(Player3D player, Game game, BoidBase3D target)
     {
         _player = player;
         _game = game;
@@ -67,12 +82,60 @@ public class BoidBase3D : Area
         _sfxHitPlayer.Stream = _hitSfx[0];
         _baseScale = _mesh.Scale;
 
+        ShaderMaterial mat = _mesh.GetActiveMaterial(0) as ShaderMaterial;
+        mat?.SetShaderParam("u_primary_colour", ColourManager.Instance.Primary);
+        mat?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Secondary);
+        
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
     }
 
     public override void _Process(float delta)
     {
-        _maxVelocity = _game.BaseBoidSpeed;
+        Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
+        
+        // steering
+        if (!_destroyed)
+        {
+            Vector2 steering = Vector2.Zero;
+
+            if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
+            {
+                steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
+            }
+            if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
+            {
+                steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
+            }
+            if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
+            {
+                steering += _SteeringSeparation(_game.Boids, _game.BaseBoidGrouping * 0.66f);
+            }
+            if ((_behaviours & (int) SteeringBehaviours.EdgeRepulsion) != 0)
+            {
+                steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
+            }
+
+            // limit angular velocity
+            if (_velocity.LengthSquared() > 0)
+            {
+                Vector2 linearComp = _velocity.To2D().Normalized() * steering.Length() *
+                                     steering.Normalized().Dot(_velocity.To2D().Normalized());
+                Vector2 tangent = new Vector2(_velocity.z, -_velocity.x);
+                Vector2 angularComp = tangent.Normalized() * steering.Length() *
+                                      steering.Normalized().Dot(tangent.Normalized());
+                steering = linearComp + angularComp.Normalized() *
+                    Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
+            }
+
+            steering = steering.Truncate(MaxVelocity);
+            _velocity += steering.To3D() * delta;
+            _velocity = _velocity.Truncate(MaxVelocity);
+        }
+
+        GlobalTranslate(_velocity * delta);
+
+        // damping
+        _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
         
         if (TrailLength > 0)
         {
@@ -88,7 +151,7 @@ public class BoidBase3D : Area
             }
         }
         
-        Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, _velocity.z), 0.0f);
+        Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
         //_trail.Rotation = -Rotation;
         
         if (_destroyed)
@@ -146,7 +209,7 @@ public class BoidBase3D : Area
 
     public virtual Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
     {
-        Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * _maxVelocity;
+        Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
@@ -156,25 +219,25 @@ public class BoidBase3D : Area
         float edgeThreshold = 50.0f;
         float edgeDist = Mathf.Clamp(GlobalPosition.Length() - (radius - edgeThreshold), 0.0f, edgeThreshold) /
                          edgeThreshold;
-        Vector2 desiredVelocity = edgeDist * -GlobalPosition.Normalized() * _maxVelocity;
+        Vector2 desiredVelocity = edgeDist * -GlobalPosition.Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
 
     public virtual Vector2 _SteeringFollow(Vector2 target, float delta)
     {
-        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * _maxVelocity;
+        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
 
     public virtual Vector2 _SteeringArrive(Vector2 target, float slowingRadius)
     {
-        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * _maxVelocity;
+        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
         float distance = (target - GlobalPosition).Length();
         if (distance < slowingRadius)
         {
-            desiredVelocity = desiredVelocity.Normalized() * _maxVelocity * (distance / slowingRadius);
+            desiredVelocity = desiredVelocity.Normalized() * MaxVelocity * (distance / slowingRadius);
         }
 
         Vector2 steering = desiredVelocity - _velocity.To2D();
@@ -206,7 +269,7 @@ public class BoidBase3D : Area
             return desiredVelocity;
         }
 
-        desiredVelocity = desiredVelocity.Normalized() * _maxVelocity;
+        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
@@ -238,7 +301,7 @@ public class BoidBase3D : Area
 
         desiredVelocity /= nCount;
         desiredVelocity = desiredVelocity - GlobalPosition;
-        desiredVelocity = desiredVelocity.Normalized() * _maxVelocity;
+        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
@@ -268,7 +331,7 @@ public class BoidBase3D : Area
             return desiredVelocity;
         }
 
-        desiredVelocity = desiredVelocity.Normalized() * _maxVelocity * -1;
+        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity * -1;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }

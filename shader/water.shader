@@ -1,23 +1,34 @@
 shader_type spatial;
-render_mode world_vertex_coords, specular_blinn;
+render_mode unshaded;
 
 uniform vec4 u_water_col : hint_color;
 uniform sampler2D u_wave_texture;
-varying vec3 v_normal;
 
 void vertex() 
 {
 }
 
+float sample_water(vec2 uv)
+{
+	return texture(u_wave_texture, uv).r;
+}
+
+void light()
+{ 
+	DIFFUSE_LIGHT = ALBEDO * ATTENUATION;
+}
+
 void fragment() 
 {
 	METALLIC = 0.5;
-	ROUGHNESS = 0.1;
+	ROUGHNESS = 0.5;
 	
-	// Waves
+	vec4 col = u_water_col;
+	
+	// waves
+	vec3 normal;
 	{
 		float kernel_size = 1.0;
-		float h_mod = 1.0;
 		
 		vec2 texSize;
 		texSize.x = float(textureSize(u_wave_texture, 0).x);
@@ -25,12 +36,18 @@ void fragment()
 		vec2 texelSize = kernel_size / texSize;
 		
 		// https://stackoverflow.com/questions/49640250/calculate-normals-from-heightmap
-		float R = texture(u_wave_texture, UV + vec2(1.0, 0.0) * texelSize).r * h_mod;
-		float L = texture(u_wave_texture, UV + vec2(-1.0, 0.0) * texelSize).r * h_mod;
-		float T = texture(u_wave_texture, UV + vec2(0.0, 1.0) * texelSize).r * h_mod;
-		float B = texture(u_wave_texture, UV + vec2(0.0, -1.0) * texelSize).r * h_mod;
-		NORMAL = normalize(vec3(2.0 * (R-L), 2.0 * -(B-T), 4.0));
-	}	
+		float R = sample_water(UV + vec2(1.0, 0.0) * texelSize);
+		float L = sample_water(UV + vec2(-1.0, 0.0) * texelSize);
+		float T = sample_water(UV + vec2(0.0, 1.0) * texelSize);
+		float B = sample_water(UV + vec2(0.0, -1.0) * texelSize);
+		normal = normalize(vec3(2.0 * (R-L), 2.0 * -(B-T), 4.0));
+	}
 	
-	ALBEDO = u_water_col.rgb;
+	ALBEDO = col.rgb;
+	
+	// rim highlight
+	if (dot(vec3(0.0, 0.0, 1.0), normal) < 0.98)
+	{
+		ALBEDO = vec3(1.0, 1.0, 1.0);
+	}
 }

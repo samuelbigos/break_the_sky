@@ -2,9 +2,9 @@
 
 [ext_resource path="res://src/singletons/ColourManager.cs" type="Script" id=1]
 
-[node name="Colours" type="Node2D"]
+[node name="ColourManager" type="Node"]
 script = ExtResource( 1 )
-Primary = Color( 1, 0, 0, 1 )
+Primary = Color( 1, 0.831373, 0.639216, 1 )
 Secondary = Color( 0.0509804, 0.168627, 0.270588, 1 )
 Tertiary = Color( 1, 0.666667, 0.368627, 1 )
 White = Color( 1, 0.92549, 0.839216, 1 )

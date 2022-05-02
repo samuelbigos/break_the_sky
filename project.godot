@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/Game3D.tscn"
+run/main_scene="res://scenes/Game.tscn"
 config/icon="res://icon.png"
 config/save_version=0
 
@@ -22,25 +22,23 @@ default_bus_layout="res://assets/sfx/default_bus_layout.tres"
 [autoload]
 
 PauseManager="*res://scenes/PauseManager.tscn"
-Colours="*res://scenes/Colours.tscn"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 Levels="*res://src/singletons/Levels.cs"
-GlobalCamera="*res://scenes/GlobalCamera.tscn"
-ReflectMaterialManager="*res://addons/Silicon.vfx.planar_reflection/reflect_material_manager.gd"
+GlobalCamera="*res://scenes/singletons/GlobalCamera.tscn"
+ColourManager="*res://scenes/singletons/ColourManager.tscn"
+PerkManager="*res://scenes/singletons/PerkManager.tscn"
 
 [display]
 
 window/size/width=1280
 window/size/height=720
 window/size/always_on_top=true
-window/size/test_width=1280
-window/size/test_height=720
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/Silicon.vfx.planar_reflection/plugin.cfg", "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 
@@ -108,3 +106,8 @@ spacebar={
 [physics]
 
 common/enable_pause_aware_picking=true
+
+[rendering]
+
+quality/shadows/filter_mode=0
+quality/filters/msaa=2

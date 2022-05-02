@@ -31,5 +31,6 @@ void fragment()
 	texSize.y = float(textureSize(TEXTURE, 0).y);
 	
 	COLOR = blur5(TEXTURE, UV, texSize, vec2(0.0, 1.0));
+	COLOR = texture(TEXTURE, UV);
 	COLOR.a = 1.0;
 }

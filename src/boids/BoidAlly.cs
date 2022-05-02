@@ -1,11 +1,7 @@
 using Godot;
 
-public class BoidAlly : BoidBase
+public class BoidAlly : BoidBase3D
 {
-    [Export] public float SlowingRadius = 100.0f;
-    [Export] public float AlignmentRadius = 20.0f;
-    [Export] public float SeparationRadius = 10.0f;
-    [Export] public float CohesionRadius = 50.0f;
     [Export] public float HitDamage = 3.0f;
     [Export] public float DestroyTime = 3.0f;
     [Export] public float ShootSize = 1.5f;
@@ -14,7 +10,6 @@ public class BoidAlly : BoidBase
     [Export] public float MicroBulletCD = 1.0f;
     [Export] public float MicroBulletRange = 400.0f;
     [Export] public float MicroBulletDamageMod = 0.25f;
-    [Export] public float MaxAngularVelocity = 500.0f;
 
     [Export] private NodePath _sfxHitMicroPlayerNode;
 
@@ -25,17 +20,14 @@ public class BoidAlly : BoidBase
 
     private float _shootCooldown; 
     private float _microBulletTargetSearchTimer;
-    private BoidBase _microBulletTarget;
+    private BoidBase3D _microBulletTarget;
     private float _microBulletCd;
 
     public override void _Ready()
     {
         base._Ready();
-
-        _sfxHitMicroPlayer = GetNode<AudioStreamPlayer2D>(_sfxHitMicroPlayerNode);
-
-        _sprite.Modulate = ColourManager.Instance.Secondary;
-        _baseScale = _sprite.Scale;
+        
+        _baseScale = _mesh.Scale;
     }
 
     public override void _Process(float delta)
@@ -43,38 +35,9 @@ public class BoidAlly : BoidBase
         base._Process(delta);
 
         MaxVelocity = _game.BaseBoidSpeed;
-
-        Vector2 targetPos = _target.GlobalPosition + (_target.Transform.BasisXform(_targetOffset) / _target.Scale);
-        Vector2 shootDir = (GetGlobalMousePosition() - GlobalPosition).Normalized();
-
-        // steering
-        if (!_destroyed)
-        {
-            Vector2 steering = _SteeringArrive(targetPos, SlowingRadius);
-            steering += _SteeringSeparation(_game.GetBoids(), _game.BaseBoidGrouping * 0.66f);
-            steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
-
-            // limit angular velocity
-            if (_velocity.LengthSquared() > 0)
-            {
-                Vector2 linearComp = _velocity.Normalized() * steering.Length() *
-                                     steering.Normalized().Dot(_velocity.Normalized());
-                Vector2 tangent = new Vector2(_velocity.y, -_velocity.x);
-                Vector2 angularComp = tangent.Normalized() * steering.Length() *
-                                      steering.Normalized().Dot(tangent.Normalized());
-                steering = linearComp + angularComp.Normalized() *
-                    Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
-            }
-
-            steering = Truncate(steering, MaxVelocity);
-            _velocity = Truncate(_velocity + steering * delta, MaxVelocity);
-        }
-
-        GlobalPosition += _velocity * delta;
-
-        // damping
-        _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
-
+        
+        Vector2 shootDir = (GlobalCamera3D.Instance.MousePosition() - GlobalPosition).Normalized();
+        
         _shootCooldown -= delta;
         if (Input.IsActionPressed("shoot") && _shootCooldown <= 0.0)
         {
@@ -92,8 +55,8 @@ public class BoidAlly : BoidBase
         {
             float t = _shootCooldown / _game.BaseBoidReload;
             t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
-            Vector2 from = _baseScale * 2.0f;
-            _sprite.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
+            Vector3 from = _baseScale * 2.0f;
+            _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
 
             // microbullets
         }
@@ -109,7 +72,7 @@ public class BoidAlly : BoidBase
             if (_microBulletTarget == null && _microBulletTargetSearchTimer < 0.0)
             {
                 _microBulletTargetSearchTimer = 0.1f;
-                foreach (BoidBase enemy in _game.Enemies)
+                foreach (BoidBase3D enemy in _game.Enemies)
                 {
                     if ((enemy.GlobalPosition - GlobalPosition).Length() < MicroBulletRange)
                     {
@@ -151,14 +114,14 @@ public class BoidAlly : BoidBase
         base._Shoot(dir);
         
         _shootCooldown = _game.BaseBoidReload;
-        Bullet bullet = BulletScene.Instance() as Bullet;
+        Bullet3D bullet = BulletScene.Instance() as Bullet3D;
         float spread = _game.BaseBoidSpread;
         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
         bullet.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, _game.BaseBoidDamage);
         bullet.GlobalPosition = GlobalPosition;
         _game.AddChild(bullet);
         _game.PushBack(this);
-        float traumaMod = 1.0f - Mathf.Clamp(_game.GetNumBoids() / 100.0f, 0.0f, 0.5f);
+        float traumaMod = 1.0f - Mathf.Clamp(_game.NumBoids / 100.0f, 0.0f, 0.5f);
         GlobalCamera.Instance.AddTrauma(ShootTrauma * traumaMod);
         //_sprite.modulate = Colours.Grey;
     }
@@ -169,7 +132,7 @@ public class BoidAlly : BoidBase
             return false;
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (BoidBase boid in _game.GetBoids())
+        foreach (BoidBase3D boid in _game.Boids)
         {
             if (boid == this || boid.IsDestroyed())
             {
@@ -191,32 +154,32 @@ public class BoidAlly : BoidBase
         base._Destroy(score);
     }
 
-    public override void _OnBoidAreaEntered(Area2D area)
+    public override void _OnBoidAreaEntered(Area area)
     {
-        BoidBase boid = area as BoidBase;
-        if (boid is BoidAlly || boid is Leader)
+        BoidBase3D boid = area as BoidBase3D;
+        if (boid is BoidAlly || boid is Player3D)
             return;
         
         if (boid != null && !boid.IsDestroyed())
         {
-            boid.OnHit(HitDamage, false, _velocity, false, GlobalPosition);
+            boid.OnHit(HitDamage, false, _velocity.To2D(), false, GlobalPosition);
             _Destroy(false);
             return;
         }
 
-        Laser laser = area as Laser;
-        if (laser != null)
-        {
-            _Destroy(false);
-            return;
-        }
-
-        Bullet bullet = area as Bullet;
-        if (bullet != null && bullet.Alignment == 1)
-        {
-            bullet.OnHit();
-            _Destroy(false);
-            return;
-        }
+        // Laser laser = area as Laser;
+        // if (laser != null)
+        // {
+        //     _Destroy(false);
+        //     return;
+        // }
+        //
+        // Bullet bullet = area as Bullet;
+        // if (bullet != null && bullet.Alignment == 1)
+        // {
+        //     bullet.OnHit();
+        //     _Destroy(false);
+        //     return;
+        // }
     }
 }

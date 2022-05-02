@@ -15,17 +15,8 @@ public class GlobalCamera3D : Camera
     private float _trauma = 0.0f;
     private Player3D _player = null;
     private float _noiseY = 0.0f;
-
-    enum WindowScale
-    {
-        Medium,
-        Large,
-        Full
-    }
-
-    private WindowScale _windowScale = WindowScale.Medium;
-
-
+    private float _cameraHeight;
+    
     public void AddTrauma(float trauma)
     {
         _trauma = Mathf.Min(_trauma + trauma, MaxTrauma);
@@ -57,35 +48,33 @@ public class GlobalCamera3D : Camera
         _noise.Period = 4;
         _noise.Octaves = 2;
 
-        GetViewport().CanvasTransform =
-            new Transform2D(new Vector2(1.0f, 0.0f), new Vector2(0.0f, 1.0f), GetViewport().Size * 0.5f);
+        _cameraHeight = GlobalTransform.origin.y;
     }
 
     public override void _Process(float delta)
     {
-        // if (_player != null)
-        // {
-        //     Vector2 cameraMouseOffset = GetGlobalMousePosition() - _player.GlobalPosition;
-        //     Vector2 camerOffset = -_player.GlobalPosition + GetViewport().Size * 0.5f - cameraMouseOffset * 0.33f;
-        //     Transform2D cameraTransform =
-        //         new Transform2D(new Vector2(1.0f, 0.0f), new Vector2(0.0f, 1.0f), camerOffset);
-        //
-        //     if (_trauma > 0.0f)
-        //     {
-        //         _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
-        //         float amount = Mathf.Pow(_trauma, TraumaPower);
-        //         float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
-        //         Vector2 offset = new Vector2(0.0f, 0.0f);
-        //         offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
-        //         offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
-        //         _noiseY += delta * 100.0f;
-        //
-        //         cameraTransform = cameraTransform.Rotated(rot);
-        //         cameraTransform = cameraTransform.Translated(offset);
-        //     }
-        //
-        //     GetViewport().CanvasTransform = cameraTransform;
-        // }
+        if (_player != null)
+        {
+            Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+            Vector2 camerOffset = cameraMouseOffset * 0.33f;
+            Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + camerOffset.To3D()));
+            cameraTransform.origin.y = _cameraHeight;
+        
+            if (_trauma > 0.0f)
+            {
+                _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
+                float amount = Mathf.Pow(_trauma, TraumaPower);
+                float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
+                Vector2 offset = new Vector2(0.0f, 0.0f);
+                offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
+                offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
+                _noiseY += delta * 100.0f;
+        
+                cameraTransform = cameraTransform.Translated(offset.To3D());
+            }
+
+            GlobalTransform = cameraTransform;
+        }
         //
         // (GetNode("CanvasLayer/Label") as Label).Text = $"{_trauma}";
         //

@@ -76,12 +76,12 @@ public class Player3D : BoidBase3D
 
             if (Input.IsActionJustPressed("boids_align"))
             {
-                _game.ChangeFormation((Game3D.Formation)1, false);
+                _game.ChangeFormation((Game.Formation)1, false);
             }
 
             if (Input.IsActionJustReleased("boids_align"))
             {
-                _game.ChangeFormation((Game3D.Formation)0, false);
+                _game.ChangeFormation((Game.Formation)0, false);
             }
         }
 

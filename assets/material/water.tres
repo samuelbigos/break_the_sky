@@ -5,4 +5,4 @@
 [resource]
 resource_local_to_scene = true
 shader = ExtResource( 1 )
-shader_param/u_water_col = Color( 0, 0.788235, 1, 1 )
+shader_param/u_water_col = Color( 0, 0.905882, 1, 1 )

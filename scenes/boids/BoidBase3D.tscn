@@ -1,19 +1,19 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/boids/BoidBase3D.cs" type="Script" id=1]
 [ext_resource path="res://src/Trail3D.cs" type="Script" id=2]
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=4]
+[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=5]
 [ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=7]
 [ext_resource path="res://scenes/particles/Hit.tscn" type="PackedScene" id=8]
+[ext_resource path="res://assets/material/water_mesh.tres" type="Material" id=9]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
 
-[sub_resource type="SpatialMaterial" id=2]
-
-[node name="BoidBase3D" type="Area"]
+[node name="BoidBase" type="Area"]
 script = ExtResource( 1 )
 HitParticles = ExtResource( 8 )
 _hitSfx = [ ExtResource( 6 ) ]
@@ -28,8 +28,11 @@ _sfxShootPlayerPath = NodePath("SFXShoot")
 shape = SubResource( 1 )
 
 [node name="Mesh" type="MeshInstance" parent="."]
-material_override = SubResource( 2 )
+material_override = ExtResource( 5 )
 script = ExtResource( 3 )
+_numExtraMeshes = 1
+_meshLayers = [ 2 ]
+_meshMaterials = [ ExtResource( 9 ) ]
 
 [node name="Trail" type="Spatial" parent="."]
 script = ExtResource( 2 )

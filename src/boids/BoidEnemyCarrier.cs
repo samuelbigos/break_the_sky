@@ -104,21 +104,21 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
     public void _SpawnDrone()
     {
-        Vector2 spawnPos;
-        BoidEnemyBase enemy = _droneScene.Instance() as BoidEnemyBase;
-        _droneSpawnSide = (_droneSpawnSide + 1) % 2;
-        if (_droneSpawnSide == 0)
-        {
-            enemy.GlobalPosition = (GetNode("SpawnLeft") as Node2D).GlobalPosition;
-        }
-        else
-        {
-            enemy.GlobalPosition = (GetNode("SpawnRight") as Node2D).GlobalPosition;
-        }
-
-        enemy.Init(_player, _game, _target);
-        _game.AddChild(enemy);
-        _game.Enemies.Append(enemy);
+        // Vector2 spawnPos;
+        // BoidEnemyBase enemy = _droneScene.Instance() as BoidEnemyBase;
+        // _droneSpawnSide = (_droneSpawnSide + 1) % 2;
+        // if (_droneSpawnSide == 0)
+        // {
+        //     enemy.GlobalPosition = (GetNode("SpawnLeft") as Node2D).GlobalPosition;
+        // }
+        // else
+        // {
+        //     enemy.GlobalPosition = (GetNode("SpawnRight") as Node2D).GlobalPosition;
+        // }
+        //
+        // enemy.Init(_player, _game, _target);
+        // _game.AddChild(enemy);
+        // _game.AddEnemy(enemy);
         //enemy._velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized();
     }
 }

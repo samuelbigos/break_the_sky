@@ -2,16 +2,23 @@
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/textures/enemy-driller.png" type="Texture" id=2]
-[ext_resource path="res://src/boids/BoidEnemyDriller.cs" type="Script" id=3]
+[ext_resource path="res://src/boids/BoidEnemyDrone.cs" type="Script" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 7.81611
 
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-MaxVelocity = 800.0
+Damping = null
 TrailLength = 125
+TrailPeriod = null
+DestroyTime = null
+SlowingRadius = null
+AlignmentRadius = null
+SeparationRadius = null
+CohesionRadius = null
 PickupDropRate = 0.125
+Points = null
 MaxHealth = 3.0
 HitFlashTime = 0.025
 DestroyTrauma = 0.075

@@ -1,28 +1,17 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://src/boids/BoidAlly.cs" type="Script" id=2]
-[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
-[ext_resource path="res://scenes/bullets/MicroBullet.tscn" type="PackedScene" id=9]
-[ext_resource path="res://assets/sfx/shot_micro.wav" type="AudioStream" id=10]
-
-[sub_resource type="CircleShape2D" id=1]
-radius = 6.20361
+[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/bullets/Bullet3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/mesh/ally.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://src/boids/BoidAlly.cs" type="Script" id=4]
 
 [node name="BoidAlly" instance=ExtResource( 1 )]
-script = ExtResource( 2 )
-SlowingRadius = 25.0
+script = ExtResource( 4 )
+_behaviours = 7
+SlowingRadius = 10.0
 AlignmentRadius = 10.0
-MicroBulletDamageMod = 0.1
-_sfxHitMicroPlayerNode = NodePath("SFXShootMicro")
-BulletScene = ExtResource( 3 )
-MicoBulletScene = ExtResource( 9 )
+BulletScene = ExtResource( 2 )
 
-[node name="CollisionShape2D" parent="." index="0"]
-shape = SubResource( 1 )
-
-[node name="Sprite" parent="." index="2"]
-scale = Vector2( 0.33, 0.33 )
-
-[node name="SFXShootMicro" type="AudioStreamPlayer2D" parent="." index="7"]
-stream = ExtResource( 10 )
+[node name="Mesh" parent="." index="1"]
+mesh = ExtResource( 3 )
+material/0 = null

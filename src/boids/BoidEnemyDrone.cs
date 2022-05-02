@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidEnemyDriller : BoidEnemyBase
+public class BoidEnemyDrone : BoidEnemyBase3D
 {
     public override void _Ready()
     {

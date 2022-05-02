@@ -1,23 +1,26 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://src/bullets/Bullet3D.cs" type="Script" id=1]
-[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=2]
-[ext_resource path="res://assets/material/water_mesh.tres" type="Material" id=3]
+[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=1]
+[ext_resource path="res://src/bullets/Bullet3D.cs" type="Script" id=2]
+[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
+[ext_resource path="res://assets/material/water_mesh.tres" type="Material" id=4]
 
 [sub_resource type="SphereShape" id=1]
 
-[sub_resource type="SphereMesh" id=2]
+[sub_resource type="CapsuleMesh" id=2]
+material = ExtResource( 1 )
 
-[node name="Bullet" type="Area" groups=["bullet"]]
-script = ExtResource( 1 )
+[node name="Bullet" type="Area"]
+script = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape" parent="."]
+[node name="CollisionShape" type="CollisionShape" parent="."]
 shape = SubResource( 1 )
 
-[node name="MeshInstance" type="MeshInstance" parent="."]
+[node name="Mesh" type="MeshInstance" parent="."]
+material_override = ExtResource( 1 )
 mesh = SubResource( 2 )
 material/0 = null
-script = ExtResource( 2 )
+script = ExtResource( 3 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
-_meshMaterials = [ ExtResource( 3 ) ]
+_meshMaterials = [ ExtResource( 4 ) ]

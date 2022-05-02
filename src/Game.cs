@@ -4,7 +4,7 @@ using Godot;
 using ImGuiNET;
 using Dictionary = Godot.Collections.Dictionary;
 
-public class Game : Node2D
+public class Game : Node
 {
     public enum Formation
     {
@@ -23,14 +23,42 @@ public class Game : Node2D
     [Export] public NodePath ImGuiNodePath;
     private ImGuiNode _imGuiNode;
 
+    [Export] private NodePath _playerPath;
+    private Player3D _player;
+    
+    [Export] private NodePath _mouseCursorPath;
+    private MeshInstance _mouseCursor;
+    
+    [Export] private NodePath _waterPath;
+    private MeshInstance _water;
+    
+#region Water Rendering
+
+    [Export] private NodePath _waterMeshViewportPath;
+    private Viewport _waterMeshViewport;
+
+    [Export] private List<NodePath> _waveMapPaths;
+    private List<Viewport> _waveMaps = new List<Viewport>();
+    [Export] private List<NodePath> _waveTextureRectPaths;
+    private List<TextureRect> _waveTextureRects = new List<TextureRect>();
+    
+    [Export] private List<NodePath> _blurViewportPaths;
+    private List<Viewport> _blurViewports = new List<Viewport>();
+    [Export] private List<NodePath> _blurTextureRectPaths;
+    private List<TextureRect> _blurTextureRects = new List<TextureRect>();
+
+    private int _currentWaveMap = 0;
+    
+#endregion
+
     [Export] public int DebugWave = -1;
 
-    [Export] private PackedScene BoidScene;
-    [Export] PackedScene PickupAddScene;
-    [Export] PackedScene EnemyDrillerScene;
-    [Export] PackedScene EnemyLaserScene;
-    [Export] PackedScene EnemyBeaconScene;
-    [Export] PackedScene EnemyCarrierScene;
+    [Export] private PackedScene _boidAllyScene;
+    [Export] private PackedScene _pickupAddScene;
+    [Export] private PackedScene _enemyDrillerScene;
+    [Export] private PackedScene _enemyLaserScene;
+    [Export] private PackedScene _enemyBeaconScene;
+    [Export] private PackedScene _enemyCarrierScene;
 
     [Export] public int InitialPickupAddCount = 20;
     [Export] public int InitialBoidCount = 100;
@@ -40,7 +68,7 @@ public class Game : Node2D
 
     [Export] public float BaseBoidReload = 1.75f;
     [Export] public int BaseBoidReinforce = 3;
-    [Export] public float BaseBoidGrouping = 25.0f;
+    [Export] public float BaseBoidGrouping = 10.0f;
     [Export] public float BaseBoidDamage = 1.0f;
     [Export] public float BaseSlowmoCD = 60.0f;
     [Export] public float BaseNukeCD = 120.0f;
@@ -56,11 +84,10 @@ public class Game : Node2D
 
     private List<Levels.Wave> _levels;
     public int _boidColCount;
-    private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
-    private List<BoidBase> _allBoids = new List<BoidBase>();
-    private Leader _player = null;
+    private List<List<BoidBase3D>> _boidColumns = new List<List<BoidBase3D>>();
+    private List<BoidBase3D> _allBoids = new List<BoidBase3D>();
     public Formation _formation = Formation.Balanced;
-    private List<Node2D> _pickups = new List<Node2D>();
+    private List<PickupAdd3D> _pickups = new List<PickupAdd3D>();
     private int _spawnPickups = 0;
     private bool _started = false;
     private int _score = 0;
@@ -68,56 +95,62 @@ public class Game : Node2D
     public float _scoreMultiTimer;
     public float _loseTimer;
     private bool _pendingLose = false;
-    public List<BoidBase> Enemies { get; } = new List<BoidBase>();
+    private List<BoidBase3D> _enemies = new List<BoidBase3D>();
     public int _numBoids = 0;
 
     private bool _hasSlowmo = false;
     private bool _hasNuke = false;
 
     private WaveState _waveState = WaveState.Cooldown;
-    public float _waveTimer = 0.0f;
-    public int _currentWave = -1;
-    public int _currentSubWave = 0;
-    public int _numWaves = 0;
-    public float _prevSubwaveTime;
+    private float _waveTimer = 0.0f;
+    private int _currentWave = -1;
+    private int _currentSubWave = 0;
+    private int _numWaves = 0;
+    private float _prevSubwaveTime;
     private float _fps = 0.0f;
-
+    private float _waterWaveUpdateTimer;
     private int _pendingBoidSpawn;
 
-    public Node _Hud;
-    public PerkManager _perks;
-
-    public List<BoidBase> GetBoids()
-    {
-        return _allBoids;
-    }
-
-    public Node2D GetPlayer()
-    {
-        return _player;
-    }
-
-    public int GetNumBoids()
-    {
-        return _numBoids;
-    }
-
-    public List<BoidBase> GetEnemies()
-    {
-        return Enemies;
-    }
+    public List<BoidBase3D> Boids => _allBoids;
+    public Player3D Player => _player;
+    public int NumBoids => _numBoids;
+    public List<BoidBase3D> Enemies => _enemies;
 
     public override void _Ready()
     {
-        _Hud = GetNode("Hud");
-        _perks = GetNode("PerkManager") as PerkManager;
+        _player = GetNode<Player3D>(_playerPath);
+        _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
+        _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
+        _water = GetNode<MeshInstance>(_waterPath);
 
-        _player = GetNode("Leader") as Leader;
+        _waterMeshViewport = GetNode<Viewport>(_waterMeshViewportPath);
+        
+        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[0]));
+        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[1]));
+        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[0]));
+        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[1]));
+        
+        _blurViewports.Add(GetNode<Viewport>(_blurViewportPaths[0]));
+        _blurViewports.Add(GetNode<Viewport>(_blurViewportPaths[1]));
+        _blurTextureRects.Add(GetNode<TextureRect>(_blurTextureRectPaths[0]));
+        _blurTextureRects.Add(GetNode<TextureRect>(_blurTextureRectPaths[1]));
+
+        // _waveMaps[0].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
+        // _waveMaps[1].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
+        _blurViewports[0].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
+        _blurViewports[1].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
+        
+        _waveTextureRects[0].Texture = _waterMeshViewport.GetTexture();
+        _waveTextureRects[1].Texture = _waterMeshViewport.GetTexture();
+        _blurTextureRects[1].Texture = _blurViewports[0].GetTexture();
+        ((ShaderMaterial) _water.GetActiveMaterial(0)).SetShaderParam("u_wave_texture", _blurViewports[1].GetTexture());
+        
         _player.Init(_player, this, null);
+        _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
 
         foreach (int i in GD.Range(0, InitialBoidCount))
         {
-            BoidBase boid = BoidScene.Instance() as BoidBase;
+            BoidBase3D boid = _boidAllyScene.Instance() as BoidBase3D;
             AddChild(boid);
             _allBoids.Add(boid);
             boid.Init(_player, this, _player);
@@ -147,7 +180,7 @@ public class Game : Node2D
             BaseBoidSpeed = 1000.0f;
             BasePlayerSpeed = 10.0f;
             BaseMicroturrets = true;
-            foreach (Node2D pickup in _pickups)
+            foreach (PickupAdd3D pickup in _pickups)
             {
                 pickup.QueueFree();
                 AddBoids(new Vector2(0.0f, 0.0f));
@@ -159,192 +192,41 @@ public class Game : Node2D
 
         _numWaves = 1; //_levels[0]["waves"].Size();
 
-        GlobalCamera.Instance.Init(_player);
-        PauseManager.Instance.Init(this);
+        GlobalCamera3D.Instance.Init(_player);
+        //PauseManager.Instance.Init(this);
 
         MusicPlayer.Instance.PlayGame();
 
         //_score += 10000;
         //addScore(10000, new Vector2(0.0, 0.0), false)
         //lose()
-
-        _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
-        _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
+        
+        //(_water.GetActiveMaterial(0) as ShaderMaterial).SetShaderParam("u_water_col", ColourManager.Instance.Primary);
     }
-
-    private void _OnImGuiLayout()
-    {
-        if (ImGui.Begin("Debug Menu", ImGuiWindowFlags.AlwaysAutoResize))
-        {
-            ImGui.Text($"FPS: {_fps:F0}");
-            ImGui.BeginTabBar("Debug Menu#left_tabs_bar");
-            if (ImGui.BeginTabItem("Spawning"))
-            {
-                if (ImGui.Button("Spawn 1"))
-                {
-                    _Spawn(0);
-                }
-                if (ImGui.Button("Spawn 2"))
-                {
-                    _Spawn(1);
-                }
-                if (ImGui.Button("Spawn 3"))
-                {
-                    _Spawn(2);
-                }
-                if (ImGui.Button("Spawn 4"))
-                {
-                    _Spawn(3);
-                }
-                ImGui.EndTabItem();
-            }
-            ImGui.EndTabBar();
-            ImGui.End();
-        }
-    }
-
-    public void ChangeFormation(Formation formation, bool setPos)
-    {
-        if (_allBoids.Count == 0)
-        {
-            return;
-        }
-
-        if (formation == (int) Formation.Balanced)
-        {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f), setPos);
-        }
-
-        if (formation == Formation.Wide)
-        {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f) * 2, setPos);
-        }
-
-        if (formation == Formation.Narrow)
-        {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count + 0.5f) * 0.5f), setPos);
-        }
-
-        _formation = formation;
-    }
-
-    public void SetColumns(int numCols, bool setPos)
-    {
-        _boidColCount = Mathf.Clamp(numCols, 0, _allBoids.Count);
-        _boidColumns = new List<List<BoidBase>>();
-        foreach (int i in GD.Range(0, _boidColCount))
-        {
-            _boidColumns.Add(new List<BoidBase>());
-        }
-
-        int perCol = _allBoids.Count / _boidColCount;
-        foreach (int i in GD.Range(0, _allBoids.Count))
-        {
-            BoidBase boid = _allBoids[i];
-            int column = i / perCol;
-            int colIdx = column;
-            if (colIdx >= _boidColumns.Count)
-            {
-                colIdx = i % _boidColCount;
-            }
-
-            _boidColumns[colIdx].Add(boid);
-            int columnIndex = _boidColumns[colIdx].IndexOf(boid);
-            Vector2 offset = GetOffset(colIdx, columnIndex);
-            boid.SetOffset(offset);
-
-            if (setPos)
-            {
-                boid.GlobalPosition = _player.GlobalPosition + offset;
-            }
-        }
-    }
-
-    public void AddBoids(Vector2 pos)
-    {
-        _pendingBoidSpawn++;
-    }
-
-    private void AddBoidsInternal()
-    {
-        bool addedBoid = false;
-        foreach (int i in GD.Range(0, BaseBoidReinforce))
-        {
-            if (_allBoids.Count > MaxDrones)
-            {
-                break;
-            }
-
-            BoidBase boid = BoidScene.Instance() as BoidBase;
-            AddChild(boid);
-            _allBoids.Add(boid);
-            boid.Init(_player, this, _player);
-            boid.GlobalPosition = _player.GlobalPosition;
-            addedBoid = true;
-        }
-
-        InitialPickupAddCount -= 1;
-        if (InitialPickupAddCount == 0)
-        {
-            Start();
-        }
-
-        if (addedBoid)
-        {
-            ChangeFormation(_formation, false);
-            _numBoids = _allBoids.Count;
-        }
-    }
-
-    public void RemoveBoid(BoidBase boid)
-    {
-        _allBoids.Remove(boid);
-        if (_allBoids.Count == 0)
-        {
-            _loseTimer = 2.0f;
-            _pendingLose = true;
-            _player.Destroy();
-        }
-
-        ChangeFormation(_formation, false);
-        _numBoids = _allBoids.Count;
-        _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
-        //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
-    }
-
-    public void SpawnPickupAdd(Vector2 pos, bool persistent)
-    {
-        PickupAdd pickup = PickupAddScene.Instance() as PickupAdd;
-        pickup.GlobalPosition = pos;
-        pickup.Init(_player);
-        if (persistent)
-        {
-            pickup.Lifetime = 9999999.0f;
-        }
-
-        AddChild(pickup);
-        _pickups.Add(pickup);
-    }
-
-    public void Start()
-    {
-        _started = true;
-    }
-
-    private Vector2 GetOffset(int column, int columnIndex)
-    {
-        column -= (int) (_boidColumns.Count * 0.5f - _boidColumns.Count % 2 * 0.5f);
-        int perCol = (int) (_allBoids.Count / _boidColumns.Count);
-        columnIndex -= (int) (perCol * 0.5f - perCol % 2 * 0.5f);
-        Vector2 offset = new Vector2(column * BaseBoidGrouping, columnIndex * BaseBoidGrouping);
-        offset += new Vector2(0.5f * ((_boidColumns.Count + 1) % 2), 0.5f * ((perCol + 1) % 2)) * BaseBoidGrouping;
-        return offset;
-    }
-
+    
     public override void _Process(float delta)
     {
         float fps = 1.0f / delta;
         _fps = 0.033f * fps + 0.966f * _fps;
+
+        if (_waterWaveUpdateTimer <= 0.0f)
+        {
+            int nextWaveMap = (_currentWaveMap + 1) % 2;
+            
+            ShaderMaterial mat = _waveTextureRects[_currentWaveMap].Material as ShaderMaterial;
+            mat?.SetShaderParam("u_prev_wave", _waveMaps[nextWaveMap].GetTexture());
+            
+            _waveMaps[_currentWaveMap].RenderTargetUpdateMode = Viewport.UpdateMode.Once;
+
+            _blurTextureRects[0].Texture = _waveMaps[_currentWaveMap].GetTexture();
+
+            _waterWaveUpdateTimer = 1.0f / 60.0f;
+            _currentWaveMap = nextWaveMap;
+        }
+
+        _waterWaveUpdateTimer -= delta;
+        
+        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera3D.Instance.MousePosition().To3D());
         
         while (_pendingBoidSpawn > 0)
         {
@@ -424,6 +306,175 @@ public class Game : Node2D
                     break;
             }
         }
+    }
+
+    private void _OnImGuiLayout()
+    {
+        if (ImGui.Begin("Debug Menu", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            ImGui.Text($"FPS: {_fps:F0}");
+            ImGui.BeginTabBar("Debug Menu#left_tabs_bar");
+            if (ImGui.BeginTabItem("Spawning"))
+            {
+                if (ImGui.Button("Spawn 1"))
+                {
+                    _Spawn(0);
+                }
+                if (ImGui.Button("Spawn 2"))
+                {
+                    _Spawn(1);
+                }
+                if (ImGui.Button("Spawn 3"))
+                {
+                    _Spawn(2);
+                }
+                if (ImGui.Button("Spawn 4"))
+                {
+                    _Spawn(3);
+                }
+                ImGui.EndTabItem();
+            }
+            ImGui.EndTabBar();
+            ImGui.End();
+        }
+    }
+
+    public void ChangeFormation(Formation formation, bool setPos)
+    {
+        if (_allBoids.Count == 0)
+        {
+            return;
+        }
+
+        if (formation == (int) Formation.Balanced)
+        {
+            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f), setPos);
+        }
+
+        if (formation == Formation.Wide)
+        {
+            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f) * 2, setPos);
+        }
+
+        if (formation == Formation.Narrow)
+        {
+            SetColumns((int) (Mathf.Sqrt(_allBoids.Count + 0.5f) * 0.5f), setPos);
+        }
+
+        _formation = formation;
+    }
+
+    public void SetColumns(int numCols, bool setPos)
+    {
+        _boidColCount = Mathf.Clamp(numCols, 0, _allBoids.Count);
+        _boidColumns = new List<List<BoidBase3D>>();
+        foreach (int i in GD.Range(0, _boidColCount))
+        {
+            _boidColumns.Add(new List<BoidBase3D>());
+        }
+
+        int perCol = _allBoids.Count / _boidColCount;
+        foreach (int i in GD.Range(0, _allBoids.Count))
+        {
+            BoidBase3D boid = _allBoids[i];
+            int column = i / perCol;
+            int colIdx = column;
+            if (colIdx >= _boidColumns.Count)
+            {
+                colIdx = i % _boidColCount;
+            }
+
+            _boidColumns[colIdx].Add(boid);
+            int columnIndex = _boidColumns[colIdx].IndexOf(boid);
+            Vector2 offset = GetOffset(colIdx, columnIndex);
+            boid.SetOffset(offset);
+
+            if (setPos)
+            {
+                boid.GlobalPosition = _player.GlobalPosition + offset;
+            }
+        }
+    }
+
+    public void AddBoids(Vector2 pos)
+    {
+        _pendingBoidSpawn++;
+    }
+
+    private void AddBoidsInternal()
+    {
+        bool addedBoid = false;
+        foreach (int i in GD.Range(0, BaseBoidReinforce))
+        {
+            if (_allBoids.Count > MaxDrones)
+            {
+                break;
+            }
+
+            BoidBase3D boid = _boidAllyScene.Instance() as BoidBase3D;
+            AddChild(boid);
+            _allBoids.Add(boid);
+            boid.Init(_player, this, _player);
+            boid.GlobalPosition = _player.GlobalPosition;
+            addedBoid = true;
+        }
+
+        InitialPickupAddCount -= 1;
+        if (InitialPickupAddCount == 0)
+        {
+            Start();
+        }
+
+        if (addedBoid)
+        {
+            ChangeFormation(_formation, false);
+            _numBoids = _allBoids.Count;
+        }
+    }
+
+    public void RemoveBoid(BoidBase3D boid)
+    {
+        _allBoids.Remove(boid);
+        if (_allBoids.Count == 0)
+        {
+            _loseTimer = 2.0f;
+            _pendingLose = true;
+            _player.QueueFree();
+        }
+
+        ChangeFormation(_formation, false);
+        _numBoids = _allBoids.Count;
+        _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
+        //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
+    }
+
+    public void SpawnPickupAdd(Vector2 pos, bool persistent)
+    {
+        PickupAdd3D pickup = _pickupAddScene.Instance() as PickupAdd3D;
+        pickup.GlobalPosition = pos;
+        pickup.Init(_player);
+        if (persistent)
+        {
+            pickup.Lifetime = 9999999.0f;
+        }
+
+        AddChild(pickup);
+        _pickups.Add(pickup);
+    }
+
+    public void Start()
+    {
+        _started = true;
+    }
+
+    private Vector2 GetOffset(int column, int columnIndex)
+    {
+        column -= (int) (_boidColumns.Count * 0.5f - _boidColumns.Count % 2 * 0.5f);
+        int perCol = (int) (_allBoids.Count / _boidColumns.Count);
+        columnIndex -= (int) (perCol * 0.5f - perCol % 2 * 0.5f);
+        Vector2 offset = new Vector2(column * BaseBoidGrouping, columnIndex * BaseBoidGrouping);
+        offset += new Vector2(0.5f * ((_boidColumns.Count + 1) % 2), 0.5f * ((perCol + 1) % 2)) * BaseBoidGrouping;
+        return offset;
     }
 
     public void EnterWaveCooldown()
@@ -526,22 +577,27 @@ public class Game : Node2D
         return 0;
     }
 
-    public void _Spawn(int id)
+    public void AddEnemy(BoidBase3D enemy)
     {
-        BoidBase enemy = null;
+        Enemies.Add(enemy);
+    }
+
+    private void _Spawn(int id)
+    {
+        BoidBase3D enemy = null;
         switch (id)
         {
             case 0:
-                enemy = EnemyDrillerScene.Instance() as BoidBase;
+                enemy = _enemyDrillerScene.Instance() as BoidBase3D;
                 break;
             case 1:
-                enemy = EnemyLaserScene.Instance() as BoidBase;
+                enemy = _enemyLaserScene.Instance() as BoidBase3D;
                 break;
             case 2:
-                enemy = EnemyBeaconScene.Instance() as BoidBase;
+                enemy = _enemyBeaconScene.Instance() as BoidBase3D;
                 break;
             case 3:
-                enemy = EnemyCarrierScene.Instance() as BoidBase;
+                enemy = _enemyCarrierScene.Instance() as BoidBase3D;
                 break;
         }
 
@@ -578,7 +634,7 @@ public class Game : Node2D
 
     public void OnPerkSelected(Perk perk)
     {
-        _perks.PickPerk(perk);
+        PerkManager.Instance.PickPerk(perk);
         GetTree().Paused = false;
         BaseBoidReload *= perk.reloadMod;
         BaseBoidReinforce += perk.reinforceMod;
@@ -599,7 +655,7 @@ public class Game : Node2D
         //_gui.SetWave(_currentWave, _currentSubWave);
     }
 
-    public void PushBack(BoidBase boid)
+    public void PushBack(BoidBase3D boid)
     {
         foreach (int i in GD.Range(0, _boidColCount))
         {
@@ -609,7 +665,7 @@ public class Game : Node2D
                 _boidColumns[i].Insert(0, boid);
                 foreach (int j in GD.Range(0, _boidColumns[i].Count))
                 {
-                    _boidColumns[i][j].SetOffset(GetOffset(i, j));
+                    _boidColumns[i][j].SetOffset(GetOffset(_boidColCount - i - 1, _boidColumns[i].Count - j - 1));
                 }
 
                 break;

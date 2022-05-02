@@ -79,7 +79,7 @@ public class BoidBase : Area2D
         if (!_destroyed)
         {
             _sfxDestroyPlayer.Play();
-            _game.RemoveBoid(this);
+            //_game.RemoveBoid(this);
             _destroyed = true;
             _sprite.Modulate = ColourManager.Instance.White;
             _destroyedTimer = DestroyTime;
