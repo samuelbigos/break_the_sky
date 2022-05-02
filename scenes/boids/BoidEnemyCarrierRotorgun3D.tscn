@@ -1,0 +1,29 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/boids/BoidEnemyCarrierRotorgun.cs" type="Script" id=2]
+[ext_resource path="res://scenes/bullets/Bullet3D.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/mesh/enemy_carrier_rotorgun.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=5]
+
+[sub_resource type="CylinderMesh" id=1]
+top_radius = 0.5
+bottom_radius = 0.5
+height = 7.0
+
+[node name="BoidEnemyCarrierRotorgun" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+_behaviours = 12
+MaxVelocity = 0.0
+MaxAngularVelocity = 500.0
+_bulletScene = ExtResource( 3 )
+_rotorMeshPath = NodePath("RotorMesh")
+
+[node name="Mesh" parent="." index="1"]
+mesh = ExtResource( 4 )
+material/0 = null
+
+[node name="RotorMesh" type="MeshInstance" parent="." index="7"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 1 )
+material/0 = ExtResource( 5 )

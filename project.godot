@@ -32,7 +32,6 @@ PerkManager="*res://scenes/singletons/PerkManager.tscn"
 
 window/size/width=1280
 window/size/height=720
-window/size/always_on_top=true
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 

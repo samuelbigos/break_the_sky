@@ -3,6 +3,13 @@ using Godot;
 
 public class BoidBase3D : Area
 {
+    public enum BoidAlignment
+    {
+        Ally,
+        Enemy,
+        Neutral
+    }
+    
     private enum SteeringBehaviours
     {
         Arrive = 1,
@@ -10,6 +17,7 @@ public class BoidBase3D : Area
         EdgeRepulsion = 4,
         Pursuit = 8
     }
+    
     [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit")] private int _behaviours;
 
     [Export] public float MaxVelocity = 500.0f;
@@ -23,6 +31,10 @@ public class BoidBase3D : Area
     [Export] public float SeparationRadius = 10.0f;
     [Export] public float CohesionRadius = 50.0f;
     [Export] public float MaxAngularVelocity = 500.0f;
+    [Export] public float HitDamage = 3.0f;
+    [Export] public float MaxHealth = 1.0f;
+    [Export] public float HitFlashTime = 1.0f / 30.0f;
+    [Export] public int Points = 10;
     
     [Export] private List<AudioStream> _hitSfx;
 
@@ -32,6 +44,9 @@ public class BoidBase3D : Area
     [Export] private NodePath _sfxDestroyPath;
     [Export] private NodePath _sfxHitPlayerPath;
     [Export] private NodePath _sfxShootPlayerPath;
+
+    public virtual BoidAlignment Alignment => BoidAlignment.Ally;
+    public bool Destroyed => _destroyed;
 
     protected Vector3 _velocity;
     private List<Vector3> _trailPoints = new List<Vector3>();
@@ -43,6 +58,8 @@ public class BoidBase3D : Area
     protected bool _destroyed = false;
     protected float _destroyedTimer;
     protected Vector3 _baseScale;
+    private float _health;
+    private float _hitFlashTimer;
 
     private Trail3D _trail;
     protected Particles _damagedParticles;
@@ -51,9 +68,15 @@ public class BoidBase3D : Area
     protected AudioStreamPlayer2D _sfxHitPlayer;
     protected AudioStreamPlayer2D _sfxShootPlayer;
     
-    public Vector3 Velocity => _velocity;
     public List<Vector3> TrailPoints => _trailPoints;
+    public float Health => Health;
 
+    public Vector3 Velocity
+    {
+        get { return _velocity; }
+        set { _velocity = value; }
+    }
+    
     public Vector2 GlobalPosition
     {
         get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
@@ -70,6 +93,8 @@ public class BoidBase3D : Area
     public override void _Ready()
     {
         base._Ready();
+        
+        _health = MaxHealth;
 
         _mesh = GetNode<MultiViewportMeshInstance>(_meshPath); 
         _trail = GetNode<Trail3D>(_trailPath);
@@ -172,15 +197,36 @@ public class BoidBase3D : Area
             ShaderMaterial mat = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
             mat?.SetShaderParam("u_velocity", _velocity);
         }
+        
+        // hit flash
+        _hitFlashTimer -= delta;
+        if (_hitFlashTimer < 0.0)
+        {
+            if (!_destroyed)
+            {
+                //_sprite.Modulate = ColourManager.Instance.Secondary;
+            }
+        }
+
+        if (_health < 0.0f && !_destroyed)
+        {
+            _Destroy(Points > 0);
+        }
     }
 
-    public bool IsDestroyed()
+    protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, bool microbullet, Vector2 pos)
     {
-        return _destroyed;
-    }
+        _health -= damage;
+        _hitFlashTimer = HitFlashTime;
+        CPUParticles2D hitParticles = HitParticles.Instance() as CPUParticles2D;
+        hitParticles.Position = pos;
+        hitParticles.Emitting = true;
+        _game.AddChild(hitParticles);
+        if (IsInstanceValid(_damagedParticles))
+        {
+            _damagedParticles.Emitting = true;
+        }
 
-    public virtual void OnHit(float damage, bool score, Vector2 bulletVel, bool microbullet, Vector2 pos)
-    {
         _sfxHitPlayer.Play();
     }
     
@@ -204,17 +250,16 @@ public class BoidBase3D : Area
     public void SetOffset(Vector2 targetOffset)
     {  
         _targetOffset = targetOffset;
-		
     }
-
-    public virtual Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
+    
+    protected virtual Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
     {
         Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
 
-    public virtual Vector2 _SteeringEdgeRepulsion(float radius)
+    protected virtual Vector2 _SteeringEdgeRepulsion(float radius)
     {
         float edgeThreshold = 50.0f;
         float edgeDist = Mathf.Clamp(GlobalPosition.Length() - (radius - edgeThreshold), 0.0f, edgeThreshold) /
@@ -224,14 +269,14 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    public virtual Vector2 _SteeringFollow(Vector2 target, float delta)
+    protected virtual Vector2 _SteeringFollow(Vector2 target, float delta)
     {
         Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
         Vector2 steering = desiredVelocity - _velocity.To2D();
         return steering;
     }
 
-    public virtual Vector2 _SteeringArrive(Vector2 target, float slowingRadius)
+    protected virtual Vector2 _SteeringArrive(Vector2 target, float slowingRadius)
     {
         Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
         float distance = (target - GlobalPosition).Length();
@@ -244,7 +289,7 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    public virtual Vector2 _SteeringAlignment(List<BoidBase3D> boids, float alignmentRadius)
+    protected virtual Vector2 _SteeringAlignment(List<BoidBase3D> boids, float alignmentRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
@@ -274,7 +319,7 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    public virtual Vector2 _SteeringCohesion(List<BoidBase3D> boids, float cohesionRadius)
+    protected virtual Vector2 _SteeringCohesion(List<BoidBase3D> boids, float cohesionRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
@@ -306,7 +351,7 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    public virtual Vector2 _SteeringSeparation(List<BoidBase3D> boids, float separationRadius)
+    protected virtual Vector2 _SteeringSeparation(List<BoidBase3D> boids, float separationRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
@@ -338,5 +383,33 @@ public class BoidBase3D : Area
 
     public virtual void _OnBoidAreaEntered(Area area)
     {
+        BoidBase3D boid = area as BoidBase3D;
+        if (boid is BoidAlly || boid is Player3D)
+        {
+            if (boid.Alignment == Alignment)
+            {
+                return;
+            }
+        }
+        
+        if (boid != null && !boid.Destroyed)
+        {
+            boid._OnHit(HitDamage, false, _velocity.To2D(), false, GlobalPosition);
+            _Destroy(false);
+            return;
+        }
+        
+        if (area.IsInGroup("laser") && Alignment != BoidAlignment.Enemy)
+        {
+            _Destroy(false);
+            return;
+        }
+
+        if (area is Bullet3D bullet && bullet.Alignment != Alignment)
+        {
+            bullet.OnHit();
+            _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.Microbullet, bullet.GlobalPosition);
+            return;
+        }
     }
 }

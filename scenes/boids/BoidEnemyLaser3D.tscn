@@ -1,0 +1,62 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/boids/BoidEnemyLaser3D.cs" type="Script" id=2]
+[ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=3]
+[ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=4]
+[ext_resource path="res://assets/mesh/enemy_laser.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=6]
+
+[sub_resource type="CylinderMesh" id=2]
+top_radius = 0.5
+bottom_radius = 0.5
+height = 7.0
+
+[sub_resource type="CylinderMesh" id=3]
+top_radius = 2.0
+bottom_radius = 2.0
+height = 200.0
+
+[sub_resource type="SpatialMaterial" id=4]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 2, 2, 100 )
+
+[node name="BoidEnemyLaser" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+_behaviours = 12
+MaxHealth = 30.0
+MaxAngularVelocity = 500.0
+_sfxLaserChargeNode = NodePath("SFXLaserCharge")
+_sfxLaserFireNode = NodePath("SFXLaserFire")
+_rotorNode = NodePath("RotorMesh")
+_laserMeshPath = NodePath("LaserMesh")
+_laserAreaPath = NodePath("LaserArea")
+
+[node name="Mesh" parent="." index="1"]
+mesh = ExtResource( 5 )
+material/0 = null
+
+[node name="RotorMesh" type="MeshInstance" parent="." index="7"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 2 )
+material/0 = ExtResource( 6 )
+
+[node name="LaserMesh" type="MeshInstance" parent="." index="8"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -110.716 )
+visible = false
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
+
+[node name="LaserArea" type="Area" parent="." index="9" groups=["laser"]]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18.3746 )
+
+[node name="CollisionShape" type="CollisionShape" parent="LaserArea" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -82.7917 )
+shape = SubResource( 1 )
+
+[node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="10"]
+stream = ExtResource( 3 )
+
+[node name="SFXLaserFire" type="AudioStreamPlayer2D" parent="." index="11"]
+stream = ExtResource( 4 )

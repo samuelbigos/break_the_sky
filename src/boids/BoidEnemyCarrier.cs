@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class BoidEnemyCarrier : BoidEnemyBase
+public class BoidEnemyCarrier : BoidEnemyBase3D
 {
-    [Export] private PackedScene _bulletScene;
+    [Export] private List<NodePath> _rotorgunsPaths;
+    [Export] private List<NodePath> _lockPaths;
+    
     [Export] private PackedScene _droneScene;
 
     [Export] private float _targetDist = 400.0f;
@@ -35,10 +37,11 @@ public class BoidEnemyCarrier : BoidEnemyBase
         _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
         _rocochetSfx = GD.Load("res://assets/sfx/ricochet.wav") as AudioStream;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < _rotorgunsPaths.Count; i++)
         {
-            _rotorguns.Add(GetNode($"Rotorgun{i + 1}") as BoidEnemyCarrierRotorgun);
-            _rotorguns[i].Init(_player, _game, _target, GetNode<Node2D>($"Lock{i + 1}"));
+            _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
+            _rotorguns[i].Init(_player, _game, _target);
+            _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
         
         _sfxHitPlayer.Stream = _rocochetSfx;
@@ -51,30 +54,19 @@ public class BoidEnemyCarrier : BoidEnemyBase
         int count = 0;
         foreach (BoidEnemyCarrierRotorgun r in _rotorguns)
         {
-            if (IsInstanceValid(r) && !r.IsDestroyed())
+            if (IsInstanceValid(r) && !r.Destroyed)
             {
                 count += 1;
             }
         }
 
-        if (count == 0 && !IsDestroyed())
+        if (count == 0 && !Destroyed)
         {
             _Destroy(true);
         }
 
         float dist = (_target.GlobalPosition - GlobalPosition).Length();
-        if (dist < _targetDist)
-        {
-            _move = false;
-        }
-        else
-        {
-            _move = true;
-
-            // drone spawn
-        }
-
-        if (!IsDestroyed())
+        if (!Destroyed)
         {
             _dronePulseTimer -= delta;
             if (_dronePulseTimer < 0.0 && dist < _droneSpawnRange && !_spawningDrones)
@@ -104,21 +96,21 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
     public void _SpawnDrone()
     {
-        // Vector2 spawnPos;
-        // BoidEnemyBase enemy = _droneScene.Instance() as BoidEnemyBase;
-        // _droneSpawnSide = (_droneSpawnSide + 1) % 2;
-        // if (_droneSpawnSide == 0)
-        // {
-        //     enemy.GlobalPosition = (GetNode("SpawnLeft") as Node2D).GlobalPosition;
-        // }
-        // else
-        // {
-        //     enemy.GlobalPosition = (GetNode("SpawnRight") as Node2D).GlobalPosition;
-        // }
-        //
-        // enemy.Init(_player, _game, _target);
-        // _game.AddChild(enemy);
-        // _game.AddEnemy(enemy);
-        //enemy._velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized();
+        Vector2 spawnPos;
+        BoidEnemyBase3D enemy = _droneScene.Instance() as BoidEnemyBase3D;
+        _droneSpawnSide = (_droneSpawnSide + 1) % 2;
+        if (_droneSpawnSide == 0)
+        {
+            enemy.GlobalPosition = (GetNode("SpawnLeft") as Spatial).GlobalTransform.origin.To2D();
+        }
+        else
+        {
+            enemy.GlobalPosition = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
+        }
+
+        enemy.Init(_player, _game, _target);
+        _game.AddChild(enemy);
+        _game.AddEnemy(enemy);
+        enemy.Velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized().To3D();
     }
 }

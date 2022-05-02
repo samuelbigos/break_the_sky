@@ -1,7 +1,7 @@
 using Godot;
 
 
-public class MicroBullet : Bullet
+public class MicroBullet : Bullet3D
 {
 	private readonly float _length = 5.0f;
 
@@ -10,10 +10,5 @@ public class MicroBullet : Bullet
 		base._Ready();
 
 		_microbullet = true;
-	}
-
-	public override void _Draw()
-	{  
-		DrawLine(new Vector2(0.0f, -_length * 0.5f), new Vector2(0.0f, _length * 0.5f), ColourManager.Instance.Secondary, Damage * 8.0f);
 	}
 }

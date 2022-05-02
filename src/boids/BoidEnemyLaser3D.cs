@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidEnemyLaser : BoidEnemyBase
+public class BoidEnemyLaser3D : BoidEnemyBase3D
 {
     [Export] private float _targetLaserDist = 250.0f;
     [Export] private float _laserCooldown = 5.0f;
@@ -9,13 +9,15 @@ public class BoidEnemyLaser : BoidEnemyBase
 
     [Export] private NodePath _sfxLaserChargeNode;
     [Export] private NodePath _sfxLaserFireNode;
-    [Export] private NodePath _laserNode;
     [Export] private NodePath _rotorNode;
-    
-    public Laser _laser;
-    public Sprite _rotor;
-    public AudioStreamPlayer2D _sfxLaserCharge;
-    public AudioStreamPlayer2D _sfxLaserFire;
+    [Export] private NodePath _laserMeshPath;
+    [Export] private NodePath _laserAreaPath;
+
+    private MeshInstance _rotor;
+    private MeshInstance _laserMesh;
+    private Area _laserArea;
+    private AudioStreamPlayer2D _sfxLaserCharge;
+    private AudioStreamPlayer2D _sfxLaserFire;
 
     public enum LaserState
     {
@@ -33,16 +35,17 @@ public class BoidEnemyLaser : BoidEnemyBase
     public override void _Ready()
     {
         base._Ready();
-
-        _laser = GetNode<Laser>(_laserNode);
-        _rotor = GetNode<Sprite>(_rotorNode);
+        
+        _rotor = GetNode<MeshInstance>(_rotorNode);
+        _laserMesh = GetNode<MeshInstance>(_laserMeshPath);
+        _laserArea = GetNode<Area>(_laserAreaPath);
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
         _maxVelBase = MaxVelocity;
-        _laser.Monitorable = false;
-        _rotor.Modulate = ColourManager.Instance.Secondary;
         _laserCooldownTimer = _laserCooldown * 0.5f;
+
+        LaserInactive();
     }
 
     public override void _Process(float delta)
@@ -57,8 +60,6 @@ public class BoidEnemyLaser : BoidEnemyBase
         else
         {
             MaxVelocity = _maxVelBase;
-
-            // firin' mah lazor
         }
 
         if (!_destroyed)
@@ -76,7 +77,6 @@ public class BoidEnemyLaser : BoidEnemyBase
 
             if (_laserState == LaserState.Charging)
             {
-                _laser.Update();
                 _laserChargeTimer -= delta;
                 if (_laserChargeTimer < 0.0f)
                 {
@@ -97,39 +97,42 @@ public class BoidEnemyLaser : BoidEnemyBase
                 }
             }
 
-            _laser.state = _laserState;
-            _rotor.Rotation = Mathf.PosMod(_rotor.Rotation + 50.0f * delta, Mathf.Pi * 2.0f);
+            Vector3 rot = _rotor.Rotation;
+            rot.y = Mathf.PosMod(_rotor.Rotation.y + 50.0f * delta, Mathf.Pi * 2.0f);
+            _rotor.Rotation = rot;
         }
     }
 
-    public void LaserCharging()
+    private void LaserCharging()
     {
-        _laser.Update();
         _sfxLaserCharge.Play();
     }
 
-    public void LaserFiring()
+    private void LaserFiring()
     {
-        _laser.Update();
-        _laser.Monitorable = true;
         _sfxLaserFire.Play();
+        _laserMesh.Visible = true;
+        _laserArea.Monitorable = true;
     }
 
-    public void LaserInactive()
+    private void LaserInactive()
     {
-        _laser.Update();
-        _laser.Monitorable = false;
+        _laserMesh.Visible = false;
+        _laserArea.Monitorable = false;
     }
 
-    public override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
+    protected override void _Destroy(bool score)
+    {
+        base._Destroy(score);
+    }
+
+    protected override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
     {
         if (_laserState == LaserState.Charging || _laserState == LaserState.Firing)
         {
             return new Vector2(0.0f, 0.0f);
         }
 
-        Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity;
-        return steering;
+        return base._SteeringPursuit(targetPos, targetVel);
     }
 }

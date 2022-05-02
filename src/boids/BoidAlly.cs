@@ -2,7 +2,6 @@ using Godot;
 
 public class BoidAlly : BoidBase3D
 {
-    [Export] public float HitDamage = 3.0f;
     [Export] public float DestroyTime = 3.0f;
     [Export] public float ShootSize = 1.5f;
     [Export] public float ShootTrauma = 0.05f;
@@ -15,6 +14,8 @@ public class BoidAlly : BoidBase3D
 
     [Export] public PackedScene BulletScene;
     [Export] public PackedScene MicoBulletScene;
+    
+    public override BoidAlignment Alignment => BoidAlignment.Ally; 
 
     private AudioStreamPlayer2D _sfxHitMicroPlayer;
 
@@ -63,7 +64,7 @@ public class BoidAlly : BoidBase3D
 
         if (_game.BaseMicroturrets && !_destroyed)
         {
-            if (!IsInstanceValid(_microBulletTarget) || _microBulletTarget.IsDestroyed())
+            if (!IsInstanceValid(_microBulletTarget) || _microBulletTarget.Destroyed)
             {
                 _microBulletTarget = null;
             }
@@ -117,7 +118,7 @@ public class BoidAlly : BoidBase3D
         Bullet3D bullet = BulletScene.Instance() as Bullet3D;
         float spread = _game.BaseBoidSpread;
         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
-        bullet.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, _game.BaseBoidDamage);
+        bullet.Init(dir * _game.BaseBulletSpeed, Alignment, _game.PlayRadius, _game.BaseBoidDamage);
         bullet.GlobalPosition = GlobalPosition;
         _game.AddChild(bullet);
         _game.PushBack(this);
@@ -134,7 +135,7 @@ public class BoidAlly : BoidBase3D
         bool blocked = false;
         foreach (BoidBase3D boid in _game.Boids)
         {
-            if (boid == this || boid.IsDestroyed())
+            if (boid == this || boid.Destroyed)
             {
                 continue;
             }
@@ -147,39 +148,5 @@ public class BoidAlly : BoidBase3D
         }
 
         return !blocked;
-    }
-
-    protected override void _Destroy(bool score)
-    {
-        base._Destroy(score);
-    }
-
-    public override void _OnBoidAreaEntered(Area area)
-    {
-        BoidBase3D boid = area as BoidBase3D;
-        if (boid is BoidAlly || boid is Player3D)
-            return;
-        
-        if (boid != null && !boid.IsDestroyed())
-        {
-            boid.OnHit(HitDamage, false, _velocity.To2D(), false, GlobalPosition);
-            _Destroy(false);
-            return;
-        }
-
-        // Laser laser = area as Laser;
-        // if (laser != null)
-        // {
-        //     _Destroy(false);
-        //     return;
-        // }
-        //
-        // Bullet bullet = area as Bullet;
-        // if (bullet != null && bullet.Alignment == 1)
-        // {
-        //     bullet.OnHit();
-        //     _Destroy(false);
-        //     return;
-        // }
     }
 }

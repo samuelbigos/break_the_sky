@@ -1,7 +1,10 @@
 using Godot;
 
-public class BoidEnemyBeacon : BoidEnemyBase
+public class BoidEnemyBeacon3D : BoidEnemyBase3D
 {
+    [Export] private NodePath _rotorMeshPath;
+    private MeshInstance _rotorMesh;
+    
     [Export] private PackedScene BulletScene;
 
     [Export] public float TargetBeaconDist = 350.0f;
@@ -32,6 +35,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
         base._Ready();
         
         _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
+        _rotorMesh = GetNode<MeshInstance>(_rotorMeshPath);
     }
 
     public override void _Process(float delta)
@@ -39,8 +43,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
         base._Process(delta);
         
         float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
-
-        // firin' mah lazor
+        
         if (!_destroyed)
         {
             if (_beaconState == BeaconState.Inactive)
@@ -82,17 +85,21 @@ public class BoidEnemyBeacon : BoidEnemyBase
                     }
                 }
             }
+            
+            Vector3 rot = _rotorMesh.Rotation;
+            rot.y = Mathf.PosMod(_rotorMesh.Rotation.y + 25.0f * delta, Mathf.Pi * 2.0f);
+            _rotorMesh.Rotation = rot;
         }
     }
 
-    public void FirePulse()
+    private void FirePulse()
     {
         foreach (int i in GD.Range(0, BulletsPerPulse))
         {
-            BulletBeacon bullet = BulletScene.Instance() as BulletBeacon;
+            Bullet3D bullet = BulletScene.Instance() as Bullet3D;
             float f = (float) (i) * Mathf.Pi * 2.0f / (float) (BulletsPerPulse);
             Vector2 dir = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized();
-            bullet.Init(dir * BulletSpeed, 1, _game.PlayRadius, 1.0f);
+            bullet.Init(dir * BulletSpeed, Alignment, _game.PlayRadius, 1.0f);
             bullet.GlobalPosition = GlobalPosition + dir * 32.0f;
             _game.AddChild(bullet);
             _sfxBeaconFire.Play();

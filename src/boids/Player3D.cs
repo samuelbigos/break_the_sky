@@ -15,7 +15,7 @@ public class Player3D : BoidBase3D
         _colour = ColourManager.Instance.Secondary;
         _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer2D;
 
-        Connect("area_entered", this, nameof(OnAreaEntered));
+        Connect("area_entered", this, nameof(_OnBoidAreaEntered));
     }
 
     public override void _Process(float delta)
@@ -87,29 +87,23 @@ public class Player3D : BoidBase3D
 
         if (_queueAddBoids)
         {
-            AddBoids(GlobalPosition);
+            _game.AddBoids(GlobalPosition);
             _queueAddBoids = false;
         }
     }
 
-    private void AddBoids(Vector2 pos)
+    protected override void _Destroy(bool score)
     {
-        _game.AddBoids(pos);
+        base._Destroy(score);
     }
 
-    public void OnAreaEntered(Node2D area)
+    public override void _OnBoidAreaEntered(Area area)
     {
-        if (area is PickupAdd)
+        if (area is PickupAdd3D)
         {
             area.QueueFree();
             _queueAddBoids = true;
             _sfxPickup.Play();
-
-            //if area.IsInGroup("enemy") && !area.IsDestroyed():
-            //	_game.Lose()
-
-            //if area.IsInGroup("bullet") && area._alignment == 1:
-            //	_game.Lose()
         }
     }
 }

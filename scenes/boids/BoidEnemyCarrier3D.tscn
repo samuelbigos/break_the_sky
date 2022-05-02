@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/boids/BoidEnemyCarrierRotorgun3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/boids/BoidEnemyCarrier.cs" type="Script" id=3]
+[ext_resource path="res://assets/mesh/enemy_carrier_body.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://scenes/boids/BoidEnemyDrone.tscn" type="PackedScene" id=5]
+
+[node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
+script = ExtResource( 3 )
+_behaviours = 12
+MaxHealth = 100.0
+MaxAngularVelocity = 500.0
+_rotorgunsPaths = [ NodePath("Rotorgun1"), NodePath("Rotorgun2"), NodePath("Rotorgun3"), NodePath("Rotorgun4") ]
+_lockPaths = [ NodePath("Lock1"), NodePath("Lock2"), NodePath("Lock3"), NodePath("Lock4") ]
+_droneScene = ExtResource( 5 )
+_droneSpawnInterval = 0.1
+_dronePulseCount = 15
+
+[node name="Mesh" parent="." index="1"]
+mesh = ExtResource( 4 )
+material/0 = null
+
+[node name="Lock1" type="Spatial" parent="." index="7"]
+
+[node name="Rotorgun1" parent="." index="8" instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.85766, 0, -10.0319 )
+
+[node name="Lock2" type="Spatial" parent="." index="9"]
+
+[node name="Rotorgun2" parent="." index="10" instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.91924, 0, -10.0109 )
+
+[node name="Lock3" type="Spatial" parent="." index="11"]
+
+[node name="Rotorgun3" parent="." index="12" instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.87438, 0, 9.94929 )
+
+[node name="Lock4" type="Spatial" parent="." index="13"]
+
+[node name="Rotorgun4" parent="." index="14" instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.91924, 0, 9.9913 )
+
+[node name="SpawnLeft" type="Spatial" parent="." index="15"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0 )
+
+[node name="SpawnRight" type="Spatial" parent="." index="16"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0 )

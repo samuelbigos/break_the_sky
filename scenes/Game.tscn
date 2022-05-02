@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://assets/material/water.tres" type="Material" id=1]
 [ext_resource path="res://src/Game.cs" type="Script" id=2]
@@ -8,9 +8,12 @@
 [ext_resource path="res://scenes/boids/BoidEnemyDrone.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scenes/boids/BoidAlly.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/pickups/PickupAdd3D.tscn" type="PackedScene" id=8]
+[ext_resource path="res://scenes/boids/BoidEnemyLaser3D.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/material/water_wave.tres" type="Material" id=10]
+[ext_resource path="res://scenes/boids/BoidEnemyBeacon3D.tscn" type="PackedScene" id=11]
 [ext_resource path="res://shader/blur_x.shader" type="Shader" id=12]
 [ext_resource path="res://shader/blur_y.shader" type="Shader" id=13]
+[ext_resource path="res://scenes/boids/BoidEnemyCarrier3D.tscn" type="PackedScene" id=14]
 
 [sub_resource type="PlaneMesh" id=7]
 size = Vector2( 512, 512 )
@@ -40,9 +43,13 @@ _blurTextureRectPaths = [ NodePath("WaveBlurX/TextureRect"), NodePath("WaveBlurY
 _boidAllyScene = ExtResource( 7 )
 _pickupAddScene = ExtResource( 8 )
 _enemyDrillerScene = ExtResource( 6 )
+_enemyLaserScene = ExtResource( 9 )
+_enemyBeaconScene = ExtResource( 11 )
+_enemyCarrierScene = ExtResource( 14 )
 InitialPickupAddCount = 0
 InitialBoidCount = 10
-PlayRadius = 250.0
+PlayRadius = 200.0
+BaseBoidDamage = 3.0
 BaseBoidSpeed = 1000.0
 BaseBulletSpeed = 150.0
 
@@ -52,7 +59,7 @@ mesh = SubResource( 7 )
 material/0 = ExtResource( 1 )
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 150, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 125, 0 )
 cull_mask = 1047553
 current = true
 far = 250.0
