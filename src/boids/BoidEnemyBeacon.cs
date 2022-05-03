@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidEnemyBeacon3D : BoidEnemyBase3D
+public class BoidEnemyBeacon : BoidEnemyBase
 {
     [Export] private NodePath _rotorMeshPath;
     private MeshInstance _rotorMesh;
@@ -96,7 +96,7 @@ public class BoidEnemyBeacon3D : BoidEnemyBase3D
     {
         foreach (int i in GD.Range(0, BulletsPerPulse))
         {
-            Bullet3D bullet = BulletScene.Instance() as Bullet3D;
+            Bullet bullet = BulletScene.Instance() as Bullet;
             float f = (float) (i) * Mathf.Pi * 2.0f / (float) (BulletsPerPulse);
             Vector2 dir = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized();
             bullet.Init(dir * BulletSpeed, Alignment, _game.PlayRadius, 1.0f);

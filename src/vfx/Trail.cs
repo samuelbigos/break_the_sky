@@ -1,14 +1,13 @@
-using System.Collections.Generic;
 using Godot;
 
-public class Trail3D : Node
+public class Trail : Node
 {
     [Export] public float Width = 2.0f;
 
     private float _alpha = 1.0f;
-    private BoidBase3D _boid = null;
+    private BoidBase _boid = null;
 
-    public void Init(BoidBase3D owner)
+    public void Init(BoidBase owner)
     {
         _boid = owner;
     }

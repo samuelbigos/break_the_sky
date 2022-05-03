@@ -1,6 +1,6 @@
 using Godot;
 
-public class Player3D : BoidBase3D
+public class Player : BoidBase
 {
     [Export] public float Damping = 0.5f;
 
@@ -22,7 +22,7 @@ public class Player3D : BoidBase3D
     {
         if (!_destroyed)
         {
-            Vector2 mousePos = GlobalCamera3D.Instance.MousePosition();
+            Vector2 mousePos = GlobalCamera.Instance.MousePosition();
             Vector2 lookAt = mousePos - GlobalPosition;
             Rotation = new Vector3(0.0f, -Mathf.Atan2(lookAt.x, -lookAt.y), 0.0f);
 

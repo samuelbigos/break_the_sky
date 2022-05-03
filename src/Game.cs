@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 using ImGuiNET;
@@ -24,32 +23,13 @@ public class Game : Node
     private ImGuiNode _imGuiNode;
 
     [Export] private NodePath _playerPath;
-    private Player3D _player;
+    private Player _player;
     
     [Export] private NodePath _mouseCursorPath;
     private MeshInstance _mouseCursor;
     
     [Export] private NodePath _waterPath;
     private MeshInstance _water;
-    
-#region Water Rendering
-
-    [Export] private NodePath _waterMeshViewportPath;
-    private Viewport _waterMeshViewport;
-
-    [Export] private List<NodePath> _waveMapPaths;
-    private List<Viewport> _waveMaps = new List<Viewport>();
-    [Export] private List<NodePath> _waveTextureRectPaths;
-    private List<TextureRect> _waveTextureRects = new List<TextureRect>();
-    
-    [Export] private List<NodePath> _blurViewportPaths;
-    private List<Viewport> _blurViewports = new List<Viewport>();
-    [Export] private List<NodePath> _blurTextureRectPaths;
-    private List<TextureRect> _blurTextureRects = new List<TextureRect>();
-
-    private int _currentWaveMap = 0;
-    
-#endregion
 
     [Export] public int DebugWave = -1;
 
@@ -84,8 +64,8 @@ public class Game : Node
 
     private List<Levels.Wave> _levels;
     public int _boidColCount;
-    private List<List<BoidBase3D>> _boidColumns = new List<List<BoidBase3D>>();
-    private List<BoidBase3D> _allBoids = new List<BoidBase3D>();
+    private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
+    private List<BoidBase> _allBoids = new List<BoidBase>();
     public Formation _formation = Formation.Balanced;
     private List<PickupAdd3D> _pickups = new List<PickupAdd3D>();
     private int _spawnPickups = 0;
@@ -95,7 +75,7 @@ public class Game : Node
     public float _scoreMultiTimer;
     public float _loseTimer;
     private bool _pendingLose = false;
-    private List<BoidBase3D> _enemies = new List<BoidBase3D>();
+    private List<BoidBase> _enemies = new List<BoidBase>();
     public int _numBoids = 0;
 
     private bool _hasSlowmo = false;
@@ -108,49 +88,26 @@ public class Game : Node
     private int _numWaves = 0;
     private float _prevSubwaveTime;
     private float _fps = 0.0f;
-    private float _waterWaveUpdateTimer;
     private int _pendingBoidSpawn;
 
-    public List<BoidBase3D> Boids => _allBoids;
-    public Player3D Player => _player;
+    public List<BoidBase> Boids => _allBoids;
+    public Player Player => _player;
     public int NumBoids => _numBoids;
-    public List<BoidBase3D> Enemies => _enemies;
+    public List<BoidBase> Enemies => _enemies;
 
     public override void _Ready()
     {
-        _player = GetNode<Player3D>(_playerPath);
+        _player = GetNode<Player>(_playerPath);
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
         _water = GetNode<MeshInstance>(_waterPath);
 
-        _waterMeshViewport = GetNode<Viewport>(_waterMeshViewportPath);
-        
-        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[0]));
-        _waveMaps.Add(GetNode<Viewport>(_waveMapPaths[1]));
-        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[0]));
-        _waveTextureRects.Add(GetNode<TextureRect>(_waveTextureRectPaths[1]));
-        
-        _blurViewports.Add(GetNode<Viewport>(_blurViewportPaths[0]));
-        _blurViewports.Add(GetNode<Viewport>(_blurViewportPaths[1]));
-        _blurTextureRects.Add(GetNode<TextureRect>(_blurTextureRectPaths[0]));
-        _blurTextureRects.Add(GetNode<TextureRect>(_blurTextureRectPaths[1]));
-
-        // _waveMaps[0].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
-        // _waveMaps[1].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
-        _blurViewports[0].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
-        _blurViewports[1].GetTexture().Flags = (uint)Texture.FlagsEnum.Filter;
-        
-        _waveTextureRects[0].Texture = _waterMeshViewport.GetTexture();
-        _waveTextureRects[1].Texture = _waterMeshViewport.GetTexture();
-        _blurTextureRects[1].Texture = _blurViewports[0].GetTexture();
-        ((ShaderMaterial) _water.GetActiveMaterial(0)).SetShaderParam("u_wave_texture", _blurViewports[1].GetTexture());
-        
         _player.Init(_player, this, null);
         _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
 
         foreach (int i in GD.Range(0, InitialBoidCount))
         {
-            BoidBase3D boid = _boidAllyScene.Instance() as BoidBase3D;
+            BoidBase boid = _boidAllyScene.Instance() as BoidBase;
             AddChild(boid);
             _allBoids.Add(boid);
             boid.Init(_player, this, _player);
@@ -192,7 +149,7 @@ public class Game : Node
 
         _numWaves = 1; //_levels[0]["waves"].Size();
 
-        GlobalCamera3D.Instance.Init(_player);
+        GlobalCamera.Instance.Init(_player);
         //PauseManager.Instance.Init(this);
 
         MusicPlayer.Instance.PlayGame();
@@ -209,24 +166,7 @@ public class Game : Node
         float fps = 1.0f / delta;
         _fps = 0.033f * fps + 0.966f * _fps;
 
-        if (_waterWaveUpdateTimer <= 0.0f)
-        {
-            int nextWaveMap = (_currentWaveMap + 1) % 2;
-            
-            ShaderMaterial mat = _waveTextureRects[_currentWaveMap].Material as ShaderMaterial;
-            mat?.SetShaderParam("u_prev_wave", _waveMaps[nextWaveMap].GetTexture());
-            
-            _waveMaps[_currentWaveMap].RenderTargetUpdateMode = Viewport.UpdateMode.Once;
-
-            _blurTextureRects[0].Texture = _waveMaps[_currentWaveMap].GetTexture();
-
-            _waterWaveUpdateTimer = 1.0f / 60.0f;
-            _currentWaveMap = nextWaveMap;
-        }
-
-        _waterWaveUpdateTimer -= delta;
-        
-        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera3D.Instance.MousePosition().To3D());
+        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
         
         while (_pendingBoidSpawn > 0)
         {
@@ -367,16 +307,16 @@ public class Game : Node
     public void SetColumns(int numCols, bool setPos)
     {
         _boidColCount = Mathf.Clamp(numCols, 0, _allBoids.Count);
-        _boidColumns = new List<List<BoidBase3D>>();
+        _boidColumns = new List<List<BoidBase>>();
         foreach (int i in GD.Range(0, _boidColCount))
         {
-            _boidColumns.Add(new List<BoidBase3D>());
+            _boidColumns.Add(new List<BoidBase>());
         }
 
         int perCol = _allBoids.Count / _boidColCount;
         foreach (int i in GD.Range(0, _allBoids.Count))
         {
-            BoidBase3D boid = _allBoids[i];
+            BoidBase boid = _allBoids[i];
             int column = i / perCol;
             int colIdx = column;
             if (colIdx >= _boidColumns.Count)
@@ -411,7 +351,7 @@ public class Game : Node
                 break;
             }
 
-            BoidBase3D boid = _boidAllyScene.Instance() as BoidBase3D;
+            BoidBase boid = _boidAllyScene.Instance() as BoidBase;
             AddChild(boid);
             _allBoids.Add(boid);
             boid.Init(_player, this, _player);
@@ -432,7 +372,7 @@ public class Game : Node
         }
     }
 
-    public void RemoveBoid(BoidBase3D boid)
+    public void RemoveBoid(BoidBase boid)
     {
         _allBoids.Remove(boid);
         if (_allBoids.Count == 0)
@@ -577,27 +517,27 @@ public class Game : Node
         return 0;
     }
 
-    public void AddEnemy(BoidBase3D enemy)
+    public void AddEnemy(BoidBase enemy)
     {
         Enemies.Add(enemy);
     }
 
     private void _Spawn(int id)
     {
-        BoidBase3D enemy = null;
+        BoidBase enemy = null;
         switch (id)
         {
             case 0:
-                enemy = _enemyDrillerScene.Instance() as BoidBase3D;
+                enemy = _enemyDrillerScene.Instance() as BoidBase;
                 break;
             case 1:
-                enemy = _enemyLaserScene.Instance() as BoidBase3D;
+                enemy = _enemyLaserScene.Instance() as BoidBase;
                 break;
             case 2:
-                enemy = _enemyBeaconScene.Instance() as BoidBase3D;
+                enemy = _enemyBeaconScene.Instance() as BoidBase;
                 break;
             case 3:
-                enemy = _enemyCarrierScene.Instance() as BoidBase3D;
+                enemy = _enemyCarrierScene.Instance() as BoidBase;
                 break;
         }
 
@@ -655,7 +595,7 @@ public class Game : Node
         //_gui.SetWave(_currentWave, _currentSubWave);
     }
 
-    public void PushBack(BoidBase3D boid)
+    public void PushBack(BoidBase boid)
     {
         foreach (int i in GD.Range(0, _boidColCount))
         {

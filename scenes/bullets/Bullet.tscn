@@ -1,14 +1,14 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=1]
-[ext_resource path="res://src/bullets/Bullet3D.cs" type="Script" id=2]
-[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
+[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
+[ext_resource path="res://src/bullets/Bullet.cs" type="Script" id=2]
+[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=3]
 [ext_resource path="res://assets/material/water_mesh.tres" type="Material" id=4]
 
 [sub_resource type="SphereShape" id=1]
 
 [sub_resource type="CapsuleMesh" id=2]
-material = ExtResource( 1 )
+material = ExtResource( 3 )
 
 [node name="Bullet" type="Area"]
 script = ExtResource( 2 )
@@ -17,10 +17,10 @@ script = ExtResource( 2 )
 shape = SubResource( 1 )
 
 [node name="Mesh" type="MeshInstance" parent="."]
-material_override = ExtResource( 1 )
+material_override = ExtResource( 3 )
 mesh = SubResource( 2 )
 material/0 = null
-script = ExtResource( 3 )
+script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
 _meshMaterials = [ ExtResource( 4 ) ]

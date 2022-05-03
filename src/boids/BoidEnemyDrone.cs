@@ -1,6 +1,4 @@
-using Godot;
-
-public class BoidEnemyDrone : BoidEnemyBase3D
+public class BoidEnemyDrone : BoidEnemyBase
 {
     public override void _Ready()
     {

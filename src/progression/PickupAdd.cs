@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 
 public class PickupAdd3D : Area
@@ -6,7 +5,7 @@ public class PickupAdd3D : Area
     [Export] public float Lifetime = 5.0f;
     [Export] public float AttractRange = 75.0f;
 
-    private Player3D _player = null;
+    private Player _player = null;
     public float _lifetime;
     public Color _colour;
     
@@ -27,7 +26,7 @@ public class PickupAdd3D : Area
         }
     }
 
-    public void Init(Player3D player)
+    public void Init(Player player)
     {
         _player = player;
     }

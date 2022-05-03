@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 
-public class BoidBase3D : Area
+public class BoidBase : Area
 {
     public enum BoidAlignment
     {
@@ -45,28 +45,28 @@ public class BoidBase3D : Area
     [Export] private NodePath _sfxHitPlayerPath;
     [Export] private NodePath _sfxShootPlayerPath;
 
-    public virtual BoidAlignment Alignment => BoidAlignment.Ally;
+    protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;
 
     protected Vector3 _velocity;
     private List<Vector3> _trailPoints = new List<Vector3>();
     private float _trailTimer;
-    protected Player3D _player;
+    protected Player _player;
     protected Game _game;
-    protected BoidBase3D _target;
-    protected Vector2 _targetOffset;
+    protected BoidBase _target;
+    private Vector2 _targetOffset;
     protected bool _destroyed = false;
-    protected float _destroyedTimer;
+    private float _destroyedTimer;
     protected Vector3 _baseScale;
     private float _health;
     private float _hitFlashTimer;
 
-    private Trail3D _trail;
-    protected Particles _damagedParticles;
+    private Trail _trail;
+    private Particles _damagedParticles;
     protected MultiViewportMeshInstance _mesh;
     private AudioStreamPlayer2D _sfxDestroyPlayer;
     protected AudioStreamPlayer2D _sfxHitPlayer;
-    protected AudioStreamPlayer2D _sfxShootPlayer;
+    private AudioStreamPlayer2D _sfxShootPlayer;
     
     public List<Vector3> TrailPoints => _trailPoints;
     public float Health => Health;
@@ -83,7 +83,7 @@ public class BoidBase3D : Area
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
 
-    public virtual void Init(Player3D player, Game game, BoidBase3D target)
+    public virtual void Init(Player player, Game game, BoidBase target)
     {
         _player = player;
         _game = game;
@@ -97,7 +97,7 @@ public class BoidBase3D : Area
         _health = MaxHealth;
 
         _mesh = GetNode<MultiViewportMeshInstance>(_meshPath); 
-        _trail = GetNode<Trail3D>(_trailPath);
+        _trail = GetNode<Trail>(_trailPath);
         _damagedParticles = GetNode<Particles>(_damagedParticlesPath);
         _sfxDestroyPlayer = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
         _sfxHitPlayer = GetNode<AudioStreamPlayer2D>(_sfxHitPlayerPath);
@@ -289,12 +289,12 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    protected virtual Vector2 _SteeringAlignment(List<BoidBase3D> boids, float alignmentRadius)
+    protected virtual Vector2 _SteeringAlignment(List<BoidBase> boids, float alignmentRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
 
-        foreach (BoidBase3D boid in boids)
+        foreach (BoidBase boid in boids)
         {
             if (boid == this)
             {
@@ -319,12 +319,12 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    protected virtual Vector2 _SteeringCohesion(List<BoidBase3D> boids, float cohesionRadius)
+    protected virtual Vector2 _SteeringCohesion(List<BoidBase> boids, float cohesionRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
 
-        foreach (BoidBase3D boid in boids)
+        foreach (BoidBase boid in boids)
         {
             if (boid == this)
             {
@@ -351,12 +351,12 @@ public class BoidBase3D : Area
         return steering;
     }
 
-    protected virtual Vector2 _SteeringSeparation(List<BoidBase3D> boids, float separationRadius)
+    protected virtual Vector2 _SteeringSeparation(List<BoidBase> boids, float separationRadius)
     {
         int nCount = 0;
         Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
 
-        foreach (BoidBase3D boid in boids)
+        foreach (BoidBase boid in boids)
         {
             if (boid == this)
             {
@@ -383,8 +383,8 @@ public class BoidBase3D : Area
 
     public virtual void _OnBoidAreaEntered(Area area)
     {
-        BoidBase3D boid = area as BoidBase3D;
-        if (boid is BoidAlly || boid is Player3D)
+        BoidBase boid = area as BoidBase;
+        if (boid is BoidAlly || boid is Player)
         {
             if (boid.Alignment == Alignment)
             {
@@ -405,7 +405,7 @@ public class BoidBase3D : Area
             return;
         }
 
-        if (area is Bullet3D bullet && bullet.Alignment != Alignment)
+        if (area is Bullet bullet && bullet.Alignment != Alignment)
         {
             bullet.OnHit();
             _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.Microbullet, bullet.GlobalPosition);

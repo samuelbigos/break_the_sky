@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using Godot;
-using Dictionary = Godot.Collections.Dictionary;
-using Array = Godot.Collections.Array;
 
 public class Levels : Node
 {

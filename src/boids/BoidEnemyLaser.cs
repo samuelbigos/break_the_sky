@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidEnemyLaser3D : BoidEnemyBase3D
+public class BoidEnemyLaser : BoidEnemyBase
 {
     [Export] private float _targetLaserDist = 250.0f;
     [Export] private float _laserCooldown = 5.0f;

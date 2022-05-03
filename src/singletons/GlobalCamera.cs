@@ -1,6 +1,6 @@
 using Godot;
 
-public class GlobalCamera : Node2D
+public class GlobalCamera : Camera
 {
     public static GlobalCamera Instance;
 
@@ -13,27 +13,27 @@ public class GlobalCamera : Node2D
     public OpenSimplexNoise _noise = new OpenSimplexNoise();
 
     private float _trauma = 0.0f;
-    private Node2D _player = null;
+    private Player _player = null;
     private float _noiseY = 0.0f;
-
-    enum WindowScale
-    {
-        Medium,
-        Large,
-        Full
-    }
-
-    private WindowScale _windowScale = WindowScale.Medium;
-
-
+    private float _cameraHeight;
+    
     public void AddTrauma(float trauma)
     {
         _trauma = Mathf.Min(_trauma + trauma, MaxTrauma);
     }
 
-    public void Init(Node2D player)
+    public void Init(Player player)
     {
         _player = player;
+    }
+
+    public Vector2 MousePosition()
+    {
+        Vector2 pos = GetViewport().GetMousePosition();
+        Vector3 origin = ProjectRayOrigin(pos);
+        Vector3 normal = ProjectRayNormal(pos);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
+        return new Vector2(hit.x, hit.z);
     }
 
     public override void _Ready()
@@ -42,25 +42,24 @@ public class GlobalCamera : Node2D
 
         _noise = new OpenSimplexNoise();
 
-        MaxOffset = MaxOffset * GetViewportRect().Size;
+        MaxOffset = MaxOffset * GetViewport().Size;
         GD.Randomize();
         _noise.Seed = (int) GD.Randi();
         _noise.Period = 4;
         _noise.Octaves = 2;
 
-        GetViewport().CanvasTransform =
-            new Transform2D(new Vector2(1.0f, 0.0f), new Vector2(0.0f, 1.0f), GetViewport().Size * 0.5f);
+        _cameraHeight = GlobalTransform.origin.y;
     }
 
     public override void _Process(float delta)
     {
         if (_player != null)
         {
-            Vector2 cameraMouseOffset = GetGlobalMousePosition() - _player.GlobalPosition;
-            Vector2 camerOffset = -_player.GlobalPosition + GetViewport().Size * 0.5f - cameraMouseOffset * 0.33f;
-            Transform2D cameraTransform =
-                new Transform2D(new Vector2(1.0f, 0.0f), new Vector2(0.0f, 1.0f), camerOffset);
-
+            Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+            Vector2 camerOffset = cameraMouseOffset * 0.33f;
+            Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + camerOffset.To3D()));
+            cameraTransform.origin.y = _cameraHeight;
+        
             if (_trauma > 0.0f)
             {
                 _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
@@ -70,37 +69,36 @@ public class GlobalCamera : Node2D
                 offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
                 offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
                 _noiseY += delta * 100.0f;
-
-                cameraTransform = cameraTransform.Rotated(rot);
-                cameraTransform = cameraTransform.Translated(offset);
+        
+                cameraTransform = cameraTransform.Translated(offset.To3D());
             }
 
-            GetViewport().CanvasTransform = cameraTransform;
+            GlobalTransform = cameraTransform;
         }
-
-        (GetNode("CanvasLayer/Label") as Label).Text = $"{_trauma}";
-
-        if (Input.IsActionJustReleased("fullscreen"))
-        {
-            switch (_windowScale)
-            {
-                case WindowScale.Medium:
-                    _windowScale = WindowScale.Large;
-                    OS.WindowBorderless = false;
-                    OS.SetWindowSize(new Vector2(1920, 1080));
-                    break;
-                case WindowScale.Large:
-                    _windowScale = WindowScale.Full;
-                    OS.WindowBorderless = true;
-                    OS.SetWindowSize(OS.GetScreenSize());
-                    OS.SetWindowPosition(new Vector2(0, 0));
-                    break;
-                case WindowScale.Full:
-                    _windowScale = WindowScale.Medium;
-                    OS.WindowBorderless = false;
-                    OS.SetWindowSize(new Vector2(960, 540));
-                    break;
-            }
-        }
+        //
+        // (GetNode("CanvasLayer/Label") as Label).Text = $"{_trauma}";
+        //
+        // if (Input.IsActionJustReleased("fullscreen"))
+        // {
+        //     switch (_windowScale)
+        //     {
+        //         case WindowScale.Medium:
+        //             _windowScale = WindowScale.Large;
+        //             OS.WindowBorderless = false;
+        //             OS.SetWindowSize(new Vector2(1920, 1080));
+        //             break;
+        //         case WindowScale.Large:
+        //             _windowScale = WindowScale.Full;
+        //             OS.WindowBorderless = true;
+        //             OS.SetWindowSize(OS.GetScreenSize());
+        //             OS.SetWindowPosition(new Vector2(0, 0));
+        //             break;
+        //         case WindowScale.Full:
+        //             _windowScale = WindowScale.Medium;
+        //             OS.WindowBorderless = false;
+        //             OS.SetWindowSize(new Vector2(960, 540));
+        //             break;
+        //     }
+        // }
     }
 }

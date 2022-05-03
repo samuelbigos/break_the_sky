@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.Collections.Generic;
 using ImGuiNET;
 
 public class ImGuiNode : Node2D

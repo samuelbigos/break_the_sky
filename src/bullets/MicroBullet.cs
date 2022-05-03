@@ -1,7 +1,4 @@
-using Godot;
-
-
-public class MicroBullet : Bullet3D
+public class MicroBullet : Bullet
 {
 	private readonly float _length = 5.0f;
 

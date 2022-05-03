@@ -1,30 +1,31 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://assets/material/water.tres" type="Material" id=1]
 [ext_resource path="res://src/Game.cs" type="Script" id=2]
-[ext_resource path="res://scenes/boids/Player3D.tscn" type="PackedScene" id=3]
-[ext_resource path="res://src/singletons/GlobalCamera3D.cs" type="Script" id=4]
+[ext_resource path="res://scenes/boids/Player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=4]
 [ext_resource path="res://addons/imgui-godot/ImGuiNode.cs" type="Script" id=5]
 [ext_resource path="res://scenes/boids/BoidEnemyDrone.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scenes/boids/BoidAlly.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/pickups/PickupAdd3D.tscn" type="PackedScene" id=8]
-[ext_resource path="res://scenes/boids/BoidEnemyLaser3D.tscn" type="PackedScene" id=9]
+[ext_resource path="res://scenes/boids/BoidEnemyLaser.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/material/water_wave.tres" type="Material" id=10]
-[ext_resource path="res://scenes/boids/BoidEnemyBeacon3D.tscn" type="PackedScene" id=11]
-[ext_resource path="res://shader/blur_x.shader" type="Shader" id=12]
-[ext_resource path="res://shader/blur_y.shader" type="Shader" id=13]
-[ext_resource path="res://scenes/boids/BoidEnemyCarrier3D.tscn" type="PackedScene" id=14]
+[ext_resource path="res://scenes/boids/BoidEnemyBeacon.tscn" type="PackedScene" id=11]
+[ext_resource path="res://assets/shader/blur_x.shader" type="Shader" id=12]
+[ext_resource path="res://assets/shader/blur_y.shader" type="Shader" id=13]
+[ext_resource path="res://scenes/boids/BoidEnemyCarrier.tscn" type="PackedScene" id=14]
+[ext_resource path="res://src/rendering/Water.cs" type="Script" id=15]
 
 [sub_resource type="PlaneMesh" id=7]
 size = Vector2( 512, 512 )
-
-[sub_resource type="SphereMesh" id=4]
 
 [sub_resource type="ShaderMaterial" id=12]
 shader = ExtResource( 13 )
 
 [sub_resource type="ShaderMaterial" id=9]
 shader = ExtResource( 12 )
+
+[sub_resource type="SphereMesh" id=4]
 
 [sub_resource type="ViewportTexture" id=11]
 viewport_path = NodePath("WaveBlurY")
@@ -35,11 +36,6 @@ ImGuiNodePath = NodePath("CanvasLayer/ImGuiNode")
 _playerPath = NodePath("Player3D")
 _mouseCursorPath = NodePath("MouseCursor")
 _waterPath = NodePath("Water")
-_waterMeshViewportPath = NodePath("WaterMeshViewport")
-_waveMapPaths = [ NodePath("WaveRenderViewportSwapA"), NodePath("WaveRenderViewportSwapB") ]
-_waveTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodePath("WaveRenderViewportSwapB/TextureRect") ]
-_blurViewportPaths = [ NodePath("WaveBlurX"), NodePath("WaveBlurY") ]
-_blurTextureRectPaths = [ NodePath("WaveBlurX/TextureRect"), NodePath("WaveBlurY/TextureRect") ]
 _boidAllyScene = ExtResource( 7 )
 _pickupAddScene = ExtResource( 8 )
 _enemyDrillerScene = ExtResource( 6 )
@@ -57,6 +53,80 @@ BaseBulletSpeed = 150.0
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )
 mesh = SubResource( 7 )
 material/0 = ExtResource( 1 )
+script = ExtResource( 15 )
+_waterMeshViewportPath = NodePath("WaterMeshViewport")
+_waveMapPaths = [ NodePath("WaveRenderViewportSwapA"), NodePath("WaveRenderViewportSwapB") ]
+_waveTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodePath("WaveRenderViewportSwapB/TextureRect") ]
+_blurViewportPaths = [ NodePath("WaveBlurY"), NodePath("WaveBlurX") ]
+_blurTextureRectPaths = [ NodePath("WaveBlurY/TextureRect"), NodePath("WaveBlurX/TextureRect") ]
+
+[node name="WaveRenderViewportSwapA" type="Viewport" parent="Water"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="Water/WaveRenderViewportSwapA"]
+material = ExtResource( 10 )
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="WaveRenderViewportSwapB" type="Viewport" parent="Water"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="Water/WaveRenderViewportSwapB"]
+material = ExtResource( 10 )
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="WaveBlurY" type="Viewport" parent="Water"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Water/WaveBlurY"]
+material = SubResource( 12 )
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="WaveBlurX" type="Viewport" parent="Water"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Water/WaveBlurX"]
+material = SubResource( 9 )
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="WaterMeshViewport" type="Viewport" parent="Water"]
+size = Vector2( 1024, 1024 )
+transparent_bg = true
+hdr = false
+keep_3d_linear = true
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="Water/WaterMeshViewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0 )
+cull_mask = 1047554
+projection = 1
+size = 512.0
+far = 10.0
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 125, 0 )
@@ -76,74 +146,6 @@ directional_shadow_max_distance = 250.0
 [node name="MouseCursor" type="MeshInstance" parent="."]
 mesh = SubResource( 4 )
 material/0 = null
-
-[node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
-hdr = false
-disable_3d = true
-keep_3d_linear = true
-usage = 0
-render_target_v_flip = true
-render_target_update_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapA"]
-material = ExtResource( 10 )
-margin_right = 40.0
-margin_bottom = 40.0
-
-[node name="WaveRenderViewportSwapB" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
-hdr = false
-disable_3d = true
-keep_3d_linear = true
-usage = 0
-render_target_v_flip = true
-render_target_update_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapB"]
-material = ExtResource( 10 )
-margin_right = 40.0
-margin_bottom = 40.0
-
-[node name="WaveBlurY" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
-hdr = false
-disable_3d = true
-keep_3d_linear = true
-usage = 0
-render_target_v_flip = true
-
-[node name="TextureRect" type="TextureRect" parent="WaveBlurY"]
-material = SubResource( 12 )
-margin_right = 40.0
-margin_bottom = 40.0
-
-[node name="WaveBlurX" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
-hdr = false
-disable_3d = true
-keep_3d_linear = true
-usage = 0
-render_target_v_flip = true
-
-[node name="TextureRect" type="TextureRect" parent="WaveBlurX"]
-material = SubResource( 9 )
-margin_right = 40.0
-margin_bottom = 40.0
-
-[node name="WaterMeshViewport" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
-transparent_bg = true
-hdr = false
-keep_3d_linear = true
-render_target_v_flip = true
-
-[node name="Camera" type="Camera" parent="WaterMeshViewport"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0 )
-cull_mask = 1047554
-projection = 1
-size = 512.0
-far = 10.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

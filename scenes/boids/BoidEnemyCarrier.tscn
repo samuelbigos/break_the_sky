@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/boids/BoidEnemyCarrierRotorgun3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/boids/BoidEnemyCarrierRotorgun.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/boids/BoidEnemyCarrier.cs" type="Script" id=3]
 [ext_resource path="res://assets/mesh/enemy_carrier_body.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://scenes/boids/BoidEnemyDrone.tscn" type="PackedScene" id=5]

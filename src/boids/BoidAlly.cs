@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidAlly : BoidBase3D
+public class BoidAlly : BoidBase
 {
     [Export] public float DestroyTime = 3.0f;
     [Export] public float ShootSize = 1.5f;
@@ -14,14 +14,14 @@ public class BoidAlly : BoidBase3D
 
     [Export] public PackedScene BulletScene;
     [Export] public PackedScene MicoBulletScene;
-    
-    public override BoidAlignment Alignment => BoidAlignment.Ally; 
+
+    protected override BoidAlignment Alignment => BoidAlignment.Ally; 
 
     private AudioStreamPlayer2D _sfxHitMicroPlayer;
 
     private float _shootCooldown; 
     private float _microBulletTargetSearchTimer;
-    private BoidBase3D _microBulletTarget;
+    private BoidBase _microBulletTarget;
     private float _microBulletCd;
 
     public override void _Ready()
@@ -37,7 +37,7 @@ public class BoidAlly : BoidBase3D
 
         MaxVelocity = _game.BaseBoidSpeed;
         
-        Vector2 shootDir = (GlobalCamera3D.Instance.MousePosition() - GlobalPosition).Normalized();
+        Vector2 shootDir = (GlobalCamera.Instance.MousePosition() - GlobalPosition).Normalized();
         
         _shootCooldown -= delta;
         if (Input.IsActionPressed("shoot") && _shootCooldown <= 0.0)
@@ -73,7 +73,7 @@ public class BoidAlly : BoidBase3D
             if (_microBulletTarget == null && _microBulletTargetSearchTimer < 0.0)
             {
                 _microBulletTargetSearchTimer = 0.1f;
-                foreach (BoidBase3D enemy in _game.Enemies)
+                foreach (BoidBase enemy in _game.Enemies)
                 {
                     if ((enemy.GlobalPosition - GlobalPosition).Length() < MicroBulletRange)
                     {
@@ -115,12 +115,12 @@ public class BoidAlly : BoidBase3D
         base._Shoot(dir);
         
         _shootCooldown = _game.BaseBoidReload;
-        Bullet3D bullet = BulletScene.Instance() as Bullet3D;
+        Bullet bullet = BulletScene.Instance() as Bullet;
         float spread = _game.BaseBoidSpread;
         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
         bullet.Init(dir * _game.BaseBulletSpeed, Alignment, _game.PlayRadius, _game.BaseBoidDamage);
-        bullet.GlobalPosition = GlobalPosition;
         _game.AddChild(bullet);
+        bullet.GlobalPosition = GlobalPosition;
         _game.PushBack(this);
         float traumaMod = 1.0f - Mathf.Clamp(_game.NumBoids / 100.0f, 0.0f, 0.5f);
         GlobalCamera.Instance.AddTrauma(ShootTrauma * traumaMod);
@@ -133,7 +133,7 @@ public class BoidAlly : BoidBase3D
             return false;
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (BoidBase3D boid in _game.Boids)
+        foreach (BoidBase boid in _game.Boids)
         {
             if (boid == this || boid.Destroyed)
             {

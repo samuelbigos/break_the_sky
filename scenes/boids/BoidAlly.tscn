@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/bullets/Bullet3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/mesh/ally.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://src/boids/BoidAlly.cs" type="Script" id=4]
 

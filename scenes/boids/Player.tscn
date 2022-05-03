@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://src/boids/Player3D.cs" type="Script" id=1]
-[ext_resource path="res://scenes/boids/BoidBase3D.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/boids/Player.cs" type="Script" id=1]
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=4]
 
 [node name="Player" instance=ExtResource( 2 )]

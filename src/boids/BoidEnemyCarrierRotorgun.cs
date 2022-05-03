@@ -1,6 +1,6 @@
 using Godot;
 
-public class BoidEnemyCarrierRotorgun : BoidEnemyBase3D
+public class BoidEnemyCarrierRotorgun : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
     [Export] private float _bulletSpeed = 200.0f;
@@ -15,7 +15,7 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase3D
 
     private BoidEnemyCarrier _parent;
 
-    public override void Init(Player3D player, Game game, BoidBase3D target)
+    public override void Init(Player player, Game game, BoidBase target)
     {
         _player = player;
         _game = game;
@@ -62,7 +62,7 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase3D
     {
         base._Shoot(dir);
         
-        Bullet3D bullet = _bulletScene.Instance() as Bullet3D;
+        Bullet bullet = _bulletScene.Instance() as Bullet;
         dir = (_target.GlobalPosition - GlobalPosition).Normalized();
         bullet.Init(dir * _bulletSpeed, Alignment, _game.PlayRadius, 1.0f);
         bullet.GlobalPosition = GlobalPosition + dir * 80.0f;

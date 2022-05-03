@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
-public class BoidEnemyCarrier : BoidEnemyBase3D
+public class BoidEnemyCarrier : BoidEnemyBase
 {
     [Export] private List<NodePath> _rotorgunsPaths;
     [Export] private List<NodePath> _lockPaths;
@@ -97,7 +96,7 @@ public class BoidEnemyCarrier : BoidEnemyBase3D
     public void _SpawnDrone()
     {
         Vector2 spawnPos;
-        BoidEnemyBase3D enemy = _droneScene.Instance() as BoidEnemyBase3D;
+        BoidEnemyBase enemy = _droneScene.Instance() as BoidEnemyBase;
         _droneSpawnSide = (_droneSpawnSide + 1) % 2;
         if (_droneSpawnSide == 0)
         {

@@ -21,10 +21,9 @@ default_bus_layout="res://assets/sfx/default_bus_layout.tres"
 
 [autoload]
 
-PauseManager="*res://scenes/PauseManager.tscn"
+PauseManager="*res://scenes/singletons/PauseManager.tscn"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 Levels="*res://src/singletons/Levels.cs"
-GlobalCamera="*res://scenes/singletons/GlobalCamera.tscn"
 ColourManager="*res://scenes/singletons/ColourManager.tscn"
 PerkManager="*res://scenes/singletons/PerkManager.tscn"
 
