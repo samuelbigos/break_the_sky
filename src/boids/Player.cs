@@ -4,7 +4,7 @@ public class Player : BoidBase
 {
     [Export] public float Damping = 0.5f;
 
-    public AudioStreamPlayer2D _sfxPickup;
+    public AudioStreamPlayer3D _sfxPickup;
 
     public Color _colour;
     private bool _destroyed = false;
@@ -13,7 +13,7 @@ public class Player : BoidBase
     public override void _Ready()
     {
         _colour = ColourManager.Instance.Secondary;
-        _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer2D;
+        _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer3D;
 
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
     }
@@ -99,7 +99,7 @@ public class Player : BoidBase
 
     public override void _OnBoidAreaEntered(Area area)
     {
-        if (area is PickupAdd3D)
+        if (area is PickupAdd)
         {
             area.QueueFree();
             _queueAddBoids = true;

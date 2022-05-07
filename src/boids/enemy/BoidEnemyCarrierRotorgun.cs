@@ -52,16 +52,14 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
             _shotCooldown -= delta;
             if (toTarget.Dot(awayParent) > 0.0f && _shotCooldown < 0.0f && dist < _bulletRange)
             {
-                _Shoot(new Vector2());
+                Shoot(new Vector2());
                 _shotCooldown = _bulletCooldown;
             }
         }
     }
 
-    protected override void _Shoot(Vector2 dir)
+    protected void Shoot(Vector2 dir)
     {
-        base._Shoot(dir);
-        
         Bullet bullet = _bulletScene.Instance() as Bullet;
         dir = (_target.GlobalPosition - GlobalPosition).Normalized();
         bullet.Init(dir * _bulletSpeed, Alignment, _game.PlayRadius, 1.0f);

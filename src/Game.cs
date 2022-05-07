@@ -67,7 +67,7 @@ public class Game : Node
     private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
     private List<BoidBase> _allBoids = new List<BoidBase>();
     public Formation _formation = Formation.Balanced;
-    private List<PickupAdd3D> _pickups = new List<PickupAdd3D>();
+    private List<PickupAdd> _pickups = new List<PickupAdd>();
     private int _spawnPickups = 0;
     private bool _started = false;
     private int _score = 0;
@@ -137,7 +137,7 @@ public class Game : Node
             BaseBoidSpeed = 1000.0f;
             BasePlayerSpeed = 10.0f;
             BaseMicroturrets = true;
-            foreach (PickupAdd3D pickup in _pickups)
+            foreach (PickupAdd pickup in _pickups)
             {
                 pickup.QueueFree();
                 AddBoids(new Vector2(0.0f, 0.0f));
@@ -390,7 +390,7 @@ public class Game : Node
 
     public void SpawnPickupAdd(Vector2 pos, bool persistent)
     {
-        PickupAdd3D pickup = _pickupAddScene.Instance() as PickupAdd3D;
+        PickupAdd pickup = _pickupAddScene.Instance() as PickupAdd;
         pickup.GlobalPosition = pos;
         pickup.Init(_player);
         if (persistent)

@@ -1,13 +1,12 @@
 using Godot;
 
-public class PickupAdd3D : Area
+public class PickupAdd : Area
 {
     [Export] public float Lifetime = 5.0f;
     [Export] public float AttractRange = 75.0f;
 
     private Player _player = null;
-    public float _lifetime;
-    public Color _colour;
+    private float _lifetime;
     
     public Vector2 GlobalPosition
     {
@@ -34,7 +33,6 @@ public class PickupAdd3D : Area
     public override void _Ready()
     {
         _lifetime = Lifetime;
-        _colour = ColourManager.Instance.Secondary;
     }
 
     public override void _Process(float delta)
@@ -49,11 +47,11 @@ public class PickupAdd3D : Area
         {
             if ((int) (_lifetime * Mathf.Lerp(100.0f, 1.0f, _lifetime / Lifetime)) % 10 < 7)
             {
-                _colour = ColourManager.Instance.Secondary;
+                //_colour = ColourManager.Instance.Secondary;
             }
             else
             {
-                _colour = ColourManager.Instance.White;
+                //_colour = ColourManager.Instance.White;
             }
         }
 

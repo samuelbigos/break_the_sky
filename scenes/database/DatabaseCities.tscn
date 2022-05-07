@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/data/Database.cs" type="Script" id=1]
+[ext_resource path="res://src/data/DataCity.cs" type="Script" id=2]
+
+[node name="DatabaseCities" type="Node"]
+script = ExtResource( 1 )
+
+[node name="sanfrancisco" type="Node" parent="."]
+script = ExtResource( 2 )
+DisplayName = "San Francisco"
+
+[node name="chicago" type="Node" parent="."]
+script = ExtResource( 2 )
+DisplayName = "Chicago"
+
+[node name="montreal" type="Node" parent="."]
+script = ExtResource( 2 )
+DisplayName = "Montreal"
+
+[node name="newyork" type="Node" parent="."]
+script = ExtResource( 2 )
+DisplayName = "New York"
+
+[node name="washington" type="Node" parent="."]
+script = ExtResource( 2 )
+DisplayName = "Washington"

@@ -1,4 +1,4 @@
-public class BoidEnemyDrone : BoidEnemyBase
+public class BoidEnemyDriller : BoidEnemyBase
 {
     public override void _Ready()
     {

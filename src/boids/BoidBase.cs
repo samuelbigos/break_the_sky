@@ -43,7 +43,6 @@ public class BoidBase : Area
     [Export] private NodePath _meshPath;
     [Export] private NodePath _sfxDestroyPath;
     [Export] private NodePath _sfxHitPlayerPath;
-    [Export] private NodePath _sfxShootPlayerPath;
 
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;
@@ -64,9 +63,8 @@ public class BoidBase : Area
     private Trail _trail;
     private Particles _damagedParticles;
     protected MultiViewportMeshInstance _mesh;
-    private AudioStreamPlayer2D _sfxDestroyPlayer;
-    protected AudioStreamPlayer2D _sfxHitPlayer;
-    private AudioStreamPlayer2D _sfxShootPlayer;
+    private AudioStreamPlayer3D _sfxDestroyPlayer;
+    protected AudioStreamPlayer3D _sfxHitPlayer;
     
     public List<Vector3> TrailPoints => _trailPoints;
     public float Health => Health;
@@ -99,10 +97,9 @@ public class BoidBase : Area
         _mesh = GetNode<MultiViewportMeshInstance>(_meshPath); 
         _trail = GetNode<Trail>(_trailPath);
         _damagedParticles = GetNode<Particles>(_damagedParticlesPath);
-        _sfxDestroyPlayer = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
-        _sfxHitPlayer = GetNode<AudioStreamPlayer2D>(_sfxHitPlayerPath);
-        _sfxShootPlayer = GetNode<AudioStreamPlayer2D>(_sfxShootPlayerPath);
-        
+        _sfxDestroyPlayer = GetNode<AudioStreamPlayer3D>(_sfxDestroyPath);
+        _sfxHitPlayer = GetNode<AudioStreamPlayer3D>(_sfxHitPlayerPath);
+
         _trail.Init(this);
         _sfxHitPlayer.Stream = _hitSfx[0];
         _baseScale = _mesh.Scale;
@@ -241,12 +238,7 @@ public class BoidBase : Area
             _damagedParticles.Emitting = true;
         }
     }
-    
-    protected virtual void _Shoot(Vector2 dir)
-    {
-        _sfxShootPlayer.Play();
-    }
-    
+
     public void SetOffset(Vector2 targetOffset)
     {  
         _targetOffset = targetOffset;
@@ -384,7 +376,7 @@ public class BoidBase : Area
     public virtual void _OnBoidAreaEntered(Area area)
     {
         BoidBase boid = area as BoidBase;
-        if (boid is BoidAlly || boid is Player)
+        if (boid is BoidAllyBase || boid is Player)
         {
             if (boid.Alignment == Alignment)
             {

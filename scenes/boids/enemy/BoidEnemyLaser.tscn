@@ -1,11 +1,11 @@
 [gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://src/boids/BoidEnemyLaser.cs" type="Script" id=2]
+[ext_resource path="res://src/boids/enemy/BoidEnemyLaser.cs" type="Script" id=2]
 [ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=3]
 [ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=4]
 [ext_resource path="res://assets/mesh/enemy_laser.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/material/boid_material.tres" type="Material" id=6]
+[ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=6]
 
 [sub_resource type="CylinderMesh" id=2]
 top_radius = 0.5
@@ -55,8 +55,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18.3746 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -82.7917 )
 shape = SubResource( 1 )
 
-[node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="10"]
+[node name="SFXLaserCharge" type="AudioStreamPlayer3D" parent="." index="10"]
 stream = ExtResource( 3 )
 
-[node name="SFXLaserFire" type="AudioStreamPlayer2D" parent="." index="11"]
+[node name="SFXLaserFire" type="AudioStreamPlayer3D" parent="." index="11"]
 stream = ExtResource( 4 )

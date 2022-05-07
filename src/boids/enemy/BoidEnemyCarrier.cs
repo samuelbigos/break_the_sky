@@ -14,7 +14,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
     [Export] private int _dronePulseCount = 10;
     [Export] private float _droneSpawnRange = 750.0f;
 
-    private AudioStreamPlayer2D _sfxBeaconFire;
+    private AudioStreamPlayer3D _sfxBeaconFire;
     private AudioStream _rocochetSfx;
 
     private List<BoidEnemyCarrierRotorgun> _rotorguns = new List<BoidEnemyCarrierRotorgun>();
@@ -33,7 +33,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
     {
         base._Ready();
         
-        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
+        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer3D;
         _rocochetSfx = GD.Load("res://assets/sfx/ricochet.wav") as AudioStream;
 
         for (int i = 0; i < _rotorgunsPaths.Count; i++)

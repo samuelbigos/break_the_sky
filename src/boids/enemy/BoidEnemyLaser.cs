@@ -16,8 +16,8 @@ public class BoidEnemyLaser : BoidEnemyBase
     private MeshInstance _rotor;
     private MeshInstance _laserMesh;
     private Area _laserArea;
-    private AudioStreamPlayer2D _sfxLaserCharge;
-    private AudioStreamPlayer2D _sfxLaserFire;
+    private AudioStreamPlayer3D _sfxLaserCharge;
+    private AudioStreamPlayer3D _sfxLaserFire;
 
     public enum LaserState
     {
@@ -39,8 +39,8 @@ public class BoidEnemyLaser : BoidEnemyBase
         _rotor = GetNode<MeshInstance>(_rotorNode);
         _laserMesh = GetNode<MeshInstance>(_laserMeshPath);
         _laserArea = GetNode<Area>(_laserAreaPath);
-        _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
-        _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
+        _sfxLaserCharge = GetNode<AudioStreamPlayer3D>(_sfxLaserChargeNode);
+        _sfxLaserFire = GetNode<AudioStreamPlayer3D>(_sfxLaserFireNode);
 
         _maxVelBase = MaxVelocity;
         _laserCooldownTimer = _laserCooldown * 0.5f;
