@@ -106,11 +106,11 @@ public class Game : Node
 
         _pendingBoidSpawn = SaveDataPlayer.Instance.InitialAllyCount;
             
-        foreach (int i in GD.Range(0, InitialPickupAddCount))
-        {
-            float f = i * Mathf.Pi * 2.0f / InitialPickupAddCount;
-            SpawnPickupAdd(new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * 80.0f, true);
-        }
+        // foreach (int i in GD.Range(0, InitialPickupAddCount))
+        // {
+        //     float f = i * Mathf.Pi * 2.0f / InitialPickupAddCount;
+        //     SpawnPickupAdd(new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * 80.0f, true);
+        // }
 
         _levels = Levels.Instance.Waves;
         // if (DebugWave >= 0)
@@ -333,7 +333,7 @@ public class Game : Node
                 {
                     _loseTimer = 2.0f;
                     _pendingLose = true;
-                    _player.QueueFree();
+                    //_player.QueueFree();
                 }
                 break;
             }

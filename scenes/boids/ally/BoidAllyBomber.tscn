@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyBomber.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/mesh/enemy_drone.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=4]
 [ext_resource path="res://assets/shader/water_mesh.shader" type="Shader" id=5]
+[ext_resource path="res://scenes/bullets/BulletBomber.tscn" type="PackedScene" id=6]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -20,11 +21,16 @@ shader_param/u_velocity = null
 
 [node name="BoidAllyBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
-_behaviours = 8
-MinVelocity = 400.0
+_behaviours = 10
+MinVelocity = 50.0
+TargetVectoringExponent = 5.0
 SlowingRadius = 100.0
 AlignmentRadius = 20.0
-MaxAngularVelocity = 10.0
+MaxAngularVelocity = 100.0
+_bulletScene = ExtResource( 6 )
+_targetAcquireRadius = 300.0
+_resupplyRadius = 50.0
+_shootRange = 75.0
 
 [node name="CollisionShape" parent="." index="0"]
 shape = SubResource( 1 )

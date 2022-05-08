@@ -8,11 +8,13 @@ public class BoidEnemyBase : BoidBase
     [Export] public float MinVelocity = 0.0f;
     [Export] public float MaxAngularVelocity = 1000.0f;
 
+    public bool IsTargetted = false;
+
     protected override BoidAlignment Alignment => BoidAlignment.Enemy;
 
-    protected override void _OnHit(float damage, bool score, Vector2 bulletVel, bool microbullet, Vector2 pos)
+    protected override void _OnHit(float damage, bool score, Vector2 bulletVel, Vector2 pos)
     {
-        base._OnHit(damage, score, bulletVel, microbullet, pos);
+        base._OnHit(damage, score, bulletVel, pos);
 
         PauseManager.Instance.PauseFlash();
         GlobalCamera.Instance.AddTrauma(HitTrauma);

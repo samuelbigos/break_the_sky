@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://src/bullets/BulletBomber.cs" type="Script" id=1]
+[ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=2]
+
+[sub_resource type="SphereMesh" id=1]
+radius = 1.5
+height = 3.0
+
+[node name="BulletBomber" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+_baseSpeed = 50.0
+
+[node name="Mesh" parent="." index="1"]
+mesh = SubResource( 1 )

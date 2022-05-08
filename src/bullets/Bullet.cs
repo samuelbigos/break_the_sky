@@ -1,18 +1,17 @@
 using Godot;
 
-
 public class Bullet : Area
 {
-	private Vector2 _velocity;
+	[Export] private float _baseSpeed = 150.0f;
+
+	protected Vector2 _velocity;
 	private BoidBase.BoidAlignment _alignment;
 	private float _playRadius;
 	private float _length = 6.0f;
 	private float _damage = 1.0f;
-	protected bool _microbullet = false;
 
 	public BoidBase.BoidAlignment Alignment => _alignment;
 	public Vector2 Velocity => _velocity;
-	public bool Microbullet => _microbullet;
 	public float Damage => _damage;
 	
 	public Vector2 GlobalPosition

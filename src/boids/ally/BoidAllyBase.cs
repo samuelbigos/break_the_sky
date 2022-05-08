@@ -10,8 +10,6 @@ public class BoidAllyBase : BoidBase
     [Export] private float _microBulletRange = 400.0f;
     [Export] private float _microBulletDamageMod = 0.25f;
     
-    [Export] private PackedScene _micoBulletScene;
-    
     [Export] private NodePath _sfxHitMicroPlayerNode;
     private AudioStreamPlayer3D _sfxHitMicroPlayer;
     
@@ -37,54 +35,54 @@ public class BoidAllyBase : BoidBase
     {
         base._Process(delta);
 
-        MaxVelocity = _game.BaseBoidSpeed;
+        //MaxVelocity = _game.BaseBoidSpeed;
 
-        if (_game.BaseMicroturrets && !_destroyed)
-        {
-            if (!IsInstanceValid(_microBulletTarget) || _microBulletTarget.Destroyed)
-            {
-                _microBulletTarget = null;
-            }
-
-            _microBulletTargetSearchTimer -= delta;
-            if (_microBulletTarget == null && _microBulletTargetSearchTimer < 0.0)
-            {
-                _microBulletTargetSearchTimer = 0.1f;
-                foreach (BoidBase enemy in _game.EnemyBoids)
-                {
-                    if ((enemy.GlobalPosition - GlobalPosition).Length() < _microBulletRange)
-                    {
-                        _microBulletTarget = enemy;
-                        _microBulletCd = (float) GD.RandRange(_microBulletCd * 0.5f, _microBulletCd * 1.5f);
-                    }
-                }
-            }
-
-            if (IsInstanceValid(_microBulletTarget))
-            {
-                if ((_microBulletTarget.GlobalPosition - GlobalPosition).Length() > _microBulletRange)
-                {
-                    _microBulletTarget = null;
-                    _microBulletTargetSearchTimer = 0.1f;
-                }
-                else
-                {
-                    _microBulletCd -= delta;
-                    if (_microBulletCd < 0.0)
-                    {
-                        _microBulletCd = (float) GD.RandRange(_microBulletCd * 0.5f, _microBulletCd * 1.5f);
-                        MicroBullet mb = _micoBulletScene.Instance() as MicroBullet;
-                        float spread = _game.BaseBoidSpread;
-                        Vector2 dir = (_microBulletTarget.GlobalPosition - GlobalPosition).Normalized();
-                        dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
-                        float damage = _game.BaseBoidDamage * _microBulletDamageMod;
-                        mb.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, damage);
-                        _game.AddChild(mb);
-                        _sfxHitMicroPlayer.Play();
-                    }
-                }
-            }
-        }
+        // if (_game.BaseMicroturrets && !_destroyed)
+        // {
+        //     if (!IsInstanceValid(_microBulletTarget) || _microBulletTarget.Destroyed)
+        //     {
+        //         _microBulletTarget = null;
+        //     }
+        //
+        //     _microBulletTargetSearchTimer -= delta;
+        //     if (_microBulletTarget == null && _microBulletTargetSearchTimer < 0.0)
+        //     {
+        //         _microBulletTargetSearchTimer = 0.1f;
+        //         foreach (BoidBase enemy in _game.EnemyBoids)
+        //         {
+        //             if ((enemy.GlobalPosition - GlobalPosition).Length() < _microBulletRange)
+        //             {
+        //                 _microBulletTarget = enemy;
+        //                 _microBulletCd = (float) GD.RandRange(_microBulletCd * 0.5f, _microBulletCd * 1.5f);
+        //             }
+        //         }
+        //     }
+        //
+        //     if (IsInstanceValid(_microBulletTarget))
+        //     {
+        //         if ((_microBulletTarget.GlobalPosition - GlobalPosition).Length() > _microBulletRange)
+        //         {
+        //             _microBulletTarget = null;
+        //             _microBulletTargetSearchTimer = 0.1f;
+        //         }
+        //         else
+        //         {
+        //             _microBulletCd -= delta;
+        //             if (_microBulletCd < 0.0)
+        //             {
+        //                 _microBulletCd = (float) GD.RandRange(_microBulletCd * 0.5f, _microBulletCd * 1.5f);
+        //                 BulletMicro mb = _micoBulletScene.Instance() as BulletMicro;
+        //                 float spread = _game.BaseBoidSpread;
+        //                 Vector2 dir = (_microBulletTarget.GlobalPosition - GlobalPosition).Normalized();
+        //                 dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
+        //                 float damage = _game.BaseBoidDamage * _microBulletDamageMod;
+        //                 mb.Init(dir * _game.BaseBulletSpeed, 0, _game.PlayRadius, damage);
+        //                 _game.AddChild(mb);
+        //                 _sfxHitMicroPlayer.Play();
+        //             }
+        //         }
+        //     }
+        // }
     }
     
     protected virtual void _Shoot(Vector2 dir)
@@ -95,7 +93,7 @@ public class BoidAllyBase : BoidBase
         _sfxShootPlayer.Play();
     }
 
-    protected bool _CanShoot(Vector2 dir)
+    protected virtual bool _CanShoot(Vector2 dir)
     {
         if (_destroyed)
             return false;

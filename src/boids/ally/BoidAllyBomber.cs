@@ -4,8 +4,16 @@ using System;
 public class BoidAllyBomber : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
-    
-    private float _shootCooldown; 
+    [Export] private float _targetAcquireRadius = 100.0f;
+    [Export] private float _resupplyRadius = 100.0f;
+    [Export] private float _shootRange = 50.0f;
+    [Export] private float _shootTargetAlignment = 0.8f;
+    [Export] private float _shootCooldown = 2.0f;
+    [Export] private float _fleeTime = 0.5f;
+
+    private bool _canShoot = false;
+    private float _shootCooldownTimer;
+    private float _fleeTimer;
     
     public override void _Ready()
     {
@@ -14,56 +22,98 @@ public class BoidAllyBomber : BoidAllyBase
 
     public override void _Process(float delta)
     {
+        if (!IsInstanceValid(_target) || _target.Destroyed)
+            _target = _player;
+        
         base._Process(delta);
+
+        // targeting
+        if (_canShoot && _target == _player)
+        {
+            AcquireTarget();
+        }
+        
+        if (_target is BoidEnemyBase)
+        {
+            // disengage
+            float dist = (_target.GlobalPosition - GlobalPosition).LengthSquared();
+            if (dist > Mathf.Pow(_targetAcquireRadius, 2.0f))
+            {
+                ((BoidEnemyBase) _target).IsTargetted = false;
+                _target = _player;
+            }
+            
+            // shooting
+            float dot = _velocity.To2D().Normalized().Dot((_target.GlobalPosition - GlobalPosition).Normalized());
+            if (_canShoot && dist < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
+            {
+                _Shoot((_target.GlobalPosition - GlobalPosition).Normalized());
+                
+                SetSteeringBehaviourEnabled(SteeringBehaviours.Flee, true);
+                SetSteeringBehaviourEnabled(SteeringBehaviours.Pursuit, false);
+                _fleeTimer = _fleeTime;
+            }
+        }
+
+        // resupply
+        _shootCooldownTimer -= delta;
+        if (_target == _player)
+        {
+            float dist = (_target.GlobalPosition - GlobalPosition).LengthSquared();
+            if (!_canShoot && _shootCooldownTimer < 0.0f && dist < Mathf.Pow(_resupplyRadius, 2.0f))
+            {
+                _canShoot = true;
+            }
+        }
+        
+        _fleeTimer -= delta;
+        if (!_canShoot && _fleeTimer <= 0.0f || _target == _player)
+        {
+            SetSteeringBehaviourEnabled(SteeringBehaviours.Flee, false);
+            SetSteeringBehaviourEnabled(SteeringBehaviours.Pursuit, true);
+            _target = _player;
+        }
     }
-    
-    protected override void DoSteering(float delta)
+
+    private void AcquireTarget()
     {
-        Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
-        Vector2 steering = Vector2.Zero;
+        BoidEnemyBase target = null;
+        foreach (BoidEnemyBase enemy in _game.EnemyBoids)
+        {
+            if ((enemy.GlobalPosition - GlobalPosition).LengthSquared() > Mathf.Pow(_targetAcquireRadius, 2.0f))
+                continue;
+            
+            target = enemy;
+            
+            if (enemy.IsTargetted) // prioritise enemies already targetted lower to avoid overkill
+                continue;
 
-        if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
-        {
-            steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
+            target = enemy;
         }
-        if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
+        
+        if (target != null)
         {
-            steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
+            target.IsTargetted = true;
+            _target = target;
         }
-        if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
-        {
-            steering += _SteeringSeparation(_game.AllBoids, _game.BaseBoidGrouping * 0.66f);
-        }
-        if ((_behaviours & (int) SteeringBehaviours.EdgeRepulsion) != 0)
-        {
-            steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
-        }
-
-        // limit angular velocity
-        if (_velocity.LengthSquared() > 0)
-        {
-            Vector2 linearComp = _velocity.To2D().Normalized() * steering.Length() * steering.Normalized().Dot(_velocity.To2D().Normalized());
-            Vector2 tangent = new Vector2(_velocity.z, -_velocity.x);
-            Vector2 angularComp = tangent.Normalized() * steering.Length() * steering.Normalized().Dot(tangent.Normalized());
-            steering = linearComp + angularComp.Normalized() * Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
-        }
-
-        steering = steering.Truncate(MaxVelocity);
-        _velocity += steering.To3D() * delta;
-        _velocity = _velocity.Truncate(MaxVelocity);
     }
-    
+
     protected override void _Shoot(Vector2 dir)
     {
         base._Shoot(dir);
         
-        _shootCooldown = _game.BaseBoidReload;
-        Bullet bullet = _bulletScene.Instance() as Bullet;
-        float spread = _game.BaseBoidSpread;
-        dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
-        bullet.Init(dir * _game.BaseBulletSpeed, Alignment, _game.PlayRadius, _game.BaseBoidDamage);
-        _game.AddChild(bullet);
-        bullet.GlobalPosition = GlobalPosition;
+        BulletBomber bullet = _bulletScene.Instance() as BulletBomber;
+        if (bullet != null)
+        {
+            bullet.Init(dir * _game.BaseBulletSpeed, Alignment, _game.PlayRadius, _game.BaseBoidDamage);
+            _game.AddChild(bullet);
+            bullet.GlobalPosition = GlobalPosition;
+            bullet.Target = _target;
+        }
+
         _game.PushBack(this);
+
+        _canShoot = false;
+        _shootCooldownTimer = _shootCooldown;
     }
 }
