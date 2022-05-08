@@ -1,12 +1,10 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://assets/material/water_mat.tres" type="Material" id=1]
-[ext_resource path="res://src/Game.cs" type="Script" id=2]
+[ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
 [ext_resource path="res://scenes/boids/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=4]
-[ext_resource path="res://addons/imgui-godot/ImGuiNode.cs" type="Script" id=5]
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyDriller.tscn" type="PackedScene" id=6]
-[ext_resource path="res://scenes/boids/ally/BoidAllyDrone.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/pickups/PickupAdd.tscn" type="PackedScene" id=8]
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyLaser.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/material/water_wave_mat.tres" type="Material" id=10]
@@ -32,18 +30,15 @@ viewport_path = NodePath("WaveBlurY")
 
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
-ImGuiNodePath = NodePath("CanvasLayer/ImGuiNode")
 _playerPath = NodePath("Player3D")
 _mouseCursorPath = NodePath("MouseCursor")
 _waterPath = NodePath("Water")
-_boidAllyScene = ExtResource( 7 )
 _pickupAddScene = ExtResource( 8 )
 _enemyDrillerScene = ExtResource( 6 )
 _enemyLaserScene = ExtResource( 9 )
 _enemyBeaconScene = ExtResource( 11 )
 _enemyCarrierScene = ExtResource( 14 )
 InitialPickupAddCount = 0
-InitialBoidCount = 10
 PlayRadius = 200.0
 BaseBoidDamage = 3.0
 BaseBoidSpeed = 1000.0
@@ -144,13 +139,11 @@ shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
 [node name="MouseCursor" type="MeshInstance" parent="."]
+visible = false
 mesh = SubResource( 4 )
 material/0 = null
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="ImGuiNode" type="Node2D" parent="CanvasLayer"]
-script = ExtResource( 5 )
 
 [node name="DebugRect1" type="TextureRect" parent="CanvasLayer"]
 visible = false

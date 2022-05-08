@@ -2,6 +2,8 @@ using Godot;
 
 public static class Utils
 {
+    public static RandomNumberGenerator Rng = new RandomNumberGenerator();
+    
     public static Vector2 To2D(this Vector3 vec)
     {
         return new Vector2(vec.x, vec.z);

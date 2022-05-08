@@ -2,10 +2,11 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public class DataCity : DataEntry
+public class DataAllyBoid : DataEntry
 {
     [Export] public string DisplayName;
-    [Export] public List<NodePath> Connections;
+    [Export] public PackedScene Scene;
+    [Export] public Mesh Mesh;
 
     public override void _Ready()
     {

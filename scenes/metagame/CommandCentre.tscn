@@ -1,18 +1,25 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=28 format=2]
 
-[ext_resource path="res://assets/material/map_mat.tres" type="Material" id=1]
-[ext_resource path="res://assets/mesh/map/north_america.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://assets/mesh/map/arctic.obj" type="ArrayMesh" id=3]
-[ext_resource path="res://assets/mesh/map/south_america.obj" type="ArrayMesh" id=4]
-[ext_resource path="res://assets/mesh/map/uk.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/mesh/map/europe.obj" type="ArrayMesh" id=6]
-[ext_resource path="res://assets/mesh/map/asia.obj" type="ArrayMesh" id=7]
-[ext_resource path="res://assets/mesh/map/australia.obj" type="ArrayMesh" id=8]
-[ext_resource path="res://assets/mesh/map/africa.obj" type="ArrayMesh" id=9]
-[ext_resource path="res://assets/mesh/map/antarctica.obj" type="ArrayMesh" id=10]
-[ext_resource path="res://src/metagame/Map.cs" type="Script" id=11]
-[ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=12]
-[ext_resource path="res://scenes/gui/map/CityMarker.tscn" type="PackedScene" id=13]
+[ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=1]
+[ext_resource path="res://src/metagame/CommandCentre.cs" type="Script" id=2]
+[ext_resource path="res://scenes/gui/map/CityMarker.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/material/map_mat.tres" type="Material" id=4]
+[ext_resource path="res://assets/mesh/map/north_america.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/mesh/map/arctic.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/mesh/map/south_america.obj" type="ArrayMesh" id=7]
+[ext_resource path="res://assets/mesh/map/uk.obj" type="ArrayMesh" id=8]
+[ext_resource path="res://assets/mesh/map/europe.obj" type="ArrayMesh" id=9]
+[ext_resource path="res://assets/mesh/map/asia.obj" type="ArrayMesh" id=10]
+[ext_resource path="res://assets/mesh/map/australia.obj" type="ArrayMesh" id=11]
+[ext_resource path="res://assets/mesh/map/africa.obj" type="ArrayMesh" id=12]
+[ext_resource path="res://assets/mesh/map/antarctica.obj" type="ArrayMesh" id=13]
+[ext_resource path="res://src/metagame/CommandCentreMap.cs" type="Script" id=14]
+[ext_resource path="res://src/metagame/CommandCentreDeploy.cs" type="Script" id=15]
+[ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=16]
+[ext_resource path="res://scenes/metagame/Game.tscn" type="PackedScene" id=17]
+
+[sub_resource type="SphereShape" id=10]
+radius = 0.065696
 
 [sub_resource type="ConcavePolygonShape" id=1]
 data = PoolVector3Array( 0.0429, 0, -0.0002, 0.1263, 0, 0.0593, 0.0089, 0, 0.0938, -0.7083, 0, -0.3995, -0.6882, 0, -0.4668, -0.7061, 0, -0.3699, 0.0663, 0, 0.1458, 0.0609, 0, 0.132, 0.1393, 0, 0.1259, 0.0619, 0, 0.312, 0.0641, 0, 0.3366, 0.0571, 0, 0.3009, 0.2649, 0, 0.3245, 0.2436, 0, 0.3607, 0.1945, 0, 0.3085, 0.1747, 0, -0.0289, 0.1391, 0, 0.0246, 0.0631, 0, -0.0461, 0.0494, 0, -0.014, 0.059, 0, -0.0323, 0.0507, 0, -0.0043, 0.0631, 0, -0.0461, 0.1391, 0, 0.0246, 0.059, 0, -0.0323, 0.1391, 0, 0.0246, 0.131, 0, 0.0447, 0.0507, 0, -0.0043, 0.059, 0, -0.0323, 0.1391, 0, 0.0246, 0.0507, 0, -0.0043, 0.1371, 0, 0.0692, 0.1349, 0, 0.0848, 0.1263, 0, 0.0593, 0.131, 0, 0.0447, 0.1263, 0, 0.0593, 0.0507, 0, -0.0043, 0.0315, 0, -0.0016, 0.0429, 0, -0.0002, -0.0075, 0, 0.0498, 0.02, 0, -0.0029, 0.0315, 0, -0.0016, -0.0075, 0, 0.0498, 0.0507, 0, -0.0043, 0.1263, 0, 0.0593, 0.0429, 0, -0.0002, 0.1349, 0, 0.0848, 0.1358, 0, 0.1058, 0.01, 0, 0.1056, 0.1263, 0, 0.0593, 0.1349, 0, 0.0848, 0.0089, 0, 0.0938, 0.01, 0, 0.1056, 0.0089, 0, 0.0938, 0.1349, 0, 0.0848, -0.0014, 0, 0.0739, -0.0018, 0, 0.0678, 0.0089, 0, 0.0938, -0.0098, 0, 0.0635, -0.0075, 0, 0.0498, -0.0018, 0, 0.0678, -0.2928, 0, 0.0233, -0.3195, 0, 0.002, -0.0217, 0, 0.0138, -0.0018, 0, 0.0678, -0.0075, 0, 0.0498, 0.0429, 0, -0.0002, 0.0089, 0, 0.0938, -0.0018, 0, 0.0678, 0.0429, 0, -0.0002, -0.3195, 0, 0.002, 0.0182, 0, -0.0172, -0.0217, 0, 0.0138, -0.0217, 0, 0.0138, 0.0182, 0, -0.0172, 0.02, 0, -0.0029, -0.0075, 0, 0.0498, -0.0217, 0, 0.0138, 0.02, 0, -0.0029, 0.1747, 0, -0.0289, 0.0631, 0, -0.0461, 0.231, 0, -0.078, 0.2601, 0, -0.1169, 0.231, 0, -0.078, 0.2003, 0, -0.2324, 0.3025, 0, -0.1956, 0.2601, 0, -0.1169, 0.232, 0, -0.2324, 0.2003, 0, -0.2324, 0.231, 0, -0.078, 0.0631, 0, -0.0461, 0.3112, 0, -0.2523, 0.3025, 0, -0.1956, 0.2918, 0, -0.2406, 0.2918, 0, -0.2406, 0.3025, 0, -0.1956, 0.232, 0, -0.2324, 0.2601, 0, -0.1169, 0.2003, 0, -0.2324, 0.232, 0, -0.2324, 0.0631, 0, -0.0461, 0.0452, 0, -0.0562, 0.2003, 0, -0.2324, 0.1885, 0, -0.2682, 0.1906, 0, -0.2477, 0.1385, 0, -0.305, 0.1906, 0, -0.2477, 0.2003, 0, -0.2324, 0.0452, 0, -0.0562, 0.1385, 0, -0.305, 0.1906, 0, -0.2477, 0.0452, 0, -0.0562, 0.1154, 0, -0.3581, 0.1385, 0, -0.305, 0.0935, 0, -0.3852, 0.0899, 0, -0.4133, 0.0935, 0, -0.3852, 0.074, 0, -0.4379, 0.0725, 0, -0.4619, 0.074, 0, -0.4379, 0.0372, 0, -0.5156, 0.0168, 0, -0.5626, 0.0372, 0, -0.5156, -0.0372, 0, -0.5834, -0.0028, 0, -0.591, 0.0168, 0, -0.5626, -0.0372, 0, -0.5834, 0.074, 0, -0.4379, 0.0935, 0, -0.3852, -0.1854, 0, -0.5697, 0.0372, 0, -0.5156, 0.074, 0, -0.4379, -0.1733, 0, -0.5719, -0.1733, 0, -0.5719, 0.074, 0, -0.4379, -0.1854, 0, -0.5697, -0.0372, 0, -0.5834, 0.0372, 0, -0.5156, -0.0739, 0, -0.5879, 0.1385, 0, -0.305, 0.0452, 0, -0.0562, 0.0269, 0, -0.0465, 0.0935, 0, -0.3852, 0.1385, 0, -0.305, 0.0269, 0, -0.0465, -0.0739, 0, -0.5879, 0.0372, 0, -0.5156, -0.1733, 0, -0.5719, -0.0993, 0, -0.5949, -0.0739, 0, -0.5879, -0.1733, 0, -0.5719, 0.0269, 0, -0.0465, 0.0195, 0, -0.0337, -0.3122, 0, -0.0914, 0.0935, 0, -0.3852, 0.0269, 0, -0.0465, -0.3211, 0, -0.1194, 0.0269, 0, -0.0465, -0.3122, 0, -0.0914, -0.3211, 0, -0.1194, 0.0182, 0, -0.0172, -0.3195, 0, 0.002, -0.3192, 0, -0.0624, 0.0195, 0, -0.0337, 0.0182, 0, -0.0172, -0.3122, 0, -0.0914, 0.0182, 0, -0.0172, -0.3192, 0, -0.0624, -0.3122, 0, -0.0914, -0.3288, 0, -0.0251, -0.3192, 0, -0.0624, -0.3195, 0, 0.002, -0.1239, 0, -0.6079, -0.0993, 0, -0.5949, -0.1624, 0, -0.5815, -0.0993, 0, -0.5949, -0.1733, 0, -0.5719, -0.1624, 0, -0.5815, -0.1369, 0, -0.6149, -0.1239, 0, -0.6079, -0.1624, 0, -0.5815, -0.1637, 0, -0.6083, -0.1369, 0, -0.6149, -0.1624, 0, -0.5815, -0.1682, 0, -0.5942, -0.1637, 0, -0.6083, -0.1624, 0, -0.5815, -0.2086, 0, -0.5844, -0.1854, 0, -0.5697, -0.2274, 0, -0.5863, -0.1854, 0, -0.5697, 0.0935, 0, -0.3852, -0.3211, 0, -0.1194, -0.1854, 0, -0.5697, -0.3211, 0, -0.1194, -0.3355, 0, -0.1249, -0.2274, 0, -0.5863, -0.1854, 0, -0.5697, -0.3893, 0, -0.1494, -0.1854, 0, -0.5697, -0.3355, 0, -0.1249, -0.3893, 0, -0.1494, -0.3737, 0, -0.1201, -0.3861, 0, -0.1335, -0.3355, 0, -0.1249, -0.2373, 0, -0.6099, -0.2325, 0, -0.5968, -0.2558, 0, -0.6114, -0.2325, 0, -0.5968, -0.2274, 0, -0.5863, -0.2558, 0, -0.6114, -0.2274, 0, -0.5863, -0.3893, 0, -0.1494, -0.4046, 0, -0.1558, -0.3861, 0, -0.1335, -0.3893, 0, -0.1494, -0.3355, 0, -0.1249, -0.2274, 0, -0.5863, -0.2928, 0, -0.6223, -0.2558, 0, -0.6114, -0.3007, 0, -0.6468, -0.3049, 0, -0.6328, -0.3482, 0, -0.6831, -0.3017, 0, -0.6691, -0.3007, 0, -0.6468, -0.3482, 0, -0.6831, -0.2928, 0, -0.6223, -0.2274, 0, -0.5863, -0.4046, 0, -0.1558, -0.3049, 0, -0.6328, -0.2928, 0, -0.6223, -0.4856, 0, -0.6586, -0.2928, 0, -0.6223, -0.4046, 0, -0.1558, -0.6121, 0, -0.5534, -0.2928, 0, -0.6223, -0.6121, 0, -0.5534, -0.4932, 0, -0.6554, -0.2982, 0, -0.679, -0.3017, 0, -0.6691, -0.3068, 0, -0.6863, -0.6121, 0, -0.5534, -0.4046, 0, -0.1558, -0.433, 0, -0.1545, -0.4856, 0, -0.6586, -0.2928, 0, -0.6223, -0.4932, 0, -0.6554, -0.3068, 0, -0.6863, -0.3017, 0, -0.6691, -0.3148, 0, -0.6905, -0.3275, 0, -0.6889, -0.3148, 0, -0.6905, -0.3017, 0, -0.6691, -0.3482, 0, -0.6831, -0.3275, 0, -0.6889, -0.3017, 0, -0.6691, -0.3721, 0, -0.6857, -0.3482, 0, -0.6831, -0.3049, 0, -0.6328, -0.4014, 0, -0.6835, -0.3721, 0, -0.6857, -0.3049, 0, -0.6328, -0.4346, 0, -0.68, -0.4014, 0, -0.6835, -0.3049, 0, -0.6328, -0.4636, 0, -0.6704, -0.4346, 0, -0.68, -0.3049, 0, -0.6328, -0.4856, 0, -0.6586, -0.4636, 0, -0.6704, -0.3049, 0, -0.6328, -0.4884, 0, -0.1296, -0.4986, 0, -0.1277, -0.5091, 0, -0.1335, -0.4524, 0, -0.1478, -0.4884, 0, -0.1296, -0.5091, 0, -0.1335, -0.433, 0, -0.1545, -0.4524, 0, -0.1478, -0.7057, 0, -0.3457, -0.5569, 0, -0.1271, -0.578, 0, -0.1201, -0.5974, 0, -0.1357, -0.5327, 0, -0.137, -0.5569, 0, -0.1271, -0.5974, 0, -0.1357, -0.5091, 0, -0.1335, -0.5327, 0, -0.137, -0.4524, 0, -0.1478, -0.6121, 0, -0.5534, -0.433, 0, -0.1545, -0.6302, 0, -0.5346, -0.5193, 0, -0.657, -0.4932, 0, -0.6554, -0.5528, 0, -0.635, -0.5362, 0, -0.6647, -0.5318, 0, -0.6599, -0.5416, 0, -0.6621, -0.5528, 0, -0.635, -0.4932, 0, -0.6554, -0.6028, 0, -0.5694, -0.5318, 0, -0.6599, -0.5193, 0, -0.657, -0.5528, 0, -0.635, -0.4524, 0, -0.1478, -0.5327, 0, -0.137, -0.7057, 0, -0.3457, -0.4932, 0, -0.6554, -0.6121, 0, -0.5534, -0.6028, 0, -0.5694, -0.5416, 0, -0.6621, -0.5318, 0, -0.6599, -0.5528, 0, -0.635, -0.5786, 0, -0.6188, -0.5528, 0, -0.635, -0.6028, 0, -0.5694, -0.5926, 0, -0.6028, -0.5786, 0, -0.6188, -0.6028, 0, -0.5694, -0.6019, 0, -0.5895, -0.5926, 0, -0.6028, -0.6028, 0, -0.5694, -0.6047, 0, -0.578, -0.6019, 0, -0.5895, -0.6028, 0, -0.5694, -0.5327, 0, -0.137, -0.5974, 0, -0.1357, -0.6404, 0, -0.1685, -0.6302, 0, -0.5346, -0.433, 0, -0.1545, -0.7061, 0, -0.3699, -0.6404, 0, -0.1685, -0.6576, 0, -0.1819, -0.6678, 0, -0.2071, -0.6404, 0, -0.1685, -0.6678, 0, -0.2071, -0.5327, 0, -0.137, -0.6665, 0, -0.1911, -0.6678, 0, -0.2071, -0.6576, 0, -0.1819, -0.6927, 0, -0.2326, -0.7038, 0, -0.2437, -0.7166, 0, -0.28, -0.6764, 0, -0.2163, -0.6927, 0, -0.2326, -0.7057, 0, -0.3457, -0.6678, 0, -0.2071, -0.6764, 0, -0.2163, -0.7057, 0, -0.3457, -0.6678, 0, -0.2071, -0.7057, 0, -0.3457, -0.5327, 0, -0.137, -0.7061, 0, -0.3699, -0.433, 0, -0.1545, -0.7057, 0, -0.3457, -0.6554, 0, -0.5283, -0.6414, 0, -0.5315, -0.6614, 0, -0.5098, -0.6414, 0, -0.5315, -0.6302, 0, -0.5346, -0.6614, 0, -0.5098, -0.715, 0, -0.2539, -0.7194, 0, -0.2644, -0.7166, 0, -0.28, -0.7038, 0, -0.2437, -0.715, 0, -0.2539, -0.7166, 0, -0.28, -0.7057, 0, -0.3457, -0.6927, 0, -0.2326, -0.7166, 0, -0.28, -0.6755, 0, -0.5031, -0.6614, 0, -0.5098, -0.6818, 0, -0.4916, -0.6614, 0, -0.5098, -0.6302, 0, -0.5346, -0.6831, 0, -0.4779, -0.721, 0, -0.2918, -0.7236, 0, -0.3027, -0.7153, 0, -0.3224, -0.7166, 0, -0.28, -0.721, 0, -0.2918, -0.7153, 0, -0.3224, -0.6818, 0, -0.4916, -0.6614, 0, -0.5098, -0.6831, 0, -0.4779, -0.7019, 0, -0.4579, -0.6882, 0, -0.4668, -0.7041, 0, -0.4438, -0.6882, 0, -0.4668, -0.6831, 0, -0.4779, -0.6302, 0, -0.5346, -0.7153, 0, -0.3224, -0.7057, 0, -0.3457, -0.7166, 0, -0.28, -0.7099, 0, -0.3811, -0.7083, 0, -0.3995, -0.7061, 0, -0.3699, -0.6302, 0, -0.5346, -0.7061, 0, -0.3699, -0.6882, 0, -0.4668, -0.7041, 0, -0.4438, -0.6882, 0, -0.4668, -0.7083, 0, -0.3995, -0.7166, 0, -0.4212, -0.7041, 0, -0.4438, -0.7083, 0, -0.3995, -0.2928, 0, 0.0233, -0.0217, 0, 0.0138, -0.2791, 0, 0.038, -0.2743, 0, 0.0606, -0.2791, 0, 0.038, -0.0217, 0, 0.0138, -0.2673, 0, 0.0816, -0.2743, 0, 0.0606, -0.0217, 0, 0.0138, -0.2673, 0, 0.1141, -0.2634, 0, 0.1052, -0.2647, 0, 0.1253, -0.2647, 0, 0.1253, -0.2634, 0, 0.1052, -0.0217, 0, 0.0593, 0.0498, 0, 0.1194, -0.2647, 0, 0.1253, 0.0032, 0, 0.1037, 0.0498, 0, 0.1194, 0.0032, 0, 0.1037, 0.01, 0, 0.1056, -0.2673, 0, 0.0816, -0.0217, 0, 0.0138, -0.0217, 0, 0.0593, -0.2634, 0, 0.1052, -0.2673, 0, 0.0816, -0.0217, 0, 0.0593, -0.0075, 0, 0.0804, 0.0032, 0, 0.1037, -0.2647, 0, 0.1253, -0.0217, 0, 0.0593, -0.0075, 0, 0.0804, -0.2647, 0, 0.1253, 0.1358, 0, 0.1058, 0.1393, 0, 0.1259, 0.0609, 0, 0.132, 0.01, 0, 0.1056, 0.1358, 0, 0.1058, 0.0498, 0, 0.1194, 0.1393, 0, 0.1259, 0.1518, 0, 0.1399, 0.1524, 0, 0.1466, 0.0498, 0, 0.1194, 0.1358, 0, 0.1058, 0.0609, 0, 0.132, 0.1524, 0, 0.1466, 0.1511, 0, 0.168, 0.1393, 0, 0.1259, 0.1556, 0, 0.1884, 0.1533, 0, 0.204, 0.0693, 0, 0.1974, 0.1511, 0, 0.168, 0.1556, 0, 0.1884, 0.0693, 0, 0.1974, 0.0693, 0, 0.1974, 0.0651, 0, 0.1867, 0.1511, 0, 0.168, 0.0624, 0, 0.1748, 0.0689, 0, 0.1546, 0.0651, 0, 0.1867, 0.0651, 0, 0.1867, 0.0689, 0, 0.1546, 0.1511, 0, 0.168, 0.0689, 0, 0.1546, 0.0663, 0, 0.1458, 0.1393, 0, 0.1259, 0.1511, 0, 0.168, 0.0689, 0, 0.1546, 0.1393, 0, 0.1259, -0.2647, 0, 0.1253, 0.0498, 0, 0.1194, -0.2552, 0, 0.1454, -0.2619, 0, 0.1693, -0.2542, 0, 0.1597, -0.2819, 0, 0.218, -0.2778, 0, 0.2002, -0.2619, 0, 0.1693, -0.2819, 0, 0.218, -0.2552, 0, 0.1454, 0.0498, 0, 0.1194, -0.2542, 0, 0.1597, 0.0555, 0, 0.1396, 0.0548, 0, 0.1626, 0.0498, 0, 0.1194, 0.0548, 0, 0.1626, 0.0525, 0, 0.176, 0.0498, 0, 0.1194, -0.2542, 0, 0.1597, 0.0498, 0, 0.1194, 0.0525, 0, 0.176, -0.2542, 0, 0.1597, 0.0525, 0, 0.176, 0.0586, 0, 0.1951, -0.2851, 0, 0.2422, -0.2819, 0, 0.218, -0.2692, 0, 0.2954, -0.2854, 0, 0.2639, -0.2851, 0, 0.2422, -0.2781, 0, 0.2808, -0.2577, 0, 0.3321, -0.2692, 0, 0.2954, -0.2437, 0, 0.3483, -0.2781, 0, 0.2808, -0.2851, 0, 0.2422, -0.2692, 0, 0.2954, -0.2692, 0, 0.2954, -0.2819, 0, 0.218, -0.2542, 0, 0.1597, -0.2692, 0, 0.2954, -0.2542, 0, 0.1597, 0.0586, 0, 0.1951, -0.2437, 0, 0.3483, -0.2692, 0, 0.2954, 0.0571, 0, 0.3009, -0.2462, 0, 0.3687, -0.2437, 0, 0.3483, -0.2316, 0, 0.4293, -0.2446, 0, 0.3961, -0.2462, 0, 0.3687, -0.2316, 0, 0.4293, -0.2396, 0, 0.4165, -0.2446, 0, 0.3961, -0.2316, 0, 0.4293, -0.2204, 0, 0.449, -0.2316, 0, 0.4293, -0.2093, 0, 0.4618, -0.2061, 0, 0.4809, -0.2093, 0, 0.4618, -0.1937, 0, 0.4984, -0.1933, 0, 0.5185, -0.1876, 0, 0.515, -0.1918, 0, 0.5357, -0.1978, 0, 0.5223, -0.1933, 0, 0.5185, -0.1965, 0, 0.5293, -0.1965, 0, 0.5293, -0.1933, 0, 0.5185, -0.1918, 0, 0.5357, -0.1854, 0, 0.5478, -0.1918, 0, 0.5357, -0.1717, 0, 0.5523, -0.1918, 0, 0.5357, -0.1876, 0, 0.515, -0.1717, 0, 0.5523, -0.1615, 0, 0.5529, -0.1717, 0, 0.5523, -0.1876, 0, 0.515, -0.1452, 0, 0.5507, -0.1615, 0, 0.5529, -0.1876, 0, 0.515, -0.1363, 0, 0.5469, -0.1452, 0, 0.5507, -0.1876, 0, 0.515, -0.1876, 0, 0.515, -0.1937, 0, 0.4984, -0.1363, 0, 0.5469, -0.2093, 0, 0.4618, -0.2316, 0, 0.4293, -0.2437, 0, 0.3483, -0.1937, 0, 0.4984, -0.2093, 0, 0.4618, -0.0296, 0, 0.5045, -0.1363, 0, 0.5469, -0.1937, 0, 0.4984, -0.1095, 0, 0.544, -0.0866, 0, 0.5437, -0.1095, 0, 0.544, -0.071, 0, 0.5376, -0.1095, 0, 0.544, -0.1937, 0, 0.4984, -0.0296, 0, 0.5045, -0.2692, 0, 0.2954, 0.0586, 0, 0.1951, 0.0571, 0, 0.3009, -0.2093, 0, 0.4618, -0.2437, 0, 0.3483, 0.024, 0, 0.4051, -0.1095, 0, 0.544, -0.0296, 0, 0.5045, -0.0503, 0, 0.5252, -0.071, 0, 0.5376, -0.1095, 0, 0.544, -0.0503, 0, 0.5252, -0.0098, 0, 0.4784, -0.0296, 0, 0.5045, -0.2093, 0, 0.4618, 0.0182, 0, 0.4487, 0.0042, 0, 0.4564, 0.0259, 0, 0.4207, 0.0042, 0, 0.4564, -0.0098, 0, 0.4784, -0.2093, 0, 0.4618, 0.0693, 0, 0.1974, 0.1533, 0, 0.204, 0.147, 0, 0.2237, 0.0663, 0, 0.2012, 0.0693, 0, 0.1974, 0.1212, 0, 0.2486, 0.0693, 0, 0.1974, 0.147, 0, 0.2237, 0.1368, 0, 0.2384, 0.0586, 0, 0.1951, 0.0663, 0, 0.2012, 0.0625, 0, 0.2932, 0.0586, 0, 0.1951, 0.0625, 0, 0.2932, 0.0571, 0, 0.3009, 0.0042, 0, 0.4564, -0.2093, 0, 0.4618, 0.024, 0, 0.4051, 0.0259, 0, 0.4207, 0.0042, 0, 0.4564, 0.024, 0, 0.4051, 0.0558, 0, 0.3837, 0.0326, 0, 0.3926, 0.067, 0, 0.3566, 0.0651, 0, 0.3754, 0.0558, 0, 0.3837, 0.067, 0, 0.3566, 0.0692, 0, 0.3662, 0.0651, 0, 0.3754, 0.067, 0, 0.3566, 0.024, 0, 0.4051, -0.2437, 0, 0.3483, 0.0326, 0, 0.3926, 0.0663, 0, 0.2012, 0.1212, 0, 0.2486, 0.0992, 0, 0.2633, 0.0693, 0, 0.1974, 0.1368, 0, 0.2384, 0.1212, 0, 0.2486, 0.0326, 0, 0.3926, -0.2437, 0, 0.3483, 0.0571, 0, 0.3009, 0.067, 0, 0.3566, 0.0326, 0, 0.3926, 0.0641, 0, 0.3366, 0.0663, 0, 0.2012, 0.0992, 0, 0.2633, 0.0848, 0, 0.2738, 0.0663, 0, 0.2012, 0.0848, 0, 0.2738, 0.0625, 0, 0.2932, 0.0641, 0, 0.3366, 0.0326, 0, 0.3926, 0.0571, 0, 0.3009, 0.2009, 0, 0.2435, 0.235, 0, 0.2232, 0.1999, 0, 0.2925, 0.1935, 0, 0.2552, 0.2009, 0, 0.2435, 0.1999, 0, 0.2925, 0.2734, 0, 0.1677, 0.2766, 0, 0.1613, 0.2937, 0, 0.1816, 0.266, 0, 0.1965, 0.2734, 0, 0.1677, 0.2937, 0, 0.1816, 0.235, 0, 0.2232, 0.266, 0, 0.1965, 0.2873, 0, 0.2424, 0.1999, 0, 0.2925, 0.235, 0, 0.2232, 0.2852, 0, 0.2818, 0.235, 0, 0.2232, 0.2873, 0, 0.2424, 0.2852, 0, 0.2818, 0.1839, 0, 0.3266, 0.1945, 0, 0.3085, 0.1881, 0, 0.3437, 0.1945, 0, 0.3085, 0.1999, 0, 0.2925, 0.2649, 0, 0.3245, 0.2958, 0, 0.2008, 0.2958, 0, 0.2264, 0.266, 0, 0.1965, 0.2937, 0, 0.1816, 0.2958, 0, 0.2008, 0.266, 0, 0.1965, 0.2852, 0, 0.2818, 0.2649, 0, 0.3245, 0.1999, 0, 0.2925, 0.2958, 0, 0.2264, 0.2873, 0, 0.2424, 0.266, 0, 0.1965, 0.1881, 0, 0.3437, 0.1945, 0, 0.3085, 0.2436, 0, 0.3607, 0.1903, 0, 0.3789, 0.1881, 0, 0.3437, 0.2436, 0, 0.3607, 0.2041, 0, 0.397, 0.1903, 0, 0.3789, 0.2233, 0, 0.3949, 0.2361, 0, 0.3831, 0.2233, 0, 0.3949, 0.1903, 0, 0.3789, 0.2436, 0, 0.3607, 0.2361, 0, 0.3831, 0.1903, 0, 0.3789 )
@@ -41,137 +48,192 @@ data = PoolVector3Array( -1.3483, 0, 0.6866, -1.3462, 0, 0.7045, -1.362, 0, 0.66
 [sub_resource type="ConcavePolygonShape" id=9]
 data = PoolVector3Array( -0.4983, 0, -0.9337, -0.4975, 0, -0.9456, -0.4848, 0, -0.9289, -0.5685, 0, -0.9706, -0.5596, 0, -0.9792, -0.5634, 0, -0.9578, -0.4563, 0, -1.0272, -0.4721, 0, -1.009, -0.4824, 0, -1.0375, -0.4697, 0, -1.0526, -0.4824, 0, -1.0375, -0.5059, 0, -1.0416, -0.5165, 0, -1.0349, -0.5108, 0, -1.0362, -0.5124, 0, -1.0282, -0.5188, 0, -1.0285, -0.5165, 0, -1.0349, -0.5124, 0, -1.0282, -0.5059, 0, -1.0416, -0.4824, 0, -1.0375, -0.5124, 0, -1.0282, -0.5108, 0, -1.0362, -0.5059, 0, -1.0416, -0.5124, 0, -1.0282, -0.4468, 0, -0.9813, -0.4412, 0, -0.9583, -0.4809, 0, -0.963, -0.4721, 0, -1.009, -0.4468, 0, -0.9813, -0.4816, 0, -0.9884, -0.4824, 0, -1.0375, -0.4721, 0, -1.009, -0.5086, 0, -1.0155, -0.5124, 0, -1.0282, -0.5086, 0, -1.0155, -0.5127, 0, -1.0225, -0.5175, 0, -1.0174, -0.5127, 0, -1.0225, -0.5159, 0, -1.0145, -0.5124, 0, -1.0282, -0.4824, 0, -1.0375, -0.5086, 0, -1.0155, -0.4816, 0, -0.9884, -0.4468, 0, -0.9813, -0.484, 0, -0.9765, -0.4246, 0, -0.9543, -0.4198, 0, -0.9464, -0.4285, 0, -0.9353, -0.4412, 0, -0.9583, -0.4246, 0, -0.9543, -0.4285, 0, -0.9353, -0.4285, 0, -0.9353, -0.4341, 0, -0.9321, -0.4412, 0, -0.9583, -0.4238, 0, -0.9273, -0.4404, 0, -0.9186, -0.4341, 0, -0.9321, -0.4404, 0, -0.9186, -0.4547, 0, -0.9186, -0.4341, 0, -0.9321, -0.5159, 0, -1.0145, -0.5127, 0, -1.0225, -0.5086, 0, -1.0155, -0.5124, 0, -1.0082, -0.5086, 0, -1.0155, -0.5032, 0, -1.0024, -0.514, 0, -1.0027, -0.5124, 0, -1.0082, -0.5032, 0, -1.0024, -0.5124, 0, -0.9954, -0.514, 0, -1.0027, -0.5076, 0, -0.9973, -0.5076, 0, -0.9973, -0.514, 0, -1.0027, -0.5032, 0, -1.0024, -0.5086, 0, -1.0155, -0.4721, 0, -1.009, -0.4981, 0, -0.9999, -0.4721, 0, -1.009, -0.4816, 0, -0.9884, -0.4981, 0, -0.9999, -0.5038, 0, -0.9884, -0.4981, 0, -0.9999, -0.4816, 0, -0.9884, -0.5032, 0, -1.0024, -0.5086, 0, -1.0155, -0.4981, 0, -0.9999, -0.4341, 0, -0.9321, -0.4547, 0, -0.9186, -0.4412, 0, -0.9583, -0.5181, 0, -0.9067, -0.5086, 0, -0.9178, -0.4832, 0, -0.9146, -0.4547, 0, -0.9186, -0.4832, 0, -0.9146, -0.4848, 0, -0.925, -0.4412, 0, -0.9583, -0.4547, 0, -0.9186, -0.4848, 0, -0.9289, -0.4547, 0, -0.9186, -0.4848, 0, -0.925, -0.4848, 0, -0.9289, -0.4896, 0, -0.9828, -0.4816, 0, -0.9884, -0.484, 0, -0.9765, -0.4991, 0, -0.9567, -0.4809, 0, -0.963, -0.4975, 0, -0.9456, -0.4809, 0, -0.963, -0.484, 0, -0.9765, -0.4468, 0, -0.9813, -0.5086, 0, -0.9178, -0.4999, 0, -0.9257, -0.4832, 0, -0.9146, -0.4999, 0, -0.9257, -0.4848, 0, -0.925, -0.4832, 0, -0.9146, -0.5118, 0, -0.9353, -0.4975, 0, -0.9456, -0.4983, 0, -0.9337, -0.4809, 0, -0.963, -0.4412, 0, -0.9583, -0.4848, 0, -0.9289, -0.4975, 0, -0.9456, -0.4809, 0, -0.963, -0.4848, 0, -0.9289, -0.5398, 0, -0.9936, -0.5245, 0, -0.9919, -0.5216, 0, -0.9725, -0.549, 0, -0.989, -0.5398, 0, -0.9936, -0.5494, 0, -0.9827, -0.5535, 0, -0.9849, -0.549, 0, -0.989, -0.5494, 0, -0.9827, -0.5596, 0, -0.9792, -0.5513, 0, -0.9788, -0.5634, 0, -0.9578, -0.5691, 0, -0.9792, -0.5596, 0, -0.9792, -0.5701, 0, -0.9747, -0.5494, 0, -0.9827, -0.5398, 0, -0.9936, -0.5216, 0, -0.9725, -0.5701, 0, -0.9747, -0.5596, 0, -0.9792, -0.5685, 0, -0.9706, -0.5513, 0, -0.9788, -0.5494, 0, -0.9827, -0.5216, 0, -0.9725, -0.5149, 0, -0.9887, -0.5111, 0, -0.9801, -0.514, 0, -0.9753, -0.5245, 0, -0.9919, -0.5149, 0, -0.9887, -0.5216, 0, -0.9725, -0.514, 0, -0.9753, -0.5216, 0, -0.9725, -0.5149, 0, -0.9887, -0.5204, 0, -0.9664, -0.5194, 0, -0.9562, -0.5325, 0, -0.9435, -0.5216, 0, -0.9725, -0.5204, 0, -0.9664, -0.5513, 0, -0.9788, -0.5513, 0, -0.9788, -0.5325, 0, -0.9435, -0.5443, 0, -0.9419, -0.5557, 0, -0.9355, -0.5663, 0, -0.932, -0.5672, 0, -0.9495, -0.5443, 0, -0.9419, -0.5557, 0, -0.9355, -0.5672, 0, -0.9495, -0.5443, 0, -0.9419, -0.5672, 0, -0.9495, -0.5634, 0, -0.9578, -0.5809, 0, -0.9412, -0.5749, 0, -0.9467, -0.5663, 0, -0.932, -0.5749, 0, -0.9467, -0.5672, 0, -0.9495, -0.5663, 0, -0.932, -0.5204, 0, -0.9664, -0.5325, 0, -0.9435, -0.5513, 0, -0.9788, -0.5443, 0, -0.9419, -0.5634, 0, -0.9578, -0.5513, 0, -0.9788, -0.5733, 0, -0.9664, -0.5685, 0, -0.9706, -0.5682, 0, -0.9635, -0.5682, 0, -0.9635, -0.5685, 0, -0.9706, -0.5634, 0, -0.9578 )
 
-[sub_resource type="SphereShape" id=10]
-radius = 0.065696
-
-[node name="Map" type="Spatial"]
-script = ExtResource( 11 )
-_cameraPath = NodePath("Camera")
-_worldNodePaths = [ NodePath("Africa"), NodePath("Antarctica"), NodePath("Arctic"), NodePath("Asia"), NodePath("Australia"), NodePath("Europe"), NodePath("NorthAmerica"), NodePath("SouthAmerica"), NodePath("UK") ]
-_worldNames = [ "", "", "", "", "", "", "", "" ]
-_worldMat = ExtResource( 1 )
-_cityContainerPath = NodePath("Cities")
-_cityMarkerScene = ExtResource( 13 )
+[node name="CommandCentre" type="Spatial"]
+script = ExtResource( 2 )
+_transitionTime = 0.5
+_gameScene = ExtResource( 17 )
+_navigationPath = NodePath("CanvasLayer/Navigation")
+_leftButtonPath = NodePath("CanvasLayer/Navigation/Left")
+_rightButtonPath = NodePath("CanvasLayer/Navigation/Right")
+_mapCameraTransformPath = NodePath("MapCameraTransform")
+_deployCameraTransformPath = NodePath("DeployCameraTransform")
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 3, 0 )
-script = ExtResource( 12 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0 )
+script = ExtResource( 1 )
 
-[node name="Africa" type="MeshInstance" parent="."]
-mesh = ExtResource( 9 )
-material/0 = null
+[node name="MapCameraTransform" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0 )
 
-[node name="StaticBody" type="StaticBody" parent="Africa"]
+[node name="DeployCameraTransform" type="Camera" parent="."]
+transform = Transform( 1.91069e-15, 1.06581e-14, -1, -4.37114e-08, 1, 1.06581e-14, 1, 4.37114e-08, 1.91069e-15, 6.08861, 2.5, 0 )
 
-[node name="CollisionShape" type="CollisionShape" parent="Africa/StaticBody"]
-shape = SubResource( 1 )
+[node name="Map" type="Spatial" parent="."]
+script = ExtResource( 14 )
+_worldNodePaths = [ NodePath("Africa"), NodePath("Antarctica"), NodePath("Arctic"), NodePath("Asia"), NodePath("Australia"), NodePath("Europe"), NodePath("NorthAmerica"), NodePath("SouthAmerica"), NodePath("UK") ]
+_worldMat = ExtResource( 4 )
+_cityContainerPath = NodePath("Cities")
+_cityMarkerScene = ExtResource( 3 )
 
-[node name="Antarctica" type="MeshInstance" parent="."]
-mesh = ExtResource( 10 )
-material/0 = null
+[node name="Cities" type="Spatial" parent="Map"]
 
-[node name="StaticBody" type="StaticBody" parent="Antarctica"]
-
-[node name="CollisionShape" type="CollisionShape" parent="Antarctica/StaticBody"]
-shape = SubResource( 2 )
-
-[node name="Arctic" type="MeshInstance" parent="."]
-mesh = ExtResource( 3 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="Arctic"]
-
-[node name="CollisionShape" type="CollisionShape" parent="Arctic/StaticBody"]
-shape = SubResource( 3 )
-
-[node name="Asia" type="MeshInstance" parent="."]
-mesh = ExtResource( 7 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="Asia"]
-
-[node name="CollisionShape" type="CollisionShape" parent="Asia/StaticBody"]
-shape = SubResource( 4 )
-
-[node name="Australia" type="MeshInstance" parent="."]
-mesh = ExtResource( 8 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="Australia"]
-
-[node name="CollisionShape" type="CollisionShape" parent="Australia/StaticBody"]
-shape = SubResource( 5 )
-
-[node name="Europe" type="MeshInstance" parent="."]
-mesh = ExtResource( 6 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="Europe"]
-
-[node name="CollisionShape" type="CollisionShape" parent="Europe/StaticBody"]
-shape = SubResource( 6 )
-
-[node name="NorthAmerica" type="MeshInstance" parent="."]
-mesh = ExtResource( 2 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="NorthAmerica"]
-
-[node name="CollisionShape" type="CollisionShape" parent="NorthAmerica/StaticBody"]
-shape = SubResource( 7 )
-
-[node name="SouthAmerica" type="MeshInstance" parent="."]
-mesh = ExtResource( 4 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="SouthAmerica"]
-
-[node name="CollisionShape" type="CollisionShape" parent="SouthAmerica/StaticBody"]
-shape = SubResource( 8 )
-
-[node name="UK" type="MeshInstance" parent="."]
-mesh = ExtResource( 5 )
-material/0 = null
-
-[node name="StaticBody" type="StaticBody" parent="UK"]
-
-[node name="CollisionShape" type="CollisionShape" parent="UK/StaticBody"]
-shape = SubResource( 9 )
-
-[node name="Cities" type="Spatial" parent="."]
-
-[node name="SanFrancisco" type="Area" parent="Cities"]
+[node name="SanFrancisco" type="Area" parent="Map/Cities"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1745, 0, -0.703859 )
 __meta__ = {
 "_edit_group_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Cities/SanFrancisco"]
+[node name="CollisionShape" type="CollisionShape" parent="Map/Cities/SanFrancisco"]
 shape = SubResource( 10 )
 
-[node name="Chicago" type="Area" parent="Cities"]
+[node name="Chicago" type="Area" parent="Map/Cities"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.74064, 0, -0.832294 )
 __meta__ = {
 "_edit_group_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Cities/Chicago"]
+[node name="CollisionShape" type="CollisionShape" parent="Map/Cities/Chicago"]
 shape = SubResource( 10 )
 
-[node name="Montreal" type="Area" parent="Cities"]
+[node name="Montreal" type="Area" parent="Map/Cities"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.42895, 0, -0.85892 )
 __meta__ = {
 "_edit_group_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Cities/Montreal"]
+[node name="CollisionShape" type="CollisionShape" parent="Map/Cities/Montreal"]
 shape = SubResource( 10 )
 
-[node name="NewYork" type="Area" parent="Cities"]
+[node name="NewYork" type="Area" parent="Map/Cities"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.16582, 0, -0.865185 )
 __meta__ = {
 "_edit_group_": true
 }
 
-[node name="CollisionShape" type="CollisionShape" parent="Cities/NewYork"]
+[node name="CollisionShape" type="CollisionShape" parent="Map/Cities/NewYork"]
 shape = SubResource( 10 )
+
+[node name="Africa" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 12 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Africa"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Africa/StaticBody"]
+shape = SubResource( 1 )
+
+[node name="Antarctica" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 13 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Antarctica"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Antarctica/StaticBody"]
+shape = SubResource( 2 )
+
+[node name="Arctic" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 6 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Arctic"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Arctic/StaticBody"]
+shape = SubResource( 3 )
+
+[node name="Asia" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 10 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Asia"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Asia/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Australia" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 11 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Australia"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Australia/StaticBody"]
+shape = SubResource( 5 )
+
+[node name="Europe" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 9 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/Europe"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/Europe/StaticBody"]
+shape = SubResource( 6 )
+
+[node name="NorthAmerica" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 5 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/NorthAmerica"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/NorthAmerica/StaticBody"]
+shape = SubResource( 7 )
+
+[node name="SouthAmerica" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 7 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/SouthAmerica"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/SouthAmerica/StaticBody"]
+shape = SubResource( 8 )
+
+[node name="UK" type="MeshInstance" parent="Map"]
+mesh = ExtResource( 8 )
+skeleton = NodePath("../..")
+material/0 = null
+
+[node name="StaticBody" type="StaticBody" parent="Map/UK"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Map/UK/StaticBody"]
+shape = SubResource( 9 )
+
+[node name="Deploy" type="Spatial" parent="."]
+script = ExtResource( 15 )
+_droneSelectSpatialPath = NodePath("DroneSelect")
+_droneSelectSpacing = Vector3( 0, 0, 1 )
+_droneMaterial = ExtResource( 16 )
+_droneScale = 0.1
+
+[node name="DroneSelect" type="Spatial" parent="Deploy"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.88754, 1.44262, -0.418433 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Navigation" type="Control" parent="CanvasLayer"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Left" type="Button" parent="CanvasLayer/Navigation"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_top = 330.0
+margin_right = 20.0
+margin_bottom = 350.0
+text = "<"
+
+[node name="Right" type="Button" parent="CanvasLayer/Navigation"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = 1220.0
+margin_top = 330.0
+margin_right = 1240.0
+margin_bottom = 350.0
+text = ">"

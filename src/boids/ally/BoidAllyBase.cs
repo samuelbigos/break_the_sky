@@ -50,7 +50,7 @@ public class BoidAllyBase : BoidBase
             if (_microBulletTarget == null && _microBulletTargetSearchTimer < 0.0)
             {
                 _microBulletTargetSearchTimer = 0.1f;
-                foreach (BoidBase enemy in _game.Enemies)
+                foreach (BoidBase enemy in _game.EnemyBoids)
                 {
                     if ((enemy.GlobalPosition - GlobalPosition).Length() < _microBulletRange)
                     {
@@ -102,7 +102,7 @@ public class BoidAllyBase : BoidBase
         
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (BoidBase boid in _game.Boids)
+        foreach (BoidBase boid in _game.AllyBoids)
         {
             if (boid == this || boid.Destroyed)
             {

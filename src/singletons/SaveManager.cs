@@ -14,14 +14,10 @@ public class SaveManager : Node
 	public override void _Ready()
 	{
 		base._Ready();
+		
+		DoLoad();
 
 		Instance = this;
-
-		if (!_loadedThisSession)
-		{
-			DoLoad();
-			_loadedThisSession = true;
-		}
 	}
 
 	public void DoSave()
@@ -61,7 +57,7 @@ public class SaveManager : Node
 		File saveGame = new File();
 		string path = SavePath(version);
 		if (!saveGame.FileExists(path))
-			return;
+			CreateSave();
 		
 		saveGame.Open(path, File.ModeFlags.Read);
 		
@@ -83,6 +79,22 @@ public class SaveManager : Node
 		}
 		
 		saveGame.Close();
+		
+		// save any changes that might have been made when loading
+		DoSave();
+	}
+
+	private void CreateSave()
+	{
+		foreach (Node node in GetTree().GetNodesInGroup("persistent"))
+		{
+			Saveable saveableNode = node as Saveable;
+			if (saveableNode == null)
+				continue;
+			
+			saveableNode.InitialiseSaveData();
+		}
+		DoSave();
 	}
 
 	private string SavePath(int version)

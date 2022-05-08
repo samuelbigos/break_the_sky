@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Godot.Collections;
 
-public class Saveable : Node
+public abstract class Saveable : Node
 {
     protected Dictionary _data = new Dictionary();
     
@@ -12,13 +12,15 @@ public class Saveable : Node
         
         AddToGroup("persistent");
     }
+    
+    public abstract void InitialiseSaveData();
 
-    public Dictionary DoSave()
+    public virtual Dictionary DoSave()
     {
         return _data.Duplicate();
     }
 
-    public void DoLoad(Dictionary data)
+    public virtual void DoLoad(Dictionary data)
     {
         _data = data.Duplicate();
     }

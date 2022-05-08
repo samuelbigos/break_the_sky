@@ -10,7 +10,7 @@ public class BoidBase : Area
         Neutral
     }
     
-    private enum SteeringBehaviours
+    protected enum SteeringBehaviours
     {
         Arrive = 1,
         Separation = 2,
@@ -18,9 +18,10 @@ public class BoidBase : Area
         Pursuit = 8
     }
     
-    [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit")] private int _behaviours;
+    [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit")] protected int _behaviours;
 
     [Export] public float MaxVelocity = 500.0f;
+    [Export] public float MinVelocity = 0.0f;
     [Export] public float Damping = 0.05f;
     [Export] public int TrailLength = 5;
     [Export] public float TrailPeriod = 0.05f;
@@ -53,7 +54,7 @@ public class BoidBase : Area
     protected Player _player;
     protected Game _game;
     protected BoidBase _target;
-    private Vector2 _targetOffset;
+    protected Vector2 _targetOffset;
     protected bool _destroyed = false;
     private float _destroyedTimer;
     protected Vector3 _baseScale;
@@ -113,45 +114,12 @@ public class BoidBase : Area
 
     public override void _Process(float delta)
     {
-        Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
+        base._Process(delta);
         
         // steering
         if (!_destroyed)
         {
-            Vector2 steering = Vector2.Zero;
-
-            if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
-            {
-                steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
-            }
-            if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
-            {
-                steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
-            }
-            if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
-            {
-                steering += _SteeringSeparation(_game.Boids, _game.BaseBoidGrouping * 0.66f);
-            }
-            if ((_behaviours & (int) SteeringBehaviours.EdgeRepulsion) != 0)
-            {
-                steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
-            }
-
-            // limit angular velocity
-            if (_velocity.LengthSquared() > 0)
-            {
-                Vector2 linearComp = _velocity.To2D().Normalized() * steering.Length() *
-                                     steering.Normalized().Dot(_velocity.To2D().Normalized());
-                Vector2 tangent = new Vector2(_velocity.z, -_velocity.x);
-                Vector2 angularComp = tangent.Normalized() * steering.Length() *
-                                      steering.Normalized().Dot(tangent.Normalized());
-                steering = linearComp + angularComp.Normalized() *
-                    Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
-            }
-
-            steering = steering.Truncate(MaxVelocity);
-            _velocity += steering.To3D() * delta;
-            _velocity = _velocity.Truncate(MaxVelocity);
+            DoSteering(delta);
         }
 
         GlobalTranslate(_velocity * delta);
@@ -209,6 +177,42 @@ public class BoidBase : Area
         {
             _Destroy(Points > 0);
         }
+    }
+
+    protected virtual void DoSteering(float delta)
+    {
+        Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
+        Vector2 steering = Vector2.Zero;
+
+        if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
+        {
+            steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
+        }
+        if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
+        {
+            steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
+        }
+        if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
+        {
+            steering += _SteeringSeparation(_game.AllBoids, _game.BaseBoidGrouping * 0.66f);
+        }
+        if ((_behaviours & (int) SteeringBehaviours.EdgeRepulsion) != 0)
+        {
+            steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
+        }
+
+        // limit angular velocity
+        if (_velocity.LengthSquared() > 0)
+        {
+            Vector2 linearComp = _velocity.To2D().Normalized() * steering.Length() * steering.Normalized().Dot(_velocity.To2D().Normalized());
+            Vector2 tangent = new Vector2(_velocity.z, -_velocity.x);
+            Vector2 angularComp = tangent.Normalized() * steering.Length() * steering.Normalized().Dot(tangent.Normalized());
+            steering = linearComp + angularComp.Normalized() * Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
+        }
+
+        steering = steering.Truncate(MaxVelocity);
+        _velocity += steering.To3D() * delta;
+        _velocity = _velocity.Truncate(MaxVelocity);
     }
 
     protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, bool microbullet, Vector2 pos)

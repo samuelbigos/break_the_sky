@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Godot;
+using Godot.Collections;
 using ImGuiNET;
 using Dictionary = Godot.Collections.Dictionary;
 
@@ -19,9 +21,6 @@ public class Game : Node
         Finished
     }
 
-    [Export] public NodePath ImGuiNodePath;
-    private ImGuiNode _imGuiNode;
-
     [Export] private NodePath _playerPath;
     private Player _player;
     
@@ -31,9 +30,6 @@ public class Game : Node
     [Export] private NodePath _waterPath;
     private MeshInstance _water;
 
-    [Export] public int DebugWave = -1;
-
-    [Export] private PackedScene _boidAllyScene;
     [Export] private PackedScene _pickupAddScene;
     [Export] private PackedScene _enemyDrillerScene;
     [Export] private PackedScene _enemyLaserScene;
@@ -41,7 +37,6 @@ public class Game : Node
     [Export] private PackedScene _enemyCarrierScene;
 
     [Export] public int InitialPickupAddCount = 20;
-    [Export] public int InitialBoidCount = 100;
     [Export] public float PlayRadius = 1000.0f;
     [Export] public float WaveCooldown = 5.0f;
     [Export] public int MaxDrones = 100;
@@ -63,20 +58,24 @@ public class Game : Node
     [Export] public float ScoreMultiIncrement = 0.5f;
 
     private List<Levels.Wave> _levels;
-    public int _boidColCount;
-    private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
-    private List<BoidBase> _allBoids = new List<BoidBase>();
-    public Formation _formation = Formation.Balanced;
+    
+    
+    private Formation _formation = Formation.Balanced;
     private List<PickupAdd> _pickups = new List<PickupAdd>();
     private int _spawnPickups = 0;
     private bool _started = false;
     private int _score = 0;
     private float _scoreMulti = 1.0f;
-    public float _scoreMultiTimer;
-    public float _loseTimer;
+    private float _scoreMultiTimer;
+    private float _loseTimer;
     private bool _pendingLose = false;
-    private List<BoidBase> _enemies = new List<BoidBase>();
-    public int _numBoids = 0;
+
+    private List<BoidBase> _allBoids = new List<BoidBase>();
+    private List<BoidEnemyBase> _enemyBoids = new List<BoidEnemyBase>();
+    private List<BoidAllyBase> _allyBoids = new List<BoidAllyBase>();
+    private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
+    private int _addedAllyCounter;
+    private int _boidColCount;
 
     private bool _hasSlowmo = false;
     private bool _hasNuke = false;
@@ -90,36 +89,23 @@ public class Game : Node
     private float _fps = 0.0f;
     private int _pendingBoidSpawn;
 
-    public List<BoidBase> Boids => _allBoids;
+    public List<BoidBase> AllBoids => _allBoids;
+    public List<BoidAllyBase> AllyBoids => _allyBoids;
+    public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public Player Player => _player;
-    public int NumBoids => _numBoids;
-    public List<BoidBase> Enemies => _enemies;
+    public int NumBoids => _allyBoids.Count;
 
     public override void _Ready()
     {
         _player = GetNode<Player>(_playerPath);
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
-        _imGuiNode = GetNode<ImGuiNode>(ImGuiNodePath);
         _water = GetNode<MeshInstance>(_waterPath);
 
         _player.Init(_player, this, null);
-        _imGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
+        DebugImGui.DebugImGuiNode.Connect("IGLayout", this, nameof(_OnImGuiLayout));
 
-        foreach (int i in GD.Range(0, InitialBoidCount))
-        {
-            BoidBase boid = _boidAllyScene.Instance() as BoidBase;
-            AddChild(boid);
-            _allBoids.Add(boid);
-            boid.Init(_player, this, _player);
-        }
-
-        if (_allBoids.Count > 0)
-        {
-            ChangeFormation(Formation.Balanced, true);
-
-            // spawn pickups
-        }
-
+        _pendingBoidSpawn = SaveDataPlayer.Instance.InitialAllyCount;
+            
         foreach (int i in GD.Range(0, InitialPickupAddCount))
         {
             float f = i * Mathf.Pi * 2.0f / InitialPickupAddCount;
@@ -127,22 +113,22 @@ public class Game : Node
         }
 
         _levels = Levels.Instance.Waves;
-        if (DebugWave >= 0)
-        {
-            _levels = Levels.Instance.Waves;
-            _currentWave = DebugWave - 1;
-            _started = true;
-            BaseBoidDamage = 5.0f;
-            BaseBoidReload = 1.0f;
-            BaseBoidSpeed = 1000.0f;
-            BasePlayerSpeed = 10.0f;
-            BaseMicroturrets = true;
-            foreach (PickupAdd pickup in _pickups)
-            {
-                pickup.QueueFree();
-                AddBoids(new Vector2(0.0f, 0.0f));
-            }
-        }
+        // if (DebugWave >= 0)
+        // {
+        //     _levels = Levels.Instance.Waves;
+        //     _currentWave = DebugWave - 1;
+        //     _started = true;
+        //     BaseBoidDamage = 5.0f;
+        //     BaseBoidReload = 1.0f;
+        //     BaseBoidSpeed = 1000.0f;
+        //     BasePlayerSpeed = 10.0f;
+        //     BaseMicroturrets = true;
+        //     foreach (PickupAdd pickup in _pickups)
+        //     {
+        //         pickup.QueueFree();
+        //         AddBoids(new Vector2(0.0f, 0.0f));
+        //     }
+        // }
 
         AddScore(0, _player.GlobalPosition, false);
         GD.Randomize();
@@ -168,9 +154,9 @@ public class Game : Node
 
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
         
-        while (_pendingBoidSpawn > 0)
+        while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.Instance.MaxAllyCount)
         {
-            AddBoidsInternal();
+            AddAllyBoidsInternal();
             _pendingBoidSpawn--;
         }
         
@@ -191,24 +177,29 @@ public class Game : Node
             _scoreMulti = 1.0f;
         }
 
-        foreach (int i in GD.Range(Enemies.Count, 0, -1))
+        for (int i = _allBoids.Count - 1; i >= 0; i--)
         {
-            if (!IsInstanceValid(Enemies[i - 1]))
+            if (!IsInstanceValid(_allBoids[i]))
             {
-                Enemies.RemoveAt(i - 1);
-
-                // waves
+                if (_allBoids[i] is BoidAllyBase)
+                    _allyBoids.Remove(_allBoids[i] as BoidAllyBase);
+                
+                if (_allBoids[i] is BoidEnemyBase)
+                    _enemyBoids.Remove(_allBoids[i] as BoidEnemyBase);
+                
+                _allBoids.Remove(_allBoids[i]);
             }
         }
-
-        int enemyCount = Enemies.Count;
+        
+        Debug.Assert(_allyBoids.Count + _enemyBoids.Count == _allBoids.Count, "Error in boid references.");
+        
         _waveTimer -= delta;
         if (_started)
         {
             switch (_waveState)
             {
                 case WaveState.Cooldown:
-                    if (_waveTimer < 0.0f && enemyCount == 0)
+                    if (_waveTimer < 0.0f && _enemyBoids.Count == 0)
                     {
                         EnterWave();
                     }
@@ -224,7 +215,7 @@ public class Game : Node
                         
                         foreach (int t in spawns)
                         {
-                            _Spawn(t);
+                            SpawnEnemy(t);
                         }
 
                         _currentSubWave += 1;
@@ -248,57 +239,26 @@ public class Game : Node
         }
     }
 
-    private void _OnImGuiLayout()
-    {
-        if (ImGui.Begin("Debug Menu", ImGuiWindowFlags.AlwaysAutoResize))
-        {
-            ImGui.Text($"FPS: {_fps:F0}");
-            ImGui.BeginTabBar("Debug Menu#left_tabs_bar");
-            if (ImGui.BeginTabItem("Spawning"))
-            {
-                if (ImGui.Button("Spawn 1"))
-                {
-                    _Spawn(0);
-                }
-                if (ImGui.Button("Spawn 2"))
-                {
-                    _Spawn(1);
-                }
-                if (ImGui.Button("Spawn 3"))
-                {
-                    _Spawn(2);
-                }
-                if (ImGui.Button("Spawn 4"))
-                {
-                    _Spawn(3);
-                }
-                ImGui.EndTabItem();
-            }
-            ImGui.EndTabBar();
-            ImGui.End();
-        }
-    }
-
     public void ChangeFormation(Formation formation, bool setPos)
     {
-        if (_allBoids.Count == 0)
+        if (_allyBoids.Count == 0)
         {
             return;
         }
 
         if (formation == (int) Formation.Balanced)
         {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f), setPos);
+            SetColumns((int) (Mathf.Sqrt(_allyBoids.Count) + 0.5f), setPos);
         }
 
         if (formation == Formation.Wide)
         {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count) + 0.5f) * 2, setPos);
+            SetColumns((int) (Mathf.Sqrt(_allyBoids.Count) + 0.5f) * 2, setPos);
         }
 
         if (formation == Formation.Narrow)
         {
-            SetColumns((int) (Mathf.Sqrt(_allBoids.Count + 0.5f) * 0.5f), setPos);
+            SetColumns((int) (Mathf.Sqrt(_allyBoids.Count + 0.5f) * 0.5f), setPos);
         }
 
         _formation = formation;
@@ -306,17 +266,17 @@ public class Game : Node
 
     public void SetColumns(int numCols, bool setPos)
     {
-        _boidColCount = Mathf.Clamp(numCols, 0, _allBoids.Count);
+        _boidColCount = Mathf.Clamp(numCols, 0, _allyBoids.Count);
         _boidColumns = new List<List<BoidBase>>();
         foreach (int i in GD.Range(0, _boidColCount))
         {
             _boidColumns.Add(new List<BoidBase>());
         }
 
-        int perCol = _allBoids.Count / _boidColCount;
-        foreach (int i in GD.Range(0, _allBoids.Count))
+        int perCol = _allyBoids.Count / _boidColCount;
+        foreach (int i in GD.Range(0, _allyBoids.Count))
         {
-            BoidBase boid = _allBoids[i];
+            BoidBase boid = _allyBoids[i];
             int column = i / perCol;
             int colIdx = column;
             if (colIdx >= _boidColumns.Count)
@@ -341,51 +301,47 @@ public class Game : Node
         _pendingBoidSpawn++;
     }
 
-    private void AddBoidsInternal()
+    private void AddAllyBoidsInternal()
     {
-        bool addedBoid = false;
-        foreach (int i in GD.Range(0, BaseBoidReinforce))
-        {
-            if (_allBoids.Count > MaxDrones)
-            {
-                break;
-            }
-
-            BoidBase boid = _boidAllyScene.Instance() as BoidBase;
-            AddChild(boid);
-            _allBoids.Add(boid);
-            boid.Init(_player, this, _player);
-            boid.GlobalPosition = _player.GlobalPosition;
-            addedBoid = true;
-        }
-
-        InitialPickupAddCount -= 1;
-        if (InitialPickupAddCount == 0)
-        {
-            Start();
-        }
-
-        if (addedBoid)
-        {
-            ChangeFormation(_formation, false);
-            _numBoids = _allBoids.Count;
-        }
+        Array activeAllyTypes = SaveDataPlayer.Instance.ActiveDrones;
+        
+        // spawn ally using _addedAllyCounter to determine type
+        string droneId = activeAllyTypes[_addedAllyCounter++ % activeAllyTypes.Count] as string;
+        DataAllyBoid droneData = Database.AllyDrones.FindEntry<DataAllyBoid>(droneId);
+        BoidAllyBase boid = droneData.Scene.Instance<BoidAllyBase>();
+        AddChild(boid);
+        _allyBoids.Add(boid);
+        _allBoids.Add(boid);
+        boid.Init(_player, this, _player);
+        
+        ChangeFormation(_formation, false);
     }
 
     public void RemoveBoid(BoidBase boid)
     {
-        _allBoids.Remove(boid);
-        if (_allBoids.Count == 0)
+        switch (boid)
         {
-            _loseTimer = 2.0f;
-            _pendingLose = true;
-            _player.QueueFree();
+            case BoidAllyBase @base:
+            {
+                _allyBoids.Remove(@base);
+            
+                ChangeFormation(_formation, false);
+                _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
+                //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
+            
+                if (_allyBoids.Count == 0)
+                {
+                    _loseTimer = 2.0f;
+                    _pendingLose = true;
+                    _player.QueueFree();
+                }
+                break;
+            }
+            case BoidEnemyBase @base:
+                _enemyBoids.Remove(@base);
+                break;
         }
-
-        ChangeFormation(_formation, false);
-        _numBoids = _allBoids.Count;
-        _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
-        //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
+        _allBoids.Remove(boid);
     }
 
     public void SpawnPickupAdd(Vector2 pos, bool persistent)
@@ -410,7 +366,7 @@ public class Game : Node
     private Vector2 GetOffset(int column, int columnIndex)
     {
         column -= (int) (_boidColumns.Count * 0.5f - _boidColumns.Count % 2 * 0.5f);
-        int perCol = (int) (_allBoids.Count / _boidColumns.Count);
+        int perCol = (int) (_allyBoids.Count / _boidColumns.Count);
         columnIndex -= (int) (perCol * 0.5f - perCol % 2 * 0.5f);
         Vector2 offset = new Vector2(column * BaseBoidGrouping, columnIndex * BaseBoidGrouping);
         offset += new Vector2(0.5f * ((_boidColumns.Count + 1) % 2), 0.5f * ((perCol + 1) % 2)) * BaseBoidGrouping;
@@ -517,27 +473,28 @@ public class Game : Node
         return 0;
     }
 
-    public void AddEnemy(BoidBase enemy)
+    public void AddEnemy(BoidEnemyBase enemy)
     {
-        Enemies.Add(enemy);
+        _enemyBoids.Add(enemy);
+        _allBoids.Add(enemy);
     }
 
-    private void _Spawn(int id)
+    private void SpawnEnemy(int id)
     {
-        BoidBase enemy = null;
+        BoidEnemyBase enemy = null;
         switch (id)
         {
             case 0:
-                enemy = _enemyDrillerScene.Instance() as BoidBase;
+                enemy = _enemyDrillerScene.Instance() as BoidEnemyBase;
                 break;
             case 1:
-                enemy = _enemyLaserScene.Instance() as BoidBase;
+                enemy = _enemyLaserScene.Instance() as BoidEnemyBase;
                 break;
             case 2:
-                enemy = _enemyBeaconScene.Instance() as BoidBase;
+                enemy = _enemyBeaconScene.Instance() as BoidEnemyBase;
                 break;
             case 3:
-                enemy = _enemyCarrierScene.Instance() as BoidBase;
+                enemy = _enemyCarrierScene.Instance() as BoidEnemyBase;
                 break;
         }
 
@@ -546,7 +503,7 @@ public class Game : Node
         //enemy.global_position = new Vector2(100.0, 0.0);
         enemy.Init(_player, this, _player);
         AddChild(enemy);
-        Enemies.Add(enemy);
+        AddEnemy(enemy);
     }
 
     public void AddScore(int score, Vector2 pos, bool show)
@@ -617,5 +574,36 @@ public class Game : Node
     {
         GetTree().Paused = true;
         //_gui.ShowLoseScreen();
+    }
+    
+    private void _OnImGuiLayout()
+    {
+        if (ImGui.Begin("Debug Menu", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            ImGui.Text($"FPS: {_fps:F0}");
+            ImGui.BeginTabBar("Debug Menu#left_tabs_bar");
+            if (ImGui.BeginTabItem("Spawning"))
+            {
+                if (ImGui.Button("Spawn 1"))
+                {
+                    SpawnEnemy(0);
+                }
+                if (ImGui.Button("Spawn 2"))
+                {
+                    SpawnEnemy(1);
+                }
+                if (ImGui.Button("Spawn 3"))
+                {
+                    SpawnEnemy(2);
+                }
+                if (ImGui.Button("Spawn 4"))
+                {
+                    SpawnEnemy(3);
+                }
+                ImGui.EndTabItem();
+            }
+            ImGui.EndTabBar();
+            ImGui.End();
+        }
     }
 }

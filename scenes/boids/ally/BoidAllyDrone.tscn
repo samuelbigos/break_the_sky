@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
-[ext_resource path="res://assets/mesh/ally.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/ally_drone.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
-[ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=5]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=6]
 [ext_resource path="res://assets/shader/water_mesh.shader" type="Shader" id=7]
 
@@ -32,7 +31,3 @@ material_override = SubResource( 2 )
 mesh = ExtResource( 2 )
 material/0 = null
 _meshMaterials = [ SubResource( 3 ) ]
-
-[node name="SFXShoot" type="AudioStreamPlayer3D" parent="." index="3"]
-stream = ExtResource( 5 )
-pitch_scale = 0.8

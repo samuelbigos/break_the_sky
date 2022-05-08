@@ -11,9 +11,9 @@ config_version=4
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/metagame/Map.tscn"
+run/main_scene="res://scenes/metagame/CommandCentre.tscn"
 config/icon="res://icon.png"
-config/save_version=0
+config/save_version=1
 
 [audio]
 
@@ -27,9 +27,12 @@ Levels="*res://src/singletons/Levels.cs"
 ColourManager="*res://scenes/singletons/ColourManager.tscn"
 PerkManager="*res://scenes/singletons/PerkManager.tscn"
 Resources="*res://scenes/singletons/Resources.tscn"
-DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
 Metagame="*res://scenes/metagame/Metagame.tscn"
-PlayerData="*res://src/metagame/PlayerData.cs"
+DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
+DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
+DebugImGui="*res://scenes/debug/DebugImGui.tscn"
+SaveDataPlayer="*res://src/singletons/SaveDataPlayer.cs"
+SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
 SaveManager="*res://src/singletons/SaveManager.cs"
 
 [display]
