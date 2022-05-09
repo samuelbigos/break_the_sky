@@ -1,17 +1,14 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://assets/material/water_mat.tres" type="Material" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
 [ext_resource path="res://scenes/boids/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=4]
-[ext_resource path="res://scenes/boids/enemy/BoidEnemyDriller.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/ai/AISpawningDirector.cs" type="Script" id=5]
 [ext_resource path="res://scenes/pickups/PickupAdd.tscn" type="PackedScene" id=8]
-[ext_resource path="res://scenes/boids/enemy/BoidEnemyLaser.tscn" type="PackedScene" id=9]
 [ext_resource path="res://assets/material/water_wave_mat.tres" type="Material" id=10]
-[ext_resource path="res://scenes/boids/enemy/BoidEnemyBeacon.tscn" type="PackedScene" id=11]
 [ext_resource path="res://assets/shader/blur_x.shader" type="Shader" id=12]
 [ext_resource path="res://assets/shader/blur_y.shader" type="Shader" id=13]
-[ext_resource path="res://scenes/boids/enemy/BoidEnemyCarrier.tscn" type="PackedScene" id=14]
 [ext_resource path="res://src/rendering/Water.cs" type="Script" id=15]
 
 [sub_resource type="PlaneMesh" id=7]
@@ -33,16 +30,15 @@ script = ExtResource( 2 )
 _playerPath = NodePath("Player3D")
 _mouseCursorPath = NodePath("MouseCursor")
 _waterPath = NodePath("Water")
+_aiSpawningDirectorPath = NodePath("AISpawningDirector")
 _pickupAddScene = ExtResource( 8 )
-_enemyDrillerScene = ExtResource( 6 )
-_enemyLaserScene = ExtResource( 9 )
-_enemyBeaconScene = ExtResource( 11 )
-_enemyCarrierScene = ExtResource( 14 )
 InitialPickupAddCount = 0
-PlayRadius = 200.0
 BaseBoidDamage = 3.0
 BaseBoidSpeed = 1000.0
 BaseBulletSpeed = 150.0
+
+[node name="AISpawningDirector" type="Node" parent="."]
+script = ExtResource( 5 )
 
 [node name="Water" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )

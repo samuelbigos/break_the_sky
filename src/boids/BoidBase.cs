@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Godot;
 
 public class BoidBase : Area
@@ -45,6 +46,7 @@ public class BoidBase : Area
 
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;
+    public string ID = "";
 
     protected Vector3 _velocity;
     protected Player _player;
@@ -76,11 +78,12 @@ public class BoidBase : Area
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
 
-    public virtual void Init(Player player, Game game, BoidBase target)
+    public virtual void Init(string id, Player player, Game game, BoidBase target)
     {
         _player = player;
         _game = game;
         _target = target;
+        ID = id;
     }
 
     public override void _Ready()
@@ -186,10 +189,6 @@ public class BoidBase : Area
         {
             steering += _SteeringSeparation(_game.AllBoids, _game.BaseBoidGrouping * 0.66f);
         }
-        if ((_behaviours & (int) SteeringBehaviours.EdgeRepulsion) != 0)
-        {
-            steering += _SteeringEdgeRepulsion(_game.PlayRadius) * 2.0f;
-        }
         if ((_behaviours & (int)SteeringBehaviours.Flee) != 0)
         {
             steering += _SteeringFlee(targetPos.To2D(), _target.Velocity.To2D());
@@ -227,6 +226,7 @@ public class BoidBase : Area
         {
             _damagedParticles.Emitting = true;
         }
+        Debug.Assert(IsInstanceValid(_sfxHitPlayer), $"{Name}, {ID}");
         _sfxHitPlayer.Play();
     }
     
@@ -398,6 +398,9 @@ public class BoidBase : Area
     public virtual void _OnBoidAreaEntered(Area area)
     {
         BoidBase boid = area as BoidBase;
+        if (!IsInstanceValid(boid))
+            return;
+        
         if (boid is BoidAllyBase || boid is Player)
         {
             if (boid.Alignment == Alignment)

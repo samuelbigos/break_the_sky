@@ -26,7 +26,7 @@ public class CommandCentreDeploy : Node
         _droneSelectSpatial = GetNode<Spatial>(_droneSelectSpatialPath);
 
         int i = 0;
-        foreach (DataAllyBoid drone in Database.AllyDrones.GetAllEntries<DataAllyBoid>())
+        foreach (DataAllyBoid drone in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
         {
             _droneList.Add(drone);
             

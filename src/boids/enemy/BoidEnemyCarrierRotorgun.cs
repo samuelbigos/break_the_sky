@@ -15,11 +15,12 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
 
     private BoidEnemyCarrier _parent;
 
-    public override void Init(Player player, Game game, BoidBase target)
+    public override void Init(string id, Player player, Game game, BoidBase target)
     {
         _player = player;
         _game = game;
         _target = target;
+        ID = id;
     }
 
     public void InitRotorgun(Spatial lockNode, BoidEnemyCarrier parent)
@@ -58,12 +59,12 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
         }
     }
 
-    protected void Shoot(Vector2 dir)
+    private void Shoot(Vector2 dir)
     {
         Bullet bullet = _bulletScene.Instance() as Bullet;
         dir = (_target.GlobalPosition - GlobalPosition).Normalized();
-        bullet.Init(dir * _bulletSpeed, Alignment, _game.PlayRadius, 1.0f);
-        bullet.GlobalPosition = GlobalPosition + dir * 80.0f;
+        Vector2 spawnPos = GlobalPosition + dir * 80.0f;
+        bullet.Init(spawnPos, dir * _bulletSpeed, Alignment, 1.0f);
         _game.AddChild(bullet);
     }
 }

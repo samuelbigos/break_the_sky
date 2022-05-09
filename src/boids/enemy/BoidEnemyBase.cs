@@ -9,7 +9,7 @@ public class BoidEnemyBase : BoidBase
     [Export] public float MaxAngularVelocity = 1000.0f;
 
     public bool IsTargetted = false;
-
+    
     protected override BoidAlignment Alignment => BoidAlignment.Enemy;
 
     protected override void _OnHit(float damage, bool score, Vector2 bulletVel, Vector2 pos)

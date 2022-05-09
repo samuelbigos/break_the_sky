@@ -6,6 +6,9 @@ public class BulletBomber : Bullet
     {
         base._Process(delta);
 
-        _velocity = (Target.GlobalPosition - GlobalPosition).Normalized() * _velocity.Length();
+        if (IsInstanceValid(Target))
+        {
+            _velocity = (Target.GlobalPosition - GlobalPosition).Normalized() * _velocity.Length();
+        }
     }
 }

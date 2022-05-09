@@ -57,11 +57,6 @@ public class Player : BoidBase
                 dir *= 100.0f * accel * delta;
                 _velocity += dir.To3D();
             }
-
-            if ((GlobalPosition + _velocity.To2D() * delta).Length() > _game.PlayRadius - 5.0f)
-            {
-                _velocity *= 0.0f;
-            }
             
             GlobalTranslate(_velocity * delta);
 

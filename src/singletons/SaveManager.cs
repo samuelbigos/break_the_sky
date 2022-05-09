@@ -8,9 +8,11 @@ public class SaveManager : Node
 	public static SaveManager Instance;
 	
 	private const string SAVE_FOLDER = "user://savegame";
-	
 	private bool _loadedThisSession = false;
-
+	
+	public static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
+	public static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
+	
 	public override void _Ready()
 	{
 		base._Ready();
@@ -31,7 +33,7 @@ public class SaveManager : Node
 		}
 		
 		File saveGame = new File();
-		saveGame.Open(SavePath(version), File.ModeFlags.Write);
+		saveGame.Open(SavePath, File.ModeFlags.Write);
 		
 		// first add the version
 		saveGame.StoreLine(JSON.Print(version));
@@ -55,7 +57,7 @@ public class SaveManager : Node
 		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 
 		File saveGame = new File();
-		string path = SavePath(version);
+		string path = SavePath;
 		if (!saveGame.FileExists(path))
 			CreateSave();
 		
@@ -84,6 +86,13 @@ public class SaveManager : Node
 		DoSave();
 	}
 
+	public void Reset()
+	{
+		Directory dir = new Directory();
+		dir.Remove(SaveManager.SavePath);
+		DoLoad();
+	}
+
 	private void CreateSave()
 	{
 		foreach (Node node in GetTree().GetNodesInGroup("persistent"))
@@ -95,10 +104,5 @@ public class SaveManager : Node
 			saveableNode.InitialiseSaveData();
 		}
 		DoSave();
-	}
-
-	private string SavePath(int version)
-	{
-		return SAVE_FOLDER.PlusFile($"save_{version:D3}.tres");
 	}
 }

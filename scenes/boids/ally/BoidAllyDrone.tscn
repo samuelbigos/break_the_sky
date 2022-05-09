@@ -21,6 +21,7 @@ shader_param/u_velocity = null
 
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
+MaxVelocity = 500.0
 _bulletScene = ExtResource( 3 )
 
 [node name="CollisionShape" parent="." index="0"]

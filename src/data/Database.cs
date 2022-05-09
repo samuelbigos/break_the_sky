@@ -7,7 +7,8 @@ using System.Linq;
 public abstract class Database : Node
 {
     public static Database Cities;
-    public static Database AllyDrones;
+    public static Database AllyBoids;
+    public static Database EnemyBoids;
     
     private readonly List<DataEntry> _entries = new List<DataEntry>();
     
@@ -35,7 +36,10 @@ public abstract class Database : Node
                 Cities = this;
                 break;
             case "DatabaseAllyBoids":
-                AllyDrones = this;
+                AllyBoids = this;
+                break;
+            case "DatabaseEnemyBoids":
+                EnemyBoids = this;
                 break;
         }
 

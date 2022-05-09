@@ -1,0 +1,35 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://src/data/Database.cs" type="Script" id=1]
+[ext_resource path="res://scenes/boids/enemy/BoidEnemyDriller.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/boids/enemy/BoidEnemyBeacon.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/boids/enemy/BoidEnemyLaser.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/boids/enemy/BoidEnemyCarrier.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/data/DataEnemyBoid.cs" type="Script" id=6]
+
+[node name="DatabaseEnemyBoids" type="Node"]
+script = ExtResource( 1 )
+
+[node name="driller" type="Node" parent="."]
+script = ExtResource( 6 )
+DisplayName = "Driller"
+Scene = ExtResource( 2 )
+SpawningCost = 1.0
+
+[node name="laser" type="Node" parent="."]
+script = ExtResource( 6 )
+DisplayName = "Laser"
+Scene = ExtResource( 4 )
+SpawningCost = 5.0
+
+[node name="beacon" type="Node" parent="."]
+script = ExtResource( 6 )
+DisplayName = "Beacon"
+Scene = ExtResource( 3 )
+SpawningCost = 10.0
+
+[node name="carrier" type="Node" parent="."]
+script = ExtResource( 6 )
+DisplayName = "Carrier"
+Scene = ExtResource( 5 )
+SpawningCost = 20.0

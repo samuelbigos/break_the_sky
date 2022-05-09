@@ -3,12 +3,13 @@ using Godot;
 public class Bullet : Area
 {
 	[Export] private float _baseSpeed = 150.0f;
+	[Export] private float _range = 2000.0f;
 
 	protected Vector2 _velocity;
 	private BoidBase.BoidAlignment _alignment;
-	private float _playRadius;
 	private float _length = 6.0f;
 	private float _damage = 1.0f;
+	private Vector2 _spawnPos;
 
 	public BoidBase.BoidAlignment Alignment => _alignment;
 	public Vector2 Velocity => _velocity;
@@ -20,12 +21,13 @@ public class Bullet : Area
 		set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
 	}
 	
-	public void Init(Vector2 velocity, BoidBase.BoidAlignment alignment, float playRadius, float damage)
+	public void Init(Vector2 position, Vector2 velocity, BoidBase.BoidAlignment alignment, float damage)
 	{
 		_damage = damage;
 		_velocity = velocity;
 		_alignment = alignment;
-		_playRadius = playRadius;
+		GlobalPosition = position;
+		_spawnPos = position;
 
 		Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.y), 0.0f);
 	}
@@ -33,7 +35,7 @@ public class Bullet : Area
 	public override void _Process(float delta)
 	{  
 		GlobalTranslate(_velocity.To3D() * delta);
-		if(GlobalPosition.Length() + _length > _playRadius)
+		if((_spawnPos - GlobalPosition).LengthSquared() > Mathf.Pow(_range, 2.0f))
 		{
 			QueueFree();
 		}

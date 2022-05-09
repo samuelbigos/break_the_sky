@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public class BoidAllyBase : BoidBase
@@ -9,6 +10,8 @@ public class BoidAllyBase : BoidBase
     [Export] private float _microBulletCd = 1.0f;
     [Export] private float _microBulletRange = 400.0f;
     [Export] private float _microBulletDamageMod = 0.25f;
+    
+    [Export] public bool BlocksShots = true;
     
     [Export] private NodePath _sfxHitMicroPlayerNode;
     private AudioStreamPlayer3D _sfxHitMicroPlayer;
@@ -100,18 +103,16 @@ public class BoidAllyBase : BoidBase
         
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (BoidBase boid in _game.AllyBoids)
+        foreach (BoidAllyBase boid in _game.AllyBoids)
         {
-            if (boid == this || boid.Destroyed)
-            {
+            if (boid == this || boid.Destroyed || !boid.BlocksShots)
                 continue;
-            }
 
-            if ((boid.GlobalPosition - GlobalPosition).Normalized().Dot(dir.Normalized()) > 0.9f)
-            {
-                blocked = true;
-                break;
-            }
+            if ((boid.GlobalPosition - GlobalPosition).Normalized().Dot(dir.Normalized()) < 0.9f)
+                continue;
+            
+            blocked = true;
+            break;
         }
 
         return !blocked;

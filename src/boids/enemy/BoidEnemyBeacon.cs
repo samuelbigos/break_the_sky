@@ -97,10 +97,10 @@ public class BoidEnemyBeacon : BoidEnemyBase
         foreach (int i in GD.Range(0, BulletsPerPulse))
         {
             Bullet bullet = BulletScene.Instance() as Bullet;
-            float f = (float) (i) * Mathf.Pi * 2.0f / (float) (BulletsPerPulse);
+            float f = i * Mathf.Pi * 2.0f / BulletsPerPulse;
             Vector2 dir = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized();
-            bullet.Init(dir * BulletSpeed, Alignment, _game.PlayRadius, 1.0f);
-            bullet.GlobalPosition = GlobalPosition + dir * 32.0f;
+            Vector2 spawnPos = GlobalPosition + dir * 32.0f;
+            bullet.Init(spawnPos, dir * BulletSpeed, Alignment, 1.0f);
             _game.AddChild(bullet);
             _sfxBeaconFire.Play();
         }
