@@ -17,8 +17,8 @@ _numExtraMeshes = 0
 _meshLayers = [  ]
 _meshMaterials = [  ]
 
-[node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="6"]
+[node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="5"]
 stream = ExtResource( 4 )
 
-[node name="Listener" type="Listener" parent="." index="7"]
+[node name="Listener" type="Listener" parent="." index="6"]
 current = true

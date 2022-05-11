@@ -397,10 +397,10 @@ public class BoidBase : Area
 
     public virtual void _OnBoidAreaEntered(Area area)
     {
-        BoidBase boid = area as BoidBase;
-        if (!IsInstanceValid(boid))
+        if (!IsInstanceValid(area))
             return;
         
+        BoidBase boid = area as BoidBase;
         if (boid is BoidAllyBase || boid is Player)
         {
             if (boid.Alignment == Alignment)

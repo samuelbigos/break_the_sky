@@ -105,8 +105,8 @@ public class BoidAllyBomber : BoidAllyBase
         BulletBomber bullet = _bulletScene.Instance() as BulletBomber;
         if (bullet != null)
         {
-            bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
             _game.AddChild(bullet);
+            bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
             bullet.Target = _target;
         }
 

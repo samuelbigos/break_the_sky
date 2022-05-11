@@ -44,7 +44,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/cloud_texture_generator/plugin.cfg", "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 

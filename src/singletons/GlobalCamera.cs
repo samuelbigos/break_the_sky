@@ -49,6 +49,8 @@ public class GlobalCamera : Camera
         _noise.Octaves = 2;
 
         _cameraHeight = GlobalTransform.origin.y;
+
+        VisualServer.SetDefaultClearColor(ColourManager.Instance.Water);
     }
 
     public override void _Process(float delta)

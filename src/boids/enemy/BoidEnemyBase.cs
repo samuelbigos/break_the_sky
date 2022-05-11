@@ -2,7 +2,6 @@ using Godot;
 
 public class BoidEnemyBase : BoidBase
 {
-    [Export] public float PickupDropRate = 0.25f;
     [Export] public float DestroyTrauma = 0.1f;
     [Export] public float HitTrauma = 0.05f;
     [Export] public float MinVelocity = 0.0f;
@@ -29,10 +28,6 @@ public class BoidEnemyBase : BoidBase
             if (score && !_destroyed)
             {
                 _game.AddScore(Points, GlobalPosition, true);
-                if (GD.RandRange(0.0, 1.0) < PickupDropRate)
-                {
-                    _game.SpawnPickupAdd(GlobalPosition, false);
-                }
             }
         }
         

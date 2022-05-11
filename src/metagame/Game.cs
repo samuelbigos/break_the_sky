@@ -33,9 +33,9 @@ public class Game : Node
     [Export] private NodePath _aiSpawningDirectorPath;
     private AISpawningDirector _aiSpawningDirector;
 
-    [Export] private PackedScene _pickupAddScene;
+    [Export] private NodePath _cloudsPath;
+    private Clouds _clouds;
 
-    [Export] public int InitialPickupAddCount = 20;
     [Export] public float SpawningRadius = 500.0f;
     [Export] public float WaveCooldown = 5.0f;
     [Export] public int MaxDrones = 100;
@@ -57,8 +57,6 @@ public class Game : Node
     [Export] public float ScoreMultiIncrement = 0.5f;
     
     private Formation _formation = Formation.Balanced;
-    private List<PickupAdd> _pickups = new List<PickupAdd>();
-    private int _spawnPickups = 0;
     private int _score = 0;
     private float _scoreMulti = 1.0f;
     private float _scoreMultiTimer;
@@ -90,6 +88,7 @@ public class Game : Node
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _water = GetNode<MeshInstance>(_waterPath);
         _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
+        _clouds = GetNode<Clouds>(_cloudsPath);
 
         _player.Init("player", _player, this, null);
         DebugImGui.DrawImGui += _OnImGuiLayout;
@@ -101,21 +100,14 @@ public class Game : Node
         GD.Randomize();
 
         GlobalCamera.Instance.Init(_player);
-        //PauseManager.Instance.Init(this);
-
         MusicPlayer.Instance.PlayGame();
-
-        //_score += 10000;
-        //addScore(10000, new Vector2(0.0, 0.0), false)
-        //lose()
-        
-        //(_water.GetActiveMaterial(0) as ShaderMaterial).SetShaderParam("u_water_col", ColourManager.Instance.Primary);
+        //PauseManager.Instance.Init(this);
     }
     
     public override void _Process(float delta)
     {
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
-        
+
         while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.Instance.MaxAllyCount)
         {
             AddAllyBoidsInternal();
@@ -257,20 +249,6 @@ public class Game : Node
                 break;
         }
         _allBoids.Remove(boid);
-    }
-
-    public void SpawnPickupAdd(Vector2 pos, bool persistent)
-    {
-        PickupAdd pickup = _pickupAddScene.Instance() as PickupAdd;
-        pickup.GlobalPosition = pos;
-        pickup.Init(_player);
-        if (persistent)
-        {
-            pickup.Lifetime = 9999999.0f;
-        }
-
-        AddChild(pickup);
-        _pickups.Add(pickup);
     }
 
     private Vector2 GetOffset(int column, int columnIndex)

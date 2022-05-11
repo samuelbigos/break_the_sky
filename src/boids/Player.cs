@@ -94,11 +94,5 @@ public class Player : BoidBase
 
     public override void _OnBoidAreaEntered(Area area)
     {
-        if (area is PickupAdd)
-        {
-            area.QueueFree();
-            _queueAddBoids = true;
-            _sfxPickup.Play();
-        }
     }
 }

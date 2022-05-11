@@ -6,6 +6,7 @@ using ImGuiNET;
 
 public class AISpawningDirector : Node
 {
+    [Export] private bool _enabled = true;
     [Export] private float _intensityWavelength = 0.036f;
     [Export] private float _intensityWavelengthScaling = 0.0f;
     [Export] private float _intensityAmplitude = 0.206f;
@@ -52,6 +53,9 @@ public class AISpawningDirector : Node
     {
         base._Process(delta);
 
+        if (!_enabled)
+            return;
+
         _totalTime += delta;
         _timeInState += delta;
         
@@ -94,10 +98,10 @@ public class AISpawningDirector : Node
         bool exitState = Utils.Rng.Randf() < delta / 10.0f * intensity;
         
         // force break out of idle after a maximum time
-        exitState |= _timeInState > 10.0f + 10.0f * (1.0f - intensity);
+        exitState |= _timeInState > 5.0f + 5.0f * (1.0f - intensity);
 
         // shorten the time of the first idle state
-        exitState |= _totalTime < 10.0f && _timeInState > 5.0f;
+        exitState |= _totalTime < 10.0f && _timeInState > 1.0f;
             
         if (exitState)
         {
@@ -270,7 +274,7 @@ public class AISpawningDirector : Node
             {
                 return (SpawningState) exitStates[i];
             }
-            rng += exitStateWeights[i];
+            rng -= exitStateWeights[i];
         }
 
         return SpawningState.Idle;
@@ -296,10 +300,9 @@ public class AISpawningDirector : Node
         
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
-        enemy.GlobalPosition = spawnPos;
-        
-        enemy.Init(id.Name, _player, _game, _player);
         AddChild(enemy);
+        enemy.GlobalPosition = spawnPos;
+        enemy.Init(id.Name, _player, _game, _player);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);
         return enemy;
