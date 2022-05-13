@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
+[ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/boids/BoidBase.cs" type="Script" id=4]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=5]
 [ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
@@ -9,6 +10,9 @@
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
+
+[sub_resource type="SpatialMaterial" id=2]
+flags_unshaded = true
 
 [node name="BoidBase" type="Area"]
 script = ExtResource( 4 )
@@ -36,3 +40,6 @@ stream = ExtResource( 7 )
 stream = ExtResource( 7 )
 
 [node name="DamagedParticles" type="Particles" parent="."]
+
+[node name="BoidTrail" parent="." instance=ExtResource( 2 )]
+material_override = SubResource( 2 )

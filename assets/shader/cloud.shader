@@ -177,7 +177,7 @@ void fragment()
 	if (u_flip == 2)
 		pos.xyz = pos.yxz;
 
-	float kernel = 1.0 / u_scale;
+	float kernel = 2.0 / u_scale;
 	float R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
 	float L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
 	float T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
@@ -189,13 +189,15 @@ void fragment()
 	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.01, d));
 	
 	// dirty AA
-	kernel = 0.1 / u_scale;
-	R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
-	L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
-	T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
-	B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
-	ALPHA = step(0.0, R) + step(0.0, L) + step(0.0, T) + step(0.0, B);
-	ALPHA /= 4.0;
+//	kernel = 0.1 / u_scale;
+//	R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
+//	L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
+//	T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
+//	B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
+//	ALPHA = step(0.0, R) + step(0.0, L) + step(0.0, T) + step(0.0, B);
+//	ALPHA /= 4.0;
+
+	ALPHA = step(0.0, cloud(pos));
 
 //	ALBEDO = vec3(cloud_noise(pos).r);
 //	ALPHA = 1.0;

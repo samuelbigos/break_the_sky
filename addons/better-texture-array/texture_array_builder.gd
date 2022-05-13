@@ -3,7 +3,7 @@ extends EditorImportPlugin
 
 enum Presets { DEFAULT }
 enum Compress { LOSSLESS, VRAM, UNCOMPRESSED }
-enum Format { FORMAT_L8, FORMAT_LA8, FORMAT_R8, FORMAT_RG8, FORMAT_RGB8, FORMAT_RGBA8, FORMAT_RGBAF }
+enum Format { FORMAT_L8, FORMAT_LA8, FORMAT_R8, FORMAT_RG8, FORMAT_RGB8, FORMAT_RGBA8, FORMAT_RGBAF, FORMAT_RGBAH }
 const formats = {
 	"FORMAT_L8": Image.FORMAT_L8,
 	"FORMAT_LA8": Image.FORMAT_LA8,
@@ -12,6 +12,7 @@ const formats = {
 	"FORMAT_RGB8": Image.FORMAT_RGB8,
 	"FORMAT_RGBA8": Image.FORMAT_RGBA8,
 	"FORMAT_RGBAF": Image.FORMAT_RGBAF,
+	"FORMAT_RGBAH": Image.FORMAT_RGBAH,
 }
 
 var is_3d: bool = false
