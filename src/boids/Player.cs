@@ -12,6 +12,8 @@ public class Player : BoidBase
     
     public override void _Ready()
     {
+        base._Ready();
+        
         _colour = ColourManager.Instance.Secondary;
         _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer3D;
 

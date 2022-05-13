@@ -27,7 +27,7 @@ public class Clouds : Spatial
                     mat.SetShaderParam("u_colour_b", ColourManager.Instance.White);
                     break;
                 case 1:
-                    mat.SetShaderParam("u_colour_a", ColourManager.Instance.Secondary);
+                    mat.SetShaderParam("u_colour_a", ColourManager.Instance.Four);
                     mat.SetShaderParam("u_colour_b", ColourManager.Instance.Tertiary);
                     break;
             }

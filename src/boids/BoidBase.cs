@@ -101,7 +101,7 @@ public class BoidBase : Area
         _baseScale = _mesh.Scale;
 
         ShaderMaterial mat = _mesh.GetActiveMaterial(0) as ShaderMaterial;
-        mat?.SetShaderParam("u_primary_colour", ColourManager.Instance.Primary);
+        mat?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
         mat?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Secondary);
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
@@ -226,7 +226,6 @@ public class BoidBase : Area
         {
             _damagedParticles.Emitting = true;
         }
-        Debug.Assert(IsInstanceValid(_sfxHitPlayer), $"{Name}, {ID}");
         _sfxHitPlayer.Play();
     }
     

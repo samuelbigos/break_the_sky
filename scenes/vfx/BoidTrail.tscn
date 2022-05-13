@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/vfx/BoidTrail.cs" type="Script" id=1]
+
+[sub_resource type="Curve" id=1]
+_data = [ Vector2( 0, 1 ), 0.0, -0.989792, 0, 0, Vector2( 0.9475, 0 ), -0.997806, 0.0, 0, 0 ]
+
+[node name="BoidTrail" type="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
+script = ExtResource( 1 )
+_linePoints = 10
+_lineWidth = 1.0
+_lineWidthCurve = SubResource( 1 )

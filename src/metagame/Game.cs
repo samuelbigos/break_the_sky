@@ -93,7 +93,7 @@ public class Game : Node
         _player.Init("player", _player, this, null);
         DebugImGui.DrawImGui += _OnImGuiLayout;
         _aiSpawningDirector.Init(this, _player);
-        
+
         _pendingBoidSpawn = SaveDataPlayer.Instance.InitialAllyCount;
 
         AddScore(0, _player.GlobalPosition, false);

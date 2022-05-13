@@ -10,6 +10,8 @@ public class ColourManager : Node
 	[Export] public Color Primary;
 	[Export] public Color Secondary;
 	[Export] public Color Tertiary;
-	[Export] public Color White;
+	[Export] public Color Four;
 	[Export] public Color Accent;
+	[Export] public Color Red;
+	[Export] public Color White;
 }

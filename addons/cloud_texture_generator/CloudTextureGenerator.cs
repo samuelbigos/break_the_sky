@@ -29,21 +29,6 @@ public class CloudTextureGenerator : EditorPlugin
         _dock.Free();
     }
 
-    private float Mix(float x, float y, float a)
-    {
-        return x * (1.0f - a) + y * a;
-    }
-    
-    private float Remap(float x, float a, float b, float c, float d)
-    {
-        return (((x - a) / (b - a)) * (d - c)) + c;
-    }
-
-    private float Fract(float x)
-    {
-        return x - Mathf.Floor(x);
-    }
-
     private Vector3 Floor(Vector3 x)
     {
         Vector3 ret = new Vector3(Mathf.Floor(x.x),
@@ -120,59 +105,6 @@ public class CloudTextureGenerator : EditorPlugin
         return a + b + c;
     }
     
-    // TODO: replace with tileable noise.
-    // https://iquilezles.org/articles/morenoise/
-    private float ValueNoise(Vector3 x)
-    {
-        // grid
-        Vector3 i = Floor(x);
-        Vector3 w = Fract(x);
-    
-        // quintic interpolant
-        Vector3 u = w*w*w*(w*(w*6.0f-Vector3.One*15.0f)+Vector3.One*10.0f);
-        Vector3 du = 30.0f*w*w*(w*(w-Vector3.One*2.0f)+Vector3.One*1.0f);  
-    
-        // gradients
-        Vector3 ga = Hash( i+new Vector3(0.0f,0.0f,0.0f) );
-        Vector3 gb = Hash( i+new Vector3(1.0f,0.0f,0.0f) );
-        Vector3 gc = Hash( i+new Vector3(0.0f,1.0f,0.0f) );
-        Vector3 gd = Hash( i+new Vector3(1.0f,1.0f,0.0f) );
-        Vector3 ge = Hash( i+new Vector3(0.0f,0.0f,1.0f) );
-        Vector3 gf = Hash( i+new Vector3(1.0f,0.0f,1.0f) );
-        Vector3 gg = Hash( i+new Vector3(0.0f,1.0f,1.0f) );
-        Vector3 gh = Hash( i+new Vector3(1.0f,1.0f,1.0f) );
-    
-        // projections
-        float va = ga.Dot(w-new Vector3(0.0f,0.0f,0.0f) );
-        float vb = gb.Dot( w-new Vector3(1.0f,0.0f,0.0f) );
-        float vc = gc.Dot( w-new Vector3(0.0f,1.0f,0.0f) );
-        float vd = gd.Dot( w-new Vector3(1.0f,1.0f,0.0f) );
-        float ve = ge.Dot( w-new Vector3(0.0f,0.0f,1.0f) );
-        float vf = gf.Dot( w-new Vector3(1.0f,0.0f,1.0f) );
-        float vg = gg.Dot( w-new Vector3(0.0f,1.0f,1.0f) );
-        float vh = gh.Dot( w-new Vector3(1.0f,1.0f,1.0f) );
-	
-        // interpolations
-        return va + u.x * (vb - va) + u.y * (vc - va) + u.z * (ve - va) + u.x * u.y * (va - vb - vc + vd) +
-                    u.y * u.z * (va - vc - ve + vg) + u.z * u.x * (va - vb - ve + vf) +
-                    (-va + vb + vc - vd + ve - vf - vg + vh) * u.x * u.y * u.z;
-    }
-
-    float ValueFbm(Vector3 p, float freq, int octaves)
-    {
-        float g = Mathf.Pow(2.0f, -.85f);
-        float amp = 1.0f;
-        float noise = 0.0f;
-        for (int i = 0; i < octaves; ++i)
-        {
-            noise += amp * ValueNoise(p * freq);
-            freq *= 2.0f;
-            amp *= g;
-        }   
-    
-        return noise;
-    }
-
     private void _OnButtonPressed()
     {
         const int sizeX = 128;
@@ -181,7 +113,7 @@ public class CloudTextureGenerator : EditorPlugin
         const float freq = 4.0f;
 
         Texture3D texture3D = new Texture3D();
-        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8);
+        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgbah);
         
         NativeScript anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
         Debug.Assert(anlScript != null, "anlScript != null");
@@ -193,7 +125,7 @@ public class CloudTextureGenerator : EditorPlugin
         for (int y = 0; y < sizeY; y++)
         {
             Image layer = new Image();
-            layer.Create(sizeX, sizeZ, true, Image.Format.Rgba8);
+            layer.Create(sizeX, sizeZ, true, Image.Format.Rgbah);
             layer.Lock();
             for (int x = 0; x < sizeX; x++)
             {

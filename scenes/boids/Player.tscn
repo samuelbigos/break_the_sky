@@ -22,3 +22,6 @@ stream = ExtResource( 4 )
 
 [node name="Listener" type="Listener" parent="." index="6"]
 current = true
+
+[node name="BoidTrail" parent="." index="7"]
+visible = false
