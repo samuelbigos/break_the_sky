@@ -1,8 +1,6 @@
 using Godot;
 using System;
-using System.Drawing;
-using System.Numerics;
-using ProceduralNoiseProject;
+using System.Diagnostics;
 using Color = Godot.Color;
 using Image = Godot.Image;
 using Vector3 = Godot.Vector3;
@@ -180,9 +178,17 @@ public class CloudTextureGenerator : EditorPlugin
         const int sizeX = 128;
         const int sizeY = 128;
         const int sizeZ = 128;
+        const float freq = 4.0f;
 
         Texture3D texture3D = new Texture3D();
         texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8);
+        
+        NativeScript anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
+        Debug.Assert(anlScript != null, "anlScript != null");
+        Node anl = anlScript.New() as Node;
+        Debug.Assert(anl != null, "anl != null");
+        
+        anl.Call("Generate3DGradientNoiseImage", sizeX, freq, DateTime.Now.Millisecond);
 
         for (int y = 0; y < sizeY; y++)
         {
@@ -194,16 +200,13 @@ public class CloudTextureGenerator : EditorPlugin
                 for (int z = 0; z < sizeZ; z++)
                 {
                     Color col = new Color();
-                    Vector3 pos = new Vector3(x, y, z) / sizeX;
+                    Vector3 pos = new Vector3(x, z, y) / sizeX;
                     
-                    float freq = 4.0f;
-                    float vFbm = Mix(1.0f, ValueFbm(pos, freq, 1), 0.5f);
-                    vFbm = Mathf.Abs(vFbm * 2.0f - 1.0f);
-
                     col.g = WorleyFbm(pos, freq);
                     col.b = WorleyFbm(pos, freq * 2.0f);
                     col.a = WorleyFbm(pos, freq * 4.0f);
-                    col.r = Remap(vFbm, 0.0f, 1.0f, col.g, 1.0f);
+
+                    col.r = (float)Convert.ToDouble(anl.Call("SampleGradientImage", x, y, z)) * 0.5f + 0.5f;
                     
                     layer.SetPixel(x, z, col);
                 }

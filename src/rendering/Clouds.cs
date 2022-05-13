@@ -6,6 +6,7 @@ public class Clouds : Spatial
 {
     [Export] private Texture3D _noise;
     [Export] private List<NodePath> _cloudLayerPaths;
+    [Export] private NativeScript _anl;
 
     private List<MeshInstance> _cloudLayers = new List<MeshInstance>();
     private int _cloudMode = 0;
@@ -17,6 +18,19 @@ public class Clouds : Spatial
         for (int i = 0; i < _cloudLayerPaths.Count; i++)
         {
             _cloudLayers.Add(GetNode<MeshInstance>(_cloudLayerPaths[i]));
+            ShaderMaterial mat = _cloudLayers[i].GetSurfaceMaterial(0) as ShaderMaterial;
+
+            switch (i)
+            {
+                case 0:
+                    mat.SetShaderParam("u_colour_a", ColourManager.Instance.Accent);
+                    mat.SetShaderParam("u_colour_b", ColourManager.Instance.White);
+                    break;
+                case 1:
+                    mat.SetShaderParam("u_colour_a", ColourManager.Instance.Secondary);
+                    mat.SetShaderParam("u_colour_b", ColourManager.Instance.Tertiary);
+                    break;
+            }
         }
     }
 
@@ -24,17 +38,11 @@ public class Clouds : Spatial
     {
         base._Process(delta);
 
-        Vector3 pos = GlobalCamera.Instance.GlobalTransform.origin;
-        pos.y = 0.0f;
-        GlobalTransform = GlobalTransform.Position(pos);
-        
-        for (int i = 0; i < _cloudLayers.Count; i++)
+        if (GlobalCamera.Instance != null)
         {
-            ShaderMaterial mat = _cloudLayers[i].GetSurfaceMaterial(0) as ShaderMaterial;
-            mat.SetShaderParam("u_mode", _cloudMode);
+            Vector3 pos = GlobalCamera.Instance.GlobalTransform.origin;
+            pos.y = 0.0f;
+            GlobalTransform = GlobalTransform.Position(pos);
         }
-
-        // if (Input.IsActionJustReleased("spacebar"))
-        //     _cloudMode = _cloudMode == 0 ? 1 : 0;
     }
 }

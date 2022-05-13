@@ -50,7 +50,7 @@ public class GlobalCamera : Camera
 
         _cameraHeight = GlobalTransform.origin.y;
 
-        VisualServer.SetDefaultClearColor(ColourManager.Instance.Water);
+        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
     }
 
     public override void _Process(float delta)

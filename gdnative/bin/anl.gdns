@@ -1,0 +1,8 @@
+[gd_resource type="NativeScript" load_steps=2 format=2]
+
+[ext_resource path="res://gdnative/bin/anl.gdnlib" type="GDNativeLibrary" id=1]
+
+[resource]
+resource_name = "ANL"
+class_name = "ANL"
+library = ExtResource( 1 )

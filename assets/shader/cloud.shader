@@ -4,10 +4,11 @@ render_mode unshaded, world_vertex_coords;
 uniform sampler3D u_noise;
 uniform vec4 u_colour_a : hint_color;
 uniform vec4 u_colour_b : hint_color;
-uniform float u_offset;
+uniform int u_flip;
 uniform float u_scroll_speed = 0.1;
 uniform float u_turbulence = 0.01;
 uniform float u_scale = 256.0;
+uniform float u_density = 0.5;
 uniform int u_mode = 0;
 
 varying vec3 v_vertPos;
@@ -136,8 +137,8 @@ vec4 cloud_noise(vec3 pos)
 		uv.y = mod(pos.y, 1.0);
 		uv.z = mod(pos.z, 1.0);
 		
-		vec4 sample = texture(u_noise, uv);
-		col = sample;
+		col = texture(u_noise, uv);
+		col.r = remap(col.r, 0., 1., col.g, 1.);
 	}    
 	return col;
 }
@@ -155,7 +156,7 @@ float cloud(vec3 pos)
 
     // cloud shape modeled after the GPU Pro 7 chapter
     float cloud = remap(perlinWorley, wfbm - 1., 1., 0., 1.);
-    cloud = remap(cloud, .9, 1., 0., 1.); // fake cloud coverage
+    cloud = remap(cloud, mix(0.9, 0.95, 1.0 - u_density), 1., 0., 1.); // fake cloud coverage
 	return cloud;
 }
 
@@ -167,7 +168,14 @@ void vertex()
 void fragment()
 {
 	vec2 scroll = vec2(TIME, TIME) * u_scroll_speed;
-	vec3 pos = vec3(v_vertPos.xz + vec2(u_offset) + scroll, TIME * u_turbulence) / u_scale;
+	vec3 pos = vec3(v_vertPos.xz + scroll, TIME * u_turbulence) / u_scale;
+	//vec3 pos = vec3(v_vertPos.xz + vec2(u_offset), 0.5) / u_scale;
+	
+	// flip to hide that we're using the same noise on different layers.
+	if (u_flip == 1)
+		pos.xyz = pos.zyx;
+	if (u_flip == 2)
+		pos.xyz = pos.yxz;
 
 	float kernel = 1.0 / u_scale;
 	float R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
@@ -178,8 +186,16 @@ void fragment()
 
 	float d = dot(normal, vec3(0.25, 1.0, 0.0));
 
-	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.025, d));
-	ALPHA = step(0.0, (R+L+T+B) / 4.0);
+	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.01, d));
+	
+	// dirty AA
+	kernel = 0.1 / u_scale;
+	R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
+	L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
+	T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
+	B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
+	ALPHA = step(0.0, R) + step(0.0, L) + step(0.0, T) + step(0.0, B);
+	ALPHA /= 4.0;
 
 //	ALBEDO = vec3(cloud_noise(pos).r);
 //	ALPHA = 1.0;

@@ -12,5 +12,4 @@ public class ColourManager : Node
 	[Export] public Color Tertiary;
 	[Export] public Color White;
 	[Export] public Color Accent;
-	[Export] public Color Water;
 }
