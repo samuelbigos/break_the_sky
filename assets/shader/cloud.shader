@@ -2,13 +2,13 @@ shader_type spatial;
 render_mode unshaded, world_vertex_coords;
 
 uniform sampler3D u_noise;
-uniform sampler2D u_noise2d;
 uniform vec4 u_colour_a : hint_color;
 uniform vec4 u_colour_b : hint_color;
 uniform float u_offset;
 uniform float u_scroll_speed = 0.1;
 uniform float u_turbulence = 0.01;
 uniform float u_scale = 256.0;
+uniform int u_mode = 0;
 
 varying vec3 v_vertPos;
 
@@ -113,25 +113,45 @@ float worleyFbm(vec3 p, float freq)
         	 worleyNoise(p*freq*4., freq*4.) * .125;
 }
 
+vec4 cloud_noise(vec3 pos)
+{	
+	vec4 col = vec4(0.);
+	
+	if (u_mode == 1)
+	{
+		float freq = 4.;
+	    float pfbm = mix(1., perlinfbm(pos, 4., 1), .5);
+	    pfbm = abs(pfbm * 2. - 1.); // billowy perlin noise
+	
+		col.g += worleyFbm(pos, freq);
+	    col.b += worleyFbm(pos, freq*2.);
+	    col.a += worleyFbm(pos, freq*4.);
+	    col.r += remap(pfbm, 0., 1., col.g, 1.); // perlin-worley
+	}
+	else
+	{
+		ivec3 texSize = textureSize(u_noise, 0);
+		vec3 uv;
+		uv.x = mod(pos.x, 1.0);
+		uv.y = mod(pos.y, 1.0);
+		uv.z = mod(pos.z, 1.0);
+		
+		vec4 sample = texture(u_noise, uv);
+		col = sample;
+	}    
+	return col;
+}
+
 float cloud(vec3 pos)
 {
-	vec4 col = vec4(0.);
-
-	float freq = 4.;    
-	vec3 uv = pos;
-    float pfbm = mix(1., perlinfbm(uv, 4., 1), .5);
-    pfbm = abs(pfbm * 2. - 1.); // billowy perlin noise    
-    col.g += worleyFbm(uv, freq);
-    col.b += worleyFbm(uv, freq*2.);
-    col.a += worleyFbm(uv, freq*4.);
-    col.r += remap(pfbm, 0., 1., col.g, 1.); // perlin-worley
-
-	vec3 worley = col.yzw;
+	vec4 cloud_noise = cloud_noise(pos);
+	
+	vec3 worley = cloud_noise.yzw;
     float wfbm = worley.x * .625 +
         		 worley.y * .125 +
         		 worley.z * .25; 
 
-	float perlinWorley = col.r;
+	float perlinWorley = cloud_noise.r;
 
     // cloud shape modeled after the GPU Pro 7 chapter
     float cloud = remap(perlinWorley, wfbm - 1., 1., 0., 1.);
@@ -148,27 +168,19 @@ void fragment()
 {
 	vec2 scroll = vec2(TIME, TIME) * u_scroll_speed;
 	vec3 pos = vec3(v_vertPos.xz + vec2(u_offset) + scroll, TIME * u_turbulence) / u_scale;
-//
-//	float kernel = 1.0 / u_scale;
-//	float R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
-//	float L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
-//	float T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
-//	float B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
-//	vec3 normal = normalize(vec3(2.0 * (R-L), 2.0 * -(B-T), 4.0));
-//
-//	float d = dot(normal, vec3(0.25, 1.0, 0.0));
-//
-//	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.0, d));
-//	ALPHA = step(0.0, (R+L+T+B) / 4.0);
-	
-	ivec3 texSize = textureSize(u_noise, 0);
-	vec3 uv;
-	uv.x = mod(pos.x, float(texSize.x)) / float(texSize.x);
-	uv.y = mod(pos.y, float(texSize.y)) / float(texSize.y);
-	uv.z = mod(pos.z, float(texSize.z)) / float(texSize.z);
-	
-	vec4 sample = texture(u_noise2d, vec2(0.5));
-	
-	ALBEDO = vec3(sample.rgb);
-	ALPHA = 1.0;
+
+	float kernel = 1.0 / u_scale;
+	float R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
+	float L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
+	float T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
+	float B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
+	vec3 normal = normalize(vec3(2.0 * (R-L), 2.0 * -(B-T), 4.0));
+
+	float d = dot(normal, vec3(0.25, 1.0, 0.0));
+
+	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.025, d));
+	ALPHA = step(0.0, (R+L+T+B) / 4.0);
+
+//	ALBEDO = vec3(cloud_noise(pos).r);
+//	ALPHA = 1.0;
 }

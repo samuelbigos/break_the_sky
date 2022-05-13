@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "ResourceFormatSaver",
+"class": "TextureArraySaver",
+"language": "GDScript",
+"path": "res://addons/better-texture-array/texture_array_saver.gd"
+} ]
+_global_script_class_icons={
+"TextureArraySaver": ""
+}
+
 [application]
 
 config/name="Break The Sky"
@@ -44,7 +54,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/cloud_texture_generator/plugin.cfg", "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg", "res://addons/cloud_texture_generator/plugin.cfg", "res://addons/gd2cs.py/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 

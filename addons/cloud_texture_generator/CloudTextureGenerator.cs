@@ -1,9 +1,11 @@
 using Godot;
 using System;
 using System.Drawing;
+using System.Numerics;
 using ProceduralNoiseProject;
 using Color = Godot.Color;
 using Image = Godot.Image;
+using Vector3 = Godot.Vector3;
 
 [Tool]
 public class CloudTextureGenerator : EditorPlugin
@@ -28,17 +30,6 @@ public class CloudTextureGenerator : EditorPlugin
         
         _dock.Free();
     }
-    
-    float WorleyFbm(WorleyNoise worley, int x, int y, int z, float freq)
-    {
-        worley.Frequency = freq;
-        float a = worley.Sample3D(x * freq, y * freq, z * freq) * .625f;
-        worley.Frequency = freq * 2.0f;
-        float b = worley.Sample3D(x * freq * 2.0f, y * freq * 2.0f, z * freq * 2.0f) * .25f;
-        worley.Frequency = freq * 2.0f;
-        float c = worley.Sample3D(x * freq * 4.0f, y * freq * 4.0f, z * freq * 4.0f) * .125f;
-        return a + b + c;
-    }
 
     private float Mix(float x, float y, float a)
     {
@@ -50,48 +41,179 @@ public class CloudTextureGenerator : EditorPlugin
         return (((x - a) / (b - a)) * (d - c)) + c;
     }
 
+    private float Fract(float x)
+    {
+        return x - Mathf.Floor(x);
+    }
+
+    private Vector3 Floor(Vector3 x)
+    {
+        Vector3 ret = new Vector3(Mathf.Floor(x.x),
+            Mathf.Floor(x.y),
+            Mathf.Floor(x.z));
+        return ret;
+    }
+    
+    private Vector3 Fract(Vector3 x)
+    {
+        Vector3 ret = new Vector3(x.x - Mathf.Floor(x.x),
+            x.y - Mathf.Floor(x.y),
+            x.z - Mathf.Floor(x.z));
+        return ret;
+    }
+
+    private Vector3 Sin(Vector3 x)
+    {
+        Vector3 ret = new Vector3(Mathf.Sin(x.x),
+            Mathf.Sin(x.y),
+            Mathf.Sin(x.z));
+        return ret;
+    }
+
+    private Vector3 Mod(Vector3 a, Vector3 b)
+    {
+        return a - b * Floor(a / b);
+    }
+    
+    private Vector3 Mod(Vector3 a, float b)
+    {
+        return new Vector3(a.x % b, a.y % b, a.z % b);
+    }
+    
+    private Vector3 Hash(Vector3 p)
+    {
+        p = new Vector3(p.Dot(new Vector3(127.1f, 311.7f, 74.7f)),
+            p.Dot(new Vector3(269.5f,183.3f,246.1f)),
+            p.Dot(new Vector3(113.5f,271.9f,124.6f)));
+
+        return new Vector3(-1.0f, -1.0f, -1.0f) + 2.0f * Fract(Sin(p) * 43758.5453123f);
+    }
+    
+    float WorleyNoise(Vector3 uv, float freq)
+    {    
+        Vector3 id = Floor(uv);
+        Vector3 p = Fract(uv);
+    
+        float minDist = 10000.0f;
+        for (int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                for(int z = -1; z <= 1; ++z)
+                {
+                    Vector3 offset = new Vector3(x, y, z);
+                    Vector3 h = Hash(Mod(id + offset, new Vector3(freq, freq, freq))) * 0.5f + Vector3.One * 0.5f;
+                    h += offset;
+                    Vector3 d = p - h;
+                    minDist = Mathf.Min(minDist, d.Dot(d));
+                }
+            }
+        }
+    
+        // inverted worley noise
+        return 1.0f - minDist;
+    }
+    
+    float WorleyFbm(Vector3 pos, float freq)
+    {
+        float a = WorleyNoise(pos * freq, freq) * .625f;
+        float b = WorleyNoise(pos * freq * 2.0f, freq * 2.0f) * .25f;
+        float c = WorleyNoise(pos * freq * 4.0f, freq * 4.0f) * .125f;
+        return a + b + c;
+    }
+    
+    // TODO: replace with tileable noise.
+    // https://iquilezles.org/articles/morenoise/
+    private float ValueNoise(Vector3 x)
+    {
+        // grid
+        Vector3 i = Floor(x);
+        Vector3 w = Fract(x);
+    
+        // quintic interpolant
+        Vector3 u = w*w*w*(w*(w*6.0f-Vector3.One*15.0f)+Vector3.One*10.0f);
+        Vector3 du = 30.0f*w*w*(w*(w-Vector3.One*2.0f)+Vector3.One*1.0f);  
+    
+        // gradients
+        Vector3 ga = Hash( i+new Vector3(0.0f,0.0f,0.0f) );
+        Vector3 gb = Hash( i+new Vector3(1.0f,0.0f,0.0f) );
+        Vector3 gc = Hash( i+new Vector3(0.0f,1.0f,0.0f) );
+        Vector3 gd = Hash( i+new Vector3(1.0f,1.0f,0.0f) );
+        Vector3 ge = Hash( i+new Vector3(0.0f,0.0f,1.0f) );
+        Vector3 gf = Hash( i+new Vector3(1.0f,0.0f,1.0f) );
+        Vector3 gg = Hash( i+new Vector3(0.0f,1.0f,1.0f) );
+        Vector3 gh = Hash( i+new Vector3(1.0f,1.0f,1.0f) );
+    
+        // projections
+        float va = ga.Dot(w-new Vector3(0.0f,0.0f,0.0f) );
+        float vb = gb.Dot( w-new Vector3(1.0f,0.0f,0.0f) );
+        float vc = gc.Dot( w-new Vector3(0.0f,1.0f,0.0f) );
+        float vd = gd.Dot( w-new Vector3(1.0f,1.0f,0.0f) );
+        float ve = ge.Dot( w-new Vector3(0.0f,0.0f,1.0f) );
+        float vf = gf.Dot( w-new Vector3(1.0f,0.0f,1.0f) );
+        float vg = gg.Dot( w-new Vector3(0.0f,1.0f,1.0f) );
+        float vh = gh.Dot( w-new Vector3(1.0f,1.0f,1.0f) );
+	
+        // interpolations
+        return va + u.x * (vb - va) + u.y * (vc - va) + u.z * (ve - va) + u.x * u.y * (va - vb - vc + vd) +
+                    u.y * u.z * (va - vc - ve + vg) + u.z * u.x * (va - vb - ve + vf) +
+                    (-va + vb + vc - vd + ve - vf - vg + vh) * u.x * u.y * u.z;
+    }
+
+    float ValueFbm(Vector3 p, float freq, int octaves)
+    {
+        float g = Mathf.Pow(2.0f, -.85f);
+        float amp = 1.0f;
+        float noise = 0.0f;
+        for (int i = 0; i < octaves; ++i)
+        {
+            noise += amp * ValueNoise(p * freq);
+            freq *= 2.0f;
+            amp *= g;
+        }   
+    
+        return noise;
+    }
+
     private void _OnButtonPressed()
     {
         const int sizeX = 128;
-        const int sizeY = 10;
+        const int sizeY = 128;
         const int sizeZ = 128;
-        
-        OpenSimplexNoise simplexNoise = new OpenSimplexNoise();
-        simplexNoise.Octaves = 1;
-        simplexNoise.Period = 10.0f;
-
-        float worleyFreq = 0.1f;
-        WorleyNoise worley = new WorleyNoise(DateTime.Now.Millisecond, worleyFreq, 1.0f, 1.0f);
 
         Texture3D texture3D = new Texture3D();
-        texture3D.Create(sizeX, sizeY, sizeZ, Image.Format.Rgbaf);
+        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8);
 
-        for (int z = 0; z < sizeZ; z++)
+        for (int y = 0; y < sizeY; y++)
         {
             Image layer = new Image();
-            layer.Create(sizeX, sizeY, true, Image.Format.Rgbaf);
+            layer.Create(sizeX, sizeZ, true, Image.Format.Rgba8);
             layer.Lock();
             for (int x = 0; x < sizeX; x++)
             {
-                for (int y = 0; y < sizeY; y++)
+                for (int z = 0; z < sizeZ; z++)
                 {
                     Color col = new Color();
+                    Vector3 pos = new Vector3(x, y, z) / sizeX;
+                    
+                    float freq = 4.0f;
+                    float vFbm = Mix(1.0f, ValueFbm(pos, freq, 1), 0.5f);
+                    vFbm = Mathf.Abs(vFbm * 2.0f - 1.0f);
 
-                    float simplex = simplexNoise.GetNoise3d(x, y, z) * 0.5f + 0.5f;
-                    simplex = Mix(1.0f, simplex, 0.5f);
+                    col.g = WorleyFbm(pos, freq);
+                    col.b = WorleyFbm(pos, freq * 2.0f);
+                    col.a = WorleyFbm(pos, freq * 4.0f);
+                    col.r = Remap(vFbm, 0.0f, 1.0f, col.g, 1.0f);
                     
-                    col.g = 1.0f - WorleyFbm(worley, x, y, z, worleyFreq);
-                    col.b = 1.0f - WorleyFbm(worley, x, y, z, worleyFreq * 2.0f);
-                    col.a = 1.0f - WorleyFbm(worley, x, y, z, worleyFreq * 4.0f);
-                    col.r = Remap(simplex, 0.0f, 1.0f, col.g, 1.0f);
-                    
-                    layer.SetPixel(x, y, col);
+                    layer.SetPixel(x, z, col);
                 }
             }
-            texture3D.SetLayerData(layer, z);
             layer.Unlock();
+            texture3D.SetLayerData(layer, y);
         }
 
-        ResourceSaver.Save("res://assets/textures/noise/cloud_noise.res", texture3D);
+        Directory dir = new Directory();
+        dir.Remove("res://assets/textures/noise/cloud_noise.tex3d");
+        ResourceSaver.Save("res://assets/textures/noise/cloud_noise.tex3d", texture3D);
     }
 }
