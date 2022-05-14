@@ -33,9 +33,6 @@ public class Game : Node
     [Export] private NodePath _cloudsPath;
     private Clouds _clouds;
 
-    [Export] private NodePath _boidVelMapCameraPath;
-    private Camera _boidVelMapCamera;
-
     [Export] public float SpawningRadius = 500.0f;
     [Export] public float WaveCooldown = 5.0f;
     [Export] public int MaxDrones = 100;
@@ -88,7 +85,6 @@ public class Game : Node
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
         _clouds = GetNode<Clouds>(_cloudsPath);
-        _boidVelMapCamera = GetNode<Camera>(_boidVelMapCameraPath);
 
         _player.Init("player", _player, this, null);
         DebugImGui.DrawImGui += _OnImGuiLayout;
@@ -107,7 +103,6 @@ public class Game : Node
     public override void _Process(float delta)
     {
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
-        _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.GlobalTransform;
 
         while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.Instance.MaxAllyCount)
         {

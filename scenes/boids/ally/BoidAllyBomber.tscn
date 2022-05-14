@@ -4,7 +4,7 @@
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/mesh/enemy_drone.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=4]
-[ext_resource path="res://assets/shader/water_mesh.shader" type="Shader" id=5]
+[ext_resource path="res://assets/shader/boid_velocity.shader" type="Shader" id=5]
 [ext_resource path="res://scenes/bullets/BulletBomber.tscn" type="PackedScene" id=6]
 
 [sub_resource type="BoxShape" id=1]
@@ -40,6 +40,5 @@ mesh = ExtResource( 3 )
 material/0 = null
 _meshMaterials = [ SubResource( 3 ) ]
 
-[node name="BoidTrail" parent="." index="7"]
+[node name="BoidTrail" parent="." index="2"]
 _linePoints = 50
-_lineWidth = 2.0

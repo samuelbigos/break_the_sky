@@ -10,8 +10,9 @@ public class GlobalCamera : Camera
     [Export] public int TraumaPower = 2; // Trauma exponent. Use [2, 3].
     [Export] public float MaxTrauma = 0.75f;
 
-    public OpenSimplexNoise _noise = new OpenSimplexNoise();
+    public Transform BaseTransform;
 
+    private OpenSimplexNoise _noise = new OpenSimplexNoise();
     private float _trauma = 0.0f;
     private Player _player = null;
     private float _noiseY = 0.0f;
@@ -57,6 +58,10 @@ public class GlobalCamera : Camera
     {
         if (_player != null)
         {
+            Vector3 basePos = _player.GlobalTransform.origin;
+            basePos.y = GlobalTransform.origin.y;
+            BaseTransform = new Transform(GlobalTransform.basis, basePos);
+            
             Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
             Vector2 camerOffset = cameraMouseOffset * 0.33f;
             Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + camerOffset.To3D()));

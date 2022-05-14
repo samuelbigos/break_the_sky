@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://assets/shader/cloud.shader" type="Shader" id=1]
 [ext_resource path="res://src/rendering/Clouds.cs" type="Script" id=2]
 [ext_resource path="res://assets/textures/noise/cloud_noise_256x8.tex3d" type="Texture3D" id=3]
 [ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture" id=4]
+[ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 384, 256 )
@@ -17,7 +18,9 @@ shader_param/u_scroll_speed = 5.0
 shader_param/u_turbulence = 10.0
 shader_param/u_scale = 256.0
 shader_param/u_density = 0.306
-shader_param/u_mode = 0
+shader_param/u_transparent = true
+shader_param/u_transparent_col = null
+shader_param/u_transparent_tex = null
 shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
@@ -25,6 +28,7 @@ shader_param/u_dither_size = 4
 shader_param/u_plane_size = Vector2( 384, 256 )
 shader_param/u_receive_shadow = null
 shader_param/u_shadow_offset = null
+shader_param/u_displace = true
 shader_param/u_noise = ExtResource( 3 )
 shader_param/u_dither_tex = ExtResource( 4 )
 
@@ -37,7 +41,9 @@ shader_param/u_scroll_speed = 2.5
 shader_param/u_turbulence = 10.0
 shader_param/u_scale = 256.0
 shader_param/u_density = 1.0
-shader_param/u_mode = 0
+shader_param/u_transparent = null
+shader_param/u_transparent_col = null
+shader_param/u_transparent_tex = null
 shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
@@ -45,13 +51,28 @@ shader_param/u_dither_size = 4
 shader_param/u_plane_size = Vector2( 384, 256 )
 shader_param/u_receive_shadow = true
 shader_param/u_shadow_offset = Vector2( -25, -25 )
+shader_param/u_displace = null
 shader_param/u_noise = ExtResource( 3 )
 shader_param/u_dither_tex = ExtResource( 4 )
+
+[sub_resource type="ViewportTexture" id=5]
+viewport_path = NodePath("BoidVelMapViewport")
+
+[sub_resource type="ViewportTexture" id=6]
+viewport_path = NodePath("BoidVelMapViewport")
+
+[sub_resource type="ViewportTexture" id=4]
+viewport_path = NodePath("WaveRenderViewportSwapA")
 
 [node name="Clouds" type="Spatial"]
 script = ExtResource( 2 )
 _noise = ExtResource( 3 )
 _cloudLayerPaths = [ NodePath("Layer1"), NodePath("Layer2") ]
+_boidVelocityMapPath = NodePath("BoidVelMapViewport")
+_boidTransparentMapPath = NodePath("BoidTransparentMapViewport")
+_displacementMapPaths = [ NodePath("WaveRenderViewportSwapA"), NodePath("WaveRenderViewportSwapB") ]
+_displacementTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodePath("WaveRenderViewportSwapB/TextureRect") ]
+_boidVelMapCameraPath = NodePath("BoidVelMapViewport/Camera")
 
 [node name="Layer1" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
@@ -65,5 +86,69 @@ material/0 = SubResource( 3 )
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 100, 0 )
-current = true
 far = 500.0
+
+[node name="BoidVelMapViewport" type="Viewport" parent="."]
+size = Vector2( 1024, 1024 )
+transparent_bg = true
+hdr = false
+keep_3d_linear = true
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="BoidVelMapViewport"]
+cull_mask = 1047554
+projection = 1
+size = 512.0
+far = 200.0
+
+[node name="BoidTransparentMapViewport" type="Viewport" parent="."]
+size = Vector2( 1024, 1024 )
+transparent_bg = true
+hdr = false
+keep_3d_linear = true
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="BoidTransparentMapViewport"]
+cull_mask = 1047554
+size = 512.0
+far = 200.0
+
+[node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapA"]
+material = ExtResource( 6 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 5 )
+
+[node name="WaveRenderViewportSwapB" type="Viewport" parent="."]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+keep_3d_linear = true
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapB"]
+material = ExtResource( 6 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 6 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="DebugRect1" type="TextureRect" parent="CanvasLayer"]
+visible = false
+margin_right = 640.0
+margin_bottom = 720.0
+texture = SubResource( 4 )
+expand = true
+stretch_mode = 7

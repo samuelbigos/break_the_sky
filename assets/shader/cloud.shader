@@ -10,7 +10,9 @@ uniform float u_scroll_speed = 1.0;
 uniform float u_turbulence = 1.0;
 uniform float u_scale = 256.0;
 uniform float u_density = 0.5;
-uniform int u_mode = 0;
+uniform bool u_transparent;
+uniform vec4 u_transparent_col : hint_color;
+uniform vec4 u_transparent_tex;
 
 // dither
 uniform sampler2D u_dither_tex;
@@ -24,6 +26,10 @@ uniform vec2 u_plane_size;
 uniform bool u_receive_shadow;
 uniform vec2 u_shadow_offset;
 uniform sampler2D u_boid_vel_tex;
+
+// cloud deform
+uniform bool u_displace;
+uniform sampler2D u_displacement_map;
 
 varying vec3 v_vertPos;
 
@@ -95,20 +101,26 @@ void fragment()
 	floored_pos /= float(u_dither_size);
 	
 	vec3 pos = scale_pos(vertPos);
-
-	float kernel = 2.0 / u_scale;
-	float R = cloud(floored_pos + vec3(1.0, 0.0, 0.0) * kernel);
-	float L = cloud(floored_pos + vec3(-1.0, 0.0, 0.0) * kernel);
-	float T = cloud(floored_pos + vec3(0.0, 0.0, 1.0) * kernel);
-	float B = cloud(floored_pos + vec3(0.0, 0.0, -1.0) * kernel);
-	vec3 normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
-
-	if (u_flip == 1)
-		normal.x = -normal.x;
-		
-	float d = dot(normal, vec3(1.0, 0.0, 1.0));
 	
-	d = clamp(d * 10.0, 0.0, 1.0);
+	// clouds
+	vec3 normal;
+	float clouds;
+	float lum;
+	{
+		float kernel = 2.0 / u_scale;
+		float R = cloud(floored_pos + vec3(1.0, 0.0, 0.0) * kernel);
+		float L = cloud(floored_pos + vec3(-1.0, 0.0, 0.0) * kernel);
+		float T = cloud(floored_pos + vec3(0.0, 0.0, 1.0) * kernel);
+		float B = cloud(floored_pos + vec3(0.0, 0.0, -1.0) * kernel);
+		normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
+
+		if (u_flip == 1)
+			normal.x = -normal.x;
+			
+		float d = dot(normal, vec3(1.0, 0.0, 1.0));
+		lum = clamp(d * 10.0, 0.0, 1.0);
+		clouds = step(0.0, cloud(pos));
+	}
 	
 	// boid shadows
 	float shadow;
@@ -128,26 +140,55 @@ void fragment()
 	
 	// dither 
 	vec3 dithered;
+	float dither_threshold;
 	{
-		float lum = min(d, 1.0 - shadow);
+		lum = min(lum, 1.0 - shadow);
 		
 		ivec2 noise_size = textureSize(u_dither_tex, 0);
 		vec2 inv_noise_size = vec2(1.0 / float(noise_size.x), 1.0 / float(noise_size.y));
 		vec2 noise_uv = pos.xz * inv_noise_size * u_scale * float(u_dither_size);
-		float threshold = texture(u_dither_tex, noise_uv).r;
+		dither_threshold = texture(u_dither_tex, noise_uv).r;
 		
-		threshold = threshold * 0.99 + 0.005;
+		dither_threshold = dither_threshold * 0.99 + 0.005;
 		
-		float ramp_val = lum < threshold ? 0.0f : 1.0f;
+		float ramp_val = lum < dither_threshold ? 0.0f : 1.0f;
 		dithered = mix(u_colour_b.rgb, u_colour_a.rgb, step(ramp_val, 0.0));
 	}
 	
-	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
-	ALBEDO = dithered;
-	ALPHA = step(0.0, cloud(pos));
-}
+	// displacement
+	float displacement = 0.0;
+//	if (u_displace)
+//	{
+//		vec2 texSize = vec2(textureSize(u_displacement_map, 0));
+//		vec2 uv = UV - 0.5;
+//		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
+//		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
+//		uv.x += u_shadow_offset.x / u_plane_size.x;
+//		uv.y += u_shadow_offset.y / u_plane_size.y;
+//		displacement = texture(u_displacement_map, uv + 0.5).r;
+//		displacement *= 0.1;
+//	}
 
-void light()
-{ 
-	//DIFFUSE_LIGHT = ALBEDO * ATTENUATION;
+	// transparency
+	float transparent;
+	vec3 transparent_col;
+	if (u_transparent)
+	{
+		// map boid texture onto clouds
+		vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
+		vec2 uv = UV - 0.5;
+		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
+		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
+		uv.x += normal.x * 0.025;
+		uv.y += normal.z * 0.025;
+		uv.x += u_shadow_offset.x / u_plane_size.x;
+		uv.y += u_shadow_offset.y / u_plane_size.y;
+		transparent = texture(u_boid_vel_tex, uv + 0.5).a;
+		
+		transparent_col = mix(u_transparent_col.rgb, dithered, step(0.5, dither_threshold));
+	}
+
+	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
+	ALBEDO = mix(dithered, transparent_col, transparent);
+	ALPHA = clouds;
 }
