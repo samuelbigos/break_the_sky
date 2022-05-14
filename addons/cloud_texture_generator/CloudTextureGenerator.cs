@@ -113,7 +113,7 @@ public class CloudTextureGenerator : EditorPlugin
         const float freq = 4.0f;
 
         Texture3D texture3D = new Texture3D();
-        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgbah);
+        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8);
         
         NativeScript anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
         Debug.Assert(anlScript != null, "anlScript != null");
@@ -125,7 +125,7 @@ public class CloudTextureGenerator : EditorPlugin
         for (int y = 0; y < sizeY; y++)
         {
             Image layer = new Image();
-            layer.Create(sizeX, sizeZ, true, Image.Format.Rgbah);
+            layer.Create(sizeX, sizeZ, true, Image.Format.Rgba8);
             layer.Lock();
             for (int x = 0; x < sizeX; x++)
             {
