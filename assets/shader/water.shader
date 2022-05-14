@@ -20,9 +20,6 @@ void light()
 
 void fragment() 
 {
-	METALLIC = 0.5;
-	ROUGHNESS = 0.5;
-	
 	vec4 col = u_water_col;
 	
 	// waves

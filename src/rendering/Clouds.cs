@@ -6,6 +6,7 @@ public class Clouds : Spatial
 {
     [Export] private Texture3D _noise;
     [Export] private List<NodePath> _cloudLayerPaths;
+    [Export] private Texture _boidVelTex;
 
     private List<MeshInstance> _cloudLayers = new List<MeshInstance>();
     private int _cloudMode = 0;
@@ -30,6 +31,8 @@ public class Clouds : Spatial
                     mat.SetShaderParam("u_colour_b", ColourManager.Instance.Tertiary);
                     break;
             }
+            
+            mat.SetShaderParam("u_boid_vel_tex", _boidVelTex);
         }
     }
 
