@@ -39,3 +39,7 @@ material_override = SubResource( 2 )
 mesh = ExtResource( 3 )
 material/0 = null
 _meshMaterials = [ SubResource( 3 ) ]
+
+[node name="BoidTrail" parent="." index="7"]
+_linePoints = 50
+_lineWidth = 2.0

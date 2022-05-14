@@ -43,3 +43,6 @@ stream = ExtResource( 7 )
 stream = ExtResource( 7 )
 
 [node name="DamagedParticles" type="Particles" parent="."]
+
+[node name="BoidTrail" parent="." instance=ExtResource( 2 )]
+material_override = SubResource( 2 )
