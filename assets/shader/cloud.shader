@@ -5,11 +5,17 @@ uniform sampler3D u_noise;
 uniform vec4 u_colour_a : hint_color;
 uniform vec4 u_colour_b : hint_color;
 uniform int u_flip;
-uniform float u_scroll_speed = 0.1;
-uniform float u_turbulence = 0.01;
+uniform float u_scroll_speed = 1.0;
+uniform float u_turbulence = 1.0;
 uniform float u_scale = 256.0;
 uniform float u_density = 0.5;
 uniform int u_mode = 0;
+
+uniform sampler2D u_dither_tex;
+uniform int u_bit_depth = 32;
+uniform float u_contrast = 0;
+uniform float u_offset = 0;
+uniform int u_dither_size = 4;
 
 varying vec3 v_vertPos;
 
@@ -116,6 +122,7 @@ float worleyFbm(vec3 p, float freq)
 
 vec4 cloud_noise(vec3 pos)
 {	
+	pos.xyz = pos.xzy;
 	vec4 col = vec4(0.);
 	
 	if (u_mode == 1)
@@ -135,9 +142,13 @@ vec4 cloud_noise(vec3 pos)
 		vec3 uv;
 		uv.x = mod(pos.x, 1.0);
 		uv.y = mod(pos.y, 1.0);
-		uv.z = mod(pos.z, 1.0);
+		uv.z = mod(pos.z + TIME * u_turbulence * 0.01, 1.0);
 		
 		col = texture(u_noise, uv);
+		
+		float pfbm= mix(1., col.r, .5);
+    	pfbm = abs(pfbm * 2. - 1.); // billowy perlin noise
+		
 		col.r = remap(col.r, 0., 1., col.g, 1.);
 	}    
 	return col;
@@ -165,40 +176,55 @@ void vertex()
 	v_vertPos = VERTEX;
 }
 
+vec3 scale_pos(vec3 pos)
+{
+	return vec3(pos.x, 0.0, pos.z) / u_scale;
+}
+
 void fragment()
 {
-	vec2 scroll = vec2(TIME, TIME) * u_scroll_speed;
-	vec3 pos = vec3(v_vertPos.xz + scroll, TIME * u_turbulence) / u_scale;
-	//vec3 pos = vec3(v_vertPos.xz + vec2(u_offset), 0.5) / u_scale;
+	vec3 vertPos = v_vertPos;
+	vertPos.x += TIME * u_scroll_speed;
+	vertPos.z += TIME * u_scroll_speed;
+	
+	vec3 floored_pos = vertPos * float(u_dither_size);
+	floored_pos = scale_pos(floor(floored_pos));
+	floored_pos /= float(u_dither_size);
+	
+	vec3 pos = scale_pos(vertPos);
 	
 	// flip to hide that we're using the same noise on different layers.
-	if (u_flip == 1)
-		pos.xyz = pos.zyx;
-	if (u_flip == 2)
-		pos.xyz = pos.yxz;
+//	if (u_flip == 1)
+//		pos.y = -pos.y;
 
 	float kernel = 2.0 / u_scale;
-	float R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
-	float L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
-	float T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
-	float B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
-	vec3 normal = normalize(vec3(2.0 * (R-L), 2.0 * -(B-T), 4.0));
+	float R = cloud(floored_pos + vec3(1.0, 0.0, 0.0) * kernel);
+	float L = cloud(floored_pos + vec3(-1.0, 0.0, 0.0) * kernel);
+	float T = cloud(floored_pos + vec3(0.0, 0.0, 1.0) * kernel);
+	float B = cloud(floored_pos + vec3(0.0, 0.0, -1.0) * kernel);
+	vec3 normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
 
-	float d = dot(normal, vec3(0.25, 1.0, 0.0));
-
-	ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, step(0.01, d));
+	float d = dot(normal, vec3(1.0, 0.0, 1.0));
 	
-	// dirty AA
-//	kernel = 0.1 / u_scale;
-//	R = cloud(pos + vec3(1.0, 0., 0.0) * kernel);
-//	L = cloud(pos + vec3(-1.0, 0., 0.0) * kernel);
-//	T = cloud(pos + vec3(0.0, 1., 0.0) * kernel);
-//	B = cloud(pos + vec3(0.0, -1., 0.0) * kernel);
-//	ALPHA = step(0.0, R) + step(0.0, L) + step(0.0, T) + step(0.0, B);
-//	ALPHA /= 4.0;
+	d = clamp(d * 10.0, 0.0, 1.0);
+	
+	// dither 
+	vec3 dithered;
+	{
+		float lum = d;
+		
+		ivec2 noise_size = textureSize(u_dither_tex, 0);
+		vec2 inv_noise_size = vec2(1.0 / float(noise_size.x), 1.0 / float(noise_size.y));
+		vec2 noise_uv = pos.xz * inv_noise_size * u_scale * float(u_dither_size);
+		float threshold = texture(u_dither_tex, noise_uv).r;
+		
+		threshold = threshold * 0.99 + 0.005;
+		
+		float ramp_val = d < threshold ? 0.0f : 1.0f;
+		dithered = mix(u_colour_b.rgb, u_colour_a.rgb, step(ramp_val, 0.0));
+	}
 
+	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
+	ALBEDO = dithered;
 	ALPHA = step(0.0, cloud(pos));
-
-//	ALBEDO = vec3(cloud_noise(pos).r);
-//	ALPHA = 1.0;
 }

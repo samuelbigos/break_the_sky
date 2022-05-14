@@ -22,7 +22,7 @@ public:
 
     void _init();
     
-    void Generate3DGradientNoiseImage(int, float, int);
+    void Generate3DGradientNoiseImage(int, float, float, float, int);
     double SampleGradientImage(int, int, int);
 };
 

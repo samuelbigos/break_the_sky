@@ -25,12 +25,12 @@ ANL::~ANL()
 void ANL::_init() {
 }
 
-void ANL::Generate3DGradientNoiseImage(int dims, float freq, int seed)
+void ANL::Generate3DGradientNoiseImage(int dims, float freqX, float freqY, float freqZ, int seed)
 {
     anl::CKernel kernel;
     m_img = new anl::CArray3Dd(dims, dims, dims);
     anl::CInstructionIndex b = kernel.gradientBasis(kernel.constant(3), kernel.seed(seed));
-    anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)m_img), kernel, anl::SMappingRanges(0.0f, freq, 0.0f, freq, 0.0f, freq), b);
+    anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)m_img), kernel, anl::SMappingRanges(0.0f, freqX, 0.0f, freqY, 0.0f, freqZ), b);
 }
 
 double ANL::SampleGradientImage(int x, int y, int z)

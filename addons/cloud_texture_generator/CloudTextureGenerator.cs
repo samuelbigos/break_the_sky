@@ -107,21 +107,28 @@ public class CloudTextureGenerator : EditorPlugin
     
     private void _OnButtonPressed()
     {
-        const int sizeX = 128;
-        const int sizeY = 128;
-        const int sizeZ = 128;
+        const int sizeX = 256;
+        const int sizeY = 8;
+        const int sizeZ = 256;
         const float freq = 4.0f;
 
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        float tick = 1.0f / Stopwatch.Frequency;
+
         Texture3D texture3D = new Texture3D();
-        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8);
+        texture3D.Create(sizeX, sizeZ, sizeY, Image.Format.Rgba8, (uint) (TextureLayered.FlagsEnum.FlagFilter | TextureLayered.FlagsEnum.FlagRepeat));
         
         NativeScript anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
         Debug.Assert(anlScript != null, "anlScript != null");
         Node anl = anlScript.New() as Node;
         Debug.Assert(anl != null, "anl != null");
         
-        anl.Call("Generate3DGradientNoiseImage", sizeX, freq, DateTime.Now.Millisecond);
-
+        anl.Call("Generate3DGradientNoiseImage", sizeX, freq, freq * ((float)sizeY / sizeX), freq, DateTime.Now.Millisecond);
+        
+        GD.Print($"Generate3DGradientNoiseImage {stopwatch.ElapsedTicks * tick:F2} seconds.");
+        stopwatch.Restart();
+        
         for (int y = 0; y < sizeY; y++)
         {
             Image layer = new Image();
@@ -145,10 +152,15 @@ public class CloudTextureGenerator : EditorPlugin
             }
             layer.Unlock();
             texture3D.SetLayerData(layer, y);
+            
+            GD.Print($"Y {y} - {stopwatch.ElapsedTicks * tick:F2} seconds.");
+            stopwatch.Restart();
         }
 
         Directory dir = new Directory();
         dir.Remove("res://assets/textures/noise/cloud_noise.tex3d");
         ResourceSaver.Save("res://assets/textures/noise/cloud_noise.tex3d", texture3D);
+        
+        GD.Print($"Save - {stopwatch.ElapsedTicks * tick:F2} seconds.");
     }
 }
