@@ -1,30 +1,55 @@
 using Godot;
 using System;
-using System.Numerics;
+using System.Diagnostics;
 using Vector3 = Godot.Vector3;
 
 public class BoidTrail : MeshInstance
 {
+    public enum TrailType
+    {
+        Smooth,
+        Burst
+    }
+
+    [Export(PropertyHint.Flags, "Smooth,Burst")] private TrailType _type = TrailType.Smooth;
     [Export] private int _linePoints = 100;
     [Export] private float _lineInterval = 1.0f / 60.0f;
     [Export] private float _lineWidth = 10.0f;
     [Export] private Curve _lineWidthCurve;
+    [Export] private NodePath _burstParticlesPath;
 
     private SurfaceTool _st = new SurfaceTool();
     private int _trailIdx;
     private Vector3[] _trailPositions;
     private Spatial _parent;
     private float _updateTimer;
+    private Particles _burstParticles;
 
     public override void _Ready()
     {
         base._Ready();
-        
-        _trailPositions = new Vector3[_linePoints];
-        _parent = GetParent<Spatial>();
-        for (int i = 0; i < _linePoints; i++)
+
+        _burstParticles = GetNode<Particles>(_burstParticlesPath);
+
+        switch (_type)
         {
-            _trailPositions[i] = _parent.GlobalTransform.origin;
+            case TrailType.Smooth:
+                _trailPositions = new Vector3[_linePoints];
+                _parent = GetParent<Spatial>();
+                for (int i = 0; i < _linePoints; i++)
+                {
+                    _trailPositions[i] = _parent.GlobalTransform.origin;
+                }
+                _burstParticles.Visible = false;
+                break;
+            case TrailType.Burst:
+                _burstParticles.Visible = true;
+                ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
+                Debug.Assert(processMaterial != null);
+                processMaterial.Color = ColourManager.Instance.White;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -32,6 +57,25 @@ public class BoidTrail : MeshInstance
     {
         base._Process(delta);
 
+        switch (_type)
+        {
+            case TrailType.Smooth:
+                ProcessSmooth(delta);
+                break;
+            case TrailType.Burst:
+                ProcessBurst(delta);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void ProcessBurst(float delta)
+    {
+    }
+
+    private void ProcessSmooth(float delta)
+    {
         _updateTimer -= delta;
         if (_updateTimer < 0.0f)
         {

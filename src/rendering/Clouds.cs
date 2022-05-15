@@ -70,15 +70,16 @@ public class Clouds : Spatial
         if (GlobalCamera.Instance != null)
         {
             _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.BaseTransform;
-        }
-
-        if (GlobalCamera.Instance != null)
-        {
+            
             Vector3 pos = GlobalCamera.Instance.BaseTransform.origin;
             pos.y = 0.0f;
-            GlobalTransform = GlobalTransform.Position(pos);
+            this.GlobalPosition(pos);
+
+            // parallax
+            ShaderMaterial mat = _cloudLayers[1].GetSurfaceMaterial(0) as ShaderMaterial;
+            mat.SetShaderParam("u_parallax_offset", -GlobalCamera.Instance.GlobalTransform.origin.To2D() * 0.25f);
         }
-        
+
         // _waterDisplacementUpdateTimer -= delta;
         // if (_waterDisplacementUpdateTimer <= 0.0f)
         // {

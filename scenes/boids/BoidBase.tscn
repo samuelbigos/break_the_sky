@@ -1,11 +1,13 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
 [ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/vfx/ParticlesDamaged.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/boids/BoidBase.cs" type="Script" id=4]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=5]
 [ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
+[ext_resource path="res://scenes/vfx/ParticlesHit.tscn" type="PackedScene" id=8]
 [ext_resource path="res://assets/material/water_mesh_mat.tres" type="Material" id=9]
 
 [sub_resource type="BoxShape" id=1]
@@ -17,23 +19,26 @@ flags_unshaded = true
 [node name="BoidBase" type="Area"]
 script = ExtResource( 4 )
 MaxVelocity = 250.0
+SeparationRadius = 3.33
 _hitSfx = [ ExtResource( 6 ) ]
-_damagedParticlesPath = NodePath("DamagedParticles")
 _meshPath = NodePath("Mesh")
 _sfxDestroyPath = NodePath("SFXDestroy")
 _sfxHitPlayerPath = NodePath("SFXHit")
+_hitParticlesScene = ExtResource( 8 )
+_damagedParticlesScene = ExtResource( 3 )
+_meshMaterial = ExtResource( 5 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 shape = SubResource( 1 )
 
 [node name="Mesh" type="MeshInstance" parent="."]
-material_override = ExtResource( 5 )
 script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
 _meshMaterials = [ ExtResource( 9 ) ]
 
 [node name="BoidTrail" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
 material_override = SubResource( 2 )
 
 [node name="SFXHit" type="AudioStreamPlayer3D" parent="."]
@@ -41,8 +46,3 @@ stream = ExtResource( 7 )
 
 [node name="SFXDestroy" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource( 7 )
-
-[node name="DamagedParticles" type="Particles" parent="."]
-
-[node name="BoidTrail" parent="." instance=ExtResource( 2 )]
-material_override = SubResource( 2 )

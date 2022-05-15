@@ -1,13 +1,48 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/vfx/BoidTrail.cs" type="Script" id=1]
 
 [sub_resource type="Curve" id=1]
 _data = [ Vector2( 0, 1 ), 0.0, -0.989792, 0, 0, Vector2( 0.9475, 0 ), -0.997806, 0.0, 0, 0 ]
 
+[sub_resource type="Curve" id=5]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.381649, 0.951613 ), -0.485162, -0.485162, 0, 0, Vector2( 1, 0 ), -2.47201, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=6]
+curve = SubResource( 5 )
+
+[sub_resource type="ParticlesMaterial" id=2]
+lifetime_randomness = 0.5
+emission_shape = 1
+emission_sphere_radius = 0.25
+gravity = Vector3( 0, 0, 0 )
+scale = 0.25
+scale_random = 0.75
+scale_curve = SubResource( 6 )
+
+[sub_resource type="SpatialMaterial" id=3]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id=4]
+material = SubResource( 3 )
+height = 0.5
+radial_segments = 16
+rings = 4
+
 [node name="BoidTrail" type="MeshInstance"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
+layers = 3
 script = ExtResource( 1 )
 _linePoints = 10
 _lineWidth = 1.0
 _lineWidthCurve = SubResource( 1 )
+_burstParticlesPath = NodePath("Particles")
+
+[node name="Particles" type="Particles" parent="."]
+visible = false
+layers = 3
+amount = 50
+local_coords = false
+process_material = SubResource( 2 )
+draw_pass_1 = SubResource( 4 )

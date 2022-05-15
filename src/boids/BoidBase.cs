@@ -7,15 +7,13 @@ public class BoidBase : Area
     public enum BoidAlignment
     {
         Ally,
-        Enemy,
-        Neutral
+        Enemy
     }
     
     protected enum SteeringBehaviours
     {
         Arrive = 1,
         Separation = 2,
-        EdgeRepulsion = 4,
         Pursuit = 8,
         Flee = 16
     }
@@ -37,13 +35,20 @@ public class BoidBase : Area
     [Export] public float HitFlashTime = 1.0f / 30.0f;
     [Export] public int Points = 10;
     
+    [Export] private int _damageVfxCount = 2;
+    
     [Export] private List<AudioStream> _hitSfx;
 
-    [Export] private NodePath _damagedParticlesPath;
     [Export] private NodePath _meshPath;
     [Export] private NodePath _sfxDestroyPath;
     [Export] private NodePath _sfxHitPlayerPath;
 
+    [Export] private PackedScene _hitParticlesScene;
+    [Export] private PackedScene _damagedParticlesScene;
+    [Export] private PackedScene _destroyParticlesScene;
+
+    [Export] private ShaderMaterial _meshMaterial;
+    
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;
     public string ID = "";
@@ -52,19 +57,20 @@ public class BoidBase : Area
     protected Player _player;
     protected Game _game;
     protected BoidBase _target;
-    protected Vector2 _targetOffset;
-    protected bool _destroyed = false;
-    private float _destroyedTimer;
+    private Vector2 _targetOffset;
+    protected bool _destroyed;
     protected Vector3 _baseScale;
     private float _health;
     private float _hitFlashTimer;
+    private List<Particles> _damagedParticles = new List<Particles>();
+    private ShaderMaterial _altMaterial;
 
-    private Particles _damagedParticles;
     protected MultiViewportMeshInstance _mesh;
-    private AudioStreamPlayer3D _sfxDestroyPlayer;
-    protected AudioStreamPlayer3D _sfxHitPlayer;
-    
-    public float Health => Health;
+    private AudioStreamPlayer3D _sfxOnDestroy;
+    protected AudioStreamPlayer3D _sfxOnHit;
+
+    private Vector3 _cachedLastHitDir;
+    private float _cachedLastHitDamage;
 
     public Vector3 Velocity
     {
@@ -77,6 +83,19 @@ public class BoidBase : Area
         get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
+    
+    public Vector2 Offset { set => _targetOffset = value; }
+
+    private Color MeshColour
+    {
+        set
+        {
+            _meshMaterial.SetShaderParam("u_primary_colour", value);
+            _meshMaterial.SetShaderParam("u_secondary_colour", value);
+        }
+    }
+
+    private Color BaseColour => ColourManager.Instance.Secondary;
 
     public virtual void Init(string id, Player player, Game game, BoidBase target)
     {
@@ -93,16 +112,25 @@ public class BoidBase : Area
         _health = MaxHealth;
 
         _mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
-        _damagedParticles = GetNode<Particles>(_damagedParticlesPath);
-        _sfxDestroyPlayer = GetNode<AudioStreamPlayer3D>(_sfxDestroyPath);
-        _sfxHitPlayer = GetNode<AudioStreamPlayer3D>(_sfxHitPlayerPath);
+        _sfxOnDestroy = GetNode<AudioStreamPlayer3D>(_sfxDestroyPath);
+        _sfxOnHit = GetNode<AudioStreamPlayer3D>(_sfxHitPlayerPath);
 
-        _sfxHitPlayer.Stream = _hitSfx[0];
+        _sfxOnHit.Stream = _hitSfx[0];
         _baseScale = _mesh.Scale;
-
-        ShaderMaterial mat = _mesh.GetActiveMaterial(0) as ShaderMaterial;
-        mat?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
-        mat?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Secondary);
+        
+        List<MeshInstance> altMeshes = _mesh.AltMeshes;
+        Debug.Assert(altMeshes.Count > 0);
+        Debug.Assert(_meshMaterial != null);
+        if (_meshMaterial == null)
+        {
+            // TODO: Something fucked up and export ref doesn't work.
+            _meshMaterial = ResourceLoader.Load<ShaderMaterial>("res://assets/material/boid_mat.tres");
+        }
+        _mesh.SetSurfaceMaterial(0, _meshMaterial);
+        Debug.Assert(_meshMaterial != null);
+        _altMaterial = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
+        Debug.Assert(_altMaterial != null);
+        MeshColour = BaseColour;
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
     }
@@ -111,53 +139,119 @@ public class BoidBase : Area
     {
         base._Process(delta);
         
-        // steering
         if (!_destroyed)
         {
             DoSteering(delta);
+            GlobalTranslate(_velocity * delta);
+            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f); // damping
+            Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
+            
+            // hit flash
+            _hitFlashTimer -= delta;
+            if (_hitFlashTimer < 0.0)
+            {
+                if (!_destroyed)
+                {
+                    MeshColour = BaseColour;
+                }
+            }
+
+            if (_health < 0.0f && !_destroyed)
+            {
+                _Destroy(Points > 0, _cachedLastHitDir, _cachedLastHitDamage);
+            }
+            _cachedLastHitDir = Vector3.Zero;
+            _cachedLastHitDamage = 0.0f;
         }
-
-        GlobalTranslate(_velocity * delta);
-
-        // damping
-        _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
-        
-        
-        Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
-
-        if (_destroyed)
+        else
         {
-            _destroyedTimer -= delta;
-            float t = 1.0f - Mathf.Clamp(_destroyedTimer / DestroyTime, 0.0f, 1.0f);
-            _mesh.Scale = _baseScale.LinearInterpolate(new Vector3(0.0f, 0.0f, 0.0f), t);
-
-            if (_destroyedTimer < 0.0f)
+            if (GlobalTransform.origin.y < -100.0f)
             {
                 QueueFree();
             }
         }
 
-        List<MeshInstance> altMeshes = _mesh.AltMeshes;
-        if (altMeshes.Count > 0)
-        {
-            ShaderMaterial mat = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
-            mat?.SetShaderParam("u_velocity", _velocity);
-        }
+        _altMaterial.SetShaderParam("u_velocity", _velocity);
+    }
+
+    protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
+    {
+        _health -= damage;
+
+        MeshColour = ColourManager.Instance.White;
+        _hitFlashTimer = HitFlashTime;
         
-        // hit flash
-        _hitFlashTimer -= delta;
-        if (_hitFlashTimer < 0.0)
+        _sfxOnHit.Play();
+
+        Particles hitParticles = _hitParticlesScene.Instance<Particles>();
+        _game.AddChild(hitParticles);
+        ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
+        Debug.Assert(mat != null);
+        Vector3 fromCentre = pos - GlobalTransform.origin;
+        mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
+        hitParticles.GlobalPosition(pos + Vector3.Up * 5.0f);
+        hitParticles.Emitting = true;
+
+        // does this cause us to go past a new damage threshold?
+        if (_damagedParticles.Count < _damageVfxCount)
         {
-            if (!_destroyed)
+            float damageVfxThresholds = 1.0f / (_damageVfxCount + 1.0f);
+            float nextThreshold = 1.0f - (_damagedParticles.Count + 1.0f) * damageVfxThresholds;
+            if (_health / MaxHealth < nextThreshold)
             {
-                //_sprite.Modulate = ColourManager.Instance.Secondary;
+                Particles particles = _damagedParticlesScene.Instance<Particles>();
+                _damagedParticles.Add(particles);
+                AddChild(particles);
+                particles.GlobalPosition(pos + Vector3.Up * 5.0f);
             }
         }
 
-        if (_health < 0.0f && !_destroyed)
+        _cachedLastHitDir = bulletVel.To3D().Normalized();
+        _cachedLastHitDamage = damage;
+    }
+    
+    protected virtual void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    {
+        if (!_destroyed)
         {
-            _Destroy(Points > 0);
+            MeshColour = BaseColour;
+            
+            _sfxOnDestroy.Play();
+            _game?.RemoveBoid(this);
+            _destroyed = true;
+            Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
+
+            // convert to rigid body for 'ragdoll' death physics.
+            Vector3 pos = GlobalTransform.origin;
+            RigidBody rb = new RigidBody();
+            GetParent().AddChild(rb);
+            rb.GlobalTransform = GlobalTransform;
+            GetParent().RemoveChild(this);
+            rb.AddChild(this);
+            CollisionShape shape = GetNode<CollisionShape>("CollisionShape");
+            rb.AddChild(shape.Duplicate());
+
+            rb.GlobalTransform = new Transform(Basis.Identity, pos);
+            GlobalTransform = new Transform(GlobalTransform.basis, pos);
+
+            if (hitDir == Vector3.Zero) // random impulse
+            {
+                Vector3 randVec =
+                    new Vector3(Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f)
+                        .Normalized();
+                rb.ApplyImpulse(GlobalTransform.origin, randVec);
+            }
+            else // impulse from hit direction
+            {
+                rb.ApplyCentralImpulse(hitDir * hitStrength);
+                rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);
+            }
         }
+    }
+
+    public void ForceDestroy()
+    {
+        _Destroy(false, Vector3.Zero, 0.0f);
     }
 
     protected void SetSteeringBehaviourEnabled(SteeringBehaviours behaviour, bool enabled)
@@ -174,6 +268,9 @@ public class BoidBase : Area
 
     protected virtual void DoSteering(float delta)
     {
+        if (_target == null)
+            return;
+        
         Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
         Vector2 steering = Vector2.Zero;
 
@@ -187,7 +284,7 @@ public class BoidBase : Area
         }
         if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
         {
-            steering += _SteeringSeparation(_game.AllBoids, _game.BaseBoidGrouping * 0.66f);
+            steering += _SteeringSeparation(_game.AllBoids, SeparationRadius);
         }
         if ((_behaviours & (int)SteeringBehaviours.Flee) != 0)
         {
@@ -217,34 +314,6 @@ public class BoidBase : Area
         velLength = Mathf.Clamp(velLength, MinVelocity, MaxVelocity);
         _velocity = velDir * velLength;
     }
-
-    protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector2 pos)
-    {
-        _health -= damage;
-        _hitFlashTimer = HitFlashTime;
-        if (IsInstanceValid(_damagedParticles))
-        {
-            _damagedParticles.Emitting = true;
-        }
-        _sfxHitPlayer.Play();
-    }
-    
-    protected virtual void _Destroy(bool score)
-    {
-        if (!_destroyed)
-        {
-            _sfxDestroyPlayer.Play();
-            _game.RemoveBoid(this);
-            _destroyed = true;
-            _destroyedTimer = DestroyTime;
-            _damagedParticles.Emitting = true;
-        }
-    }
-
-    public void SetOffset(Vector2 targetOffset)
-    {  
-        _targetOffset = targetOffset;
-    }
     
     protected virtual Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
     {
@@ -272,6 +341,7 @@ public class BoidBase : Area
         return steering;
     }
 
+    // ReSharper disable once UnusedMember.Global
     protected virtual Vector2 _SteeringEdgeRepulsion(float radius)
     {
         float edgeThreshold = 50.0f;
@@ -282,6 +352,7 @@ public class BoidBase : Area
         return steering;
     }
 
+    // ReSharper disable once UnusedMember.Global
     protected virtual Vector2 _SteeringFollow(Vector2 target, float delta)
     {
         Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
@@ -302,6 +373,7 @@ public class BoidBase : Area
         return steering;
     }
 
+    // ReSharper disable once UnusedMember.Global
     protected virtual Vector2 _SteeringAlignment(List<BoidBase> boids, float alignmentRadius)
     {
         int nCount = 0;
@@ -332,6 +404,7 @@ public class BoidBase : Area
         return steering;
     }
 
+    // ReSharper disable once UnusedMember.Global
     protected virtual Vector2 _SteeringCohesion(List<BoidBase> boids, float cohesionRadius)
     {
         int nCount = 0;
@@ -376,8 +449,8 @@ public class BoidBase : Area
                 continue;
             }
 
-            float distance = (boid.GlobalPosition - GlobalPosition).Length();
-            if (distance < separationRadius)
+            float distance = (boid.GlobalPosition - GlobalPosition).LengthSquared();
+            if (distance < Mathf.Pow(separationRadius + boid.SeparationRadius, 2.0f))
             {
                 desiredVelocity += boid.GlobalPosition - GlobalPosition;
                 nCount += 1;
@@ -410,22 +483,20 @@ public class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(HitDamage, false, _velocity.To2D(), GlobalPosition);
-            _Destroy(false);
+            boid._OnHit(HitDamage, false, _velocity.To2D(), GlobalTransform.origin);
             return;
         }
         
         if (area.IsInGroup("laser") && Alignment != BoidAlignment.Enemy)
         {
-            _Destroy(false);
+            _Destroy(false, Vector3.Zero, MaxHealth);
             return;
         }
 
         if (area is Bullet bullet && bullet.Alignment != Alignment)
         {
             bullet.OnHit();
-            _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.GlobalPosition);
-            return;
+            _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.GlobalTransform.origin);
         }
     }
 }

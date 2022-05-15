@@ -5,8 +5,7 @@ public class Player : BoidBase
     [Export] public float Damping = 0.5f;
 
     public AudioStreamPlayer3D _sfxPickup;
-
-    public Color _colour;
+    
     private bool _destroyed = false;
     private bool _queueAddBoids = false;
     
@@ -14,10 +13,7 @@ public class Player : BoidBase
     {
         base._Ready();
         
-        _colour = ColourManager.Instance.Secondary;
         _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer3D;
-
-        Connect("area_entered", this, nameof(_OnBoidAreaEntered));
     }
 
     public override void _Process(float delta)
@@ -87,11 +83,6 @@ public class Player : BoidBase
             _game.AddBoids(GlobalPosition);
             _queueAddBoids = false;
         }
-    }
-
-    protected override void _Destroy(bool score)
-    {
-        base._Destroy(score);
     }
 
     public override void _OnBoidAreaEntered(Area area)

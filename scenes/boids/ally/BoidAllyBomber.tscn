@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyBomber.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=2]
@@ -6,6 +6,12 @@
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=4]
 [ext_resource path="res://assets/shader/boid_velocity.shader" type="Shader" id=5]
 [ext_resource path="res://scenes/bullets/BulletBomber.tscn" type="PackedScene" id=6]
+
+[sub_resource type="ShaderMaterial" id=4]
+resource_local_to_scene = true
+shader = ExtResource( 4 )
+shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
+shader_param/u_secondary_colour = null
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -25,6 +31,7 @@ _behaviours = 10
 MinVelocity = 50.0
 TargetVectoringExponent = 5.0
 MaxAngularVelocity = 100.0
+_meshMaterial = SubResource( 4 )
 BlocksShots = false
 _bulletScene = ExtResource( 6 )
 _targetAcquireRadius = 300.0
@@ -41,4 +48,6 @@ material/0 = null
 _meshMaterials = [ SubResource( 3 ) ]
 
 [node name="BoidTrail" parent="." index="2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
+_type = 1
 _linePoints = 50

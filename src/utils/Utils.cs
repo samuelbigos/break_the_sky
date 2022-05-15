@@ -14,9 +14,9 @@ public static class Utils
         return new Vector3(vec.x, 0.0f, vec.y);
     }
 
-    public static Transform Position(this Transform trans, Vector3 position)
+    public static void GlobalPosition(this Spatial spatial, Vector3 position)
     {
-        return new Transform(trans.basis, position);
+        spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
     }
     
     public static Vector2 Truncate(this Vector2 vec, float vMax)

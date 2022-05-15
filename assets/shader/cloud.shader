@@ -9,6 +9,7 @@ uniform int u_flip;
 uniform float u_scroll_speed = 1.0;
 uniform float u_turbulence = 1.0;
 uniform float u_scale = 256.0;
+uniform vec2 u_parallax_offset;
 uniform float u_density = 0.5;
 uniform bool u_transparent;
 uniform vec4 u_transparent_col : hint_color;
@@ -19,7 +20,7 @@ uniform sampler2D u_dither_tex;
 uniform int u_bit_depth = 32;
 uniform float u_contrast = 0;
 uniform float u_offset = 0;
-uniform int u_dither_size = 4;
+uniform int u_dither_size = 1;
 
 // shadows
 uniform vec2 u_plane_size;
@@ -83,7 +84,7 @@ float cloud(vec3 pos)
 
 vec3 scale_pos(vec3 pos)
 {
-	return vec3(pos.x, 0.0, pos.z) / u_scale;
+	return vec3(pos.x + u_parallax_offset.x, 0.0, pos.z + u_parallax_offset.y) / u_scale;
 }
 
 void fragment()
@@ -95,10 +96,6 @@ void fragment()
 	// flip to hide that we're using the same noise on different layers.
 	if (u_flip == 1)
 		vertPos.x = -vertPos.x;
-		
-	vec3 floored_pos = vertPos * float(u_dither_size);
-	floored_pos = scale_pos(floor(floored_pos));
-	floored_pos /= float(u_dither_size);
 	
 	vec3 pos = scale_pos(vertPos);
 	
@@ -108,10 +105,10 @@ void fragment()
 	float lum;
 	{
 		float kernel = 2.0 / u_scale;
-		float R = cloud(floored_pos + vec3(1.0, 0.0, 0.0) * kernel);
-		float L = cloud(floored_pos + vec3(-1.0, 0.0, 0.0) * kernel);
-		float T = cloud(floored_pos + vec3(0.0, 0.0, 1.0) * kernel);
-		float B = cloud(floored_pos + vec3(0.0, 0.0, -1.0) * kernel);
+		float R = cloud(pos + vec3(1.0, 0.0, 0.0) * kernel);
+		float L = cloud(pos + vec3(-1.0, 0.0, 0.0) * kernel);
+		float T = cloud(pos + vec3(0.0, 0.0, 1.0) * kernel);
+		float B = cloud(pos + vec3(0.0, 0.0, -1.0) * kernel);
 		normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
 
 		if (u_flip == 1)

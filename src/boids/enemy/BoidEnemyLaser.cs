@@ -121,11 +121,6 @@ public class BoidEnemyLaser : BoidEnemyBase
         _laserArea.Monitorable = false;
     }
 
-    protected override void _Destroy(bool score)
-    {
-        base._Destroy(score);
-    }
-
     protected override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
     {
         if (_laserState == LaserState.Charging || _laserState == LaserState.Firing)

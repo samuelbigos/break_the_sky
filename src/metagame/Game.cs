@@ -30,9 +30,6 @@ public class Game : Node
     [Export] private NodePath _aiSpawningDirectorPath;
     private AISpawningDirector _aiSpawningDirector;
 
-    [Export] private NodePath _cloudsPath;
-    private Clouds _clouds;
-
     [Export] public float SpawningRadius = 500.0f;
     [Export] public float WaveCooldown = 5.0f;
     [Export] public int MaxDrones = 100;
@@ -84,7 +81,6 @@ public class Game : Node
         _player = GetNode<Player>(_playerPath);
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
-        _clouds = GetNode<Clouds>(_cloudsPath);
 
         _player.Init("player", _player, this, null);
         DebugImGui.DrawImGui += _OnImGuiLayout;
@@ -190,7 +186,7 @@ public class Game : Node
             _boidColumns[colIdx].Add(boid);
             int columnIndex = _boidColumns[colIdx].IndexOf(boid);
             Vector2 offset = GetOffset(colIdx, columnIndex);
-            boid.SetOffset(offset);
+            boid.Offset = offset;
 
             if (setPos)
             {
@@ -319,7 +315,7 @@ public class Game : Node
                 _boidColumns[i].Insert(0, boid);
                 foreach (int j in GD.Range(0, _boidColumns[i].Count))
                 {
-                    _boidColumns[i][j].SetOffset(GetOffset(_boidColCount - i - 1, _boidColumns[i].Count - j - 1));
+                    _boidColumns[i][j].Offset = GetOffset(_boidColCount - i - 1, _boidColumns[i].Count - j - 1);
                 }
 
                 break;

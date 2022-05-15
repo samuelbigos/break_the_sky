@@ -16,6 +16,9 @@ _droneId = "driller"
 _droneSpawnInterval = 0.1
 _dronePulseCount = 15
 
+[node name="CollisionShape" parent="." index="0"]
+transform = Transform( 2.46802, 0, 0, 0, 2.8404, 0, 0, 0, 4.49237, 0, 0, 0 )
+
 [node name="Mesh" parent="." index="1"]
 mesh = ExtResource( 4 )
 material/0 = null

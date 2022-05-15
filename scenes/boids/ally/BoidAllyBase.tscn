@@ -1,9 +1,16 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/sfx/shot_micro.wav" type="AudioStream" id=2]
+[ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=3]
 [ext_resource path="res://src/boids/ally/BoidAllyBase.cs" type="Script" id=4]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=5]
+
+[sub_resource type="ShaderMaterial" id=1]
+resource_local_to_scene = true
+shader = ExtResource( 3 )
+shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
+shader_param/u_secondary_colour = null
 
 [node name="BoidAllyBase" instance=ExtResource( 1 )]
 script = ExtResource( 4 )
@@ -12,6 +19,7 @@ Damping = 0.05
 SlowingRadius = 10.0
 AlignmentRadius = 10.0
 HitFlashTime = 0.0333333
+_meshMaterial = SubResource( 1 )
 _sfxHitMicroPlayerNode = NodePath("SFXMicroShoot")
 _sfxShootPlayerPath = NodePath("SFXShoot")
 

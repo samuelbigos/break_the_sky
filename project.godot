@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/metagame/CommandCentre.tscn"
+run/main_scene="res://scenes/metagame/Game.tscn"
 config/icon="res://icon.png"
 config/save_version=1
 
@@ -49,13 +49,12 @@ SaveManager="*res://src/singletons/SaveManager.cs"
 
 window/size/width=1280
 window/size/height=720
-window/size/always_on_top=true
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/imgui-godot/plugin.cfg" )
 
 [gd2cs]
 

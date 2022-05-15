@@ -300,8 +300,8 @@ public class AISpawningDirector : Node
         
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
-        AddChild(enemy);
         enemy.GlobalPosition = spawnPos;
+        AddChild(enemy);
         enemy.Init(id.Name, _player, _game, _player);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);

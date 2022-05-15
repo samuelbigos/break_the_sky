@@ -1,0 +1,37 @@
+[gd_scene load_steps=8 format=2]
+
+[sub_resource type="Gradient" id=5]
+offsets = PoolRealArray( 0, 0.394286, 0.725714, 0.994286 )
+colors = PoolColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.963867, 0.140081, 0.0489464, 1, 0, 0, 0, 1 )
+
+[sub_resource type="GradientTexture" id=6]
+gradient = SubResource( 5 )
+
+[sub_resource type="Curve" id=7]
+_data = [ Vector2( 0, 0 ), 0.0, 9.07945, 0, 0, Vector2( 0.195479, 0.732258 ), 1.08523, 1.08523, 0, 0, Vector2( 0.722075, 0.951613 ), 0.0577572, 0.0577572, 0, 0, Vector2( 1, 0 ), -11.982, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=8]
+curve = SubResource( 7 )
+
+[sub_resource type="ParticlesMaterial" id=2]
+lifetime_randomness = 0.5
+emission_shape = 1
+emission_sphere_radius = 1.0
+gravity = Vector3( 0, 0, 0 )
+scale_curve = SubResource( 8 )
+color_ramp = SubResource( 6 )
+
+[sub_resource type="SpatialMaterial" id=3]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id=4]
+material = SubResource( 3 )
+
+[node name="ParticlesDamaged" type="Particles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
+amount = 50
+lifetime = 2.0
+local_coords = false
+process_material = SubResource( 2 )
+draw_pass_1 = SubResource( 4 )

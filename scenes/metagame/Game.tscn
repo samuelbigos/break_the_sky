@@ -13,7 +13,7 @@ script = ExtResource( 2 )
 _playerPath = NodePath("Player3D")
 _mouseCursorPath = NodePath("MouseCursor")
 _aiSpawningDirectorPath = NodePath("AISpawningDirector")
-_cloudsPath = NodePath("Clouds")
+SpawningRadius = 250.0
 BaseBoidDamage = 3.0
 BaseBoidSpeed = 1000.0
 BaseBulletSpeed = 150.0
@@ -33,6 +33,11 @@ script = ExtResource( 4 )
 
 [node name="Player3D" parent="." instance=ExtResource( 3 )]
 MaxVelocity = 500.0
+SeparationRadius = 10.0
+_hitSfx = [ null ]
+_hitParticlesScene = null
+_damagedParticlesScene = null
+_meshMaterial = null
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( -1, 5.01437e-08, -7.16125e-08, 0, 0.819152, 0.573577, 8.74228e-08, 0.573577, -0.819152, 0, 100, 0 )

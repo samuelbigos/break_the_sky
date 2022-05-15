@@ -43,7 +43,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
             _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
         
-        _sfxHitPlayer.Stream = _rocochetSfx;
+        _sfxOnHit.Stream = _rocochetSfx;
     }
 
     public override void _Process(float delta)
@@ -61,7 +61,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
         if (count == 0 && !Destroyed)
         {
-            _Destroy(true);
+            _Destroy(true, Vector3.Zero, 0.0f);
         }
 
         float dist = (_target.GlobalPosition - GlobalPosition).Length();
