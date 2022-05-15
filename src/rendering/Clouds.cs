@@ -1,25 +1,30 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class Clouds : Spatial
 {
     [Export] private Texture3D _noise;
+    [Export] private Vector2 _cloudSize;
+    [Export] private List<NodePath> _cloudLayerViewportPaths;
+    [Export] private List<NodePath> _cloudLayerCameraPaths;
     [Export] private List<NodePath> _cloudLayerPaths;
-    
     [Export] private NodePath _boidVelocityMapPath;
-    private Viewport _boidVelocityMap;
     [Export] private NodePath _boidTransparentMapPath;
-    private Viewport _boidTransparentMap;
-    
     [Export] private List<NodePath> _displacementMapPaths;
-    private List<Viewport> _displacementMaps = new List<Viewport>();
     [Export] private List<NodePath> _displacementTextureRectPaths;
-    private List<TextureRect> _displacementTextureRects = new List<TextureRect>();
     [Export] private NodePath _boidVelMapCameraPath;
+    
+    private Viewport _boidVelocityMap;
+    private Viewport _boidTransparentMap;
+    private List<Viewport> _displacementMaps = new List<Viewport>();
+    private List<Camera> _cloudLayerCameras = new List<Camera>();
+    private List<TextureRect> _displacementTextureRects = new List<TextureRect>();
     private Camera _boidVelMapCamera;
-
+    private List<Viewport> _cloudLayerViewports = new List<Viewport>();
     private List<MeshInstance> _cloudLayers = new List<MeshInstance>();
+    
     private int _cloudMode = 0;
     private int _currentDisplacementMap;
     private float _waterDisplacementUpdateTimer;
@@ -40,11 +45,16 @@ public class Clouds : Spatial
         _displacementTextureRects[0].Texture = _boidVelocityMap.GetTexture();
         _displacementTextureRects[1].Texture = _boidVelocityMap.GetTexture();
         
+        Debug.Assert(_cloudLayerViewportPaths.Count ==_cloudLayerPaths.Count);
+        Debug.Assert(_cloudLayerCameraPaths.Count ==_cloudLayerPaths.Count);
         for (int i = 0; i < _cloudLayerPaths.Count; i++)
         {
+            _cloudLayerViewports.Add(GetNode<Viewport>(_cloudLayerViewportPaths[i]));
+            _cloudLayerCameras.Add(GetNode<Camera>(_cloudLayerCameraPaths[i]));
             _cloudLayers.Add(GetNode<MeshInstance>(_cloudLayerPaths[i]));
+            
             ShaderMaterial mat = _cloudLayers[i].GetSurfaceMaterial(0) as ShaderMaterial;
-
+            Debug.Assert(mat != null);
             switch (i)
             {
                 case 0:
@@ -60,6 +70,10 @@ public class Clouds : Spatial
             mat.SetShaderParam("u_boid_vel_tex", _boidVelocityMap.GetTexture());
             mat.SetShaderParam("u_transparent_tex", _boidTransparentMap);
             mat.SetShaderParam("u_transparent_col", ColourManager.Instance.Secondary);
+            mat.SetShaderParam("u_plane_size", _cloudSize);
+
+            _cloudLayerCameras[i].Size = _cloudSize.x;
+            _cloudLayerViewports[i].Size = _cloudSize * 4.0f;
         }
     }
 
@@ -69,14 +83,26 @@ public class Clouds : Spatial
 
         if (GlobalCamera.Instance != null)
         {
-            _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.BaseTransform;
-        }
-
-        if (GlobalCamera.Instance != null)
-        {
             Vector3 pos = GlobalCamera.Instance.BaseTransform.origin;
             pos.y = 0.0f;
             GlobalTransform = GlobalTransform.Position(pos);
+            _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.BaseTransform;
+
+            foreach (Camera t in _cloudLayerCameras)
+            {
+                pos = GlobalCamera.Instance.BaseTransform.origin;
+                pos.x = 0.0f;
+                pos.z = 0.0f;
+                t.GlobalTransform = new Transform(GlobalCamera.Instance.GlobalTransform.basis, pos);
+                t.Far = GlobalCamera.Instance.Far;
+            }
+            
+            foreach (MeshInstance t in _cloudLayers)
+            {
+                ShaderMaterial mat = t.GetSurfaceMaterial(0) as ShaderMaterial;
+                Debug.Assert(mat != null);
+                mat.SetShaderParam("u_offset", GlobalCamera.Instance.BaseTransform.origin);
+            }
         }
         
         // _waterDisplacementUpdateTimer -= delta;

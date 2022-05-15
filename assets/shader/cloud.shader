@@ -9,6 +9,7 @@ uniform int u_flip;
 uniform float u_scroll_speed = 1.0;
 uniform float u_turbulence = 1.0;
 uniform float u_scale = 256.0;
+uniform vec3 u_offset;
 uniform float u_density = 0.5;
 uniform bool u_transparent;
 uniform vec4 u_transparent_col : hint_color;
@@ -16,9 +17,6 @@ uniform vec4 u_transparent_tex;
 
 // dither
 uniform sampler2D u_dither_tex;
-uniform int u_bit_depth = 32;
-uniform float u_contrast = 0;
-uniform float u_offset = 0;
 uniform int u_dither_size = 4;
 
 // shadows
@@ -26,6 +24,7 @@ uniform vec2 u_plane_size;
 uniform bool u_receive_shadow;
 uniform vec2 u_shadow_offset;
 uniform sampler2D u_boid_vel_tex;
+uniform sampler2D u_cloud_tex;
 
 // cloud deform
 uniform bool u_displace;
@@ -52,6 +51,7 @@ vec4 cloud_noise(vec3 pos)
 	vec3 uv;
 	uv.x = mod(pos.x, 1.0);
 	uv.y = mod(pos.y, 1.0);
+	//uv.z = mod(pos.z, 1.0);
 	uv.z = mod(pos.z + TIME * u_turbulence * 0.01, 1.0);
 	
 	col = texture(u_noise, uv);
@@ -88,7 +88,7 @@ vec3 scale_pos(vec3 pos)
 
 void fragment()
 {
-	vec3 vertPos = v_vertPos;
+	vec3 vertPos = v_vertPos + u_offset;
 	vertPos.x += TIME * u_scroll_speed;
 	vertPos.z += TIME * u_scroll_speed;
 	
@@ -127,15 +127,29 @@ void fragment()
 	if (u_receive_shadow)
 	{
 		// map boid texture onto clouds
-		vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
-		vec2 uv = UV - 0.5;
-		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
-		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
-		uv.x += normal.x * 0.05;
-		uv.y += normal.z * 0.05;
-		uv.x += u_shadow_offset.x / u_plane_size.x;
-		uv.y += u_shadow_offset.y / u_plane_size.y;
-		shadow = texture(u_boid_vel_tex, uv + 0.5).a;
+		{
+			vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
+			vec2 uv = UV - 0.5;
+			uv.x *= (u_plane_size.x / texSize.x) * 2.0;
+			uv.y *= (u_plane_size.y / texSize.y) * 2.0;
+			uv.x += normal.x * 0.05;
+			uv.y += normal.z * 0.05;
+			uv.x += u_shadow_offset.x / u_plane_size.x;
+			uv.y += u_shadow_offset.y / u_plane_size.y;
+			shadow = texture(u_boid_vel_tex, uv + 0.5).a;
+		}
+		
+		// map cloud shadow onto clouds
+		{
+			vec2 texSize = vec2(textureSize(u_cloud_tex, 0));
+			vec2 uv = UV - 0.5;
+			uv.x += normal.x * 0.1;
+			uv.y += normal.z * 0.1;
+			uv.x += u_shadow_offset.x / u_plane_size.x;
+			uv.y += u_shadow_offset.y / u_plane_size.y;
+			vec4 cloud_shadow = texture(u_cloud_tex, uv + 0.5);
+			shadow = max(shadow, cloud_shadow.a);
+		}
 	}
 	
 	// dither 
@@ -153,6 +167,8 @@ void fragment()
 		
 		float ramp_val = lum < dither_threshold ? 0.0f : 1.0f;
 		dithered = mix(u_colour_b.rgb, u_colour_a.rgb, step(ramp_val, 0.0));
+		
+		//dithered = vec3(dither_threshold);
 	}
 	
 	// displacement
