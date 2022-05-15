@@ -6,7 +6,6 @@ using System.Diagnostics;
 public class Clouds : Spatial
 {
     [Export] private Texture3D _noise;
-    [Export] private Vector2 _cloudSize;
     [Export] private List<NodePath> _cloudLayerViewportPaths;
     [Export] private List<NodePath> _cloudLayerCameraPaths;
     [Export] private List<NodePath> _cloudLayerPaths;
@@ -15,6 +14,7 @@ public class Clouds : Spatial
     [Export] private List<NodePath> _displacementMapPaths;
     [Export] private List<NodePath> _displacementTextureRectPaths;
     [Export] private NodePath _boidVelMapCameraPath;
+    [Export] private NodePath _debugCameraPath;
     
     private Viewport _boidVelocityMap;
     private Viewport _boidTransparentMap;
@@ -24,6 +24,7 @@ public class Clouds : Spatial
     private Camera _boidVelMapCamera;
     private List<Viewport> _cloudLayerViewports = new List<Viewport>();
     private List<MeshInstance> _cloudLayers = new List<MeshInstance>();
+    private Camera _debugCamera;
     
     private int _cloudMode = 0;
     private int _currentDisplacementMap;
@@ -70,10 +71,20 @@ public class Clouds : Spatial
             mat.SetShaderParam("u_boid_vel_tex", _boidVelocityMap.GetTexture());
             mat.SetShaderParam("u_transparent_tex", _boidTransparentMap);
             mat.SetShaderParam("u_transparent_col", ColourManager.Instance.Secondary);
-            mat.SetShaderParam("u_plane_size", _cloudSize);
 
-            _cloudLayerCameras[i].Size = _cloudSize.x;
-            _cloudLayerViewports[i].Size = _cloudSize * 4.0f;
+            _cloudLayerCameras[i].Size = Mathf.Max(GetViewport().Size.x, GetViewport().Size.y);
+            _cloudLayerViewports[i].Size = GetViewport().Size;
+        }
+
+        _boidVelocityMap.Size = GetViewport().Size;
+        _boidVelMapCamera.Size = Mathf.Max(GetViewport().Size.x, GetViewport().Size.y);
+
+        _debugCamera = GetNode<Camera>(_debugCameraPath);
+        _debugCamera.Size = Mathf.Max(GetViewport().Size.x, GetViewport().Size.y);
+
+        if (GlobalCamera.Instance != null)
+        {
+            _debugCamera.QueueFree();
         }
     }
 
@@ -83,25 +94,29 @@ public class Clouds : Spatial
 
         if (GlobalCamera.Instance != null)
         {
-            Vector3 pos = GlobalCamera.Instance.BaseTransform.origin;
-            pos.y = 0.0f;
-            GlobalTransform = GlobalTransform.Position(pos);
-            _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.BaseTransform;
+            Vector3 camPos = GlobalCamera.Instance.GlobalTransform.origin;
+            MeshInstance c1 = GetNode<MeshInstance>("Layer1");
+            MeshInstance c2 = GetNode<MeshInstance>("Layer2");
+            c1.GlobalTransform = new Transform(c1.GlobalTransform.basis,
+                new Vector3(camPos.x, c1.GlobalTransform.origin.y, camPos.z));
+            c2.GlobalTransform = new Transform(c2.GlobalTransform.basis,
+                new Vector3(camPos.x, c2.GlobalTransform.origin.y, camPos.z));
 
-            foreach (Camera t in _cloudLayerCameras)
-            {
-                pos = GlobalCamera.Instance.BaseTransform.origin;
-                pos.x = 0.0f;
-                pos.z = 0.0f;
-                t.GlobalTransform = new Transform(GlobalCamera.Instance.GlobalTransform.basis, pos);
-                t.Far = GlobalCamera.Instance.Far;
-            }
+            _boidVelMapCamera.GlobalTransform = new Transform(_boidVelMapCamera.GlobalTransform.basis, 
+                new Vector3(camPos.x, _boidVelMapCamera.GlobalTransform.origin.y, camPos.z));
             
-            foreach (MeshInstance t in _cloudLayers)
+            for (int i = 0; i < _cloudLayers.Count; i++)
             {
-                ShaderMaterial mat = t.GetSurfaceMaterial(0) as ShaderMaterial;
-                Debug.Assert(mat != null);
-                mat.SetShaderParam("u_offset", GlobalCamera.Instance.BaseTransform.origin);
+                Vector3 pos = camPos * 6.0f; // TODO: Fix hacky hardcoded value.
+                
+                MeshInstance mesh = _cloudLayers[i];
+                Camera cam = _cloudLayerCameras[i];
+
+                pos.y = mesh.GlobalTransform.origin.y;
+                mesh.GlobalTransform = new Transform(mesh.GlobalTransform.basis, pos);
+                
+                pos.y = cam.GlobalTransform.origin.y;
+                cam.GlobalTransform = new Transform(cam.GlobalTransform.basis, pos);
             }
         }
         

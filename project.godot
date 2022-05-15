@@ -49,6 +49,7 @@ SaveManager="*res://src/singletons/SaveManager.cs"
 
 window/size/width=1920
 window/size/height=1080
+window/size/borderless=true
 window/vsync/use_vsync=false
 
 [editor_plugins]

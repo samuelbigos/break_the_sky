@@ -8,7 +8,6 @@ uniform vec4 u_colour_b : hint_color;
 uniform int u_flip;
 uniform float u_scroll_speed = 1.0;
 uniform float u_turbulence = 1.0;
-uniform float u_scale = 256.0;
 uniform vec3 u_offset;
 uniform float u_density = 0.5;
 uniform bool u_transparent;
@@ -17,10 +16,9 @@ uniform vec4 u_transparent_tex;
 
 // dither
 uniform sampler2D u_dither_tex;
-uniform int u_dither_size = 4;
+uniform int u_dither_size = 1;
 
 // shadows
-uniform vec2 u_plane_size;
 uniform bool u_receive_shadow;
 uniform vec2 u_shadow_offset;
 uniform sampler2D u_boid_vel_tex;
@@ -51,8 +49,8 @@ vec4 cloud_noise(vec3 pos)
 	vec3 uv;
 	uv.x = mod(pos.x, 1.0);
 	uv.y = mod(pos.y, 1.0);
-	//uv.z = mod(pos.z, 1.0);
-	uv.z = mod(pos.z + TIME * u_turbulence * 0.01, 1.0);
+	uv.z = mod(pos.z, 1.0);
+	//uv.z = mod(pos.z + TIME * u_turbulence * 0.01, 1.0);
 	
 	col = texture(u_noise, uv);
 	
@@ -81,37 +79,36 @@ float cloud(vec3 pos)
 	return cloud;
 }
 
-vec3 scale_pos(vec3 pos)
-{
-	return vec3(pos.x, 0.0, pos.z) / u_scale;
+vec3 uv(vec3 pos, float s)
+{	
+	return vec3(pos.x / s, 0.0, pos.z / s);
 }
 
 void fragment()
 {
-	vec3 vertPos = v_vertPos + u_offset;
-	vertPos.x += TIME * u_scroll_speed;
-	vertPos.z += TIME * u_scroll_speed;
+	vec2 screen_size = vec2(textureSize(SCREEN_TEXTURE, 0));
+	float min_screen = min(screen_size.x, screen_size.y);
+	
+	vec3 vertPos = v_vertPos;
+//	vertPos.x += TIME * u_scroll_speed;
+//	vertPos.z += TIME * u_scroll_speed;
 	
 	// flip to hide that we're using the same noise on different layers.
 	if (u_flip == 1)
 		vertPos.x = -vertPos.x;
 		
-	vec3 floored_pos = vertPos * float(u_dither_size);
-	floored_pos = scale_pos(floor(floored_pos));
-	floored_pos /= float(u_dither_size);
-	
-	vec3 pos = scale_pos(vertPos);
+	vec3 pos = uv(vertPos, min_screen);
 	
 	// clouds
 	vec3 normal;
 	float clouds;
 	float lum;
 	{
-		float kernel = 2.0 / u_scale;
-		float R = cloud(floored_pos + vec3(1.0, 0.0, 0.0) * kernel);
-		float L = cloud(floored_pos + vec3(-1.0, 0.0, 0.0) * kernel);
-		float T = cloud(floored_pos + vec3(0.0, 0.0, 1.0) * kernel);
-		float B = cloud(floored_pos + vec3(0.0, 0.0, -1.0) * kernel);
+		vec2 kernel = 5.0 / vec2(min_screen);
+		float R = cloud(pos + vec3(kernel.x, 0.0, 0.0));
+		float L = cloud(pos + vec3(-kernel.x, 0.0, 0.0));
+		float T = cloud(pos + vec3(0.0, 0.0, kernel.y));
+		float B = cloud(pos + vec3(0.0, 0.0, -kernel.y));
 		normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
 
 		if (u_flip == 1)
@@ -128,27 +125,27 @@ void fragment()
 	{
 		// map boid texture onto clouds
 		{
-			vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
-			vec2 uv = UV - 0.5;
-			uv.x *= (u_plane_size.x / texSize.x) * 2.0;
-			uv.y *= (u_plane_size.y / texSize.y) * 2.0;
-			uv.x += normal.x * 0.05;
-			uv.y += normal.z * 0.05;
-			uv.x += u_shadow_offset.x / u_plane_size.x;
-			uv.y += u_shadow_offset.y / u_plane_size.y;
-			shadow = texture(u_boid_vel_tex, uv + 0.5).a;
+//			vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
+//			vec2 uv = UV - 0.5;
+//			uv.x *= (u_plane_size.x / texSize.x) * 2.0;
+//			uv.y *= (u_plane_size.y / texSize.y) * 2.0;
+//			uv.x += normal.x * 0.05;
+//			uv.y += normal.z * 0.05;
+//			uv.x += u_shadow_offset.x / u_plane_size.x;
+//			uv.y += u_shadow_offset.y / u_plane_size.y;
+//			shadow = texture(u_boid_vel_tex, uv + 0.5).a;
 		}
 		
 		// map cloud shadow onto clouds
 		{
-			vec2 texSize = vec2(textureSize(u_cloud_tex, 0));
-			vec2 uv = UV - 0.5;
-			uv.x += normal.x * 0.1;
-			uv.y += normal.z * 0.1;
-			uv.x += u_shadow_offset.x / u_plane_size.x;
-			uv.y += u_shadow_offset.y / u_plane_size.y;
-			vec4 cloud_shadow = texture(u_cloud_tex, uv + 0.5);
-			shadow = max(shadow, cloud_shadow.a);
+//			vec2 texSize = vec2(textureSize(u_cloud_tex, 0));
+//			vec2 uv = UV - 0.5;
+//			uv.x += normal.x * 0.1;
+//			uv.y += normal.z * 0.1;
+//			uv.x += u_shadow_offset.x / u_plane_size.x;
+//			uv.y += u_shadow_offset.y / u_plane_size.y;
+//			vec4 cloud_shadow = texture(u_cloud_tex, uv + 0.5);
+//			shadow = max(shadow, cloud_shadow.a);
 		}
 	}
 	
@@ -159,8 +156,11 @@ void fragment()
 		lum = min(lum, 1.0 - shadow);
 		
 		ivec2 noise_size = textureSize(u_dither_tex, 0);
-		vec2 inv_noise_size = vec2(1.0 / float(noise_size.x), 1.0 / float(noise_size.y));
-		vec2 noise_uv = pos.xz * inv_noise_size * u_scale * float(u_dither_size);
+		
+		vec2 noise_uv = SCREEN_UV;
+		noise_uv.x /= float(noise_size.x) / float(screen_size.x) * float(u_dither_size);
+		noise_uv.y /= float(noise_size.y) / float(screen_size.y) * float(u_dither_size);
+		
 		dither_threshold = texture(u_dither_tex, noise_uv).r;
 		
 		dither_threshold = dither_threshold * 0.99 + 0.005;
@@ -193,18 +193,13 @@ void fragment()
 		// map boid texture onto clouds
 		vec2 texSize = vec2(textureSize(u_boid_vel_tex, 0));
 		vec2 uv = UV - 0.5;
-		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
-		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
-		uv.x += normal.x * 0.025;
-		uv.y += normal.z * 0.025;
-		uv.x += u_shadow_offset.x / u_plane_size.x;
-		uv.y += u_shadow_offset.y / u_plane_size.y;
 		transparent = texture(u_boid_vel_tex, uv + 0.5).a;
-		
+
 		transparent_col = mix(u_transparent_col.rgb, dithered, step(0.5, dither_threshold));
 	}
 
 	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
-	ALBEDO = mix(dithered, transparent_col, transparent);
-	ALPHA = clouds;
+	//ALBEDO = mix(dithered, transparent_col, transparent);
+	ALBEDO = dithered;
+	ALPHA = clouds + transparent;
 }

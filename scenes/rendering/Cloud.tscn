@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://assets/shader/cloud.shader" type="Shader" id=1]
 [ext_resource path="res://src/rendering/Clouds.cs" type="Script" id=2]
@@ -6,24 +6,29 @@
 [ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture" id=4]
 [ext_resource path="res://assets/mesh/Cloud.tres" type="PlaneMesh" id=5]
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
+[ext_resource path="res://assets/shader/cloud_blit.shader" type="Shader" id=7]
 
-[sub_resource type="ViewportTexture" id=8]
+[sub_resource type="PlaneMesh" id=12]
+size = Vector2( 512, 512 )
+
+[sub_resource type="ViewportTexture" id=14]
 viewport_path = NodePath("Layer1Viewport")
 
-[sub_resource type="SpatialMaterial" id=9]
+[sub_resource type="ShaderMaterial" id=15]
 resource_local_to_scene = true
-flags_transparent = true
-flags_unshaded = true
-albedo_texture = SubResource( 8 )
+shader = ExtResource( 7 )
+shader_param/u_cloud_tex = SubResource( 14 )
 
-[sub_resource type="ViewportTexture" id=10]
+[sub_resource type="PlaneMesh" id=13]
+size = Vector2( 512, 512 )
+
+[sub_resource type="ViewportTexture" id=16]
 viewport_path = NodePath("Layer2Viewport")
 
-[sub_resource type="SpatialMaterial" id=11]
+[sub_resource type="ShaderMaterial" id=17]
 resource_local_to_scene = true
-flags_transparent = true
-flags_unshaded = true
-albedo_texture = SubResource( 10 )
+shader = ExtResource( 7 )
+shader_param/u_cloud_tex = SubResource( 16 )
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 1 )
@@ -32,14 +37,12 @@ shader_param/u_colour_b = Color( 0, 0, 0, 1 )
 shader_param/u_flip = 1
 shader_param/u_scroll_speed = 5.0
 shader_param/u_turbulence = 10.0
-shader_param/u_scale = 256.0
 shader_param/u_offset = 0.0
 shader_param/u_density = 0.33
 shader_param/u_transparent = true
 shader_param/u_transparent_col = null
 shader_param/u_transparent_tex = null
-shader_param/u_dither_size = 4
-shader_param/u_plane_size = Vector2( 0, 0 )
+shader_param/u_dither_size = 1
 shader_param/u_receive_shadow = null
 shader_param/u_shadow_offset = null
 shader_param/u_displace = true
@@ -57,14 +60,12 @@ shader_param/u_colour_b = Color( 0, 0, 0, 1 )
 shader_param/u_flip = null
 shader_param/u_scroll_speed = 2.5
 shader_param/u_turbulence = 10.0
-shader_param/u_scale = 256.0
 shader_param/u_offset = 0.0
 shader_param/u_density = 1.0
 shader_param/u_transparent = null
 shader_param/u_transparent_col = null
 shader_param/u_transparent_tex = null
-shader_param/u_dither_size = 4
-shader_param/u_plane_size = Vector2( 0, 0 )
+shader_param/u_dither_size = 1
 shader_param/u_receive_shadow = true
 shader_param/u_shadow_offset = Vector2( -25, -25 )
 shader_param/u_displace = null
@@ -79,42 +80,44 @@ viewport_path = NodePath("BoidVelMapViewport")
 viewport_path = NodePath("BoidVelMapViewport")
 
 [sub_resource type="ViewportTexture" id=4]
-viewport_path = NodePath("Layer1Viewport")
+viewport_path = NodePath("BoidVelMapViewport")
 
 [node name="Clouds" type="Spatial"]
 script = ExtResource( 2 )
 _noise = ExtResource( 3 )
-_cloudSize = Vector2( 512, 512 )
 _cloudLayerViewportPaths = [ NodePath("Layer1Viewport"), NodePath("Layer2Viewport") ]
-_cloudLayerCameraPaths = [ NodePath("Layer1Viewport/Camera"), NodePath("Layer2Viewport/Camera") ]
-_cloudLayerPaths = [ NodePath("Layer1Viewport/Clouds"), NodePath("Layer2Viewport/Clouds") ]
+_cloudLayerCameraPaths = [ NodePath("Layer1Viewport/Layer1Camera"), NodePath("Layer2Viewport/Layer2Camera") ]
+_cloudLayerPaths = [ NodePath("Layer1Viewport/Layer1Clouds"), NodePath("Layer2Viewport/Layer2Clouds") ]
 _boidVelocityMapPath = NodePath("BoidVelMapViewport")
 _boidTransparentMapPath = NodePath("BoidTransparentMapViewport")
-_displacementMapPaths = [ NodePath("WaveRenderViewportSwapA"), NodePath("WaveRenderViewportSwapB") ]
-_displacementTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodePath("WaveRenderViewportSwapB/TextureRect") ]
+_displacementMapPaths = [ NodePath("DisplacementViewportSwapA"), NodePath("DisplacementViewportSwapB") ]
+_displacementTextureRectPaths = [ NodePath("DisplacementViewportSwapA/TextureRect"), NodePath("DisplacementViewportSwapB/TextureRect") ]
 _boidVelMapCameraPath = NodePath("BoidVelMapViewport/Camera")
+_debugCameraPath = NodePath("DebugCamera")
 
 [node name="Layer1" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
-mesh = ExtResource( 5 )
-material/0 = SubResource( 9 )
+mesh = SubResource( 12 )
+material/0 = SubResource( 15 )
 
 [node name="Layer2" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0 )
-mesh = ExtResource( 5 )
-material/0 = SubResource( 11 )
+mesh = SubResource( 13 )
+material/0 = SubResource( 17 )
 
 [node name="Layer1Viewport" type="Viewport" parent="."]
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
-render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="Layer1Viewport"]
+[node name="Layer1Camera" type="Camera" parent="Layer1Viewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0 )
+keep_aspect = 0
 cull_mask = 1047808
 projection = 1
+far = 50.0
 
-[node name="Clouds" type="MeshInstance" parent="Layer1Viewport"]
+[node name="Layer1Clouds" type="MeshInstance" parent="Layer1Viewport"]
 layers = 256
 mesh = ExtResource( 5 )
 skeleton = NodePath("../..")
@@ -124,29 +127,37 @@ material/0 = SubResource( 2 )
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
-render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="Layer2Viewport"]
+[node name="Layer2Camera" type="Camera" parent="Layer2Viewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0 )
+keep_aspect = 0
 cull_mask = 1048064
 projection = 1
+far = 50.0
 
-[node name="Clouds" type="MeshInstance" parent="Layer2Viewport"]
+[node name="Layer2Clouds" type="MeshInstance" parent="Layer2Viewport"]
 layers = 512
 mesh = ExtResource( 5 )
 skeleton = NodePath("../..")
 material/0 = SubResource( 3 )
 
+[node name="DebugCamera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 125, 0 )
+keep_aspect = 0
+cull_mask = 1047553
+far = 500.0
+
 [node name="BoidVelMapViewport" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
 render_target_v_flip = true
 
 [node name="Camera" type="Camera" parent="BoidVelMapViewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0 )
+keep_aspect = 0
 cull_mask = 1047554
 projection = 1
-size = 512.0
 far = 200.0
 
 [node name="BoidTransparentMapViewport" type="Viewport" parent="."]
@@ -161,7 +172,7 @@ cull_mask = 1047554
 size = 512.0
 far = 200.0
 
-[node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
+[node name="DisplacementViewportSwapA" type="Viewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -170,13 +181,13 @@ usage = 0
 render_target_v_flip = true
 render_target_update_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapA"]
+[node name="TextureRect" type="TextureRect" parent="DisplacementViewportSwapA"]
 material = ExtResource( 6 )
 margin_right = 40.0
 margin_bottom = 40.0
 texture = SubResource( 5 )
 
-[node name="WaveRenderViewportSwapB" type="Viewport" parent="."]
+[node name="DisplacementViewportSwapB" type="Viewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -185,23 +196,17 @@ usage = 0
 render_target_v_flip = true
 render_target_update_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapB"]
+[node name="TextureRect" type="TextureRect" parent="DisplacementViewportSwapB"]
 material = ExtResource( 6 )
 margin_right = 40.0
 margin_bottom = 40.0
 texture = SubResource( 6 )
 
-[node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 100, 0 )
-far = 500.0
-
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="DebugRect1" type="TextureRect" parent="CanvasLayer"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = -960.0
 texture = SubResource( 4 )
 expand = true
 stretch_mode = 2
