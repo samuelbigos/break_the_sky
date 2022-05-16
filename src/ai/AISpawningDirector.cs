@@ -302,7 +302,7 @@ public class AISpawningDirector : Node
         Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
         enemy.GlobalPosition = spawnPos;
         AddChild(enemy);
-        enemy.Init(id.Name, _player, _game, _player);
+        enemy.Init(id.Name, _player, _game, _player, null);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);
         return enemy;

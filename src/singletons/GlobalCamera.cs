@@ -37,6 +37,11 @@ public class GlobalCamera : Camera
         return new Vector2(hit.x, hit.z);
     }
 
+    public Vector3 ProjectToZero(Vector2 screen)
+    {
+        return ProjectPosition(screen, GlobalTransform.origin.y);
+    }
+
     public override void _Ready()
     {
         Instance = this;

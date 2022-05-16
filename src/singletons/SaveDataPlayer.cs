@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Godot.Collections;
 using Array = Godot.Collections.Array;
 
@@ -55,11 +57,18 @@ public class SaveDataPlayer : Saveable
         _data["maxAllyCount"] = 50;
         _data["initialAllyCount"] = 10;
         Dictionary seenEnemies = new Dictionary();
-        foreach (DataEnemyBoid enemy in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
+        
+        List<DataEnemyBoid> enemyBoids = Database.EnemyBoids.GetAllEntries<DataEnemyBoid>();
+        Debug.Assert(enemyBoids.Count > 0, "Error creating save file, no enemy boid data!");
+        foreach (DataEnemyBoid enemy in enemyBoids)
         {
             seenEnemies[enemy.Name] = false;
         }
         _data["seenEnemies"] = seenEnemies;
-        SetSeenEnemy("driller"); // so we always have something to spawn
+        SetSeenEnemy(enemyBoids[0].Name); // so we always have something to spawn
+        
+        List<DataAllyBoid> allyBoids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
+        Debug.Assert(allyBoids.Count > 0, "Error creating save file, no ally boid data!");
+        ActiveDrones.Add(allyBoids[0].Name);
     }
 }

@@ -7,6 +7,8 @@ using Dictionary = Godot.Collections.Dictionary;
 
 public class Game : Node
 {
+    public static Game Instance;
+    
     public enum Formation
     {
         Balanced,
@@ -54,10 +56,9 @@ public class Game : Node
     private int _score = 0;
     private float _scoreMulti = 1.0f;
     private float _scoreMultiTimer;
-    private float _loseTimer;
-    private bool _pendingLose = false;
 
     private List<BoidBase> _allBoids = new List<BoidBase>();
+    private List<BoidBase> _destroyedBoids = new List<BoidBase>();
     private List<BoidEnemyBase> _enemyBoids = new List<BoidEnemyBase>();
     private List<BoidAllyBase> _allyBoids = new List<BoidAllyBase>();
     private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
@@ -71,6 +72,7 @@ public class Game : Node
     private int _pendingBoidSpawn;
 
     public List<BoidBase> AllBoids => _allBoids;
+    public List<BoidBase> DestroyedBoids => _destroyedBoids;
     public List<BoidAllyBase> AllyBoids => _allyBoids;
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public Player Player => _player;
@@ -82,7 +84,7 @@ public class Game : Node
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
 
-        _player.Init("player", _player, this, null);
+        _player.Init("player", _player, this, null, _OnBoidDestroyed);
         DebugImGui.DrawImGui += _OnImGuiLayout;
         _aiSpawningDirector.Init(this, _player);
 
@@ -95,7 +97,21 @@ public class Game : Node
         MusicPlayer.Instance.PlayGame();
         //PauseManager.Instance.Init(this);
     }
-    
+
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        
+        Instance = this;
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        
+        Instance = null;
+    }
+
     public override void _Process(float delta)
     {
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
@@ -104,17 +120,6 @@ public class Game : Node
         {
             AddAllyBoidsInternal();
             _pendingBoidSpawn--;
-        }
-        
-        if (_pendingLose)
-        {
-            _loseTimer -= delta;
-            if (_loseTimer < 0.0f)
-            {
-                Lose();
-            }
-
-            return;
         }
 
         _scoreMultiTimer -= delta;
@@ -195,9 +200,10 @@ public class Game : Node
         }
     }
 
-    public void AddBoids(Vector2 pos)
+    public void FreeBoid(BoidBase boid)
     {
-        _pendingBoidSpawn++;
+        _destroyedBoids.Remove(boid);
+        boid.QueueFree();
     }
 
     private void AddAllyBoidsInternal()
@@ -211,36 +217,9 @@ public class Game : Node
         AddChild(boid);
         _allyBoids.Add(boid);
         _allBoids.Add(boid);
-        boid.Init(droneData.Name, _player, this, _player);
+        boid.Init(droneData.Name, _player, this, _player, _OnBoidDestroyed);
         
         ChangeFormation(_formation, false);
-    }
-
-    public void RemoveBoid(BoidBase boid)
-    {
-        switch (boid)
-        {
-            case BoidAllyBase @base:
-            {
-                _allyBoids.Remove(@base);
-            
-                ChangeFormation(_formation, false);
-                _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
-                //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
-            
-                if (_allyBoids.Count == 0)
-                {
-                    _loseTimer = 2.0f;
-                    _pendingLose = true;
-                    //_player.QueueFree();
-                }
-                break;
-            }
-            case BoidEnemyBase @base:
-                _enemyBoids.Remove(@base);
-                break;
-        }
-        _allBoids.Remove(boid);
     }
 
     private Vector2 GetOffset(int column, int columnIndex)
@@ -257,6 +236,7 @@ public class Game : Node
     {
         _enemyBoids.Add(enemy);
         _allBoids.Add(enemy);
+        enemy.OnBoidDestroyed += _OnBoidDestroyed;
     }
 
     public void AddScore(int score, Vector2 pos, bool show)
@@ -323,10 +303,24 @@ public class Game : Node
         }
     }
 
-    public void Lose()
+    private void _OnBoidDestroyed(BoidBase boid)
     {
-        GetTree().Paused = true;
-        //_gui.ShowLoseScreen();
+        switch (boid)
+        {
+            case BoidAllyBase @base:
+            {
+                _allyBoids.Remove(@base);
+                ChangeFormation(_formation, false);
+                _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
+                //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
+                break;
+            }
+            case BoidEnemyBase @base:
+                _enemyBoids.Remove(@base);
+                break;
+        }
+        _allBoids.Remove(boid);
+        _destroyedBoids.Add(boid);
     }
     
     private void _OnImGuiLayout()

@@ -7,7 +7,7 @@
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
 
 [sub_resource type="PlaneMesh" id=1]
-size = Vector2( 384, 256 )
+size = Vector2( 640, 512 )
 
 [sub_resource type="ViewportTexture" id=8]
 viewport_path = NodePath("BoidVelMapViewport")
@@ -21,6 +21,7 @@ shader_param/u_flip = 1
 shader_param/u_scroll_speed = 5.0
 shader_param/u_turbulence = 10.0
 shader_param/u_scale = 256.0
+shader_param/u_pos_y = null
 shader_param/u_parallax_offset = null
 shader_param/u_density = 0.306
 shader_param/u_transparent = true
@@ -30,10 +31,16 @@ shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
 shader_param/u_dither_size = 4
-shader_param/u_plane_size = Vector2( 384, 256 )
+shader_param/u_plane_size = Vector2( 640, 512 )
 shader_param/u_receive_shadow = null
 shader_param/u_shadow_offset = null
-shader_param/u_displace = true
+shader_param/u_num_boids = null
+shader_param/u_displace_radius = null
+shader_param/u_boid_pos_1 = null
+shader_param/u_boid_pos_2 = null
+shader_param/u_boid_pos_3 = null
+shader_param/u_boid_pos_4 = null
+shader_param/u_boid_pos_5 = null
 shader_param/u_noise = ExtResource( 3 )
 shader_param/u_dither_tex = ExtResource( 4 )
 shader_param/u_boid_vel_tex = SubResource( 8 )
@@ -50,6 +57,7 @@ shader_param/u_flip = null
 shader_param/u_scroll_speed = 2.5
 shader_param/u_turbulence = 10.0
 shader_param/u_scale = 256.0
+shader_param/u_pos_y = null
 shader_param/u_parallax_offset = null
 shader_param/u_density = 1.0
 shader_param/u_transparent = null
@@ -59,10 +67,16 @@ shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
 shader_param/u_dither_size = 4
-shader_param/u_plane_size = Vector2( 384, 256 )
+shader_param/u_plane_size = Vector2( 640, 512 )
 shader_param/u_receive_shadow = true
 shader_param/u_shadow_offset = Vector2( -25, -25 )
-shader_param/u_displace = null
+shader_param/u_num_boids = null
+shader_param/u_displace_radius = null
+shader_param/u_boid_pos_1 = null
+shader_param/u_boid_pos_2 = null
+shader_param/u_boid_pos_3 = null
+shader_param/u_boid_pos_4 = null
+shader_param/u_boid_pos_5 = null
 shader_param/u_noise = ExtResource( 3 )
 shader_param/u_dither_tex = ExtResource( 4 )
 shader_param/u_boid_vel_tex = SubResource( 7 )

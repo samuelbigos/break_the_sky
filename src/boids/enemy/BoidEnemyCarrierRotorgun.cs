@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public class BoidEnemyCarrierRotorgun : BoidEnemyBase
@@ -14,14 +15,6 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
     private float _shotCooldown;
 
     private BoidEnemyCarrier _parent;
-
-    public override void Init(string id, Player player, Game game, BoidBase target)
-    {
-        _player = player;
-        _game = game;
-        _target = target;
-        ID = id;
-    }
 
     public void InitRotorgun(Spatial lockNode, BoidEnemyCarrier parent)
     {

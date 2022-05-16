@@ -20,6 +20,7 @@ public class Clouds : Spatial
     private Camera _boidVelMapCamera;
 
     private List<MeshInstance> _cloudLayers = new List<MeshInstance>();
+    private List<ShaderMaterial> _cloudMats = new List<ShaderMaterial>();
     private int _cloudMode = 0;
     private int _currentDisplacementMap;
     private float _waterDisplacementUpdateTimer;
@@ -43,7 +44,8 @@ public class Clouds : Spatial
         for (int i = 0; i < _cloudLayerPaths.Count; i++)
         {
             _cloudLayers.Add(GetNode<MeshInstance>(_cloudLayerPaths[i]));
-            ShaderMaterial mat = _cloudLayers[i].GetSurfaceMaterial(0) as ShaderMaterial;
+            _cloudMats.Add(_cloudLayers[i].GetSurfaceMaterial(0) as ShaderMaterial);
+            ShaderMaterial mat = _cloudMats[i];
 
             switch (i)
             {
@@ -60,6 +62,7 @@ public class Clouds : Spatial
             mat.SetShaderParam("u_boid_vel_tex", _boidVelocityMap.GetTexture());
             mat.SetShaderParam("u_transparent_tex", _boidTransparentMap);
             mat.SetShaderParam("u_transparent_col", ColourManager.Instance.Secondary);
+            mat.SetShaderParam("u_plane_size", ((PlaneMesh) _cloudLayers[i].Mesh).Size);
         }
     }
 
@@ -78,6 +81,32 @@ public class Clouds : Spatial
             // parallax
             ShaderMaterial mat = _cloudLayers[1].GetSurfaceMaterial(0) as ShaderMaterial;
             mat.SetShaderParam("u_parallax_offset", -GlobalCamera.Instance.GlobalTransform.origin.To2D() * 0.25f);
+        }
+
+        if (Game.Instance != null)
+        {
+            float displaceRadius = 12.5f;
+            List<BoidBase> boids = new List<BoidBase>();
+            float cloudY = _cloudLayers[1].GlobalTransform.origin.y;
+            foreach (BoidBase boid in Game.Instance.DestroyedBoids)
+            {
+                float boidY = boid.GlobalTransform.origin.y;
+                if (boidY < cloudY + displaceRadius && boidY > cloudY - displaceRadius)
+                {
+                    boids.Add(boid);
+                }
+
+                if (boids.Count >= 5)
+                    break;
+            }
+            
+            _cloudMats[1].SetShaderParam("u_pos_y", cloudY);
+            _cloudMats[1].SetShaderParam("u_num_boids", boids.Count);
+            _cloudMats[1].SetShaderParam("u_displace_radius", displaceRadius);
+            for (int i = 0; i < boids.Count; i++)
+            {
+                _cloudMats[1].SetShaderParam($"u_boid_pos_{i + 1}", boids[i].GlobalTransform.origin);
+            }
         }
 
         // _waterDisplacementUpdateTimer -= delta;

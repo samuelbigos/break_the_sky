@@ -9,6 +9,7 @@ uniform int u_flip;
 uniform float u_scroll_speed = 1.0;
 uniform float u_turbulence = 1.0;
 uniform float u_scale = 256.0;
+uniform float u_pos_y;
 uniform vec2 u_parallax_offset;
 uniform float u_density = 0.5;
 uniform bool u_transparent;
@@ -29,8 +30,13 @@ uniform vec2 u_shadow_offset;
 uniform sampler2D u_boid_vel_tex;
 
 // cloud deform
-uniform bool u_displace;
-uniform sampler2D u_displacement_map;
+uniform int u_num_boids;
+uniform float u_displace_radius;
+uniform vec3 u_boid_pos_1;
+uniform vec3 u_boid_pos_2;
+uniform vec3 u_boid_pos_3;
+uniform vec3 u_boid_pos_4;
+uniform vec3 u_boid_pos_5;
 
 varying vec3 v_vertPos;
 
@@ -42,6 +48,11 @@ void vertex()
 float remap(float x, float a, float b, float c, float d)
 {
     return (((x - a) / (b - a)) * (d - c)) + c;
+}
+
+vec3 scale_pos(vec3 pos)
+{
+	return vec3(pos.x + u_parallax_offset.x, pos.y, pos.z + u_parallax_offset.y) / u_scale;
 }
 
 vec4 cloud_noise(vec3 pos)
@@ -79,24 +90,45 @@ float cloud(vec3 pos)
     // cloud shape modeled after the GPU Pro 7 chapter
     float cloud = remap(perlinWorley, wfbm - 1., 1., 0., 1.);
     cloud = remap(cloud, mix(0.9, 0.95, 1.0 - u_density), 1., 0., 1.); // fake cloud coverage
-	return cloud;
-}
-
-vec3 scale_pos(vec3 pos)
-{
-	return vec3(pos.x + u_parallax_offset.x, 0.0, pos.z + u_parallax_offset.y) / u_scale;
+	
+	pos.y = u_pos_y / u_scale;
+	float radius = u_displace_radius / u_scale;
+	
+	if (u_num_boids > 0)
+	{
+		float d = 99999.0;
+		if (u_num_boids > 0)
+			d = min(d, length(pos - scale_pos(u_boid_pos_1)));
+		if (u_num_boids > 1)
+			d = min(d, length(pos - scale_pos(u_boid_pos_2)));
+		if (u_num_boids > 2)
+			d = min(d, length(pos - scale_pos(u_boid_pos_3)));
+		if (u_num_boids > 3)
+			d = min(d, length(pos - scale_pos(u_boid_pos_4)));
+		if (u_num_boids > 4)
+			d = min(d, length(pos - scale_pos(u_boid_pos_5)));
+			
+		d = clamp(d, 0.0, radius) / radius;
+		
+		return cloud - (mix(2.0, 0.0, d));
+	}
+	else
+	{
+		return cloud;
+	}
+	
 }
 
 void fragment()
 {
 	vec3 vertPos = v_vertPos;
-	vertPos.x += TIME * u_scroll_speed;
-	vertPos.z += TIME * u_scroll_speed;
+//	vertPos.x += TIME * u_scroll_speed;
+//	vertPos.z += TIME * u_scroll_speed;
 	
 	// flip to hide that we're using the same noise on different layers.
 	if (u_flip == 1)
 		vertPos.x = -vertPos.x;
-	
+		
 	vec3 pos = scale_pos(vertPos);
 	
 	// clouds

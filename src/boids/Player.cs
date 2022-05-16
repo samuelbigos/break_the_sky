@@ -4,11 +4,8 @@ public class Player : BoidBase
 {
     [Export] public float Damping = 0.5f;
 
-    public AudioStreamPlayer3D _sfxPickup;
-    
-    private bool _destroyed = false;
-    private bool _queueAddBoids = false;
-    
+    private AudioStreamPlayer3D _sfxPickup;
+
     public override void _Ready()
     {
         base._Ready();
@@ -76,12 +73,6 @@ public class Player : BoidBase
             {
                 _game.ChangeFormation((Game.Formation)0, false);
             }
-        }
-
-        if (_queueAddBoids)
-        {
-            _game.AddBoids(GlobalPosition);
-            _queueAddBoids = false;
         }
     }
 

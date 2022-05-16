@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
@@ -49,6 +50,8 @@ public class BoidBase : Area
 
     [Export] private ShaderMaterial _meshMaterial;
     
+    public Action<BoidBase> OnBoidDestroyed;
+    
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;
     public string ID = "";
@@ -97,12 +100,13 @@ public class BoidBase : Area
 
     private Color BaseColour => ColourManager.Instance.Secondary;
 
-    public virtual void Init(string id, Player player, Game game, BoidBase target)
+    public virtual void Init(string id, Player player, Game game, BoidBase target, Action<BoidBase> onDestroy)
     {
         _player = player;
         _game = game;
         _target = target;
         ID = id;
+        OnBoidDestroyed += onDestroy;
     }
 
     public override void _Ready()
@@ -167,7 +171,7 @@ public class BoidBase : Area
         {
             if (GlobalTransform.origin.y < -100.0f)
             {
-                QueueFree();
+                _game.FreeBoid(this);
             }
         }
 
@@ -217,7 +221,6 @@ public class BoidBase : Area
             MeshColour = BaseColour;
             
             _sfxOnDestroy.Play();
-            _game?.RemoveBoid(this);
             _destroyed = true;
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
 
@@ -246,12 +249,9 @@ public class BoidBase : Area
                 rb.ApplyCentralImpulse(hitDir * hitStrength);
                 rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);
             }
+            
+            OnBoidDestroyed?.Invoke(this);
         }
-    }
-
-    public void ForceDestroy()
-    {
-        _Destroy(false, Vector3.Zero, 0.0f);
     }
 
     protected void SetSteeringBehaviourEnabled(SteeringBehaviours behaviour, bool enabled)
