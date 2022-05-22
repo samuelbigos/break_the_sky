@@ -15,6 +15,11 @@ public abstract class Saveable : Node
     
     public abstract void InitialiseSaveData();
 
+    public void Reset()
+    {
+        _data = new Dictionary();
+    }
+
     public virtual Dictionary DoSave()
     {
         return _data.Duplicate();

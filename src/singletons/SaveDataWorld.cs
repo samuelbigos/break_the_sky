@@ -26,14 +26,18 @@ public class SaveDataWorld : Saveable
 
         return (CityState) Convert.ToInt32(cityStates[city]);
     }
+    
+    public SaveDataWorld()
+    {
+        Debug.Assert(Instance == null, "Attempting to create multiple SaveDataWorld instances!");
+        Instance = this;
+    }
 
     public override void _Ready()
     {
         base._Ready();
 
         Utils.Rng.Seed = (ulong)DateTime.Now.Millisecond;
-
-        Instance = this;
     }
 
     public override void InitialiseSaveData()

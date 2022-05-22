@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 
 public class Resources : Node
 {
@@ -7,10 +8,9 @@ public class Resources : Node
     
     [Export] public PackedScene Tooltip;
 
-    public override void _Ready()
+    public Resources()
     {
-        base._Ready();
-
+        Debug.Assert(Instance == null, "Attempting to create multiple Resources instances!");
         Instance = this;
     }
 }

@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using Godot;
 
-public class GlobalCamera : Camera
+public class GameCamera : Camera
 {
-    public static GlobalCamera Instance;
+    public static GameCamera Instance;
 
     [Export] public float Decay = 1.0f; // How quickly the shaking stops [0, 1].
     [Export] public Vector2 MaxOffset = new Vector2(0.02f, 0.02f); // Maximum hor/ver shake in pixels.
@@ -45,12 +45,10 @@ public class GlobalCamera : Camera
     {
         return ProjectPosition(screen, GlobalTransform.origin.y);
     }
-
+    
     public override void _Ready()
     {
         base._Ready();
-        
-        Instance = this;
 
         _noise = new OpenSimplexNoise();
 
@@ -63,8 +61,24 @@ public class GlobalCamera : Camera
         VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
 
         _initialTrans = GlobalTransform;
+    }
 
-        Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        
+        Debug.Assert(Instance == null, "Attempting to create multiple GlobalCamera instances!");
+        Instance = this;
+        
+        if (Game.Instance != null)
+            Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        
+        Instance = null;
     }
 
     public override void _Process(float delta)

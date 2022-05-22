@@ -1,17 +1,22 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scenes/gui/hud/WarningIndicator.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/gui/hud/HUD.cs" type="Script" id=2]
-[ext_resource path="res://assets/gui/9-patch.png" type="Texture" id=3]
+[ext_resource path="res://assets/Theme.tres" type="Theme" id=4]
+[ext_resource path="res://scenes/gui/BoidIcon.tscn" type="PackedScene" id=5]
 
 [node name="HUD" type="Spatial"]
 script = ExtResource( 2 )
 _warningIndicatorScene = ExtResource( 1 )
-_constructUIPath = NodePath("CanvasLayer/Construct")
+_boidIconScene = ExtResource( 5 )
+_materialsValuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow/MaterialsValue")
+_TabUIPath = NodePath("CanvasLayer/TabMenu")
+_fabicateMenuPath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateMenu")
+_fabricateQueuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateQueue")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Construct" type="MarginContainer" parent="CanvasLayer"]
+[node name="TabMenu" type="MarginContainer" parent="CanvasLayer"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -21,21 +26,11 @@ margin_top = -432.0
 margin_right = -66.0
 margin_bottom = 432.0
 
-[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer/Construct"]
-visible = false
-margin_right = 980.0
-margin_bottom = 864.0
-texture = ExtResource( 3 )
-patch_margin_left = 2
-patch_margin_top = 2
-patch_margin_right = 2
-patch_margin_bottom = 2
-
-[node name="TabContainer" type="TabContainer" parent="CanvasLayer/Construct"]
+[node name="TabContainer" type="TabContainer" parent="CanvasLayer/TabMenu"]
 margin_right = 980.0
 margin_bottom = 864.0
 
-[node name="Construct" type="Tabs" parent="CanvasLayer/Construct/TabContainer"]
+[node name="Fabricate" type="Tabs" parent="CanvasLayer/TabMenu/TabContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
@@ -43,7 +38,48 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 
-[node name="Research" type="Tabs" parent="CanvasLayer/Construct/TabContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate"]
+margin_right = 40.0
+margin_bottom = 40.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 182.0
+margin_bottom = 51.0
+
+[node name="TopRow" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
+margin_right = 172.0
+margin_bottom = 33.0
+
+[node name="MaterialsLabel" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow"]
+margin_right = 152.0
+margin_bottom = 33.0
+theme = ExtResource( 4 )
+text = "Materials:"
+
+[node name="MaterialsValue" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow"]
+margin_left = 156.0
+margin_right = 172.0
+margin_bottom = 33.0
+theme = ExtResource( 4 )
+text = "0"
+
+[node name="FabricateQueue" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
+margin_top = 37.0
+margin_right = 172.0
+margin_bottom = 37.0
+
+[node name="FabricateMenu" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
+margin_top = 41.0
+margin_right = 172.0
+margin_bottom = 41.0
+
+[node name="Research" type="Tabs" parent="CanvasLayer/TabMenu/TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0

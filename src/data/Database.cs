@@ -48,4 +48,15 @@ public abstract class Database : Node
             _entries.Add(node);
         }
     }
+    
+    // quick-helpers
+    public static DataAllyBoid AllyBoid(string id)
+    {
+        return AllyBoids.FindEntry<DataAllyBoid>(id);
+    }
+    
+    public static DataEnemyBoid EnemyBoid(string id)
+    {
+        return EnemyBoids.FindEntry<DataEnemyBoid>(id);
+    }
 }

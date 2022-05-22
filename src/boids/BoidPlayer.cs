@@ -4,7 +4,7 @@ using Godot;
 public class BoidPlayer : BoidBase
 {
     [Export] private NodePath _sfxPickupPath;
-    
+
     private AudioStreamPlayer2D _sfxPickup;
 
     public override void _Ready()
@@ -13,12 +13,12 @@ public class BoidPlayer : BoidBase
 
         _sfxPickup = GetNode<AudioStreamPlayer2D>(_sfxPickupPath);
     }
-    
+
     public override void _Process(float delta)
     {
         if (!_destroyed && _acceptInput)
         {
-            Vector2 mousePos = GlobalCamera.Instance.MousePosition();
+            Vector2 mousePos = GameCamera.Instance.MousePosition();
             Vector2 lookAt = mousePos - GlobalPosition;
             Rotation = new Vector3(0.0f, -Mathf.Atan2(lookAt.x, -lookAt.y), 0.0f);
 
@@ -77,7 +77,18 @@ public class BoidPlayer : BoidBase
         }
     }
 
+    public void RegisterPickup(PickupMaterial pickup)
+    {
+        pickup.OnCollected += _OnPickupCollected;
+    }
+
     public override void _OnBoidAreaEntered(Area area)
     {
+    }
+
+    private void _OnPickupCollected(PickupMaterial pickup)
+    {
+        SaveDataPlayer.MaterialCount += 1;
+        _sfxPickup.Play();
     }
 }

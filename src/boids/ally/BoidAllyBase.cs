@@ -92,7 +92,7 @@ public class BoidAllyBase : BoidBase
     protected virtual void _Shoot(Vector2 dir)
     {
         float traumaMod = 1.0f - Mathf.Clamp(_game.NumBoids / 100.0f, 0.0f, 0.5f);
-        GlobalCamera.Instance.AddTrauma(_shootTrauma * traumaMod);
+        GameCamera.Instance.AddTrauma(_shootTrauma * traumaMod);
         
         _sfxShootPlayer.Play();
     }

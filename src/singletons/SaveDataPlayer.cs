@@ -9,62 +9,79 @@ public class SaveDataPlayer : Saveable
 {
     public static SaveDataPlayer Instance;
 
-    public int MaxAllyCount
+    private Godot.Collections.Dictionary<string, object> _defaults = new Godot.Collections.Dictionary<string, object>()
     {
-        get => Convert.ToInt32(_data["maxAllyCount"]);
-        set => _data["maxAllyCount"] = value;
+        {"materialCount", 100},
+        {"maxAllyCount", 50},
+        {"initialAllyCount", 1},
+        {"activeDrones", new Array()},
+        {"seenEnemies", new Dictionary()},
+    };
+
+    public static int MaxAllyCount
+    {
+        get => Convert.ToInt32(Instance._data["maxAllyCount"]);
+        set => Instance._data["maxAllyCount"] = value;
     }
     
-    public int InitialAllyCount
+    public static int InitialAllyCount
     {
-        get => Convert.ToInt32(_data["initialAllyCount"]);
-        set => _data["initialAllyCount"] = value;
+        get => Convert.ToInt32(Instance._data["initialAllyCount"]);
+        set => Instance._data["initialAllyCount"] = value;
     }
 
-    public int Level => Convert.ToInt32(_data["level"]);
+    public static int Level => Convert.ToInt32(Instance._data["level"]);
+    public static Array ActiveDrones => Instance._data["activeDrones"] as Array;
 
-    public Array ActiveDrones => _data["activeDrones"] as Array;
-
-    public bool HasSeenEnemy(string id)
+    public static int MaterialCount
     {
-        Dictionary seenEnemies = _data["seenEnemies"] as Dictionary;
+        get => Convert.ToInt32(Instance._data["materialCount"]);
+        set => Instance._data["materialCount"] = value;
+    }
+
+    public static bool HasSeenEnemy(string id)
+    {
+        Dictionary seenEnemies = Instance._data["seenEnemies"] as Dictionary;
+        if (!seenEnemies.Contains(id))
+            return false;
         return (bool) seenEnemies[id];
     }
 
-    public void SetSeenEnemy(string id)
+    public static void SetSeenEnemy(string id)
     {
-        Dictionary seenEnemies = _data["seenEnemies"] as Dictionary;
+        Dictionary seenEnemies = Instance._data["seenEnemies"] as Dictionary;
         seenEnemies[id] = true;
     }
-
-    public void LevelUp()
+    
+    public SaveDataPlayer()
     {
-        _data["level"] = Convert.ToInt32(_data["level"]) + 1;
+        Debug.Assert(Instance == null, "Attempting to create multiple SaveDataPlayer instances!");
+        Instance = this;
     }
 
     public override void _Ready()
     {
         base._Ready();
+        
+        Validate();
+    }
 
-        Instance = this;
+    private void Validate()
+    {
+        foreach (string key in _defaults.Keys)
+        {
+            if (!_data.Contains(key))
+            {
+                _data[key] = _defaults[key];
+            }
+        }
     }
 
     public override void InitialiseSaveData()
     {
-        _data["level"] = 1;
-        Array activeDrones = new Array();
-        _data["activeDrones"] = activeDrones;
-        _data["maxAllyCount"] = 50;
-        _data["initialAllyCount"] = 10;
-        Dictionary seenEnemies = new Dictionary();
+        Validate();
         
         List<DataEnemyBoid> enemyBoids = Database.EnemyBoids.GetAllEntries<DataEnemyBoid>();
-        Debug.Assert(enemyBoids.Count > 0, "Error creating save file, no enemy boid data!");
-        foreach (DataEnemyBoid enemy in enemyBoids)
-        {
-            seenEnemies[enemy.Name] = false;
-        }
-        _data["seenEnemies"] = seenEnemies;
         SetSeenEnemy(enemyBoids[0].Name); // so we always have something to spawn
         
         List<DataAllyBoid> allyBoids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();

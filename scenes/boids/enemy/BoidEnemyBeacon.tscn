@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://assets/mesh/enemy_beacon.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/mesh/enemies/enemy_beacon.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scenes/bullets/BulletBeacon.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/boids/enemy/BoidEnemyBeacon.cs" type="Script" id=4]

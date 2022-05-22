@@ -13,12 +13,14 @@ public class CommandCentre : Spatial
     [Export] private NodePath _navigationPath;
     [Export] private NodePath _leftButtonPath;
     [Export] private NodePath _rightButtonPath;
+    [Export] private NodePath _cameraPath;
     [Export] private NodePath _mapCameraTransformPath;
     [Export] private NodePath _deployCameraTransformPath;
 
     private Button _leftButton;
     private Button _rightButton;
 
+    private Camera _camera;
     private Spatial _mapCameraTransform;
     private Spatial _deployCameraTransform;
 
@@ -39,26 +41,27 @@ public class CommandCentre : Spatial
         _leftButton.Connect("pressed", this, nameof(_OnNavigateLeft));
         _rightButton.Connect("pressed", this, nameof(_OnNavigateRight));
 
+        _camera = GetNode<Camera>(_cameraPath);
         _mapCameraTransform = GetNode<Spatial>(_mapCameraTransformPath);
         _deployCameraTransform = GetNode<Spatial>(_deployCameraTransformPath);
 
         switch (Metagame.Instance.CurrentState)
         {
             case Metagame.GameState.Map:
-                GlobalCamera.Instance.GlobalTransform = _mapCameraTransform.GlobalTransform;
+                _camera.GlobalTransform = _mapCameraTransform.GlobalTransform;
                 break;
             case Metagame.GameState.Deploy:
-                GlobalCamera.Instance.GlobalTransform = _deployCameraTransform.GlobalTransform;
+                _camera.GlobalTransform = _deployCameraTransform.GlobalTransform;
                 break;
             case Metagame.GameState.Results:
                 // we quit the results screen, assume the results have been saved and thus go back to the map screen.
                 Metagame.Instance.ChangeState(Metagame.GameState.Map);
-                GlobalCamera.Instance.GlobalTransform = _mapCameraTransform.GlobalTransform;
+                _camera.GlobalTransform = _mapCameraTransform.GlobalTransform;
                 break;
             case Metagame.GameState.InGame:
                 // we quit the previous game session, so start back in the deploy screen
                 Metagame.Instance.ChangeState(Metagame.GameState.Deploy);
-                GlobalCamera.Instance.GlobalTransform = _deployCameraTransform.GlobalTransform;
+                _camera.GlobalTransform = _deployCameraTransform.GlobalTransform;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -86,7 +89,7 @@ public class CommandCentre : Spatial
             }
 
             float t = Mathf.Clamp(_transitionTimer / _transitionTime, 0.0f, 1.0f);
-            GlobalCamera.Instance.GlobalTransform = _transitionFrom.GlobalTransform.InterpolateWith(_transitionTo.GlobalTransform, t);
+            _camera.GlobalTransform = _transitionFrom.GlobalTransform.InterpolateWith(_transitionTo.GlobalTransform, t);
         }
     }
 

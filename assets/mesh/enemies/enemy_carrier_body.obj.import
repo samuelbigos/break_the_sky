@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/enemy_carrier_body.obj-14012b021ec12ec3b3118f4b5901bda3.mesh"
+
+[deps]
+
+files=[ "res://.import/enemy_carrier_body.obj-14012b021ec12ec3b3118f4b5901bda3.mesh" ]
+
+source_file="res://assets/mesh/enemies/enemy_carrier_body.obj"
+dest_files=[ "res://.import/enemy_carrier_body.obj-14012b021ec12ec3b3118f4b5901bda3.mesh", "res://.import/enemy_carrier_body.obj-14012b021ec12ec3b3118f4b5901bda3.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

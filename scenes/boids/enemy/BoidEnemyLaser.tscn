@@ -4,7 +4,7 @@
 [ext_resource path="res://src/boids/enemy/BoidEnemyLaser.cs" type="Script" id=2]
 [ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=3]
 [ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=4]
-[ext_resource path="res://assets/mesh/enemy_laser.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/mesh/enemies/enemy_laser.obj" type="ArrayMesh" id=5]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=6]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=7]
 

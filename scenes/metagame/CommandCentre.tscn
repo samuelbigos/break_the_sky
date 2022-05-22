@@ -1,6 +1,5 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=27 format=2]
 
-[ext_resource path="res://src/singletons/GlobalCamera.cs" type="Script" id=1]
 [ext_resource path="res://src/metagame/CommandCentre.cs" type="Script" id=2]
 [ext_resource path="res://scenes/gui/map/CityMarker.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/material/map_mat.tres" type="Material" id=4]
@@ -55,12 +54,13 @@ _gameScene = ExtResource( 17 )
 _navigationPath = NodePath("CanvasLayer/Navigation")
 _leftButtonPath = NodePath("CanvasLayer/Navigation/Left")
 _rightButtonPath = NodePath("CanvasLayer/Navigation/Right")
+_cameraPath = NodePath("Camera")
 _mapCameraTransformPath = NodePath("MapCameraTransform")
 _deployCameraTransformPath = NodePath("DeployCameraTransform")
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0 )
-script = ExtResource( 1 )
+current = true
 
 [node name="MapCameraTransform" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0 )

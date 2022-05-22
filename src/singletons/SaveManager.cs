@@ -12,14 +12,17 @@ public class SaveManager : Node
 	
 	public static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 	public static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
+
+	public SaveManager()
+	{
+		Instance = this;
+	}
 	
 	public override void _Ready()
 	{
 		base._Ready();
 		
 		DoLoad();
-
-		Instance = this;
 	}
 
 	public void DoSave()
@@ -52,7 +55,7 @@ public class SaveManager : Node
 		saveGame.Close();
 	}
 
-	public void DoLoad()
+	private void DoLoad()
 	{
 		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 
@@ -98,6 +101,7 @@ public class SaveManager : Node
 		foreach (Node node in GetTree().GetNodesInGroup("persistent"))
 		{
 			Saveable saveableNode = node as Saveable;
+			saveableNode.Reset();
 			if (saveableNode == null)
 				continue;
 			

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Godot;
 
 public class PauseManager : Node
@@ -9,8 +10,9 @@ public class PauseManager : Node
     private bool _paused = false;
     private float _pauseFlashTime = 1.0f / 60.0f;
 
-    public override void _Ready()
+    public PauseManager()
     {
+        Debug.Assert(Instance == null, "Attempting to create multiple PauseManager instances!");
         Instance = this;
     }
 

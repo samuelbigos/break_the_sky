@@ -70,17 +70,17 @@ public class Clouds : Spatial
     {
         base._Process(delta);
 
-        if (GlobalCamera.Instance != null)
+        if (GameCamera.Instance != null)
         {
-            _boidVelMapCamera.GlobalTransform = GlobalCamera.Instance.BaseTransform;
+            _boidVelMapCamera.GlobalTransform = GameCamera.Instance.BaseTransform;
             
-            Vector3 pos = GlobalCamera.Instance.BaseTransform.origin;
+            Vector3 pos = GameCamera.Instance.BaseTransform.origin;
             pos.y = 0.0f;
             this.GlobalPosition(pos);
 
             // parallax
             ShaderMaterial mat = _cloudLayers[1].GetSurfaceMaterial(0) as ShaderMaterial;
-            mat.SetShaderParam("u_parallax_offset", -GlobalCamera.Instance.GlobalTransform.origin.To2D() * 0.25f);
+            mat.SetShaderParam("u_parallax_offset", -GameCamera.Instance.GlobalTransform.origin.To2D() * 0.25f);
         }
 
         if (Game.Instance != null)

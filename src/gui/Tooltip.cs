@@ -14,8 +14,12 @@ public class Tooltip : Control
 
     public Vector3 WorldPosition
     {
-        get => GlobalCamera.Instance.ProjectPosition(RectGlobalPosition, 0.0f);
-        set => RectGlobalPosition = GlobalCamera.Instance.UnprojectPosition(value);
+        get => GameCamera.Instance.ProjectPosition(RectGlobalPosition, 0.0f);
+        set
+        {
+            if (GetViewport()?.GetCamera() != null)
+                RectGlobalPosition = GetViewport().GetCamera().UnprojectPosition(value);
+        }
     }
 
     public bool Showing

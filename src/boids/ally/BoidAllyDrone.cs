@@ -16,7 +16,7 @@ public class BoidAllyDrone : BoidAllyBase
     {
         base._Process(delta);
         
-        Vector2 shootDir = (GlobalCamera.Instance.MousePosition() - GlobalPosition).Normalized();
+        Vector2 shootDir = (GameCamera.Instance.MousePosition() - GlobalPosition).Normalized();
         
         _shootCooldown -= delta;
         if (Input.IsActionPressed("shoot") && _shootCooldown <= 0.0)

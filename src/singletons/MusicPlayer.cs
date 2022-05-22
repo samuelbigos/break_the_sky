@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Godot;
 
 public class MusicPlayer : Node
@@ -7,10 +8,14 @@ public class MusicPlayer : Node
     public AudioStreamPlayer2D Player;
     public bool MusicEnabled = false;
 
+    public MusicPlayer()
+    {
+        Debug.Assert(Instance == null, "Attempting to create multiple GlobalCamera instances!");
+        Instance = this;
+    }
+    
     public override void _Ready()
     {
-        Instance = this;
-        
         Player = new AudioStreamPlayer2D();
         AddChild(Player);
         PauseMode = PauseModeEnum.Process;

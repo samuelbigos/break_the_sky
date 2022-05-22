@@ -262,7 +262,7 @@ public class AISpawningDirector : Node
     private float CalcBudget(float intensity)
     {
         // budget is a factor of intensity and player level
-        return _baseBudget * (SaveDataPlayer.Instance.Level * _levelScale) * intensity;
+        return _baseBudget * (SaveDataPlayer.Level * _levelScale) * intensity;
     }
 
     private SpawningState CalcExitState(float intensity, List<SpawningState> exitStates, List<float> exitStateWeights)
@@ -285,7 +285,7 @@ public class AISpawningDirector : Node
         List<DataEnemyBoid> possibleTypes = new List<DataEnemyBoid>();
         foreach (DataEnemyBoid enemy in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
         {
-            if (SaveDataPlayer.Instance.HasSeenEnemy(enemy.Name))
+            if (SaveDataPlayer.HasSeenEnemy(enemy.Name))
                 possibleTypes.Add(enemy);
         }
 

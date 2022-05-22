@@ -20,9 +20,13 @@ public class DebugImGui : Node
     public override void _Process(float delta)
     {
         base._Process(delta);
-        
-        float fps = 1.0f / delta;
-        _fps = 0.033f * fps + 0.966f * _fps;
+
+        delta = TimeSystem.UnscaledDelta;
+        if (delta != 0.0f)
+        {
+            float fps = 1.0f / delta;
+            _fps = 0.033f * fps + 0.966f * _fps;
+        }
     }
 
     private void _OnImGuiLayout()

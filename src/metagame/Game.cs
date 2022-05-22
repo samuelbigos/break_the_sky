@@ -88,8 +88,16 @@ public class Game : Node
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public int NumBoids => _allyBoids.Count;
 
+    public Game()
+    {
+        Debug.Assert(Instance == null, "Attempting to create multiple Game instances!");
+        Instance = this;
+    }
+    
     public override void _Ready()
     {
+        base._Ready();
+        
         _player = _playerScene.Instance<BoidPlayer>();
         AddChild(_player);
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
@@ -97,15 +105,15 @@ public class Game : Node
         _hud = GetNode<HUD>(_hudPath);
 
         _player.Init("player", _player, this, null, _OnBoidDestroyed);
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        
         _aiSpawningDirector.Init(this, _player);
 
-        _pendingBoidSpawn = SaveDataPlayer.Instance.InitialAllyCount;
+        _pendingBoidSpawn = SaveDataPlayer.InitialAllyCount;
 
         //AddScore(0, _player.GlobalPosition, false);
         GD.Randomize();
 
-        GlobalCamera.Instance.Init(_player);
+        GameCamera.Instance.Init(_player);
         MusicPlayer.Instance.PlayGame();
         //PauseManager.Instance.Init(this);
 
@@ -115,25 +123,22 @@ public class Game : Node
     public override void _EnterTree()
     {
         base._EnterTree();
-        
-        Instance = this;
+        DebugImGui.DrawImGui += _OnImGuiLayout;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        
-        Instance = null;
         DebugImGui.DrawImGui -= _OnImGuiLayout;
     }
 
     public override void _Process(float delta)
     {
-        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GlobalCamera.Instance.MousePosition().To3D());
+        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GameCamera.Instance.MousePosition().To3D());
 
-        while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.Instance.MaxAllyCount)
+        while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.MaxAllyCount)
         {
-            AddAllyBoidsInternal();
+            AddAllyBoid(Database.AllyBoids.GetAllEntries<DataAllyBoid>()[0].Name);
             _pendingBoidSpawn--;
         }
 
@@ -221,20 +226,22 @@ public class Game : Node
         boid.QueueFree();
     }
 
-    private void AddAllyBoidsInternal()
+    public bool AddAllyBoid(string boidId)
     {
-        Array activeAllyTypes = SaveDataPlayer.Instance.ActiveDrones;
-        
-        // spawn ally using _addedAllyCounter to determine type
-        string droneId = activeAllyTypes[_addedAllyCounter++ % activeAllyTypes.Count] as string;
-        DataAllyBoid droneData = Database.AllyBoids.FindEntry<DataAllyBoid>(droneId);
+        if (_allyBoids.Count >= SaveDataPlayer.MaxAllyCount)
+            return false;
+            
+        DataAllyBoid droneData = Database.AllyBoids.FindEntry<DataAllyBoid>(boidId);
         BoidAllyBase boid = droneData.Scene.Instance<BoidAllyBase>();
         AddChild(boid);
         _allyBoids.Add(boid);
         _allBoids.Add(boid);
         boid.Init(droneData.Name, _player, this, _player, _OnBoidDestroyed);
+        boid.GlobalPosition(_player.GlobalTransform.origin);
         
         ChangeFormation(_formation, false);
+
+        return true;
     }
 
     private Vector2 GetOffset(int column, int columnIndex)

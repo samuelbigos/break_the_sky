@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
-[ext_resource path="res://assets/mesh/ally_drone_2.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/allies/ally_drone_2.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=5]

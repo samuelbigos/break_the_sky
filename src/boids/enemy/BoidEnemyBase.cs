@@ -24,14 +24,14 @@ public class BoidEnemyBase : BoidBase
         base._OnHit(damage, score, bulletVel, pos);
 
         PauseManager.Instance.PauseFlash();
-        GlobalCamera.Instance.AddTrauma(HitTrauma);
+        GameCamera.Instance.AddTrauma(HitTrauma);
     }
     
     protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
     {
         if (!_destroyed)
         {
-            GlobalCamera.Instance.AddTrauma(DestroyTrauma);
+            GameCamera.Instance.AddTrauma(DestroyTrauma);
             
             if (score && !_destroyed)
             {
@@ -46,6 +46,7 @@ public class BoidEnemyBase : BoidBase
         {
             PickupMaterial drop = _pickupMaterialScene.Instance<PickupMaterial>();
             _game.AddChild(drop);
+            _player.RegisterPickup(drop);
             drop.GlobalTransform = GlobalTransform;
             float eject = 25.0f;
             drop.Init(new Vector2(Utils.Randf01(), Utils.Randf01()).Normalized() * eject, _player);
