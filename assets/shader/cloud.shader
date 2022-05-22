@@ -208,8 +208,8 @@ void fragment()
 		vec2 uv = UV - 0.5;
 		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
 		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
-		uv.x += normal.x * 0.025;
-		uv.y += normal.z * 0.025;
+		uv.x += normal.x * 0.01;
+		uv.y += normal.z * 0.01;
 		uv.x += u_shadow_offset.x / u_plane_size.x;
 		uv.y += u_shadow_offset.y / u_plane_size.y;
 		transparent = texture(u_boid_vel_tex, uv + 0.5).a;

@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using Godot;
 
 public class GlobalCamera : Camera
@@ -9,21 +11,23 @@ public class GlobalCamera : Camera
     [Export] public float MaxRoll = 0.175f; // Maximum rotation in Radians (use sparingly).
     [Export] public int TraumaPower = 2; // Trauma exponent. Use [2, 3].
     [Export] public float MaxTrauma = 0.75f;
+    [Export] private float _stateTransitionTime = 0.5f;
 
     public Transform BaseTransform;
 
     private OpenSimplexNoise _noise = new OpenSimplexNoise();
     private float _trauma = 0.0f;
-    private Player _player = null;
+    private BoidPlayer _player = null;
     private float _noiseY = 0.0f;
-    private float _cameraHeight;
+    private float _stateTransitionTimer;
+    private Transform _initialTrans;
     
     public void AddTrauma(float trauma)
     {
         _trauma = Mathf.Min(_trauma + trauma, MaxTrauma);
     }
 
-    public void Init(Player player)
+    public void Init(BoidPlayer player)
     {
         _player = player;
     }
@@ -44,6 +48,8 @@ public class GlobalCamera : Camera
 
     public override void _Ready()
     {
+        base._Ready();
+        
         Instance = this;
 
         _noise = new OpenSimplexNoise();
@@ -54,63 +60,94 @@ public class GlobalCamera : Camera
         _noise.Period = 4;
         _noise.Octaves = 2;
 
-        _cameraHeight = GlobalTransform.origin.y;
-
         VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
+
+        _initialTrans = GlobalTransform;
+
+        Game.Instance.OnGameStateChanged += _OnGameStateChanged;
     }
 
     public override void _Process(float delta)
     {
-        if (_player != null)
-        {
-            Vector3 basePos = _player.GlobalTransform.origin;
-            basePos.y = GlobalTransform.origin.y;
-            BaseTransform = new Transform(GlobalTransform.basis, basePos);
-            
-            Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
-            Vector2 camerOffset = cameraMouseOffset * 0.33f;
-            Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + camerOffset.To3D()));
-            cameraTransform.origin.y = _cameraHeight;
+        base._Process(delta);
         
-            if (_trauma > 0.0f)
-            {
-                _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
-                float amount = Mathf.Pow(_trauma, TraumaPower);
-                float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
-                Vector2 offset = new Vector2(0.0f, 0.0f);
-                offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
-                offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
-                _noiseY += delta * 100.0f;
+        // ignore timescale
+        delta = TimeSystem.UnscaledDelta;
         
-                cameraTransform = cameraTransform.Translated(offset.To3D());
-            }
+        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
+        
+        Debug.Assert(_player != null);
+        
+        // for clouds
+        Vector3 basePos = _player.GlobalTransform.origin;
+        basePos.y = GlobalTransform.origin.y;
+        BaseTransform = new Transform(GlobalTransform.basis, basePos);
 
-            GlobalTransform = cameraTransform;
+        // set camera transform based on state/transitions
+        _stateTransitionTimer -= delta;
+        if (_stateTransitionTimer > 0.0f)
+        {
+            float t = Utils.Ease_CubicInOut(_stateTransitionTimer / _stateTransitionTime);
+            GlobalTransform = GetTransform(Game.Instance.CurrentState, delta).InterpolateWith(GetTransform(Game.Instance.PrevState, delta), t);
         }
-        //
-        // (GetNode("CanvasLayer/Label") as Label).Text = $"{_trauma}";
-        //
-        // if (Input.IsActionJustReleased("fullscreen"))
-        // {
-        //     switch (_windowScale)
-        //     {
-        //         case WindowScale.Medium:
-        //             _windowScale = WindowScale.Large;
-        //             OS.WindowBorderless = false;
-        //             OS.SetWindowSize(new Vector2(1920, 1080));
-        //             break;
-        //         case WindowScale.Large:
-        //             _windowScale = WindowScale.Full;
-        //             OS.WindowBorderless = true;
-        //             OS.SetWindowSize(OS.GetScreenSize());
-        //             OS.SetWindowPosition(new Vector2(0, 0));
-        //             break;
-        //         case WindowScale.Full:
-        //             _windowScale = WindowScale.Medium;
-        //             OS.WindowBorderless = false;
-        //             OS.SetWindowSize(new Vector2(960, 540));
-        //             break;
-        //     }
-        // }
+        else
+        {
+            GlobalTransform = GetTransform(Game.Instance.CurrentState, delta);
+        }
+    }
+
+    private Transform GetTransform(Game.State state, float delta)
+    {
+        switch (state)
+        {
+            case Game.State.Play:
+            {
+                Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+                Vector2 cameraOffset = cameraMouseOffset * 0.33f;
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
+                cameraTransform.origin.y = _initialTrans.origin.y;
+                
+                if (_trauma > 0.0f)
+                {
+                    _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
+                    float amount = Mathf.Pow(_trauma, TraumaPower);
+                    float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
+                    Vector2 offset = new Vector2(0.0f, 0.0f);
+                    offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
+                    offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
+                    _noiseY += delta * 100.0f;
+        
+                    cameraTransform = cameraTransform.Translated(offset.To3D());
+                }
+
+                return cameraTransform;
+            }
+            case Game.State.Construct:
+            {
+                Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+                Vector2 cameraOffset = cameraMouseOffset * 0.1f + Vector2.Right * 30.0f;
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
+                cameraTransform.origin.y = _initialTrans.origin.y * 0.5f;
+
+                return cameraTransform;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void _OnGameStateChanged(Game.State state, Game.State prevState)
+    {
+        switch (state)
+        {
+            case Game.State.Play:
+                _stateTransitionTimer = _stateTransitionTime;
+                break;
+            case Game.State.Construct:
+                _stateTransitionTimer = _stateTransitionTime;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(state), state, null);
+        }
     }
 }

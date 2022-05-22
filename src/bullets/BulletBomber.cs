@@ -10,5 +10,10 @@ public class BulletBomber : Bullet
         {
             _velocity = (Target.GlobalPosition - GlobalPosition).Normalized() * _velocity.Length();
         }
+
+        if (!IsInstanceValid(Target) || Target.Destroyed)
+        {
+            Target = null;
+        }
     }
 }

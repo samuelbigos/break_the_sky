@@ -19,10 +19,11 @@ public class BoidAllyBase : BoidBase
     [Export] private NodePath _sfxShootPlayerPath;
     private AudioStreamPlayer3D _sfxShootPlayer;
 
-    protected override BoidAlignment Alignment => BoidAlignment.Ally;
-
     private float _microBulletTargetSearchTimer;
     private BoidBase _microBulletTarget;
+    
+    protected override BoidAlignment Alignment => BoidAlignment.Ally;
+    protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     public override void _Ready()
     {
@@ -98,7 +99,7 @@ public class BoidAllyBase : BoidBase
 
     protected virtual bool _CanShoot(Vector2 dir)
     {
-        if (_destroyed)
+        if (_destroyed || !_acceptInput)
             return false;
         
         // can shoot if there are no other boids in the shoot direction

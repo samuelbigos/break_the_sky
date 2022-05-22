@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/mesh/enemy_drone.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://src/boids/enemy/BoidEnemyCruncher.cs" type="Script" id=3]
+[ext_resource path="res://assets/mesh/enemies/cruncher.glb" type="PackedScene" id=4]
+
+[sub_resource type="CapsuleShape" id=1]
+
+[node name="BoidEnemyCruncher" instance=ExtResource( 1 )]
+script = ExtResource( 3 )
+_behaviours = 10
+MaxVelocity = 150.0
+SeparationRadius = 5.0
+MaxHealth = 5.0
+MaxAngularVelocity = 500.0
+
+[node name="CollisionShape" parent="." index="0"]
+transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, -4.94396 )
+shape = SubResource( 1 )
+
+[node name="Mesh" parent="." index="1"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, -3.53188 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="cruncher" parent="." index="5" instance=ExtResource( 4 )]
+transform = Transform( 2, 0, 0, 0, -4.37114e-08, -2, 0, 1, -8.74228e-08, 0, 0, -1.04645 )
+
+[node name="Camera" type="Camera" parent="." index="6"]
+transform = Transform( 1.91069e-15, 1, 4.37114e-08, 4.37114e-08, -4.37114e-08, 1, 1, 0, -4.37114e-08, 0, 19.7183, 11.9301 )

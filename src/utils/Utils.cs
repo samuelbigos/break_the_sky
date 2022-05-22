@@ -18,6 +18,11 @@ public static class Utils
     {
         spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
     }
+
+    public static float Randf01()
+    {
+        return Rng.RandfRange(-1.0f, 1.0f);
+    }
     
     public static Vector2 Truncate(this Vector2 vec, float vMax)
     {
@@ -32,16 +37,10 @@ public static class Utils
         return vec * i;
     }
     
-    public static Vector3 Truncate(this Vector3 vec, float vMax)
+    public static float Ease_CubicInOut(float t) 
     {
-        float length = vec.Length();
-        if (length == 0.0f)
-        {
-            return vec;
-        }
-
-        float i = vMax / vec.Length();
-        i = Mathf.Min(i, 1.0f);
-        return vec * i;
+        return t < 0.5f
+            ? 4.0f * t * t * t
+            : 0.5f * Mathf.Pow(2.0f * t - 2.0f, 3.0f) + 1.0f;
     }
 }

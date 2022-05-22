@@ -24,6 +24,7 @@ public class BoidTrail : MeshInstance
     private Spatial _parent;
     private float _updateTimer;
     private Particles _burstParticles;
+    private bool _initialised;
 
     public override void _Ready()
     {
@@ -31,31 +32,38 @@ public class BoidTrail : MeshInstance
 
         _burstParticles = GetNode<Particles>(_burstParticlesPath);
 
-        switch (_type)
-        {
-            case TrailType.Smooth:
-                _trailPositions = new Vector3[_linePoints];
-                _parent = GetParent<Spatial>();
-                for (int i = 0; i < _linePoints; i++)
-                {
-                    _trailPositions[i] = _parent.GlobalTransform.origin;
-                }
-                _burstParticles.Visible = false;
-                break;
-            case TrailType.Burst:
-                _burstParticles.Visible = true;
-                ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
-                Debug.Assert(processMaterial != null);
-                processMaterial.Color = ColourManager.Instance.White;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        _initialised = false;
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
+
+        if (!_initialised)
+        {
+            switch (_type)
+            {
+                case TrailType.Smooth:
+                    _trailPositions = new Vector3[_linePoints];
+                    _parent = GetParent<Spatial>();
+                    for (int i = 0; i < _linePoints; i++)
+                    {
+                        _trailPositions[i] = _parent.GlobalTransform.origin;
+                    }
+                    _burstParticles.Visible = false;
+                    break;
+                case TrailType.Burst:
+                    _burstParticles.Visible = true;
+                    ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
+                    Debug.Assert(processMaterial != null);
+                    processMaterial.Color = ColourManager.Instance.White;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            _initialised = true;
+        }
 
         switch (_type)
         {

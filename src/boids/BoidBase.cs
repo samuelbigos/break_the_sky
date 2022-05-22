@@ -50,6 +50,8 @@ public class BoidBase : Area
 
     [Export] private ShaderMaterial _meshMaterial;
     
+    [Export] protected PackedScene _pickupMaterialScene;
+    
     public Action<BoidBase> OnBoidDestroyed;
     
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
@@ -57,7 +59,7 @@ public class BoidBase : Area
     public string ID = "";
 
     protected Vector3 _velocity;
-    protected Player _player;
+    protected BoidPlayer _player;
     protected Game _game;
     protected BoidBase _target;
     private Vector2 _targetOffset;
@@ -74,6 +76,8 @@ public class BoidBase : Area
 
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
+    
+    protected bool _acceptInput = true;
 
     public Vector3 Velocity
     {
@@ -98,9 +102,9 @@ public class BoidBase : Area
         }
     }
 
-    private Color BaseColour => ColourManager.Instance.Secondary;
+    protected virtual Color BaseColour => ColourManager.Instance.Secondary;
 
-    public virtual void Init(string id, Player player, Game game, BoidBase target, Action<BoidBase> onDestroy)
+    public void Init(string id, BoidPlayer player, Game game, BoidBase target, Action<BoidBase> onDestroy)
     {
         _player = player;
         _game = game;
@@ -124,19 +128,14 @@ public class BoidBase : Area
         
         List<MeshInstance> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
-        Debug.Assert(_meshMaterial != null);
-        if (_meshMaterial == null)
-        {
-            // TODO: Something fucked up and export ref doesn't work.
-            _meshMaterial = ResourceLoader.Load<ShaderMaterial>("res://assets/material/boid_mat.tres");
-        }
+        Debug.Assert(_meshMaterial != null, $"_meshMaterial is null on {Name}");
         _mesh.SetSurfaceMaterial(0, _meshMaterial);
-        Debug.Assert(_meshMaterial != null);
         _altMaterial = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
-        Debug.Assert(_altMaterial != null);
         MeshColour = BaseColour;
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
+        
+        Game.Instance.OnGameStateChanged += _OnGameStateChanged;
     }
 
     public override void _Process(float delta)
@@ -473,7 +472,7 @@ public class BoidBase : Area
             return;
         
         BoidBase boid = area as BoidBase;
-        if (boid is BoidAllyBase || boid is Player)
+        if (boid is BoidAllyBase || boid is BoidPlayer)
         {
             if (boid.Alignment == Alignment)
             {
@@ -497,6 +496,22 @@ public class BoidBase : Area
         {
             bullet.OnHit();
             _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.GlobalTransform.origin);
+        }
+    }
+    
+    private void _OnGameStateChanged(Game.State state, Game.State prevState)
+    {
+        switch (state)
+        {
+            case Game.State.Play:
+                _acceptInput = true;
+                break;
+            case Game.State.Pause:
+            case Game.State.Construct:
+                _acceptInput = false;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
     }
 }

@@ -27,7 +27,9 @@ public class MultiViewportMeshInstance : MeshInstance
             mesh.Mesh = Mesh;
             mesh.Layers = _meshLayers[i];
             mesh.MaterialOverride = _meshMaterials[i];
+            mesh.Transform = Transform;
             _meshes.Add(mesh);
+            mesh.Visible = Visible;
         }
     }
 

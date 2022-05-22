@@ -1,15 +1,17 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/bullets/BulletBomber.cs" type="Script" id=1]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=3]
 
-[sub_resource type="SphereMesh" id=1]
-radius = 1.5
-height = 3.0
+[sub_resource type="ShaderMaterial" id=1]
+resource_local_to_scene = true
+shader = ExtResource( 3 )
+shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
+shader_param/u_secondary_colour = null
 
 [node name="BulletBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
-_baseSpeed = 50.0
 
-[node name="Mesh" parent="." index="1"]
-mesh = SubResource( 1 )
+[node name="InsideMesh" parent="." index="1"]
+material_override = SubResource( 1 )

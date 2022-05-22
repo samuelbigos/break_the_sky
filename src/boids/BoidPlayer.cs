@@ -1,21 +1,22 @@
+using System;
 using Godot;
 
-public class Player : BoidBase
+public class BoidPlayer : BoidBase
 {
-    [Export] public float Damping = 0.5f;
-
-    private AudioStreamPlayer3D _sfxPickup;
+    [Export] private NodePath _sfxPickupPath;
+    
+    private AudioStreamPlayer2D _sfxPickup;
 
     public override void _Ready()
     {
         base._Ready();
-        
-        _sfxPickup = GetNode("SFXPickup") as AudioStreamPlayer3D;
-    }
 
+        _sfxPickup = GetNode<AudioStreamPlayer2D>(_sfxPickupPath);
+    }
+    
     public override void _Process(float delta)
     {
-        if (!_destroyed)
+        if (!_destroyed && _acceptInput)
         {
             Vector2 mousePos = GlobalCamera.Instance.MousePosition();
             Vector2 lookAt = mousePos - GlobalPosition;

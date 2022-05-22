@@ -10,7 +10,8 @@ public class BoidEnemyBase : BoidBase
     public bool IsTargetted = false;
     
     protected override BoidAlignment Alignment => BoidAlignment.Enemy;
-
+    protected override Color BaseColour => ColourManager.Instance.Secondary;
+    
     public override void _Ready()
     {
         base._Ready();
@@ -34,10 +35,20 @@ public class BoidEnemyBase : BoidBase
             
             if (score && !_destroyed)
             {
-                _game.AddScore(Points, GlobalPosition, true);
+                //_game.AddScore(Points, GlobalPosition, true);
             }
         }
         
         base._Destroy(score, hitDir, hitStrength);
+
+        DataEnemyBoid data = Database.EnemyBoids.FindEntry<DataEnemyBoid>(ID);
+        for (int i = 0; i < data.MaterialDropCount; i++)
+        {
+            PickupMaterial drop = _pickupMaterialScene.Instance<PickupMaterial>();
+            _game.AddChild(drop);
+            drop.GlobalTransform = GlobalTransform;
+            float eject = 25.0f;
+            drop.Init(new Vector2(Utils.Randf01(), Utils.Randf01()).Normalized() * eject, _player);
+        }
     }
 }

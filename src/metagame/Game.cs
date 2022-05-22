@@ -1,13 +1,21 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using Godot.Collections;
 using ImGuiNET;
+using Array = Godot.Collections.Array;
 using Dictionary = Godot.Collections.Dictionary;
 
 public class Game : Node
 {
     public static Game Instance;
+
+    public enum State
+    {
+        Play,
+        Construct,
+        Pause
+    }
     
     public enum Formation
     {
@@ -16,21 +24,17 @@ public class Game : Node
         Narrow,
     }
 
-    enum WaveState
-    {
-        Wave,
-        Cooldown,
-        Finished
-    }
-
-    [Export] private NodePath _playerPath;
-    private Player _player;
+    [Export] private PackedScene _playerScene;
+    private BoidPlayer _player;
     
     [Export] private NodePath _mouseCursorPath;
     private MeshInstance _mouseCursor;
 
     [Export] private NodePath _aiSpawningDirectorPath;
     private AISpawningDirector _aiSpawningDirector;
+
+    [Export] private NodePath _hudPath;
+    private HUD _hud;
 
     [Export] public float SpawningRadius = 500.0f;
     [Export] public float WaveCooldown = 5.0f;
@@ -51,6 +55,13 @@ public class Game : Node
     [Export] public float ScoreMultiTimeout = 10.0f;
     [Export] public int ScoreMultiMax = 10;
     [Export] public float ScoreMultiIncrement = 0.5f;
+
+    public Action<State, State> OnGameStateChanged;
+    public State CurrentState => _state;
+    public State PrevState => _prevState;
+
+    private State _state;
+    private State _prevState;
     
     private Formation _formation = Formation.Balanced;
     private int _score = 0;
@@ -75,14 +86,15 @@ public class Game : Node
     public List<BoidBase> DestroyedBoids => _destroyedBoids;
     public List<BoidAllyBase> AllyBoids => _allyBoids;
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
-    public Player Player => _player;
     public int NumBoids => _allyBoids.Count;
 
     public override void _Ready()
     {
-        _player = GetNode<Player>(_playerPath);
+        _player = _playerScene.Instance<BoidPlayer>();
+        AddChild(_player);
         _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
         _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
+        _hud = GetNode<HUD>(_hudPath);
 
         _player.Init("player", _player, this, null, _OnBoidDestroyed);
         DebugImGui.DrawImGui += _OnImGuiLayout;
@@ -90,12 +102,14 @@ public class Game : Node
 
         _pendingBoidSpawn = SaveDataPlayer.Instance.InitialAllyCount;
 
-        AddScore(0, _player.GlobalPosition, false);
+        //AddScore(0, _player.GlobalPosition, false);
         GD.Randomize();
 
         GlobalCamera.Instance.Init(_player);
         MusicPlayer.Instance.PlayGame();
         //PauseManager.Instance.Init(this);
+
+        ChangeGameState(State.Play);
     }
 
     public override void _EnterTree()
@@ -110,6 +124,7 @@ public class Game : Node
         base._ExitTree();
         
         Instance = null;
+        DebugImGui.DrawImGui -= _OnImGuiLayout;
     }
 
     public override void _Process(float delta)
@@ -239,52 +254,27 @@ public class Game : Node
         enemy.OnBoidDestroyed += _OnBoidDestroyed;
     }
 
-    public void AddScore(int score, Vector2 pos, bool show)
+    public void ChangeGameState(State state)
     {
-        // _gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
-        // if(show)
-        // {
-        // 	_gui.ShowFloatingScore(score * _scoreMulti, pos, this);
-        // 	_score += score * _scoreMulti;
-        // 	_scoreMulti = Mathf.Clamp(_scoreMulti + ScoreMultiIncrement, 0, ScoreMultiMax);
-        // 	_scoreMultiTimer = ScoreMultiTimeout;
-        //
-        // }
-    }
-
-    public void DoPerk()
-    {
-        GetTree().Paused = true;
-        // _gui.ShowPerks(_perks.GetRandomPerks(3));
-        // if(!_gui.IsConnected("onPerkSelected", this, "onPerkSelected"))
-        // {
-        // 	_gui.Connect("onPerkSelected", this, "onPerkSelected");
-        // }
-    }
-
-    public void OnPerkSelected(Perk perk)
-    {
-        PerkManager.Instance.PickPerk(perk);
-        GetTree().Paused = false;
-        BaseBoidReload *= perk.reloadMod;
-        BaseBoidReinforce += perk.reinforceMod;
-        BaseBoidGrouping += perk.groupingMod;
-        BaseBoidDamage += perk.damageMod;
-        BaseSlowmoCD *= perk.slowmoMod;
-        BaseNukeCD *= perk.nukeMod;
-        BaseBoidSpeed += perk.boidSpeedMod;
-        BasePlayerSpeed += perk.playerSpeedMod;
-        BaseBoidSpread *= perk.spreadMod;
-        BaseBulletSpeed += perk.bulletSpeedMod;
-        if (perk.microturrets)
+        _prevState = _state;
+        switch (state)
         {
-            BaseMicroturrets = true;
+            case State.Play:
+                Engine.TimeScale = 1.0f;
+                break;
+            case State.Pause:
+            case State.Construct:
+                Engine.TimeScale = 0.0f;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
 
-        ChangeFormation(Formation.Balanced, false);
-        //_gui.SetWave(_currentWave, _currentSubWave);
+        _state = state;
+        
+        OnGameStateChanged?.Invoke(state, _prevState);
     }
-
+    
     public void PushBack(BoidBase boid)
     {
         foreach (int i in GD.Range(0, _boidColCount))

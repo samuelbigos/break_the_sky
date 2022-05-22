@@ -29,7 +29,7 @@ public class AISpawningDirector : Node
     }
     
     private Game _game;
-    private Player _player;
+    private BoidPlayer _player;
 
     private SpawningState _state;
     private float _totalTime;
@@ -38,7 +38,7 @@ public class AISpawningDirector : Node
     private List<BoidEnemyBase> _waveEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _swarmingEnemies = new List<BoidEnemyBase>();
  
-    public void Init(Game game, Player player)
+    public void Init(Game game, BoidPlayer player)
     {
         _game = game;
         _player = player;
@@ -300,8 +300,8 @@ public class AISpawningDirector : Node
         
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
-        enemy.GlobalPosition = spawnPos;
         AddChild(enemy);
+        enemy.GlobalPosition = spawnPos;
         enemy.Init(id.Name, _player, _game, _player, null);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);
@@ -323,6 +323,8 @@ public class AISpawningDirector : Node
         ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Budget");
         
         ImGui.Spacing();
+
+        ImGui.Checkbox("Enabled", ref _enabled);
         
         ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
             0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/data/Database.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyDriller.tscn" type="PackedScene" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyCarrier.tscn" type="PackedScene" id=5]
 [ext_resource path="res://src/data/DataEnemyBoid.cs" type="Script" id=6]
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyDummy.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scenes/boids/enemy/BoidEnemyCruncher.tscn" type="PackedScene" id=8]
 
 [node name="DatabaseEnemyBoids" type="Node"]
 script = ExtResource( 1 )
@@ -16,24 +17,35 @@ script = ExtResource( 6 )
 DisplayName = "Driller"
 Scene = ExtResource( 2 )
 SpawningCost = 1.0
+MaterialDropCount = 3
+
+[node name="cruncher" type="Node" parent="."]
+script = ExtResource( 6 )
+DisplayName = "Cruncher"
+Scene = ExtResource( 8 )
+SpawningCost = 1.0
+MaterialDropCount = 3
 
 [node name="laser" type="Node" parent="."]
 script = ExtResource( 6 )
 DisplayName = "Laser"
 Scene = ExtResource( 4 )
 SpawningCost = 5.0
+MaterialDropCount = 8
 
 [node name="beacon" type="Node" parent="."]
 script = ExtResource( 6 )
 DisplayName = "Beacon"
 Scene = ExtResource( 3 )
 SpawningCost = 10.0
+MaterialDropCount = 12
 
 [node name="carrier" type="Node" parent="."]
 script = ExtResource( 6 )
 DisplayName = "Carrier"
 Scene = ExtResource( 5 )
 SpawningCost = 20.0
+MaterialDropCount = 25
 
 [node name="dummy" type="Node" parent="."]
 script = ExtResource( 6 )

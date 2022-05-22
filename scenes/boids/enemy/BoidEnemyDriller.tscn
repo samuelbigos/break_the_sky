@@ -15,9 +15,10 @@ shader_param/u_secondary_colour = null
 
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-_behaviours = 12
+_behaviours = 10
 MaxVelocity = 175.0
 Damping = 0.05
+SeparationRadius = 5.0
 MaxHealth = 3.0
 HitFlashTime = 0.0333333
 _meshMaterial = SubResource( 2 )
@@ -31,3 +32,5 @@ shape = SubResource( 1 )
 transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0 )
 mesh = ExtResource( 2 )
 material/0 = null
+
+[node name="Skeleton" type="Skeleton" parent="." index="5"]

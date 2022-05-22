@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 
 public class BoidAllyBomber : BoidAllyBase
 {
@@ -103,15 +104,11 @@ public class BoidAllyBomber : BoidAllyBase
         base._Shoot(dir);
         
         BulletBomber bullet = _bulletScene.Instance() as BulletBomber;
-        if (bullet != null)
-        {
-            _game.AddChild(bullet);
-            bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
-            bullet.Target = _target;
-        }
-
-        _game.PushBack(this);
-
+        Debug.Assert(bullet != null);
+        _game.AddChild(bullet);
+        bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
+        bullet.Target = _target;
+        
         _canShoot = false;
         _shootCooldownTimer = _shootCooldown;
     }
