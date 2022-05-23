@@ -69,4 +69,8 @@ public class SaveDataWorld : Saveable
             cityStates[city] = CityState.Warm;
         }
     }
+
+    protected override void Validate()
+    {
+    }
 }

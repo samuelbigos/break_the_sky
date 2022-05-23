@@ -328,7 +328,7 @@ public class Game : Node
             {
                 if (ImGui.Button($"Spawn {boid.DisplayName}"))
                 {
-                    _aiSpawningDirector.SpawnEnemy(boid);
+                    _aiSpawningDirector.SpawnEnemyRandom(boid);
                 }
             }
             ImGui.EndTabItem();

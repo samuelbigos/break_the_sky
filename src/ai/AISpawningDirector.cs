@@ -137,7 +137,7 @@ public class AISpawningDirector : Node
             List<DataEnemyBoid> list = ListPossibleEnemies();
             DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             activeBudget += enemy.SpawningCost;
-            _swarmingEnemies.Add(SpawnEnemy(enemy));
+            _swarmingEnemies.Add(SpawnEnemyRandom(enemy));
         }
         
         // exit swarming once a given time has passed
@@ -167,7 +167,7 @@ public class AISpawningDirector : Node
         {
             DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             budget -= enemy.SpawningCost;
-            _waveEnemies.Add(SpawnEnemy(enemy));
+            _waveEnemies.Add(SpawnEnemyRandom(enemy));
         }
     }
     private void ProcessStateWave(float delta, float intensity)
@@ -206,7 +206,7 @@ public class AISpawningDirector : Node
         {
             DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             budget -= enemy.SpawningCost;
-            SpawnEnemy(enemy);
+            SpawnEnemyRandom(enemy);
         }
     }
     private void ProcessStatePatrol(float delta, float intensity)
@@ -272,7 +272,7 @@ public class AISpawningDirector : Node
         {
             if (rng < exitStateWeights[i])
             {
-                return (SpawningState) exitStates[i];
+                return exitStates[i];
             }
             rng -= exitStateWeights[i];
         }
@@ -291,21 +291,37 @@ public class AISpawningDirector : Node
 
         return possibleTypes;
     }
+
+    public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
+    {
+        // spawn at a random location around the spawning circle centred on the player
+        float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
+        Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
+        return SpawnEnemy(id, spawnPos);
+    }
     
-    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id)
+    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos)
     {
         BoidEnemyBase enemy = id.Scene.Instance<BoidEnemyBase>();
-
-        float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
-        
-        // spawn at a random location around the spawning circle centred on the player
-        Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
         AddChild(enemy);
-        enemy.GlobalPosition = spawnPos;
+        enemy.GlobalPosition = pos;
         enemy.Init(id.Name, _player, _game, _player, null);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);
         return enemy;
+    }
+
+    public void SpawnEnemyEscort(DataEnemyBoid leaderId, List<DataEnemyBoid> escortIds)
+    {
+        BoidEnemyBase leader = SpawnEnemyRandom(leaderId);
+        foreach (DataEnemyBoid id in escortIds)
+        {
+            float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
+            float escortRadius = 50.0f;
+            Vector2 spawnPos = leader.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * escortRadius;
+            BoidEnemyBase escort = SpawnEnemy(id, spawnPos);
+            escort.SetupEscort(leader);
+        }
     }
 
     public void _OnImGuiLayout()
@@ -315,6 +331,13 @@ public class AISpawningDirector : Node
         for (int i = 0; i < secondsToPlot; i++)
         {
             points[i] = CalcIntensity(i);
+        }
+
+        if (ImGui.Button("Escort Wave"))
+        {
+            DataEnemyBoid escort = Database.EnemyBoid("driller");
+            SpawnEnemyEscort(Database.EnemyBoid("laser"),
+                new List<DataEnemyBoid>() {escort, escort, escort, escort, escort});
         }
 
         ImGui.Text($"[{_state}] for {_timeInState:F2}");

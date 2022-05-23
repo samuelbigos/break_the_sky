@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
+using GodotOnReady.Attributes;
 
-public class BoidBase : Area
+public partial class BoidBase : Area
 {
     public enum BoidAlignment
     {
@@ -55,7 +56,7 @@ public class BoidBase : Area
     public Action<BoidBase> OnBoidDestroyed;
     
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
-    public bool Destroyed => _destroyed;
+    public bool Destroyed => _destroyed;    
     public string ID = "";
 
     protected Vector3 _velocity;
@@ -70,9 +71,9 @@ public class BoidBase : Area
     private List<Particles> _damagedParticles = new List<Particles>();
     private ShaderMaterial _altMaterial;
 
-    protected MultiViewportMeshInstance _mesh;
-    private AudioStreamPlayer3D _sfxOnDestroy;
-    protected AudioStreamPlayer3D _sfxOnHit;
+    [OnReadyGet] protected MultiViewportMeshInstance _mesh;
+    private AudioStreamPlayer2D _sfxOnDestroy;
+    protected AudioStreamPlayer2D _sfxOnHit;
 
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
@@ -113,15 +114,13 @@ public class BoidBase : Area
         OnBoidDestroyed += onDestroy;
     }
 
-    public override void _Ready()
+    [OnReady] private void Ready()
     {
-        base._Ready();
-        
         _health = MaxHealth;
 
-        _mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
-        _sfxOnDestroy = GetNode<AudioStreamPlayer3D>(_sfxDestroyPath);
-        _sfxOnHit = GetNode<AudioStreamPlayer3D>(_sfxHitPlayerPath);
+        //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
+        _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
+        _sfxOnHit = GetNode<AudioStreamPlayer2D>(_sfxHitPlayerPath);
 
         _sfxOnHit.Stream = _hitSfx[0];
         _baseScale = _mesh.Scale;
@@ -472,7 +471,8 @@ public class BoidBase : Area
             return;
         
         BoidBase boid = area as BoidBase;
-        if (boid is BoidAllyBase || boid is BoidPlayer)
+        //if (boid is BoidAllyBase || boid is BoidPlayer)
+        if (boid != null)
         {
             if (boid.Alignment == Alignment)
             {

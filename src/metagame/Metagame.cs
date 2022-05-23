@@ -32,6 +32,10 @@ public class Metagame : Saveable
         Instance = this;
     }
 
+    protected override void Validate()
+    {
+    }
+
     public override void DoLoad(Dictionary data)
     {
         base.DoLoad(data);

@@ -22,7 +22,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
         Firing
     }
 
-    public AudioStreamPlayer3D _sfxBeaconFire;
+    public AudioStreamPlayer2D _sfxBeaconFire;
 
     private BeaconState _beaconState = BeaconState.Inactive;
     public float _beaconCooldown;
@@ -34,7 +34,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
     {
         base._Ready();
         
-        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer3D;
+        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
         _rotorMesh = GetNode<MeshInstance>(_rotorMeshPath);
     }
 

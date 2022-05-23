@@ -1,6 +1,7 @@
 using Godot;
+using GodotOnReady.Attributes;
 
-public class BoidEnemyLaser : BoidEnemyBase
+public partial class BoidEnemyLaser : BoidEnemyBase
 {
     [Export] private float _targetLaserDist = 250.0f;
     [Export] private float _laserCooldown = 5.0f;
@@ -10,14 +11,15 @@ public class BoidEnemyLaser : BoidEnemyBase
     [Export] private NodePath _sfxLaserChargeNode;
     [Export] private NodePath _sfxLaserFireNode;
     [Export] private NodePath _rotorNode;
-    [Export] private NodePath _laserMeshPath;
     [Export] private NodePath _laserAreaPath;
 
+    [OnReadyGet] private MeshInstance _laserMesh;
+    [OnReadyGet] private MeshInstance _laserWarningMesh;
+
     private MeshInstance _rotor;
-    private MeshInstance _laserMesh;
     private Area _laserArea;
-    private AudioStreamPlayer3D _sfxLaserCharge;
-    private AudioStreamPlayer3D _sfxLaserFire;
+    private AudioStreamPlayer2D _sfxLaserCharge;
+    private AudioStreamPlayer2D _sfxLaserFire;
 
     public enum LaserState
     {
@@ -31,21 +33,23 @@ public class BoidEnemyLaser : BoidEnemyBase
     private float _laserChargeTimer;
     private float _laserDurationTimer;
     private float _maxVelBase;
+    private float _flashingTimer;
+    private int _flashState;
 
-    public override void _Ready()
+    [OnReady] private void Ready()
     {
-        base._Ready();
-        
         _rotor = GetNode<MeshInstance>(_rotorNode);
-        _laserMesh = GetNode<MeshInstance>(_laserMeshPath);
         _laserArea = GetNode<Area>(_laserAreaPath);
-        _sfxLaserCharge = GetNode<AudioStreamPlayer3D>(_sfxLaserChargeNode);
-        _sfxLaserFire = GetNode<AudioStreamPlayer3D>(_sfxLaserFireNode);
+        _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
+        _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
         _maxVelBase = MaxVelocity;
         _laserCooldownTimer = _laserCooldown * 0.5f;
 
         LaserInactive();
+
+        SpatialMaterial mat = _laserMesh.GetActiveMaterial(0) as SpatialMaterial;
+        mat.AlbedoColor = ColourManager.Instance.White;
     }
 
     public override void _Process(float delta)
@@ -78,6 +82,13 @@ public class BoidEnemyLaser : BoidEnemyBase
             if (_laserState == LaserState.Charging)
             {
                 _laserChargeTimer -= delta;
+                _flashingTimer -= delta;
+                if (_flashingTimer < 0.0f)
+                {
+                    _flashingTimer = 0.1f;
+                    _laserWarningMesh.Visible = _flashState == 1;
+                    _flashState = (_flashState + 1) % 2;
+                }
                 if (_laserChargeTimer < 0.0f)
                 {
                     _laserState = LaserState.Firing;
@@ -106,6 +117,7 @@ public class BoidEnemyLaser : BoidEnemyBase
     private void LaserCharging()
     {
         _sfxLaserCharge.Play();
+        _laserWarningMesh.Visible = true;
     }
 
     private void LaserFiring()
@@ -113,6 +125,7 @@ public class BoidEnemyLaser : BoidEnemyBase
         _sfxLaserFire.Play();
         _laserMesh.Visible = true;
         _laserArea.Monitorable = true;
+        _laserWarningMesh.Visible = false;
     }
 
     private void LaserInactive()
@@ -129,5 +142,12 @@ public class BoidEnemyLaser : BoidEnemyBase
         }
 
         return base._SteeringPursuit(targetPos, targetVel);
+    }
+
+    protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    {
+        base._Destroy(score, hitDir, hitStrength);
+        
+        _laserWarningMesh.Visible = false;
     }
 }

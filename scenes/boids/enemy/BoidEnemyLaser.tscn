@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/enemy/BoidEnemyLaser.cs" type="Script" id=2]
@@ -7,6 +7,8 @@
 [ext_resource path="res://assets/mesh/enemies/enemy_laser.obj" type="ArrayMesh" id=5]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=6]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=7]
+[ext_resource path="res://assets/material/spatial_red.material" type="Material" id=8]
+[ext_resource path="res://assets/mesh/ui/warning_zone_line.obj" type="ArrayMesh" id=9]
 
 [sub_resource type="ShaderMaterial" id=5]
 resource_local_to_scene = true
@@ -22,23 +24,25 @@ height = 7.0
 [sub_resource type="CylinderMesh" id=3]
 top_radius = 2.0
 bottom_radius = 2.0
-height = 200.0
+height = 500.0
 
 [sub_resource type="SpatialMaterial" id=4]
+flags_unshaded = true
 
 [sub_resource type="BoxShape" id=1]
-extents = Vector3( 2, 2, 100 )
+extents = Vector3( 2, 2, 250 )
 
 [node name="BoidEnemyLaser" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _behaviours = 12
+MaxVelocity = 75.0
 MaxHealth = 30.0
 _meshMaterial = SubResource( 5 )
-MaxAngularVelocity = 500.0
+LaserMeshPath = NodePath("LaserMesh")
+LaserWarningMeshPath = NodePath("LaserWarningMesh")
 _sfxLaserChargeNode = NodePath("SFXLaserCharge")
 _sfxLaserFireNode = NodePath("SFXLaserFire")
 _rotorNode = NodePath("RotorMesh")
-_laserMeshPath = NodePath("LaserMesh")
 _laserAreaPath = NodePath("LaserArea")
 
 [node name="CollisionShape" parent="." index="0"]
@@ -54,7 +58,7 @@ mesh = SubResource( 2 )
 material/0 = ExtResource( 6 )
 
 [node name="LaserMesh" type="MeshInstance" parent="." index="6"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -110.716 )
+transform = Transform( 1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, -261.499 )
 visible = false
 mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
@@ -63,11 +67,18 @@ material/0 = SubResource( 4 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18.3746 )
 
 [node name="CollisionShape" type="CollisionShape" parent="LaserArea" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -82.7917 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -242.371 )
 shape = SubResource( 1 )
 
-[node name="SFXLaserCharge" type="AudioStreamPlayer3D" parent="." index="8"]
+[node name="LaserWarningMesh" type="MeshInstance" parent="." index="8"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, -12.3501 )
+visible = false
+material_override = ExtResource( 8 )
+mesh = ExtResource( 9 )
+material/0 = null
+
+[node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="9"]
 stream = ExtResource( 3 )
 
-[node name="SFXLaserFire" type="AudioStreamPlayer3D" parent="." index="9"]
+[node name="SFXLaserFire" type="AudioStreamPlayer2D" parent="." index="10"]
 stream = ExtResource( 4 )

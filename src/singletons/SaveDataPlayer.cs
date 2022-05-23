@@ -11,6 +11,7 @@ public class SaveDataPlayer : Saveable
 
     private Godot.Collections.Dictionary<string, object> _defaults = new Godot.Collections.Dictionary<string, object>()
     {
+        {"level", 1},
         {"materialCount", 100},
         {"maxAllyCount", 50},
         {"initialAllyCount", 1},
@@ -62,11 +63,9 @@ public class SaveDataPlayer : Saveable
     public override void _Ready()
     {
         base._Ready();
-        
-        Validate();
     }
 
-    private void Validate()
+    protected override void Validate()
     {
         foreach (string key in _defaults.Keys)
         {

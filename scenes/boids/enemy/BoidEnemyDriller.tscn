@@ -14,15 +14,17 @@ shader_param/u_secondary_colour = null
 [sub_resource type="CapsuleShape" id=1]
 
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.011179, -1.90735e-06, 0.0347118 )
 script = ExtResource( 3 )
 _behaviours = 10
 MaxVelocity = 175.0
+MinVelocity = 50.0
 Damping = 0.05
-SeparationRadius = 5.0
+SeparationRadius = 50.0
+MaxAngularVelocity = 100.0
 MaxHealth = 3.0
 HitFlashTime = 0.0333333
 _meshMaterial = SubResource( 2 )
-MaxAngularVelocity = 500.0
 
 [node name="CollisionShape" parent="." index="0"]
 transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, -1.41208 )

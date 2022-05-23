@@ -20,6 +20,8 @@ public abstract class Saveable : Node
         _data = new Dictionary();
     }
 
+    protected abstract void Validate();
+
     public virtual Dictionary DoSave()
     {
         return _data.Duplicate();
@@ -28,5 +30,6 @@ public abstract class Saveable : Node
     public virtual void DoLoad(Dictionary data)
     {
         _data = data.Duplicate();
+        Validate();
     }
 }
