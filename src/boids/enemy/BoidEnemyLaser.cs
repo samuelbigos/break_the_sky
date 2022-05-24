@@ -56,6 +56,11 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     {
         base._Process(delta);
 
+#if TOOLS
+        if (_target == null)
+            return;
+#endif
+
         float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
         if (distToTarget < _targetLaserDist && _laserState == LaserState.Inactive)
         {

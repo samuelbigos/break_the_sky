@@ -322,13 +322,34 @@ public class Game : Node
     
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("Spawn"))
+        if (ImGui.BeginTabItem("Spawn Fabricants"))
         {
+            ImGui.Text("Enemies");
+            foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
+            {
+                if (ImGui.Button($"{boid.DisplayName}"))
+                {
+                    AddAllyBoid(boid.Name);
+                }
+            }
+            ImGui.EndTabItem();
+        }
+        if (ImGui.BeginTabItem("Spawn Enemies"))
+        {
+            ImGui.Text("Enemies");
             foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
             {
-                if (ImGui.Button($"Spawn {boid.DisplayName}"))
+                if (ImGui.Button($"{boid.DisplayName}"))
                 {
                     _aiSpawningDirector.SpawnEnemyRandom(boid);
+                }
+            }
+            ImGui.Text("Waves");
+            foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
+            {
+                if (ImGui.Button($"{wave.Name}"))
+                {
+                    _aiSpawningDirector.SpawnWave(wave, new List<BoidEnemyBase>(), new List<BoidEnemyBase>());
                 }
             }
             ImGui.EndTabItem();

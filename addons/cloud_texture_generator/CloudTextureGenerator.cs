@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 using System.Diagnostics;
@@ -164,3 +165,4 @@ public class CloudTextureGenerator : EditorPlugin
         GD.Print($"Save - {stopwatch.ElapsedTicks * tick:F2} seconds.");
     }
 }
+#endif

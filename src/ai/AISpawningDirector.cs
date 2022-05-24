@@ -37,6 +37,9 @@ public class AISpawningDirector : Node
     private List<BoidEnemyBase> _activeEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _waveEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _swarmingEnemies = new List<BoidEnemyBase>();
+    private List<BoidEnemyBase> _scriptedWaveEnemies = new List<BoidEnemyBase>();
+    private List<DataWave> _triggeredWaves = new List<DataWave>();
+    private DataWave _scriptedWaveToTrigger;
  
     public void Init(Game game, BoidPlayer player)
     {
@@ -211,17 +214,42 @@ public class AISpawningDirector : Node
     }
     private void ProcessStatePatrol(float delta, float intensity)
     {
+    }
+
+    private void EnterStateScripted()
+    {
+        SpawnWave(_scriptedWaveToTrigger, _scriptedWaveEnemies, new List<BoidEnemyBase>());
         
+        _triggeredWaves.Add(_scriptedWaveToTrigger);
+        _scriptedWaveToTrigger = null;
     }
     
     private void ProcessStateScripted(float delta, float intensity)
     {
+        for (int i = _scriptedWaveEnemies.Count - 1; i >= 0; i--)
+        {
+            if (!IsInstanceValid(_scriptedWaveEnemies[i]) || _scriptedWaveEnemies[i].Destroyed)
+                _scriptedWaveEnemies.Remove(_scriptedWaveEnemies[i]);
+        }
         
+        // exit if all enemies in the wave are killed
+        bool exitState = _scriptedWaveEnemies.Count == 0;
+        if (exitState)
+        {
+            float iInvSq = Mathf.Pow(1.0f - intensity, 2.0f);
+            ChangeState(CalcExitState(intensity, 
+                new List<SpawningState>() {SpawningState.Idle, SpawningState.Swarming, SpawningState.Wave}, 
+                new List<float>(){
+                    iInvSq,
+                    (1.0f - iInvSq) * 0.5f,
+                    (1.0f - iInvSq) * 0.5f
+                }));
+        }
     }
 
     private void ChangeState(SpawningState to)
     {
-        GD.Print($"Switching spawning state to: {to}");
+        GD.Print($"Switching spawning state from {_state} to: {to}");
         _state = to;
         _timeInState = 0.0f;
 
@@ -239,6 +267,7 @@ public class AISpawningDirector : Node
             //     EnterStatePatrol();
             //     break;
             case SpawningState.Scripted:
+                EnterStateScripted();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(to), to, null);
@@ -267,6 +296,21 @@ public class AISpawningDirector : Node
 
     private SpawningState CalcExitState(float intensity, List<SpawningState> exitStates, List<float> exitStateWeights)
     {
+        // check for triggered scripted waves
+        List<DataWave> waves = Database.Waves.GetAllEntries<DataWave>();
+        foreach (DataWave wave in waves)
+        {
+            if (_triggeredWaves.Contains(wave))
+                continue;
+            
+            if (wave.Introduction && _totalTime > wave.TriggerTimeMinutes * 60.0f)
+            {
+                // trigger this enemy intro wave.
+                _scriptedWaveToTrigger = wave;
+                return SpawningState.Scripted;
+            }
+        }
+        
         float rng = Utils.Rng.Randf();
         for (int i = 0; i < exitStates.Count; i++)
         {
@@ -299,8 +343,8 @@ public class AISpawningDirector : Node
         Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
         return SpawnEnemy(id, spawnPos);
     }
-    
-    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos)
+
+    private BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos)
     {
         BoidEnemyBase enemy = id.Scene.Instance<BoidEnemyBase>();
         AddChild(enemy);
@@ -308,11 +352,13 @@ public class AISpawningDirector : Node
         enemy.Init(id.Name, _player, _game, _player, null);
         _game.AddEnemy(enemy);
         _activeEnemies.Add(enemy);
+        SaveDataPlayer.SetSeenEnemy(id.Name);
         return enemy;
     }
 
-    public void SpawnEnemyEscort(DataEnemyBoid leaderId, List<DataEnemyBoid> escortIds)
+    private void SpawnEnemyEscort(DataEnemyBoid leaderId, List<DataEnemyBoid> escortIds, out BoidEnemyBase leaderBoid, out List<BoidEnemyBase> escortBoids)
     {
+        escortBoids = new List<BoidEnemyBase>();
         BoidEnemyBase leader = SpawnEnemyRandom(leaderId);
         foreach (DataEnemyBoid id in escortIds)
         {
@@ -320,7 +366,44 @@ public class AISpawningDirector : Node
             float escortRadius = 50.0f;
             Vector2 spawnPos = leader.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * escortRadius;
             BoidEnemyBase escort = SpawnEnemy(id, spawnPos);
+            escortBoids.Add(escort);
             escort.SetupEscort(leader);
+        }
+
+        leaderBoid = leader;
+    }
+
+    public void SpawnWave(DataWave wave, List<BoidEnemyBase> primaryList, List<BoidEnemyBase> secondaryList)
+    {
+        switch (wave.WaveType)
+        {
+            case DataWave.Type.Standard:
+                break;
+            case DataWave.Type.Escort:
+            {
+                // get leader
+                Debug.Assert(wave.PrimarySpawns.Count > 0, "Invalid wave setup");
+                DataEnemyBoid leaderData = Database.EnemyBoid(wave.PrimarySpawns[0]);
+
+                // get escort
+                List<DataEnemyBoid> escort = new List<DataEnemyBoid>();
+                foreach (string id in wave.SecondarySpawns)
+                {
+                    Debug.Assert(Database.EnemyBoid(id) != null, "Invalid wave setup");
+                    escort.Add(Database.EnemyBoid(id));
+                }
+
+                // spawn
+                SpawnEnemyEscort(leaderData, escort,
+                    out BoidEnemyBase spawnedLeader,
+                    out secondaryList);
+                primaryList.Add(spawnedLeader);
+                break;
+            }
+            case DataWave.Type.Swarm:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -333,19 +416,24 @@ public class AISpawningDirector : Node
             points[i] = CalcIntensity(i);
         }
 
-        if (ImGui.Button("Escort Wave"))
-        {
-            DataEnemyBoid escort = Database.EnemyBoid("driller");
-            SpawnEnemyEscort(Database.EnemyBoid("laser"),
-                new List<DataEnemyBoid>() {escort, escort, escort, escort, escort});
-        }
-
         ImGui.Text($"[{_state}] for {_timeInState:F2}");
         ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
         ImGui.Text($"{_totalTime:F2} TotalTime");
         ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Budget");
         
         ImGui.Spacing();
+
+        if (ImGui.Button("+10s"))
+        {
+            _totalTime += 10.0f;
+            _timeInState += 10.0f;
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("+60s"))
+        {
+            _totalTime += 60.0f;
+            _timeInState += 60.0f;
+        }
 
         ImGui.Checkbox("Enabled", ref _enabled);
         

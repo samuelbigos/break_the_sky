@@ -7,3 +7,5 @@ resource_local_to_scene = true
 shader = ExtResource( 1 )
 shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
 shader_param/u_secondary_colour = null
+shader_param/threshold_depth = 0.0
+shader_param/blend_depth = 0.01

@@ -60,11 +60,6 @@ public class SaveDataPlayer : Saveable
         Instance = this;
     }
 
-    public override void _Ready()
-    {
-        base._Ready();
-    }
-
     protected override void Validate()
     {
         foreach (string key in _defaults.Keys)

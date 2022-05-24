@@ -9,6 +9,7 @@ public abstract class Database : Node
     public static Database Cities;
     public static Database AllyBoids;
     public static Database EnemyBoids;
+    public static Database Waves;
     
     private readonly List<DataEntry> _entries = new List<DataEntry>();
     
@@ -41,11 +42,27 @@ public abstract class Database : Node
             case "DatabaseEnemyBoids":
                 EnemyBoids = this;
                 break;
+            case "DatabaseWaves":
+                Waves = this;
+                break;
         }
 
-        foreach (DataEntry node in GetChildren())
+        AddEntriesInChildren(this, "");
+    }
+
+    private void AddEntriesInChildren(Node parent, string name)
+    {
+        foreach (Node node in parent.GetChildren())
         {
-            _entries.Add(node);
+            if (node is DataEntry entry)
+            {
+                entry.Name = $"{name}{node.Name}";
+                _entries.Add(entry);
+            }
+            else
+            {
+                AddEntriesInChildren(node, $"{name}{node.Name}_");
+            }
         }
     }
     

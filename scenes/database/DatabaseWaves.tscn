@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/data/Database.cs" type="Script" id=1]
+[ext_resource path="res://src/data/DataWave.cs" type="Script" id=2]
+
+[node name="DatabaseWaves" type="Node"]
+script = ExtResource( 1 )
+
+[node name="Introductions" type="Node" parent="."]
+
+[node name="Laser" type="Node" parent="Introductions"]
+script = ExtResource( 2 )
+Introduction = true
+WaveType = 1
+TriggerTimeMinutes = 2.0
+PrimarySpawns = [ "laser" ]
+SecondarySpawns = [ "driller", "driller", "driller", "driller", "driller" ]

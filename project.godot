@@ -39,6 +39,7 @@ Metagame="*res://scenes/metagame/Metagame.tscn"
 DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
 DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
 DatabaseEnemyBoids="*res://scenes/database/DatabaseEnemyBoids.tscn"
+DatabaseWaves="*res://scenes/database/DatabaseWaves.tscn"
 DebugImGui="*res://scenes/debug/DebugImGui.tscn"
 SaveDataPlayer="*res://src/singletons/SaveDataPlayer.cs"
 SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
@@ -50,6 +51,7 @@ TimeSystem="*res://src/singletons/TimeSystem.cs"
 window/size/width=1920
 window/size/height=1080
 window/size/borderless=true
+window/size/fullscreen=true
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 

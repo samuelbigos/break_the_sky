@@ -48,8 +48,6 @@ public partial class BoidBase : Area
     [Export] private PackedScene _hitParticlesScene;
     [Export] private PackedScene _damagedParticlesScene;
     [Export] private PackedScene _destroyParticlesScene;
-
-    [Export] private ShaderMaterial _meshMaterial;
     
     [Export] protected PackedScene _pickupMaterialScene;
     
@@ -64,11 +62,13 @@ public partial class BoidBase : Area
     protected Game _game;
     protected BoidBase _target;
     private Vector2 _targetOffset;
+    private bool _queueDestroy;
     protected bool _destroyed;
     protected Vector3 _baseScale;
     private float _health;
     private float _hitFlashTimer;
     private List<Particles> _damagedParticles = new List<Particles>();
+    private ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
 
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
@@ -127,6 +127,7 @@ public partial class BoidBase : Area
         
         List<MeshInstance> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
+        _meshMaterial = _mesh.MaterialOverride as ShaderMaterial;
         Debug.Assert(_meshMaterial != null, $"_meshMaterial is null on {Name}");
         _mesh.SetSurfaceMaterial(0, _meshMaterial);
         _altMaterial = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
@@ -134,7 +135,8 @@ public partial class BoidBase : Area
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
-        Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+        if (Game.Instance != null)
+            Game.Instance.OnGameStateChanged += _OnGameStateChanged;
     }
 
     public override void _Process(float delta)
@@ -227,7 +229,7 @@ public partial class BoidBase : Area
             RigidBody rb = new RigidBody();
             GetParent().AddChild(rb);
             rb.GlobalTransform = GlobalTransform;
-            GetParent().RemoveChild(this);
+            GetParent().RemoveChild(this);  
             rb.AddChild(this);
             CollisionShape shape = GetNode<CollisionShape>("CollisionShape");
             rb.AddChild(shape.Duplicate());
@@ -471,7 +473,6 @@ public partial class BoidBase : Area
             return;
         
         BoidBase boid = area as BoidBase;
-        //if (boid is BoidAllyBase || boid is BoidPlayer)
         if (boid != null)
         {
             if (boid.Alignment == Alignment)
@@ -488,7 +489,7 @@ public partial class BoidBase : Area
         
         if (area.IsInGroup("laser") && Alignment != BoidAlignment.Enemy)
         {
-            _Destroy(false, Vector3.Zero, MaxHealth);
+            _OnHit(_health, Alignment == BoidAlignment.Enemy, Vector2.Zero, Vector3.Zero);
             return;
         }
 

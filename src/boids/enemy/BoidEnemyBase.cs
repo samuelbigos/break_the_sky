@@ -12,6 +12,7 @@ public class BoidEnemyBase : BoidBase
     protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     private int _cachedBehaviours;
+    private bool _escorting;
     
     public override void _Ready()
     {
@@ -24,10 +25,18 @@ public class BoidEnemyBase : BoidBase
     {
         base._Process(delta);
 
-        float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
-        if (distToPlayerSq < EngageRange * EngageRange)
+#if TOOLS
+        if (_player == null)
+            return;
+#endif
+
+        if (_escorting)
         {
-            DropEscortAndEngage();
+            float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
+            if (distToPlayerSq < EngageRange * EngageRange)
+            {
+                DropEscortAndEngage();
+            }
         }
     }
 
@@ -36,6 +45,7 @@ public class BoidEnemyBase : BoidBase
         _target = leader;
         _cachedBehaviours = _behaviours;
         _behaviours = 0;
+        _escorting = true;
         SetSteeringBehaviourEnabled(SteeringBehaviours.Pursuit, true);
         SetSteeringBehaviourEnabled(SteeringBehaviours.Separation, true);
     }
@@ -44,6 +54,7 @@ public class BoidEnemyBase : BoidBase
     {
         _behaviours = _cachedBehaviours;
         _target = _player;
+        _escorting = false;
     }
 
     protected override void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
