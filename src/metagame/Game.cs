@@ -309,11 +309,11 @@ public class Game : Node
                 _allyBoids.Remove(@base);
                 ChangeFormation(_formation, false);
                 _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
-                //_gui.SetScore(_score, _scoreMulti, _perks.GetNextThreshold(), _scoreMulti == ScoreMultiMax);
                 break;
             }
             case BoidEnemyBase @base:
                 _enemyBoids.Remove(@base);
+                _aiSpawningDirector.OnEnemyDestroyed(@base);
                 break;
         }
         _allBoids.Remove(boid);

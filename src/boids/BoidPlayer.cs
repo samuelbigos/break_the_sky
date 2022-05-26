@@ -50,7 +50,7 @@ public class BoidPlayer : BoidBase
             if (dir != new Vector2(0.0f, 0.0f))
             {
                 dir = dir.Normalized();
-                dir *= 100.0f * accel * delta;
+                dir *= MaxVelocity * accel * delta;
                 _velocity += dir.To3D();
             }
             

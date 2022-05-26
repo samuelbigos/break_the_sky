@@ -33,6 +33,7 @@ public class AISpawningDirector : Node
 
     private SpawningState _state;
     private float _totalTime;
+    private float _totalBudgetDestoyed;
     private float _timeInState;
     private List<BoidEnemyBase> _activeEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _waveEnemies = new List<BoidEnemyBase>();
@@ -303,7 +304,9 @@ public class AISpawningDirector : Node
             if (_triggeredWaves.Contains(wave))
                 continue;
             
-            if (wave.Introduction && _totalTime > wave.TriggerTimeMinutes * 60.0f)
+            if (wave.Introduction && 
+                // trigger on time or total budget destroyed, whichever comes first.
+                (_totalTime > wave.TriggerTimeMinutes * 60.0f || _totalBudgetDestoyed > wave.TriggerBudget))
             {
                 // trigger this enemy intro wave.
                 _scriptedWaveToTrigger = wave;
@@ -334,6 +337,11 @@ public class AISpawningDirector : Node
         }
 
         return possibleTypes;
+    }
+
+    public void OnEnemyDestroyed(BoidEnemyBase enemy)
+    {
+        _totalBudgetDestoyed += Database.EnemyBoid(enemy.ID).SpawningCost;
     }
 
     public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
@@ -419,7 +427,8 @@ public class AISpawningDirector : Node
         ImGui.Text($"[{_state}] for {_timeInState:F2}");
         ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
         ImGui.Text($"{_totalTime:F2} TotalTime");
-        ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Budget");
+        ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Current Budget");
+        ImGui.Text($"{_totalBudgetDestoyed:F1} Total Budget Destroyed");
         
         ImGui.Spacing();
 

@@ -70,7 +70,7 @@ public class CommandCentreDeploy : Node
             float yBot = _droneSelectSpatial.GlobalTransform.Translated(_droneSelectSpacing * i).origin.y;
             float yTop = yBot + _droneSelectedHeightDelta;
             Vector3 pos = droneMesh.GlobalTransform.origin;
-            bool active = SaveDataPlayer.ActiveDrones.Contains(_droneList[i].Name);
+            bool active = SaveDataPlayer.UnlockedAllies.Contains(_droneList[i].Name);
             float d = _droneActiveSpeed * delta;
             pos.y = active ? Mathf.Min(pos.y + d, yTop) : Mathf.Max(pos.y - d, yBot);
             droneMesh.GlobalTransform = new Transform(droneMesh.GlobalTransform.basis, pos);
@@ -82,7 +82,7 @@ public class CommandCentreDeploy : Node
 
     private void _OnDroneMouseEntered(int i)
     {
-        if (SaveDataPlayer.ActiveDrones.Contains(_droneList[i].Name))
+        if (SaveDataPlayer.UnlockedAllies.Contains(_droneList[i].Name))
             return;
         
         _droneHovered = _droneMeshes[i];
@@ -90,7 +90,7 @@ public class CommandCentreDeploy : Node
     
     private void _OnDroneMouseExited(int i)
     {
-        if (SaveDataPlayer.ActiveDrones.Contains(_droneList[i].Name) || _droneHovered == null)
+        if (SaveDataPlayer.UnlockedAllies.Contains(_droneList[i].Name) || _droneHovered == null)
             return;
         
         _droneHovered.Rotation = Vector3.Zero;
@@ -101,13 +101,13 @@ public class CommandCentreDeploy : Node
     {
         if (e.IsPressed())
         {
-            if (SaveDataPlayer.ActiveDrones.Contains(_droneList[i].Name))
+            if (SaveDataPlayer.UnlockedAllies.Contains(_droneList[i].Name))
             {
-                SaveDataPlayer.ActiveDrones.Remove(_droneList[i].Name);
+                SaveDataPlayer.UnlockedAllies.Remove(_droneList[i].Name);
             }
             else
             {
-                SaveDataPlayer.ActiveDrones.Add(_droneList[i].Name);
+                SaveDataPlayer.UnlockedAllies.Add(_droneList[i].Name);
             }
             SaveManager.Instance.DoSave();
         }

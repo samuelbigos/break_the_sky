@@ -1,22 +1,34 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
 [ext_resource path="res://assets/mesh/allies/ally_drone_2.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
+[ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=5]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
 
+[sub_resource type="ShaderMaterial" id=2]
+resource_local_to_scene = true
+shader = ExtResource( 5 )
+shader_param/u_primary_colour = null
+shader_param/u_secondary_colour = null
+shader_param/threshold_depth = -6.304
+shader_param/blend_depth = 0.003
+
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
-MaxVelocity = 500.0
+MaxVelocity = 200.0
+SeparationRadius = 10.0
+MaxAngularVelocity = 250.0
 _bulletScene = ExtResource( 3 )
 
 [node name="CollisionShape" parent="." index="0"]
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
+material_override = SubResource( 2 )
 mesh = ExtResource( 2 )
 material/0 = null
 

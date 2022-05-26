@@ -12,10 +12,10 @@ public class SaveDataPlayer : Saveable
     private Godot.Collections.Dictionary<string, object> _defaults = new Godot.Collections.Dictionary<string, object>()
     {
         {"level", 1},
-        {"materialCount", 100},
+        {"materialCount", 10},
         {"maxAllyCount", 50},
         {"initialAllyCount", 1},
-        {"activeDrones", new Array()},
+        {"unlockedAllies", new Array()},
         {"seenEnemies", new Dictionary()},
     };
 
@@ -24,7 +24,7 @@ public class SaveDataPlayer : Saveable
         get => Convert.ToInt32(Instance._data["maxAllyCount"]);
         set => Instance._data["maxAllyCount"] = value;
     }
-    
+
     public static int InitialAllyCount
     {
         get => Convert.ToInt32(Instance._data["initialAllyCount"]);
@@ -32,8 +32,8 @@ public class SaveDataPlayer : Saveable
     }
 
     public static int Level => Convert.ToInt32(Instance._data["level"]);
-    public static Array ActiveDrones => Instance._data["activeDrones"] as Array;
-
+    public static Array UnlockedAllies => Instance._data["unlockedAllies"] as Array;
+    
     public static int MaterialCount
     {
         get => Convert.ToInt32(Instance._data["materialCount"]);
@@ -53,7 +53,7 @@ public class SaveDataPlayer : Saveable
         Dictionary seenEnemies = Instance._data["seenEnemies"] as Dictionary;
         seenEnemies[id] = true;
     }
-    
+
     public SaveDataPlayer()
     {
         Debug.Assert(Instance == null, "Attempting to create multiple SaveDataPlayer instances!");
@@ -74,12 +74,12 @@ public class SaveDataPlayer : Saveable
     public override void InitialiseSaveData()
     {
         Validate();
-        
+
         List<DataEnemyBoid> enemyBoids = Database.EnemyBoids.GetAllEntries<DataEnemyBoid>();
         SetSeenEnemy(enemyBoids[0].Name); // so we always have something to spawn
-        
+
         List<DataAllyBoid> allyBoids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
         Debug.Assert(allyBoids.Count > 0, "Error creating save file, no ally boid data!");
-        ActiveDrones.Add(allyBoids[0].Name);
+        UnlockedAllies.Add(allyBoids[0].Name);
     }
 }

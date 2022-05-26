@@ -14,14 +14,10 @@ public class BoidAllyBase : BoidBase
     [Export] public bool BlocksShots = true;
     
     [Export] private NodePath _sfxHitMicroPlayerNode;
-    private AudioStreamPlayer2D _sfxHitMicroPlayer;
     
     [Export] private NodePath _sfxShootPlayerPath;
     private AudioStreamPlayer2D _sfxShootPlayer;
 
-    private float _microBulletTargetSearchTimer;
-    private BoidBase _microBulletTarget;
-    
     protected override BoidAlignment Alignment => BoidAlignment.Ally;
     protected override Color BaseColour => ColourManager.Instance.Secondary;
 
@@ -31,7 +27,6 @@ public class BoidAllyBase : BoidBase
         
         _baseScale = _mesh.Scale;
 
-        _sfxHitMicroPlayer = GetNode<AudioStreamPlayer2D>(_sfxHitMicroPlayerNode);
         _sfxShootPlayer = GetNode<AudioStreamPlayer2D>(_sfxShootPlayerPath);
     }
 

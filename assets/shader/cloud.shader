@@ -151,6 +151,24 @@ void fragment()
 		clouds = step(0.0, cloud(pos));
 	}
 	
+	// outline
+//	float edge;
+//	{
+//		float kernel = 0.5 / u_scale;
+//		float R = cloud(pos + vec3(1.0, 0.0, 0.0) * kernel);
+//		float L = cloud(pos + vec3(-1.0, 0.0, 0.0) * kernel);
+//		float T = cloud(pos + vec3(0.0, 0.0, 1.0) * kernel);
+//		float B = cloud(pos + vec3(0.0, 0.0, -1.0) * kernel);
+//		normal = normalize(vec3(2.0 * (R-L), 4.0, 2.0 * -(B-T)));
+//
+//		float dcdx = step(0.0, R) - step(0.0, L);
+//		float dcdy = step(0.0, T) - step(0.0, B);
+//		vec2 dcdi = vec2(dcdx,dcdy);
+//		edge = length(dcdi);
+//		edge = 1.0 - edge;
+//		edge = smoothstep(0.0, 0.01, edge);
+//	}
+	
 	// boid shadows
 	float shadow;
 	if (u_receive_shadow)
@@ -219,5 +237,7 @@ void fragment()
 
 	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
 	ALBEDO = mix(dithered, transparent_col, transparent);
+	//ALBEDO = mix(vec3(0.0), ALBEDO, edge);
+	//ALBEDO = vec3(edge);
 	ALPHA = clouds;
 }

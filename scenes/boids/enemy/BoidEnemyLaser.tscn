@@ -38,6 +38,7 @@ extents = Vector3( 2, 2, 250 )
 script = ExtResource( 2 )
 _behaviours = 12
 MaxVelocity = 75.0
+SeparationRadius = 0.0
 MaxHealth = 30.0
 LaserMeshPath = NodePath("LaserMesh")
 LaserWarningMeshPath = NodePath("LaserWarningMesh")

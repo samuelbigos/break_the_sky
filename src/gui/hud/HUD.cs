@@ -44,21 +44,29 @@ public class HUD : Spatial
         _fabricateMenu = GetNode<Control>(_fabicateMenuPath);
         _materialValue = GetNode<Label>(_materialsValuePath);
 
-        // setup fabrication buttons
-        List<DataAllyBoid> boids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
-        foreach (DataAllyBoid boid in boids)
-        {
-            BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
-            _fabricateMenu.AddChild(icon);
-            icon.OnPressed += _OnFabricateButtonPressed;
-            icon.Init(boid.Name, false);
-        }
+        Refresh();
         
         FabricateManager.Instance.OnPushQueue += _OnPushQueue;
         FabricateManager.Instance.OnPopQueue += _OnPopQueue;
         
         if (Game.Instance != null)
             Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+    }
+
+    private void Refresh()
+    {
+        // setup fabrication buttons
+        List<DataAllyBoid> boids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
+        foreach (DataAllyBoid boid in boids)
+        {
+            if (!SaveDataPlayer.UnlockedAllies.Contains(boid.Name))
+                continue;
+            
+            BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
+            _fabricateMenu.AddChild(icon);
+            icon.OnPressed += _OnFabricateButtonPressed;
+            icon.Init(boid.Name, false);
+        }
     }
 
     public override void _Process(float delta)

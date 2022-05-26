@@ -44,7 +44,7 @@ void fragment(){
 	float c2y = getGrayScale(SCREEN_TEXTURE, texCoords.xy+delta/2.0);
 	float c1x = getGrayScale(SCREEN_TEXTURE, texCoords.xy-delta.yx/2.0);
 	float c2x = getGrayScale(SCREEN_TEXTURE, texCoords.xy+delta.yx/2.0);
-	float dcdx = (c2x - c1x)/(delta.y*10.0);
+	float dcdx = (c2x - c1x)/(delta.x*10.0);
 	float dcdy = (c2y - c1y)/(delta.y*10.0);
 	
 	vec2 dcdi = vec2(dcdx,dcdy);
@@ -59,7 +59,7 @@ void fragment(){
 		c2y = get_linear_depth(DEPTH_TEXTURE, texCoords.xy+delta/2.0, INV_PROJECTION_MATRIX);
 		c1x = get_linear_depth(DEPTH_TEXTURE, texCoords.xy-delta.yx/2.0, INV_PROJECTION_MATRIX);
 		c2x = get_linear_depth(DEPTH_TEXTURE, texCoords.xy+delta.yx/2.0, INV_PROJECTION_MATRIX);
-		dcdx = (c2x - c1x)/(delta.y*10.0);
+		dcdx = (c2x - c1x)/(delta.x*10.0);
 		dcdy = (c2y - c1y)/(delta.y*10.0);
 		dcdi = vec2(dcdx,dcdy);
 		float depth_edge = length(dcdi)/10.0;
@@ -75,4 +75,6 @@ void fragment(){
 	final_edge = 1.0 - final_edge;
 	
 	ALBEDO = mix(edge_color.rgb, screen_color.rgb, final_edge);
+	//float d = get_linear_depth(DEPTH_TEXTURE, SCREEN_UV, INV_PROJECTION_MATRIX);
+	//ALBEDO = vec3(d);
 }

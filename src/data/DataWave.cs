@@ -14,6 +14,7 @@ public class DataWave : DataEntry
     [Export] public bool Introduction;
     [Export] public Type WaveType;
     [Export] public float TriggerTimeMinutes;
+    [Export] public float TriggerBudget;
     [Export] public List<string> PrimarySpawns;
     [Export] public List<string> SecondarySpawns;
 }

@@ -13,5 +13,15 @@ script = ExtResource( 2 )
 Introduction = true
 WaveType = 1
 TriggerTimeMinutes = 2.0
+TriggerBudget = 50.0
 PrimarySpawns = [ "laser" ]
 SecondarySpawns = [ "driller", "driller", "driller", "driller", "driller" ]
+
+[node name="Beacon" type="Node" parent="Introductions"]
+script = ExtResource( 2 )
+Introduction = true
+WaveType = 1
+TriggerTimeMinutes = 5.0
+TriggerBudget = 150.0
+PrimarySpawns = [ "beacon" ]
+SecondarySpawns = [ "driller", "driller", "driller", "laser", "laser" ]

@@ -62,7 +62,6 @@ public partial class BoidBase : Area
     protected Game _game;
     protected BoidBase _target;
     private Vector2 _targetOffset;
-    private bool _queueDestroy;
     protected bool _destroyed;
     protected Vector3 _baseScale;
     private float _health;
@@ -70,6 +69,7 @@ public partial class BoidBase : Area
     private List<Particles> _damagedParticles = new List<Particles>();
     private ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
+    private List<Particles> _hitParticles = new List<Particles>();
 
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
     private AudioStreamPlayer2D _sfxOnDestroy;
@@ -77,7 +77,6 @@ public partial class BoidBase : Area
 
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
-    
     protected bool _acceptInput = true;
 
     public Vector3 Velocity
@@ -171,6 +170,10 @@ public partial class BoidBase : Area
         {
             if (GlobalTransform.origin.y < -100.0f)
             {
+                foreach (Particles p in _hitParticles)
+                {
+                    p.QueueFree();
+                }
                 _game.FreeBoid(this);
             }
         }
@@ -195,6 +198,7 @@ public partial class BoidBase : Area
         mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
         hitParticles.GlobalPosition(pos + Vector3.Up * 5.0f);
         hitParticles.Emitting = true;
+        _hitParticles.Add(hitParticles);
 
         // does this cause us to go past a new damage threshold?
         if (_damagedParticles.Count < _damageVfxCount)
