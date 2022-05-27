@@ -45,7 +45,7 @@ public class BoidAllyBomber : BoidAllyBase
             }
             
             // shooting
-            float dot = _velocity.To2D().Normalized().Dot((_target.GlobalPosition - GlobalPosition).Normalized());
+            float dot = Velocity.Normalized().Dot((_target.GlobalPosition - GlobalPosition).Normalized());
             if (_canShoot && dist < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
             {
                 _Shoot((_target.GlobalPosition - GlobalPosition).Normalized());

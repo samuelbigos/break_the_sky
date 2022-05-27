@@ -35,6 +35,7 @@ PauseManager="*res://scenes/singletons/PauseManager.tscn"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 ColourManager="*res://scenes/singletons/ColourManager.tscn"
 Resources="*res://scenes/singletons/Resources.tscn"
+FlockingManager="*res://src/singletons/FlockingManager.cs"
 Metagame="*res://scenes/metagame/Metagame.tscn"
 DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
 DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
@@ -48,10 +49,8 @@ TimeSystem="*res://src/singletons/TimeSystem.cs"
 
 [display]
 
-window/size/width=1920
-window/size/height=1080
-window/size/borderless=true
-window/size/fullscreen=true
+window/size/width=1280
+window/size/height=720
 window/vsync/use_vsync=false
 window/stretch/mode="viewport"
 
@@ -126,6 +125,10 @@ open_construct_ui={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777218,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
+
+[mono]
+
+profiler/enabled=true
 
 [physics]
 

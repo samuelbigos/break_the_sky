@@ -12,6 +12,9 @@ public class BoidPlayer : BoidBase
         base._Ready();
 
         _sfxPickup = GetNode<AudioStreamPlayer2D>(_sfxPickupPath);
+
+        _debugBoid?.QueueFree();
+        _mesh.Visible = true;
     }
 
     public override void _Process(float delta)
@@ -24,7 +27,6 @@ public class BoidPlayer : BoidBase
 
             Vector2 forward = new Vector2(0.0f, -1.0f);
             Vector2 left = new Vector2(-1.0f, 0.0f);
-            float accel = _game.BasePlayerSpeed;
 
             Vector2 dir = new Vector2(0.0f, 0.0f);
             if (Input.IsActionPressed("w"))
@@ -50,30 +52,13 @@ public class BoidPlayer : BoidBase
             if (dir != new Vector2(0.0f, 0.0f))
             {
                 dir = dir.Normalized();
-                dir *= MaxVelocity * accel * delta;
-                _velocity += dir.To3D();
+                dir *= MaxVelocity * delta;
+                Velocity += dir;
             }
             
-            GlobalTranslate(_velocity * delta);
+            GlobalTranslate(Velocity.To3D() * delta);
 
-            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
-
-            //	if Input.IsActionJustPressed("formation_1"):
-            //		_game.ChangeFormation(0, false)
-            //	if Input.IsActionJustPressed("formation_2"):
-            //		_game.ChangeFormation(1, false)
-            //	if Input.IsActionJustPressed("formation_3"):
-            //		_game.ChangeFormation(2, false)
-
-            if (Input.IsActionJustPressed("boids_align"))
-            {
-                _game.ChangeFormation((Game.Formation)1, false);
-            }
-
-            if (Input.IsActionJustReleased("boids_align"))
-            {
-                _game.ChangeFormation((Game.Formation)0, false);
-            }
+            Velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
         }
     }
 

@@ -18,12 +18,14 @@ rings = 4
 
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
-MaxVelocity = 150.0
 _sfxPickupPath = NodePath("SFXPickup")
 
 [node name="Mesh" parent="." index="1"]
 material_override = SubResource( 3 )
 mesh = SubResource( 2 )
 material/0 = null
+
+[node name="BoidTrail" parent="." index="2"]
+visible = false
 
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="5"]

@@ -44,10 +44,6 @@ public class Game : Node
     [Export] public int BaseBoidReinforce = 3;
     [Export] public float BaseBoidGrouping = 10.0f;
     [Export] public float BaseBoidDamage = 1.0f;
-    [Export] public float BaseSlowmoCD = 60.0f;
-    [Export] public float BaseNukeCD = 120.0f;
-    [Export] public float BaseBoidSpeed = 1500.0f;
-    [Export] public float BasePlayerSpeed = 4.0f;
     [Export] public float BaseBoidSpread = 0.1f;
     [Export] public float BaseBulletSpeed = 500.0f;
     [Export] public bool BaseMicroturrets = false;
@@ -72,9 +68,7 @@ public class Game : Node
     private List<BoidBase> _destroyedBoids = new List<BoidBase>();
     private List<BoidEnemyBase> _enemyBoids = new List<BoidEnemyBase>();
     private List<BoidAllyBase> _allyBoids = new List<BoidAllyBase>();
-    private List<List<BoidBase>> _boidColumns = new List<List<BoidBase>>();
     private int _addedAllyCounter;
-    private int _boidColCount;
 
     private bool _hasSlowmo = false;
     private bool _hasNuke = false;
@@ -134,6 +128,8 @@ public class Game : Node
 
     public override void _Process(float delta)
     {
+        FlockingManager.Instance.FlockPosition = _player.GlobalTransform.origin.To2D();
+        
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GameCamera.Instance.MousePosition().To3D());
 
         while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.MaxAllyCount)
@@ -164,62 +160,7 @@ public class Game : Node
         
         Debug.Assert(_allyBoids.Count + _enemyBoids.Count == _allBoids.Count, "Error in boid references.");
     }
-
-    public void ChangeFormation(Formation formation, bool setPos)
-    {
-        if (_allyBoids.Count == 0)
-        {
-            return;
-        }
-
-        switch (formation)
-        {
-            case (int) Formation.Balanced:
-                SetColumns((int) (Mathf.Sqrt(_allyBoids.Count) + 0.5f), setPos);
-                break;
-            case Formation.Wide:
-                SetColumns((int) (Mathf.Sqrt(_allyBoids.Count) + 0.5f) * 2, setPos);
-                break;
-            case Formation.Narrow:
-                SetColumns((int) (Mathf.Sqrt(_allyBoids.Count + 0.5f) * 0.5f), setPos);
-                break;
-        }
-
-        _formation = formation;
-    }
-
-    public void SetColumns(int numCols, bool setPos)
-    {
-        _boidColCount = Mathf.Clamp(numCols, 0, _allyBoids.Count);
-        _boidColumns = new List<List<BoidBase>>();
-        foreach (int i in GD.Range(0, _boidColCount))
-        {
-            _boidColumns.Add(new List<BoidBase>());
-        }
-
-        int perCol = _allyBoids.Count / _boidColCount;
-        foreach (int i in GD.Range(0, _allyBoids.Count))
-        {
-            BoidBase boid = _allyBoids[i];
-            int column = i / perCol;
-            int colIdx = column;
-            if (colIdx >= _boidColumns.Count)
-            {
-                colIdx = i % _boidColCount;
-            }
-
-            _boidColumns[colIdx].Add(boid);
-            int columnIndex = _boidColumns[colIdx].IndexOf(boid);
-            Vector2 offset = GetOffset(colIdx, columnIndex);
-            boid.Offset = offset;
-
-            if (setPos)
-            {
-                boid.GlobalPosition = _player.GlobalPosition + offset;
-            }
-        }
-    }
-
+    
     public void FreeBoid(BoidBase boid)
     {
         _destroyedBoids.Remove(boid);
@@ -238,20 +179,8 @@ public class Game : Node
         _allBoids.Add(boid);
         boid.Init(droneData.Name, _player, this, _player, _OnBoidDestroyed);
         boid.GlobalPosition(_player.GlobalTransform.origin);
-        
-        ChangeFormation(_formation, false);
 
         return true;
-    }
-
-    private Vector2 GetOffset(int column, int columnIndex)
-    {
-        column -= (int) (_boidColumns.Count * 0.5f - _boidColumns.Count % 2 * 0.5f);
-        int perCol = _allyBoids.Count / _boidColumns.Count;
-        columnIndex -= (int) (perCol * 0.5f - perCol % 2 * 0.5f);
-        Vector2 offset = new Vector2(column * BaseBoidGrouping, columnIndex * BaseBoidGrouping);
-        offset += new Vector2(0.5f * ((_boidColumns.Count + 1) % 2), 0.5f * ((perCol + 1) % 2)) * BaseBoidGrouping;
-        return offset;
     }
 
     public void AddEnemy(BoidEnemyBase enemy)
@@ -281,24 +210,6 @@ public class Game : Node
         
         OnGameStateChanged?.Invoke(state, _prevState);
     }
-    
-    public void PushBack(BoidBase boid)
-    {
-        foreach (int i in GD.Range(0, _boidColCount))
-        {
-            if (_boidColumns[i].Contains(boid))
-            {
-                _boidColumns[i].Remove(boid);
-                _boidColumns[i].Insert(0, boid);
-                foreach (int j in GD.Range(0, _boidColumns[i].Count))
-                {
-                    _boidColumns[i][j].Offset = GetOffset(_boidColCount - i - 1, _boidColumns[i].Count - j - 1);
-                }
-
-                break;
-            }
-        }
-    }
 
     private void _OnBoidDestroyed(BoidBase boid)
     {
@@ -307,7 +218,6 @@ public class Game : Node
             case BoidAllyBase @base:
             {
                 _allyBoids.Remove(@base);
-                ChangeFormation(_formation, false);
                 _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
                 break;
             }

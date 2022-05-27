@@ -46,6 +46,5 @@ public class BoidAllyDrone : BoidAllyBase
         dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
         _game.AddChild(bullet);
         bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
-        _game.PushBack(this);
     }
 }

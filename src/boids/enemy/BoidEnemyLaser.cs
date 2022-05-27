@@ -139,15 +139,15 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         _laserArea.Monitorable = false;
     }
 
-    protected override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
-    {
-        if (_laserState == LaserState.Charging || _laserState == LaserState.Firing)
-        {
-            return new Vector2(0.0f, 0.0f);
-        }
-
-        return base._SteeringPursuit(targetPos, targetVel);
-    }
+    // protected override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
+    // {
+    //     if (_laserState == LaserState.Charging || _laserState == LaserState.Firing)
+    //     {
+    //         return new Vector2(0.0f, 0.0f);
+    //     }
+    //
+    //     return base._SteeringPursuit(targetPos, targetVel);
+    // }
 
     protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
     {

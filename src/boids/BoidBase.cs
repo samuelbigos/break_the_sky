@@ -22,6 +22,8 @@ public partial class BoidBase : Area
     
     [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit,Flee")] protected int _behaviours;
 
+    [Export] public bool DebugBoid = true;
+    [Export] public PackedScene DebugBoidScene;
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
     [Export] public float TargetVectoringExponent = 1.0f;
@@ -57,11 +59,9 @@ public partial class BoidBase : Area
     public bool Destroyed => _destroyed;    
     public string ID = "";
 
-    protected Vector3 _velocity;
     protected BoidPlayer _player;
     protected Game _game;
     protected BoidBase _target;
-    private Vector2 _targetOffset;
     protected bool _destroyed;
     protected Vector3 _baseScale;
     private float _health;
@@ -70,8 +70,10 @@ public partial class BoidBase : Area
     private ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
     private List<Particles> _hitParticles = new List<Particles>();
+    protected DebugBoid _debugBoid;
 
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
+    [OnReadyGet] private BoidTrail _trail;
     private AudioStreamPlayer2D _sfxOnDestroy;
     protected AudioStreamPlayer2D _sfxOnHit;
 
@@ -79,19 +81,14 @@ public partial class BoidBase : Area
     private float _cachedLastHitDamage;
     protected bool _acceptInput = true;
 
-    public Vector3 Velocity
-    {
-        get { return _velocity; }
-        set { _velocity = value; }
-    }
-    
+    public Vector2 Velocity;
+    public Vector2 Steering;
+
     public Vector2 GlobalPosition
     {
         get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
-    
-    public Vector2 Offset { set => _targetOffset = value; }
 
     private Color MeshColour
     {
@@ -136,6 +133,17 @@ public partial class BoidBase : Area
         
         if (Game.Instance != null)
             Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+        
+#if TOOLS
+        if (DebugBoid)
+        {
+            _debugBoid = DebugBoidScene.Instance<DebugBoid>();
+            AddChild(_debugBoid);
+            _debugBoid.Owner = this;
+            _mesh.Visible = false;
+            _trail.Visible = false;
+        }
+#endif
     }
 
     public override void _Process(float delta)
@@ -144,10 +152,10 @@ public partial class BoidBase : Area
         
         if (!_destroyed)
         {
-            DoSteering(delta);
-            GlobalTranslate(_velocity * delta);
-            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f); // damping
-            Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
+            // DoSteering(delta);
+            // GlobalTranslate(_velocity * delta);
+            // _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f); // damping
+            // Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
             
             // hit flash
             _hitFlashTimer -= delta;
@@ -178,7 +186,7 @@ public partial class BoidBase : Area
             }
         }
 
-        _altMaterial.SetShaderParam("u_velocity", _velocity);
+        _altMaterial.SetShaderParam("u_velocity", Velocity);
     }
 
     protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
@@ -275,200 +283,46 @@ public partial class BoidBase : Area
         if (_target == null)
             return;
         
-        Vector3 targetPos = _target.GlobalPosition.To3D() + _target.Transform.basis.Xform(_targetOffset.To3D());
         Vector2 steering = Vector2.Zero;
 
-        if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
-        {
-            steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
-        }
-        if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
-        {
-            steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
-        }
-        if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
-        {
-            steering += _SteeringSeparation(_game.AllBoids, SeparationRadius);
-        }
-        if ((_behaviours & (int)SteeringBehaviours.Flee) != 0)
-        {
-            steering += _SteeringFlee(targetPos.To2D(), _target.Velocity.To2D());
-        }
+        // if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
+        // {
+        //     steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
+        // }
+        // if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
+        // {
+        //     steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
+        // }
+        // if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
+        // {
+        //     steering += _SteeringSeparation(_game.AllBoids, SeparationRadius);
+        // }
+        // if ((_behaviours & (int)SteeringBehaviours.Flee) != 0)
+        // {
+        //     steering += _SteeringFlee(targetPos.To2D(), _target.Velocity.To2D());
+        // }
 
         // limit angular velocity
-        if (_velocity != Vector3.Zero)
-        {
-            Vector2 vel = _velocity.To2D();
-            float dot = steering.Normalized().Dot(vel.Normalized());
-            
-            // this causes the angular velocity to be more limited the less the target is ahead of this boid
-            if (dot > 0.0f) dot = Mathf.Pow(dot, TargetVectoringExponent);
-            
-            Vector2 linearComp = vel.Normalized() * steering.Length() * dot;
-            Vector2 tangent = new Vector2(vel.y, -vel.x);
-            Vector2 angularComp = tangent.Normalized() * steering.Length() * steering.Normalized().Dot(tangent.Normalized());
-            steering = linearComp + angularComp.Normalized() * Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
-        }
-
-        steering = steering.Truncate(MaxVelocity);
-        _velocity += steering.To3D() * delta;
-        
-        float velLength = _velocity.Length();
-        Vector3 velDir = _velocity.Normalized();
-        velLength = Mathf.Clamp(velLength, MinVelocity, MaxVelocity);
-        _velocity = velDir * velLength;
-    }
-    
-    protected virtual Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
-    {
-        Vector2 desiredVelocity = (targetPos - GlobalPosition).Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        float dot = steering.Normalized().Dot(_velocity.To2D().Normalized());
-        if (dot < -0.9f)
-        {
-            float len = steering.Length();
-            steering = new Vector2(steering.y, -steering.x).Normalized() * len;
-        }
-        return steering;
-    }
-    
-    protected virtual Vector2 _SteeringFlee(Vector2 targetPos, Vector2 targetVel)
-    {
-        Vector2 desiredVelocity = (GlobalPosition - targetPos).Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        float dot = steering.Normalized().Dot(_velocity.To2D().Normalized());
-        if (dot < -0.9f) // we're basically heading towards the target and need corrective action
-        {
-            float len = steering.Length();
-            steering = new Vector2(steering.y, -steering.x).Normalized() * len;
-        }
-        return steering;
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    protected virtual Vector2 _SteeringEdgeRepulsion(float radius)
-    {
-        float edgeThreshold = 50.0f;
-        float edgeDist = Mathf.Clamp(GlobalPosition.Length() - (radius - edgeThreshold), 0.0f, edgeThreshold) /
-                         edgeThreshold;
-        Vector2 desiredVelocity = edgeDist * -GlobalPosition.Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    protected virtual Vector2 _SteeringFollow(Vector2 target, float delta)
-    {
-        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
-    }
-
-    protected virtual Vector2 _SteeringArrive(Vector2 target, float slowingRadius)
-    {
-        Vector2 desiredVelocity = (target - GlobalPosition).Normalized() * MaxVelocity;
-        float distance = (target - GlobalPosition).Length();
-        if (distance < slowingRadius)
-        {
-            desiredVelocity = desiredVelocity.Normalized() * MaxVelocity * (distance / slowingRadius);
-        }
-
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    protected virtual Vector2 _SteeringAlignment(List<BoidBase> boids, float alignmentRadius)
-    {
-        int nCount = 0;
-        Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
-
-        foreach (BoidBase boid in boids)
-        {
-            if (boid == this)
-            {
-                continue;
-            }
-
-            float distance = (boid.GlobalPosition - GlobalPosition).Length();
-            if (distance < alignmentRadius)
-            {
-                desiredVelocity += boid.Velocity.To2D();
-                nCount += 1;
-            }
-        }
-
-        if (nCount == 0)
-        {
-            return desiredVelocity;
-        }
-
-        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    protected virtual Vector2 _SteeringCohesion(List<BoidBase> boids, float cohesionRadius)
-    {
-        int nCount = 0;
-        Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
-
-        foreach (BoidBase boid in boids)
-        {
-            if (boid == this)
-            {
-                continue;
-            }
-
-            float distance = (boid.GlobalPosition - GlobalPosition).Length();
-            if (distance < cohesionRadius)
-            {
-                desiredVelocity += boid.GlobalPosition;
-                nCount += 1;
-            }
-        }
-
-        if (nCount == 0)
-        {
-            return desiredVelocity;
-        }
-
-        desiredVelocity /= nCount;
-        desiredVelocity = desiredVelocity - GlobalPosition;
-        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
-    }
-
-    protected virtual Vector2 _SteeringSeparation(List<BoidBase> boids, float separationRadius)
-    {
-        int nCount = 0;
-        Vector2 desiredVelocity = new Vector2(0.0f, 0.0f);
-
-        foreach (BoidBase boid in boids)
-        {
-            if (boid == this)
-            {
-                continue;
-            }
-
-            float distance = (boid.GlobalPosition - GlobalPosition).LengthSquared();
-            if (distance < Mathf.Pow(separationRadius + boid.SeparationRadius, 2.0f))
-            {
-                desiredVelocity += boid.GlobalPosition - GlobalPosition;
-                nCount += 1;
-            }
-        }
-
-        if (nCount == 0)
-        {
-            return desiredVelocity;
-        }
-
-        desiredVelocity = desiredVelocity.Normalized() * MaxVelocity * -1;
-        Vector2 steering = desiredVelocity - _velocity.To2D();
-        return steering;
+        // if (Velocity != Vector2.Zero)
+        // {
+        //     float dot = steering.Normalized().Dot(vel.Normalized());
+        //     
+        //     // this causes the angular velocity to be more limited the less the target is ahead of this boid
+        //     if (dot > 0.0f) dot = Mathf.Pow(dot, TargetVectoringExponent);
+        //     
+        //     Vector2 linearComp = vel.Normalized() * steering.Length() * dot;
+        //     Vector2 tangent = new Vector2(vel.y, -vel.x);
+        //     Vector2 angularComp = tangent.Normalized() * steering.Length() * steering.Normalized().Dot(tangent.Normalized());
+        //     steering = linearComp + angularComp.Normalized() * Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
+        // }
+        //
+        // steering = steering.Truncate(MaxVelocity);
+        // _velocity += steering.To3D() * delta;
+        //
+        // float velLength = _velocity.Length();
+        // Vector3 velDir = _velocity.Normalized();
+        // velLength = Mathf.Clamp(velLength, MinVelocity, MaxVelocity);
+        // _velocity = velDir * velLength;
     }
 
     public virtual void _OnBoidAreaEntered(Area area)
@@ -487,7 +341,7 @@ public partial class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(HitDamage, false, _velocity.To2D(), GlobalTransform.origin);
+            boid._OnHit(HitDamage, false, Velocity, GlobalTransform.origin);
             return;
         }
         

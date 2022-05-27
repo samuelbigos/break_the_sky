@@ -101,7 +101,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
         enemy.Init(null, _player, _game, _target, _OnRotorgunDestroyed);
         _game.AddChild(enemy);
         _game.AddEnemy(enemy);
-        enemy.Velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized().To3D();
+        //enemy.Velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized().To3D();
     }
 
     private void _OnRotorgunDestroyed(BoidBase boid)
