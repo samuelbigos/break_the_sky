@@ -10,17 +10,12 @@ public partial class BoidBase : Area
     {
         Ally,
         Enemy
-    }
-    
-    protected enum SteeringBehaviours
-    {
-        Arrive = 1,
-        Separation = 2,
-        Pursuit = 8,
-        Flee = 16
-    }
-    
-    [Export(PropertyHint.Flags, "Arrive,Separation,EdgeRepulsion,Pursuit,Flee")] protected int _behaviours;
+    };
+
+    #region Export
+
+    [Export(PropertyHint.Flags, "Flock,Align,Separate,Arrive,Pursuit,Flee")] public int Behaviours;
+    [Export] public float[] BehaviourWeights;
 
     [Export] public bool DebugBoid = true;
     [Export] public PackedScene DebugBoidScene;
@@ -53,43 +48,60 @@ public partial class BoidBase : Area
     
     [Export] protected PackedScene _pickupMaterialScene;
     
-    public Action<BoidBase> OnBoidDestroyed;
-    
-    protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
-    public bool Destroyed => _destroyed;    
-    public string ID = "";
-
-    protected BoidPlayer _player;
-    protected Game _game;
-    protected BoidBase _target;
-    protected bool _destroyed;
-    protected Vector3 _baseScale;
-    private float _health;
-    private float _hitFlashTimer;
-    private List<Particles> _damagedParticles = new List<Particles>();
-    private ShaderMaterial _meshMaterial;
-    private ShaderMaterial _altMaterial;
-    private List<Particles> _hitParticles = new List<Particles>();
-    protected DebugBoid _debugBoid;
-
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
     [OnReadyGet] private BoidTrail _trail;
-    private AudioStreamPlayer2D _sfxOnDestroy;
-    protected AudioStreamPlayer2D _sfxOnHit;
 
-    private Vector3 _cachedLastHitDir;
-    private float _cachedLastHitDamage;
-    protected bool _acceptInput = true;
+    #endregion
 
+    #region Signals
+
+    public Action<BoidBase> OnBoidDestroyed;
+
+    #endregion
+
+    #region Public
+
+    public virtual BoidAlignment Alignment => BoidAlignment.Ally;
+    public bool Destroyed => _destroyed;    
+    public string ID = "";
     public Vector2 Velocity;
     public Vector2 Steering;
-
+    public Vector2 TargetPos;
+    
     public Vector2 GlobalPosition
     {
         get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
     }
 
+    #endregion
+
+    #region Protected
+
+    protected BoidPlayer _player;
+    protected Game _game;
+    protected BoidBase _target;
+    protected bool _destroyed;
+    protected Vector3 _baseScale;
+    protected DebugBoid _debugBoid;
+    protected bool _acceptInput = true;
+    protected AudioStreamPlayer2D _sfxOnHit;
+    protected virtual Color BaseColour => ColourManager.Instance.Secondary;
+
+    #endregion
+
+    #region Private
+
+    private float _health;
+    private float _hitFlashTimer;
+    private List<Particles> _damagedParticles = new List<Particles>();
+    private ShaderMaterial _meshMaterial;
+    private ShaderMaterial _altMaterial;
+    private List<Particles> _hitParticles = new List<Particles>();
+    private AudioStreamPlayer2D _sfxOnDestroy;
+    private Vector3 _cachedLastHitDir;
+    private float _cachedLastHitDamage;
+    
     private Color MeshColour
     {
         set
@@ -99,7 +111,7 @@ public partial class BoidBase : Area
         }
     }
 
-    protected virtual Color BaseColour => ColourManager.Instance.Secondary;
+    #endregion
 
     public void Init(string id, BoidPlayer player, Game game, BoidBase target, Action<BoidBase> onDestroy)
     {
@@ -149,6 +161,10 @@ public partial class BoidBase : Area
     public override void _Process(float delta)
     {
         base._Process(delta);
+
+        if (_target != null)
+            TargetPos = _target.GlobalTransform.origin.To2D();
+        FlockingManager.Instance.UpdateBoid(this);
         
         if (!_destroyed)
         {
@@ -266,63 +282,16 @@ public partial class BoidBase : Area
         }
     }
 
-    protected void SetSteeringBehaviourEnabled(SteeringBehaviours behaviour, bool enabled)
+    protected void SetSteeringBehaviourEnabled(FlockingManager.Behaviours behaviour, bool enabled)
     {
         if (enabled)
         {
-            _behaviours |= (int) behaviour;
+            Behaviours |= (1 << (int) behaviour);
         }
         else
         {
-            _behaviours &= ~(int) behaviour;
+            Behaviours &= ~ (1 << (int) behaviour);
         }
-    }
-
-    protected virtual void DoSteering(float delta)
-    {
-        if (_target == null)
-            return;
-        
-        Vector2 steering = Vector2.Zero;
-
-        // if ((_behaviours & (int) SteeringBehaviours.Arrive) != 0)
-        // {
-        //     steering += _SteeringArrive(targetPos.To2D(), SlowingRadius);
-        // }
-        // if ((_behaviours & (int)SteeringBehaviours.Pursuit) != 0)
-        // {
-        //     steering += _SteeringPursuit(targetPos.To2D(), _target.Velocity.To2D());
-        // }
-        // if ((_behaviours & (int) SteeringBehaviours.Separation) != 0)
-        // {
-        //     steering += _SteeringSeparation(_game.AllBoids, SeparationRadius);
-        // }
-        // if ((_behaviours & (int)SteeringBehaviours.Flee) != 0)
-        // {
-        //     steering += _SteeringFlee(targetPos.To2D(), _target.Velocity.To2D());
-        // }
-
-        // limit angular velocity
-        // if (Velocity != Vector2.Zero)
-        // {
-        //     float dot = steering.Normalized().Dot(vel.Normalized());
-        //     
-        //     // this causes the angular velocity to be more limited the less the target is ahead of this boid
-        //     if (dot > 0.0f) dot = Mathf.Pow(dot, TargetVectoringExponent);
-        //     
-        //     Vector2 linearComp = vel.Normalized() * steering.Length() * dot;
-        //     Vector2 tangent = new Vector2(vel.y, -vel.x);
-        //     Vector2 angularComp = tangent.Normalized() * steering.Length() * steering.Normalized().Dot(tangent.Normalized());
-        //     steering = linearComp + angularComp.Normalized() * Mathf.Clamp(angularComp.Length(), 0.0f, MaxAngularVelocity);
-        // }
-        //
-        // steering = steering.Truncate(MaxVelocity);
-        // _velocity += steering.To3D() * delta;
-        //
-        // float velLength = _velocity.Length();
-        // Vector3 velDir = _velocity.Normalized();
-        // velLength = Mathf.Clamp(velLength, MinVelocity, MaxVelocity);
-        // _velocity = velDir * velLength;
     }
 
     public virtual void _OnBoidAreaEntered(Area area)

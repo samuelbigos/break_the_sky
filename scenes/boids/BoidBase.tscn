@@ -30,6 +30,7 @@ flags_unshaded = true
 script = ExtResource( 4 )
 MeshPath = NodePath("Mesh")
 TrailPath = NodePath("BoidTrail")
+BehaviourWeights = PoolRealArray( 0, 0, 0, 0, 0, 0 )
 DebugBoid = false
 DebugBoidScene = ExtResource( 11 )
 MaxVelocity = 250.0

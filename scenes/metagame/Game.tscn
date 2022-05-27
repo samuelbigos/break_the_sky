@@ -57,7 +57,6 @@ far = 250.0
 script = ExtResource( 4 )
 
 [node name="Clouds" parent="." instance=ExtResource( 6 )]
-visible = false
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( -1, 5.01437e-08, -7.16125e-08, 0, 0.819152, 0.573577, 8.74228e-08, 0.573577, -0.819152, 0, 100, 0 )

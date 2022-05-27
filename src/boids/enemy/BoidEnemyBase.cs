@@ -7,8 +7,8 @@ public class BoidEnemyBase : BoidBase
     [Export] public float EngageRange = 100.0f;
 
     public bool IsTargetted = false;
-    
-    protected override BoidAlignment Alignment => BoidAlignment.Enemy;
+
+    public override BoidAlignment Alignment => BoidAlignment.Enemy;
     protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     private int _cachedBehaviours;
@@ -43,16 +43,16 @@ public class BoidEnemyBase : BoidBase
     public void SetupEscort(BoidEnemyBase leader)
     {
         _target = leader;
-        _cachedBehaviours = _behaviours;
-        _behaviours = 0;
+        _cachedBehaviours = Behaviours;
+        Behaviours = 0;
         _escorting = true;
-        SetSteeringBehaviourEnabled(SteeringBehaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(SteeringBehaviours.Separation, true);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separate, true);
     }
 
     private void DropEscortAndEngage()
     {
-        _behaviours = _cachedBehaviours;
+        Behaviours = _cachedBehaviours;
         _target = _player;
         _escorting = false;
     }

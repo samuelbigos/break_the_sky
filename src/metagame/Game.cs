@@ -128,8 +128,6 @@ public class Game : Node
 
     public override void _Process(float delta)
     {
-        FlockingManager.Instance.FlockPosition = _player.GlobalTransform.origin.To2D();
-        
         _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GameCamera.Instance.MousePosition().To3D());
 
         while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.MaxAllyCount)
