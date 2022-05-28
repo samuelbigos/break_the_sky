@@ -2,39 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
+using GodotOnReady.Attributes;
 using ImGuiNET;
 using Array = Godot.Collections.Array;
 using Dictionary = Godot.Collections.Dictionary;
 
-public class Game : Node
+public partial class Game : Singleton<Game>
 {
-    public static Game Instance;
-
-    public enum State
-    {
-        Play,
-        Construct,
-        Pause
-    }
-    
-    public enum Formation
-    {
-        Balanced,
-        Wide,
-        Narrow,
-    }
-
-    [Export] private PackedScene _playerScene;
-    private BoidPlayer _player;
-    
-    [Export] private NodePath _mouseCursorPath;
-    private MeshInstance _mouseCursor;
-
-    [Export] private NodePath _aiSpawningDirectorPath;
-    private AISpawningDirector _aiSpawningDirector;
-
-    [Export] private NodePath _hudPath;
-    private HUD _hud;
+    [OnReadyGet] private StateMachine_Game _stateMachine;
+    [OnReadyGet] private BoidPlayer _player;
+    [OnReadyGet] private AISpawningDirector _aiSpawningDirector;
+    [OnReadyGet] private HUD _hud;
 
     [Export] public float SpawningRadius = 500.0f;
     [Export] public float WaveCooldown = 5.0f;
@@ -51,15 +29,7 @@ public class Game : Node
     [Export] public float ScoreMultiTimeout = 10.0f;
     [Export] public int ScoreMultiMax = 10;
     [Export] public float ScoreMultiIncrement = 0.5f;
-
-    public Action<State, State> OnGameStateChanged;
-    public State CurrentState => _state;
-    public State PrevState => _prevState;
-
-    private State _state;
-    private State _prevState;
     
-    private Formation _formation = Formation.Balanced;
     private int _score = 0;
     private float _scoreMulti = 1.0f;
     private float _scoreMultiTimer;
@@ -81,23 +51,11 @@ public class Game : Node
     public List<BoidAllyBase> AllyBoids => _allyBoids;
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public int NumBoids => _allyBoids.Count;
-
-    public Game()
-    {
-        Debug.Assert(Instance == null, "Attempting to create multiple Game instances!");
-        Instance = this;
-    }
     
-    public override void _Ready()
+    [OnReady] private void Ready()
     {
         base._Ready();
         
-        _player = _playerScene.Instance<BoidPlayer>();
-        AddChild(_player);
-        _mouseCursor = GetNode<MeshInstance>(_mouseCursorPath);
-        _aiSpawningDirector = GetNode<AISpawningDirector>(_aiSpawningDirectorPath);
-        _hud = GetNode<HUD>(_hudPath);
-
         _player.Init("player", _player, this, null, _OnBoidDestroyed);
         
         _aiSpawningDirector.Init(this, _player);
@@ -110,8 +68,8 @@ public class Game : Node
         GameCamera.Instance.Init(_player);
         MusicPlayer.Instance.PlayGame();
         //PauseManager.Instance.Init(this);
-
-        ChangeGameState(State.Play);
+        
+        StateMachine_Game.Instance.SendInitialStateChange();
     }
 
     public override void _EnterTree()
@@ -128,8 +86,6 @@ public class Game : Node
 
     public override void _Process(float delta)
     {
-        _mouseCursor.GlobalTransform = new Transform(_mouseCursor.GlobalTransform.basis, GameCamera.Instance.MousePosition().To3D());
-
         while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.MaxAllyCount)
         {
             AddAllyBoid(Database.AllyBoids.GetAllEntries<DataAllyBoid>()[0].Name);
@@ -177,6 +133,7 @@ public class Game : Node
         _allBoids.Add(boid);
         boid.Init(droneData.Name, _player, this, _player, _OnBoidDestroyed);
         boid.GlobalPosition(_player.GlobalTransform.origin);
+        FlockingManager.Instance.AddBoid(boid);
 
         return true;
     }
@@ -186,27 +143,7 @@ public class Game : Node
         _enemyBoids.Add(enemy);
         _allBoids.Add(enemy);
         enemy.OnBoidDestroyed += _OnBoidDestroyed;
-    }
-
-    public void ChangeGameState(State state)
-    {
-        _prevState = _state;
-        switch (state)
-        {
-            case State.Play:
-                Engine.TimeScale = 1.0f;
-                break;
-            case State.Pause:
-            case State.Construct:
-                Engine.TimeScale = 0.0f;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(state), state, null);
-        }
-
-        _state = state;
-        
-        OnGameStateChanged?.Invoke(state, _prevState);
+        FlockingManager.Instance.AddBoid(enemy);
     }
 
     private void _OnBoidDestroyed(BoidBase boid)
@@ -226,6 +163,8 @@ public class Game : Node
         }
         _allBoids.Remove(boid);
         _destroyedBoids.Add(boid);
+        
+        FlockingManager.Instance.RemoveBoid(boid);
     }
     
     private void _OnImGuiLayout()

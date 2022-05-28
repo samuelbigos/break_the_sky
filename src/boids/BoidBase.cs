@@ -94,10 +94,10 @@ public partial class BoidBase : Area
 
     private float _health;
     private float _hitFlashTimer;
-    private List<Particles> _damagedParticles = new List<Particles>();
+    private List<Particles> _damagedParticles = new();
     private ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
-    private List<Particles> _hitParticles = new List<Particles>();
+    private List<Particles> _hitParticles = new();
     private AudioStreamPlayer2D _sfxOnDestroy;
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
@@ -144,7 +144,7 @@ public partial class BoidBase : Area
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
         if (Game.Instance != null)
-            Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+            StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
         
 #if TOOLS
         if (DebugBoid)
@@ -327,15 +327,15 @@ public partial class BoidBase : Area
         }
     }
     
-    private void _OnGameStateChanged(Game.State state, Game.State prevState)
+    private void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {
         switch (state)
         {
-            case Game.State.Play:
+            case StateMachine_Game.States.Play:
                 _acceptInput = true;
                 break;
-            case Game.State.Pause:
-            case Game.State.Construct:
+            case StateMachine_Game.States.TacticalPause:
+            case StateMachine_Game.States.Construct:
                 _acceptInput = false;
                 break;
             default:

@@ -28,8 +28,6 @@ public class BoidAllyBase : BoidBase
         _baseScale = _mesh.Scale;
 
         _sfxShootPlayer = GetNode<AudioStreamPlayer2D>(_sfxShootPlayerPath);
-        
-        FlockingManager.Instance.AddBoid(this);
     }
 
     protected virtual void _Shoot(Vector2 dir)

@@ -61,7 +61,6 @@ public class BoidEnemyBase : BoidBase
     {
         base._OnHit(damage, score, bulletVel, pos);
 
-        PauseManager.Instance.PauseFlash();
         GameCamera.Instance.AddTrauma(HitTrauma);
     }
     

@@ -7,28 +7,27 @@
 
 [node name="HUD" type="Spatial"]
 script = ExtResource( 2 )
+TabUIContainerPath = NodePath("CanvasLayer/TabMenu")
 _warningIndicatorScene = ExtResource( 1 )
 _boidIconScene = ExtResource( 5 )
 _materialsValuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow/MaterialsValue")
-_TabUIPath = NodePath("CanvasLayer/TabMenu")
 _fabicateMenuPath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateMenu")
 _fabricateQueuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateQueue")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="TabMenu" type="MarginContainer" parent="CanvasLayer"]
-anchor_left = 1.0
-anchor_top = 0.5
+anchor_left = 0.509
 anchor_right = 1.0
-anchor_bottom = 0.5
-margin_left = -1046.0
-margin_top = -432.0
-margin_right = -66.0
-margin_bottom = 432.0
+anchor_bottom = 1.0
+margin_left = -0.52002
+margin_top = 36.0
+margin_right = -42.0
+margin_bottom = -39.0
 
 [node name="TabContainer" type="TabContainer" parent="CanvasLayer/TabMenu"]
-margin_right = 980.0
-margin_bottom = 864.0
+margin_right = 587.0
+margin_bottom = 645.0
 
 [node name="Fabricate" type="Tabs" parent="CanvasLayer/TabMenu/TabContainer"]
 anchor_right = 1.0

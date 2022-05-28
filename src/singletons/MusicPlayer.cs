@@ -1,18 +1,10 @@
 using System.Diagnostics;
 using Godot;
 
-public class MusicPlayer : Node
+public class MusicPlayer : Singleton<MusicPlayer>
 {
-    public static MusicPlayer Instance;
-    
     public AudioStreamPlayer2D Player;
     public bool MusicEnabled = false;
-
-    public MusicPlayer()
-    {
-        Debug.Assert(Instance == null, "Attempting to create multiple GlobalCamera instances!");
-        Instance = this;
-    }
     
     public override void _Ready()
     {

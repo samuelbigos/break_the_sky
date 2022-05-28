@@ -3,10 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public class FabricateManager : Node
+public class FabricateManager : Singleton<FabricateManager>
 {
-    public static FabricateManager Instance;
-    
     public class Fabricant
     {
         public string BoidId;
@@ -20,12 +18,6 @@ public class FabricateManager : Node
     public Action<int> OnPopQueue;
 
     private List<Fabricant> _queue = new List<Fabricant>();
-
-    public FabricateManager()
-    {
-        Debug.Assert(Instance == null, "Attempting to create multiple FabricateManager instances!");
-        Instance = this;
-    }
 
     public override void _Ready()
     {

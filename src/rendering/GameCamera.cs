@@ -71,7 +71,7 @@ public class GameCamera : Camera
         Instance = this;
         
         if (Game.Instance != null)
-            Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+            StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
     }
 
     public override void _ExitTree()
@@ -102,19 +102,20 @@ public class GameCamera : Camera
         if (_stateTransitionTimer > 0.0f)
         {
             float t = Utils.Ease_CubicInOut(_stateTransitionTimer / _stateTransitionTime);
-            GlobalTransform = GetTransform(Game.Instance.CurrentState, delta).InterpolateWith(GetTransform(Game.Instance.PrevState, delta), t);
+            GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta).InterpolateWith(GetTransform(StateMachine_Game.PrevState, delta), t);
         }
         else
         {
-            GlobalTransform = GetTransform(Game.Instance.CurrentState, delta);
+            GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta);
         }
     }
 
-    private Transform GetTransform(Game.State state, float delta)
+    private Transform GetTransform(StateMachine_Game.States state, float delta)
     {
         switch (state)
         {
-            case Game.State.Play:
+            case StateMachine_Game.States.Play:
+            case StateMachine_Game.States.TacticalPause:
             {
                 Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
@@ -136,7 +137,7 @@ public class GameCamera : Camera
 
                 return cameraTransform;
             }
-            case Game.State.Construct:
+            case StateMachine_Game.States.Construct:
             {
                 Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.1f + Vector2.Right * 30.0f;
@@ -150,18 +151,8 @@ public class GameCamera : Camera
         }
     }
 
-    private void _OnGameStateChanged(Game.State state, Game.State prevState)
+    private void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {
-        switch (state)
-        {
-            case Game.State.Play:
-                _stateTransitionTimer = _stateTransitionTime;
-                break;
-            case Game.State.Construct:
-                _stateTransitionTimer = _stateTransitionTime;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(state), state, null);
-        }
+        _stateTransitionTimer = _stateTransitionTime;
     }
 }

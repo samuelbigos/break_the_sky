@@ -2,10 +2,8 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public class FlockingManager : Node
+public class FlockingManager : Singleton<FlockingManager>
 {
-    public static FlockingManager Instance;
-    
     public enum Behaviours
     {
         Flock,
@@ -24,24 +22,16 @@ public class FlockingManager : Node
 #if TOOLS
         public Vector2 Steering;
 #endif
+        public float MaxSpeed;
         public float FOV;
         public int Behaviours;
         public float[] Weights;
         public Vector2 Target;
     }
 
-    public float MaxSpeed = 100.0f;
-
     private List<Boid> _boids = new(1000);
     private Dictionary<BoidBase, int> _boidToIndex = new(); 
-    private Dictionary<int, BoidBase> _indexToBoid = new(); 
-    
-    public override void _Ready()
-    {
-        base._Ready();
-
-        Instance = this;
-    }
+    private Dictionary<int, BoidBase> _indexToBoid = new();
     
     public override void _Process(float delta)
     {
@@ -53,23 +43,23 @@ public class FlockingManager : Node
 
             Vector2 steering = Vector2.Zero;
             
-            if ((boid.Behaviours & (int) Behaviours.Flock) != 0)
+            if ((boid.Behaviours & (1 << (int) Behaviours.Flock)) != 0)
                 steering += Steering_Flock(boid, 50.0f, boid.Weights[(int) Behaviours.Flock]);
             
-            if ((boid.Behaviours & (int) Behaviours.Align) != 0)
+            if ((boid.Behaviours & (1 << (int) Behaviours.Align)) != 0)
                 steering += Steering_Align(boid, 50.0f, boid.Weights[(int) Behaviours.Align]);
             
-            if ((boid.Behaviours & (int) Behaviours.Separate) != 0)
+            if ((boid.Behaviours & (1 << (int) Behaviours.Separate)) != 0)
                 steering += Steering_Separate(boid, 10.0f, boid.Weights[(int) Behaviours.Separate]);
             
-            if ((boid.Behaviours & (int) Behaviours.Arrive) != 0)
+            if ((boid.Behaviours & (1 << (int) Behaviours.Arrive)) != 0)
                 steering += Steering_Arrive(boid, boid.Target, 50.0f, boid.Weights[(int) Behaviours.Arrive]);
 
             float speed = steering.Length();
-            if (speed > MaxSpeed)
+            if (speed > boid.MaxSpeed)
             {
                 steering /= speed;
-                steering *= MaxSpeed;
+                steering *= boid.MaxSpeed;
             }
             boid.Velocity = steering;
 #if TOOLS
@@ -99,6 +89,12 @@ public class FlockingManager : Node
 
     public void AddBoid(BoidBase boidObj)
     {
+        if (_boidToIndex.TryGetValue(boidObj, out int _))
+        {
+            UpdateBoid(boidObj);
+            return;
+        }
+        
         _boids.Add(NewBoid(boidObj));
         int i = _boids.Count - 1;
         _boidToIndex[boidObj] = i;
@@ -107,16 +103,20 @@ public class FlockingManager : Node
 
     public void RemoveBoid(BoidBase boidObj)
     {
-        int i = _boidToIndex[boidObj];
+        if (!_boidToIndex.TryGetValue(boidObj, out int i))
+            return;
+        
         _boids.RemoveAt(i);
         _boidToIndex.Remove(boidObj);
         _indexToBoid.Remove(i);
     }
 
-    public void UpdateBoid(BoidBase boid)
+    public void UpdateBoid(BoidBase boidObj)
     {
-        int index = _boidToIndex[boid];
-        _boids[index] = NewBoid(boid);
+        if (!_boidToIndex.TryGetValue(boidObj, out int i))
+            return;
+        
+        _boids[i] = NewBoid(boidObj);
     }
 
     private Boid NewBoid(BoidBase boid)
@@ -128,22 +128,17 @@ public class FlockingManager : Node
             Steering = Vector2.Zero,
 #endif
             Velocity = Vector2.Zero,
-            FOV = -0.5f,
+            MaxSpeed = boid.MaxVelocity,
             Behaviours = boid.Behaviours,
             Weights = boid.BehaviourWeights,
             Target = boid.TargetPos,
         };
     }
 
-    private bool InFoV(Boid boid, Boid other)
-    {
-        return boid.Velocity.Normalized().Dot((boid.Position - other.Position).Normalized()) > boid.FOV;
-    }
-
     private Vector2 Steering_Flock(Boid boid, float radius, float weight)
     {
-        Vector2 centre = Vector2.Zero;
-        int count = 0;
+        Vector2 centre = boid.Position;
+        int count = 1;
         foreach (Boid other in _boids)
         {
             if ((boid.Position - other.Position).LengthSquared() > radius * radius)
@@ -159,16 +154,18 @@ public class FlockingManager : Node
     
     private Vector2 Steering_Align(Boid boid, float radius, float weight)
     {
-        Vector2 meanVel = Vector2.Zero;;
+        Vector2 meanVel = Vector2.Zero;
+        int count = 0;
         foreach (Boid other in _boids)
         {
-            if ((boid.Position - other.Position).LengthSquared() > radius * radius
-                || !InFoV(boid, other))
+            if ((boid.Position - other.Position).LengthSquared() > radius * radius)
                 continue;
 
             meanVel += other.Velocity;
+            count++;
         }
-        
+
+        meanVel /= count;
         Vector2 dVel = meanVel - boid.Velocity;
         return dVel * weight;
     }

@@ -3,21 +3,14 @@ using System;
 using System.Diagnostics;
 using Godot.Collections;
 
-public class SaveManager : Node
+public class SaveManager : Singleton<SaveManager>
 {
-	public static SaveManager Instance;
-	
 	private const string SAVE_FOLDER = "user://savegame";
 	private bool _loadedThisSession = false;
 	
 	public static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 	public static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
 
-	public SaveManager()
-	{
-		Instance = this;
-	}
-	
 	public override void _Ready()
 	{
 		base._Ready();

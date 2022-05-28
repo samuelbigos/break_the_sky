@@ -2,11 +2,10 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using GodotOnReady.Attributes;
 
-public class HUD : Spatial
+public partial class HUD : Singleton<HUD>
 {
-    public static HUD Instance;
-    
     [Export] private PackedScene _warningIndicatorScene;
     [Export] private PackedScene _boidIconScene;
     
@@ -14,7 +13,7 @@ public class HUD : Spatial
     [Export] private NodePath _materialsValuePath;
     
     // fabrication
-    [Export] private NodePath _TabUIPath;
+    [OnReadyGet] private Control _tabUIContainer;
     [Export] private NodePath _fabicateMenuPath;
     [Export] private NodePath _fabricateQueuePath;
     
@@ -23,23 +22,15 @@ public class HUD : Spatial
     
     private Dictionary<BoidEnemyBase, WarningIndicator> _warningIndicators = new Dictionary<BoidEnemyBase, WarningIndicator>();
 
-    private Control _tabUIContainer;
     private Control _fabricateQueue;
     private Control _fabricateMenu;
     private Label _materialValue;
     private List<BoidIcon> _queueIcons = new List<BoidIcon>();
 
-    public HUD()
-    {
-        Debug.Assert(Instance == null, "Attempting to create multiple HUD instances!");
-        Instance = this;
-    }
-    
-    public override void _Ready()
+    [OnReady] private void Ready()
     {
         base._Ready();
         
-        _tabUIContainer = GetNode<Control>(_TabUIPath);
         _fabricateQueue = GetNode<Control>(_fabricateQueuePath);
         _fabricateMenu = GetNode<Control>(_fabicateMenuPath);
         _materialValue = GetNode<Label>(_materialsValuePath);
@@ -50,7 +41,7 @@ public class HUD : Spatial
         FabricateManager.Instance.OnPopQueue += _OnPopQueue;
         
         if (Game.Instance != null)
-            Game.Instance.OnGameStateChanged += _OnGameStateChanged;
+            StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
     }
 
     private void Refresh()
@@ -118,22 +109,6 @@ public class HUD : Spatial
             FabricateManager.Fabricant fab = FabricateManager.Instance.Queue[i];
             icon.UpdateProgress(1.0f - fab.TimeLeft / fab.TotalTime);
         }
-
-        // input
-        if (Input.IsActionJustPressed("open_construct_ui"))
-        {
-            switch (Game.Instance.CurrentState)
-            {
-                case Game.State.Play:
-                    Game.Instance.ChangeGameState(Game.State.Construct);
-                    break;
-                case Game.State.Construct:
-                    Game.Instance.ChangeGameState(Game.State.Play);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
     }
 
     private bool BoidOffScreen(BoidBase boid, out Vector2 edgePosition, float marginPercent)
@@ -175,17 +150,16 @@ public class HUD : Spatial
         _warningIndicators.Remove(boid as BoidEnemyBase);
     }
 
-    private void _OnGameStateChanged(Game.State state, Game.State prevState)
+    private void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {
         switch (state)
         {
-            case Game.State.Play:
+            case StateMachine_Game.States.Play:
+            case StateMachine_Game.States.TacticalPause:
                 _tabUIContainer.Visible = false;
                 break;
-            case Game.State.Construct:
+            case StateMachine_Game.States.Construct:
                 _tabUIContainer.Visible = true;
-                break;
-            case Game.State.Pause:
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);

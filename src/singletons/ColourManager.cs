@@ -2,17 +2,12 @@ using System.Diagnostics;
 using Godot;
 using GodotOnReady.Attributes;
 
-public partial class ColourManager : Node
+public partial class ColourManager : Singleton<ColourManager>
 {
-	public static ColourManager Instance;
-
 	[OnReadyGet] private SpatialMaterial _redMaterial;
 	
 	[OnReady] private void Ready()
 	{
-		Debug.Assert(Instance == null, "Attempting to create multiple ColourManager instances!");
-		Instance = this;
-
 		_redMaterial.AlbedoColor = Red;
 	}
 	
