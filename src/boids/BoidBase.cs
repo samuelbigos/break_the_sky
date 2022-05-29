@@ -206,7 +206,7 @@ public partial class BoidBase : Area
                 SetTarget(TargetType.None);
         }
 
-        FlockingManager.Instance.UpdateBoid(this);
+        //FlockingManager.Instance.UpdateBoid(this);
         
         if (!_destroyed)
         {

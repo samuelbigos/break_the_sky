@@ -18,7 +18,7 @@ public class BoidTrail : MeshInstance
     [Export] private Curve _lineWidthCurve;
     [Export] private NodePath _burstParticlesPath;
 
-    private SurfaceTool _st = new SurfaceTool();
+    private SurfaceTool _st = new();
     private int _trailIdx;
     private Vector3[] _trailPositions;
     private Spatial _parent;

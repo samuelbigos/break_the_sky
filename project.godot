@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/metagame/Game.tscn"
+run/main_scene="res://scenes/debug/BoidTestbed.tscn"
 config/icon="res://icon.png"
 config/save_version=1
 
@@ -34,7 +34,7 @@ default_bus_layout="res://assets/sfx/default_bus_layout.tres"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 ColourManager="*res://scenes/singletons/ColourManager.tscn"
 Resources="*res://scenes/singletons/Resources.tscn"
-FlockingManager="*res://src/singletons/FlockingManager.cs"
+FlockingManager="*res://src/flocking/FlockingManager.cs"
 Metagame="*res://scenes/metagame/Metagame.tscn"
 DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
 DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
@@ -45,7 +45,6 @@ SaveDataPlayer="*res://src/singletons/SaveDataPlayer.cs"
 SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
 SaveManager="*res://src/singletons/SaveManager.cs"
 TimeSystem="*res://src/singletons/TimeSystem.cs"
-TacticalPauseManager="*res://src/singletons/TacticalPauseManager.cs"
 
 [display]
 
