@@ -42,7 +42,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
     {
         base._Process(delta);
         
-        float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
+        float distToTarget = (GlobalPosition - TargetPos).Length();
         
         if (!_destroyed)
         {

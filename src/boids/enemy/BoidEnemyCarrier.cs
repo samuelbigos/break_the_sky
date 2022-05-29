@@ -39,7 +39,8 @@ public class BoidEnemyCarrier : BoidEnemyBase
         for (int i = 0; i < _rotorgunsPaths.Count; i++)
         {
             _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
-            _rotorguns[i].Init("rotorgun", _player, _game, _target, _OnRotorgunDestroyed);
+            _rotorguns[i].Init("rotorgun", _player, _game, _OnRotorgunDestroyed);
+            _rotorguns[i].SetTarget(TargetType.Enemy, _player);
             _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
         
@@ -55,7 +56,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
             _Destroy(true, Vector3.Zero, 0.0f);
         }
 
-        float dist = (_target.GlobalPosition - GlobalPosition).Length();
+        float dist = (TargetPos - GlobalPosition).Length();
         if (!Destroyed)
         {
             _dronePulseTimer -= delta;
@@ -98,9 +99,10 @@ public class BoidEnemyCarrier : BoidEnemyBase
             enemy.GlobalPosition = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
         }
 
-        enemy.Init(null, _player, _game, _target, _OnRotorgunDestroyed);
+        enemy.Init(null, _player, _game, _OnRotorgunDestroyed);
+        enemy.SetTarget(TargetType.Enemy, _player);
         _game.AddChild(enemy);
-        _game.AddEnemy(enemy);
+        _game.RegisterEnemyBoid(enemy);
         //enemy.Velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized().To3D();
     }
 

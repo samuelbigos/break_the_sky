@@ -15,7 +15,6 @@ shader_param/blend_depth = 0.003
 
 [node name="BoidAllyBase" instance=ExtResource( 1 )]
 script = ExtResource( 4 )
-_behaviours = 7
 Damping = 0.05
 SlowingRadius = 10.0
 AlignmentRadius = 10.0

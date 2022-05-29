@@ -19,16 +19,27 @@ public class BoidEnemyBase : BoidBase
         base._Ready();
 
         HitDamage = 9999.0f; // colliding with enemy boids should always destroy the allied boid.
+        
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Cohesion, true);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Alignment, true);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separation, true, 10.0f);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.EdgeRepulsion, true, 2.0f);
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
 
-#if TOOLS
-        if (_player == null)
-            return;
-#endif
+        // if (_targetType == TargetType.None)
+        // {
+        //     float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
+        //     if (distToPlayerSq < EngageRange * EngageRange)
+        //     {
+        //         SetTarget(TargetType.Enemy, _player);
+        //         SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
+        //         SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Wander, false);
+        //     }
+        // }
 
         if (_escorting)
         {
@@ -42,18 +53,18 @@ public class BoidEnemyBase : BoidBase
 
     public void SetupEscort(BoidEnemyBase leader)
     {
-        _target = leader;
+        SetTarget(TargetType.Ally, leader);
         _cachedBehaviours = Behaviours;
         Behaviours = 0;
         _escorting = true;
         SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separate, true);
+        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separation, true);
     }
 
     private void DropEscortAndEngage()
     {
         Behaviours = _cachedBehaviours;
-        _target = _player;
+        SetTarget(TargetType.Enemy, _player);
         _escorting = false;
     }
 
@@ -86,7 +97,7 @@ public class BoidEnemyBase : BoidBase
             _player.RegisterPickup(drop);
             drop.GlobalTransform = GlobalTransform;
             float eject = 25.0f;
-            drop.Init(new Vector2(Utils.Randf01(), Utils.Randf01()).Normalized() * eject, _player);
+            drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, _player);
         }
     }
 }

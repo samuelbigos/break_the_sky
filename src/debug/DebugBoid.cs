@@ -5,11 +5,6 @@ using System;
 public class DebugBoid : ImmediateGeometry
 {
     public BoidBase Owner;
-    
-    public override void _Ready()
-    {
-        base._Ready();
-    }
 
     public override void _Process(float delta)
     {
@@ -33,15 +28,16 @@ public class DebugBoid : ImmediateGeometry
             Begin(Mesh.PrimitiveType.Lines);
             SetColor(Colors.Red);
             AddVertex(Transform.origin);
-            AddVertex(Transform.origin + Owner.Steering.To3D() * 1.0f);
+            AddVertex(Transform.origin + Owner.Steering.To3D() * 10.0f);
             End();
         }
         
         // boid
         {
             Begin(Mesh.PrimitiveType.Triangles);
-            SetColor(Colors.Blue);
-            Vector3 forward = Owner.Velocity.Normalized().To3D();
+            SetColor(Colors.Black);
+            Vector3 forward = Vector2.Up.To3D();
+            if (Owner.Velocity != Vector2.Zero) forward = Owner.Velocity.Normalized().To3D();
             Vector3 right = new Vector2(forward.z, -forward.x).To3D();
             AddVertex(Transform.origin + forward * -2.5f + right * 2.0f);
             AddVertex(Transform.origin + forward * 2.5f);

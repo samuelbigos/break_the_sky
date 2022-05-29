@@ -14,7 +14,7 @@ public partial class Game : Singleton<Game>
     [OnReadyGet] private AISpawningDirector _aiSpawningDirector;
     [OnReadyGet] private HUD _hud;
 
-    [Export] public float SpawningRadius = 500.0f;
+    [Export] public Rect2 AreaRect;
     [Export] public float WaveCooldown = 5.0f;
     [Export] public int MaxDrones = 100;
 
@@ -24,7 +24,7 @@ public partial class Game : Singleton<Game>
     [Export] public float BaseBoidDamage = 1.0f;
     [Export] public float BaseBoidSpread = 0.1f;
     [Export] public float BaseBulletSpeed = 500.0f;
-    [Export] public bool BaseMicroturrets = false;
+    [Export] public bool BaseMicroturrets;
 
     [Export] public float ScoreMultiTimeout = 10.0f;
     [Export] public int ScoreMultiMax = 10;
@@ -34,33 +34,28 @@ public partial class Game : Singleton<Game>
     private float _scoreMulti = 1.0f;
     private float _scoreMultiTimer;
 
-    private List<BoidBase> _allBoids = new List<BoidBase>();
-    private List<BoidBase> _destroyedBoids = new List<BoidBase>();
-    private List<BoidEnemyBase> _enemyBoids = new List<BoidEnemyBase>();
-    private List<BoidAllyBase> _allyBoids = new List<BoidAllyBase>();
+    private List<BoidBase> _allBoids = new();
+    private List<BoidBase> _destroyedBoids = new();
+    private List<BoidEnemyBase> _enemyBoids = new();
+    private List<BoidAllyBase> _allyBoids = new();
     private int _addedAllyCounter;
-
-    private bool _hasSlowmo = false;
-    private bool _hasNuke = false;
-
-    private float _prevSubwaveTime;
-    private int _pendingBoidSpawn;
+    private bool _initialSpawn;
 
     public List<BoidBase> AllBoids => _allBoids;
     public List<BoidBase> DestroyedBoids => _destroyedBoids;
     public List<BoidAllyBase> AllyBoids => _allyBoids;
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public int NumBoids => _allyBoids.Count;
+    public BoidPlayer Player => _player;
+    public Rect2 SpawningRect => new(Player.GlobalPosition - AreaRect.Size * 0.5f, AreaRect.Size);
     
     [OnReady] private void Ready()
     {
         base._Ready();
         
-        _player.Init("player", _player, this, null, _OnBoidDestroyed);
+        _player.Init("player", _player, this, _OnBoidDestroyed);
         
         _aiSpawningDirector.Init(this, _player);
-
-        _pendingBoidSpawn = SaveDataPlayer.InitialAllyCount;
 
         //AddScore(0, _player.GlobalPosition, false);
         GD.Randomize();
@@ -86,12 +81,21 @@ public partial class Game : Singleton<Game>
 
     public override void _Process(float delta)
     {
-        while (_pendingBoidSpawn > 0 && _allyBoids.Count < SaveDataPlayer.MaxAllyCount)
-        {
-            AddAllyBoid(Database.AllyBoids.GetAllEntries<DataAllyBoid>()[0].Name);
-            _pendingBoidSpawn--;
-        }
+        base._Process(delta);
 
+        if (!_initialSpawn)
+        {
+            // for (int i = 0; i < 50; i++)
+            // {
+            //     BoidEnemyBase boid = _aiSpawningDirector.SpawnEnemyRandom(Database.EnemyBoid("driller"));
+            // }
+            
+            _aiSpawningDirector.SpawnEnemy(Database.EnemyBoid("driller"), new Vector2(100.0f, 0.0f), new Vector2(-50.0f, 0.0f));
+            _aiSpawningDirector.SpawnEnemy(Database.EnemyBoid("driller"), new Vector2(-100.0f, 0.0f), new Vector2(50.0f, 0.0f));
+            
+            _initialSpawn = true;
+        }
+        
         _scoreMultiTimer -= delta;
         if (_scoreMultiTimer < 0.0f)
         {
@@ -131,19 +135,19 @@ public partial class Game : Singleton<Game>
         AddChild(boid);
         _allyBoids.Add(boid);
         _allBoids.Add(boid);
-        boid.Init(droneData.Name, _player, this, _player, _OnBoidDestroyed);
+        boid.Init(droneData.Name, _player, this, _OnBoidDestroyed);
+        boid.SetTarget(BoidBase.TargetType.Ally, _player);
         boid.GlobalPosition(_player.GlobalTransform.origin);
-        FlockingManager.Instance.AddBoid(boid);
+        FlockingManager.Instance.AddBoid(boid, Vector2.Zero);
 
         return true;
     }
 
-    public void AddEnemy(BoidEnemyBase enemy)
+    public void RegisterEnemyBoid(BoidEnemyBase enemy)
     {
         _enemyBoids.Add(enemy);
         _allBoids.Add(enemy);
         enemy.OnBoidDestroyed += _OnBoidDestroyed;
-        FlockingManager.Instance.AddBoid(enemy);
     }
 
     private void _OnBoidDestroyed(BoidBase boid)

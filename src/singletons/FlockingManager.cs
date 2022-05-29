@@ -1,67 +1,84 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 public class FlockingManager : Singleton<FlockingManager>
 {
     public enum Behaviours
     {
-        Flock,
-        Align,
-        Separate,
+        Cohesion,
+        Alignment,
+        Separation,
         Arrive,
         Pursuit,
         Flee,
+        Wander,
+        EdgeRepulsion,
         COUNT,
     }
-    
+
     private struct Boid
     {
+        public bool Alive;
         public Vector2 Position;
         public Vector2 Velocity;
+        public float Damping;
 #if TOOLS
         public Vector2 Steering;
 #endif
+        public float WanderAngle;
         public float MaxSpeed;
-        public float FOV;
+        public float MaxForce;
         public int Behaviours;
         public float[] Weights;
         public Vector2 Target;
+        public float ViewAngle;
     }
 
     private List<Boid> _boids = new(1000);
-    private Dictionary<BoidBase, int> _boidToIndex = new(); 
+    private Dictionary<BoidBase, int> _boidToIndex = new();
     private Dictionary<int, BoidBase> _indexToBoid = new();
-    
+
     public override void _Process(float delta)
     {
         base._Process(delta);
 
+        Rect2 edgeBounds = Game.Instance.SpawningRect;
+
         for (int i = 0; i < _boids.Count; i++)
         {
             Boid boid = _boids[i];
+            if (!boid.Alive)
+                continue;
 
             Vector2 steering = Vector2.Zero;
-            
-            if ((boid.Behaviours & (1 << (int) Behaviours.Flock)) != 0)
-                steering += Steering_Flock(boid, 50.0f, boid.Weights[(int) Behaviours.Flock]);
-            
-            if ((boid.Behaviours & (1 << (int) Behaviours.Align)) != 0)
-                steering += Steering_Align(boid, 50.0f, boid.Weights[(int) Behaviours.Align]);
-            
-            if ((boid.Behaviours & (1 << (int) Behaviours.Separate)) != 0)
-                steering += Steering_Separate(boid, 10.0f, boid.Weights[(int) Behaviours.Separate]);
-            
+
+            if ((boid.Behaviours & (1 << (int) Behaviours.Cohesion)) != 0)
+                steering += Steering_Cohesion(i, 50.0f, boid.Weights[(int) Behaviours.Cohesion]);
+
+            if ((boid.Behaviours & (1 << (int) Behaviours.Alignment)) != 0)
+                steering += Steering_Align(i, 50.0f, boid.Weights[(int) Behaviours.Alignment]);
+
             if ((boid.Behaviours & (1 << (int) Behaviours.Arrive)) != 0)
                 steering += Steering_Arrive(boid, boid.Target, 50.0f, boid.Weights[(int) Behaviours.Arrive]);
 
-            float speed = steering.Length();
-            if (speed > boid.MaxSpeed)
-            {
-                steering /= speed;
-                steering *= boid.MaxSpeed;
-            }
-            boid.Velocity = steering;
+            if ((boid.Behaviours & (1 << (int) Behaviours.Pursuit)) != 0)
+                steering += Steering_Pursuit(boid, boid.Target, boid.Weights[(int) Behaviours.Pursuit]);
+
+            if ((boid.Behaviours & (1 << (int) Behaviours.Wander)) != 0)
+                steering += Steering_Wander(ref boid, boid.Weights[(int) Behaviours.Wander]);
+
+            if ((boid.Behaviours & (1 << (int) Behaviours.EdgeRepulsion)) != 0)
+                steering += Steering_EdgeRepulsion(boid, edgeBounds, boid.Weights[(int) Behaviours.EdgeRepulsion]);
+
+            if ((boid.Behaviours & (1 << (int) Behaviours.Separation)) != 0)
+                steering += Steering_Separate(i, 10.0f, boid.Weights[(int) Behaviours.Separation]);
+            
+            steering = steering.Truncate(boid.MaxForce);
+
+            boid.Velocity = (boid.Velocity + steering).Truncate(boid.MaxSpeed);
+            boid.Velocity *= Mathf.Pow(1.0f - Mathf.Clamp(boid.Damping, 0.0f, 1.0f), delta * 60.0f); // damping
 #if TOOLS
             boid.Steering = steering;
 #endif
@@ -72,8 +89,11 @@ public class FlockingManager : Singleton<FlockingManager>
         for (int i = 0; i < _boids.Count; i++)
         {
             Boid boid = _boids[i];
+            if (!boid.Alive)
+                continue;
+
             BoidBase boidObj = _indexToBoid[i];
-            
+
             boid.Position += boid.Velocity * delta;
             _boids[i] = boid;
 
@@ -81,22 +101,28 @@ public class FlockingManager : Singleton<FlockingManager>
 #if TOOLS
             boidObj.Steering = boid.Steering;
 #endif
-            
+
             boidObj.GlobalTransform = new Transform(Basis.Identity, boid.Position.To3D());
             boidObj.Rotation = new Vector3(0.0f, -Mathf.Atan2(boid.Velocity.x, -boid.Velocity.y), 0.0f);
         }
     }
 
-    public void AddBoid(BoidBase boidObj)
+    public void AddBoid(BoidBase boidObj, Vector2 vel)
     {
         if (_boidToIndex.TryGetValue(boidObj, out int _))
         {
             UpdateBoid(boidObj);
             return;
         }
-        
-        _boids.Add(NewBoid(boidObj));
-        int i = _boids.Count - 1;
+
+        int i = FindEmptyBoidIndex();
+        if (i == -1)
+        {
+            _boids.Add(NewBoid(boidObj, vel));
+            i = _boids.Count - 1;
+        }
+
+        _boids[i] = NewBoid(boidObj, vel);
         _boidToIndex[boidObj] = i;
         _indexToBoid[i] = boidObj;
     }
@@ -105,8 +131,11 @@ public class FlockingManager : Singleton<FlockingManager>
     {
         if (!_boidToIndex.TryGetValue(boidObj, out int i))
             return;
-        
-        _boids.RemoveAt(i);
+
+        _boids[i] = new Boid
+        {
+            Alive = false
+        };
         _boidToIndex.Remove(boidObj);
         _indexToBoid.Remove(i);
     }
@@ -115,85 +144,191 @@ public class FlockingManager : Singleton<FlockingManager>
     {
         if (!_boidToIndex.TryGetValue(boidObj, out int i))
             return;
-        
-        _boids[i] = NewBoid(boidObj);
+
+        Boid boid = NewBoid(boidObj, _boids[i].Velocity);
+        boid.WanderAngle = _boids[i].WanderAngle;
+        _boids[i] = boid;
     }
 
-    private Boid NewBoid(BoidBase boid)
+    private Boid NewBoid(BoidBase boid, Vector2 vel)
     {
         return new Boid()
         {
+            Alive = true,
             Position = boid.GlobalTransform.origin.To2D(),
 #if TOOLS
             Steering = Vector2.Zero,
 #endif
-            Velocity = Vector2.Zero,
+            Velocity = vel,
+            Damping = boid.Damping,
+            WanderAngle = Utils.Rng.Randf() * Mathf.Pi * 2.0f,
             MaxSpeed = boid.MaxVelocity,
+            MaxForce = 1.0f,
             Behaviours = boid.Behaviours,
             Weights = boid.BehaviourWeights,
             Target = boid.TargetPos,
+            ViewAngle = boid.FieldOfView,
         };
     }
 
-    private Vector2 Steering_Flock(Boid boid, float radius, float weight)
+    private int FindEmptyBoidIndex()
     {
-        Vector2 centre = boid.Position;
-        int count = 1;
-        foreach (Boid other in _boids)
+        for (int i = 0; i < _boids.Count; i++)
         {
-            if ((boid.Position - other.Position).LengthSquared() > radius * radius)
-                continue;
+            if (!_boids[i].Alive)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private bool InView(Boid boid, Boid other, float viewDegrees)
+    {
+        Vector2 toOther = other.Position - boid.Position;
+        Vector2 viewDir = Vector2.Up;
+        if (boid.Velocity != Vector2.Zero)
+            viewDir = boid.Velocity.Normalized();
+        float angleRad = viewDir.AngleTo(toOther);
+        return Mathf.Abs(angleRad) < Mathf.Deg2Rad(viewDegrees * 0.5f);
+    }
+
+    private Vector2 Steering_Seek(Boid boid, Vector2 position)
+    {
+        Vector2 desired = (position - boid.Position);
+        desired *= boid.MaxSpeed / desired.Length();
+
+        Vector2 force = desired - boid.Velocity;
+        return force * (boid.MaxForce / boid.MaxSpeed);
+    }
+
+    private Vector2 Steering_Cohesion(int i, float radius, float weight)
+    {
+        Boid boid = _boids[i];
+        Vector2 centre = Vector2.Zero;
+        int count = 0;
+        for (int j = 0; j < _boids.Count; j++)
+        {
+            Boid other = _boids[j];
+            if (i == j) continue;
+            if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
+            if (!InView(boid, other, boid.ViewAngle)) continue;
 
             centre += other.Position;
             count++;
         }
 
-        centre /= count;
-        return (centre - boid.Position) * weight;
-    }
-    
-    private Vector2 Steering_Align(Boid boid, float radius, float weight)
-    {
-        Vector2 meanVel = Vector2.Zero;
-        int count = 0;
-        foreach (Boid other in _boids)
-        {
-            if ((boid.Position - other.Position).LengthSquared() > radius * radius)
-                continue;
+        if (count == 0)
+            return Vector2.Zero;
 
-            meanVel += other.Velocity;
+        centre /= count;
+        return Steering_Seek(boid, centre) * weight;
+    }
+
+    private Vector2 Steering_Align(int i, float radius, float weight)
+    {
+        Boid boid = _boids[i];
+        Vector2 desired = Vector2.Zero;
+        int count = 0;
+        for (int j = 0; j < _boids.Count; j++)
+        {
+            Boid other = _boids[j];
+            if (i == j) continue;
+            if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
+            if (!InView(boid, other, boid.ViewAngle)) continue;
+
+            desired += other.Velocity;
             count++;
         }
 
-        meanVel /= count;
-        Vector2 dVel = meanVel - boid.Velocity;
-        return dVel * weight;
+        if (count == 0)
+            return Vector2.Zero;
+
+        desired /= count;
+        return (desired - boid.Velocity).Truncate(boid.MaxForce) * weight;
     }
 
-    private Vector2 Steering_Separate(Boid boid, float radius, float weight)
+    private Vector2 Steering_Separate(int i, float radius, float weight)
     {
-        Vector2 sumCloseness = Vector2.Zero;;
-        foreach (Boid other in _boids)
+        Boid boid = _boids[i];
+
+        // Vector2 totalForce = Vector2.Zero;
+        // int count = 0;
+        // for (int j = 0; j < _boids.Count; j++)
+        // {
+        //     if (i == j) continue;
+        //     Boid other = _boids[j];
+        //     float dist = (boid.Position - other.Position).Length();
+        //     if (dist > radius)
+        //         continue;
+        //
+        //     Vector2 pushForce = (boid.Position - other.Position);
+        //     totalForce += Vector2.One - (pushForce / radius);
+        // }
+        //
+        // if (count == 0)
+        //     return Vector2.Zero;
+        //
+        // totalForce /= count;
+        // return totalForce * boid.MaxForce;
+
+        Vector2 desiredSum = Vector2.Zero;
+        int count = 0;
+        for (int j = 0; j < _boids.Count; j++)
         {
-            if ((boid.Position - other.Position).LengthSquared() > radius * radius)
+            if (i == j) continue;
+            Boid other = _boids[j];
+            float dist = (boid.Position - other.Position).Length();
+            if (dist > radius)
                 continue;
-
-            float closeness = radius - (boid.Position - other.Position).Length();
-            sumCloseness += (boid.Position - other.Position) * closeness;
-        }
-
-        return sumCloseness * weight;
+        
+            Vector2 desired = (boid.Position - other.Position).Normalized() * boid.MaxSpeed * (dist / radius);
+            desiredSum += desired;
+            count++;
+        }   
+        
+        if (count == 0)
+            return Vector2.Zero;
+        
+        return (desiredSum - boid.Velocity) * weight;
     }
     
     private Vector2 Steering_Arrive(Boid boid, Vector2 position, float radius, float weight)
     {
         float dist = (boid.Position - position).Length();
-        if (dist < radius)
+        if (dist > radius)
         {
-            float stopPercent = 0.5f;
-            float t = (dist - stopPercent) / (radius - stopPercent);
-            return (position - boid.Position) * t * weight;
+            return Steering_Seek(boid, position) * weight;
         }
-        return (position - boid.Position) * weight;
+
+        Vector2 desired = position - boid.Position;
+        desired = desired.Normalized() * boid.MaxSpeed * (dist / radius);
+        return (desired - boid.Velocity) * weight;
+    }
+    
+    private Vector2 Steering_Pursuit(Boid boid, Vector2 position, float weight)
+    {
+        return Steering_Seek(boid, position) * weight;
+    }
+    
+    private Vector2 Steering_Wander(ref Boid boid, float weight)
+    {
+        Vector2 circleCentre = (boid.Velocity == Vector2.Zero ? Vector2.Up : boid.Velocity.Normalized()) * 5.0f;
+        float circleRadius = 5.0f;
+        Vector2 displacement = new Vector2(Mathf.Cos(boid.WanderAngle), Mathf.Sin(boid.WanderAngle)).Normalized() * circleRadius;
+        boid.WanderAngle += (Utils.Rng.Randf() - 0.5f) * TimeSystem.Delta * 100.0f;
+        
+        Vector2 desired = circleCentre + displacement;
+        return desired * weight;
+    }
+    
+    private Vector2 Steering_EdgeRepulsion(Boid boid, Rect2 bounds, float weight)
+    {
+        if (bounds.HasPoint(boid.Position))
+            return Vector2.Zero;
+
+        Vector2 closestPointOnEdge = new Vector2(Mathf.Max(Mathf.Min(boid.Position.x, bounds.End.x), bounds.Position.x),
+            Mathf.Max(Mathf.Min(boid.Position.y, bounds.End.y), bounds.Position.y));
+
+        return Steering_Seek(boid, closestPointOnEdge) * weight;
     }
 }

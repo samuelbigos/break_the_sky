@@ -19,7 +19,7 @@ public static class Utils
         spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
     }
 
-    public static float Randf01()
+    public static float RandfUnit()
     {
         return Rng.RandfRange(-1.0f, 1.0f);
     }
@@ -42,5 +42,20 @@ public static class Utils
         return t < 0.5f
             ? 4.0f * t * t * t
             : 0.5f * Mathf.Pow(2.0f * t - 2.0f, 3.0f) + 1.0f;
+    }
+
+    public static Vector2 RandPointOnEdge(this Rect2 rect)
+    {
+        Vector2 r = new Vector2(Rng.Randf(), Rng.Randf());
+        if (Rng.Randf() > 0.5f)
+        {
+            r.x = Mathf.Floor(Rng.Randf() + 0.5f);
+        }
+        else
+        {
+            r.y = Mathf.Floor(Rng.Randf() + 0.5f);
+        }
+
+        return rect.Position + r * rect.Size;
     }
 }

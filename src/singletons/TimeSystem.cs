@@ -5,6 +5,7 @@ using System.Diagnostics;
 public class TimeSystem : Node
 {
     public static float UnscaledDelta;
+    public static float Delta;
     
     private Stopwatch _stopwatch = new Stopwatch();
     private float _stopwatchTickMs;
@@ -20,7 +21,8 @@ public class TimeSystem : Node
     public override void _Process(float delta)
     {
         base._Process(delta);
-        
+
+        Delta = delta;
         UnscaledDelta = _stopwatch.ElapsedTicks * _stopwatchTickMs;
         _stopwatch.Restart();
     }

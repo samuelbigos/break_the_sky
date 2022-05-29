@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
 [ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://assets/material/water_mesh_mat.tres" type="Material" id=9]
 [ext_resource path="res://scenes/pickups/PickupMaterial.tscn" type="PackedScene" id=10]
 [ext_resource path="res://scenes/debug/DebugBoid.tscn" type="PackedScene" id=11]
+[ext_resource path="res://assets/mesh/ui/selection_circle.obj" type="ArrayMesh" id=12]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -26,11 +27,15 @@ shader_param/blend_depth = 0.003
 [sub_resource type="SpatialMaterial" id=2]
 flags_unshaded = true
 
+[sub_resource type="SpatialMaterial" id=4]
+flags_unshaded = true
+
 [node name="BoidBase" type="Area"]
 script = ExtResource( 4 )
+SelectedIndicatorPath = NodePath("SelectionIndicator")
 MeshPath = NodePath("Mesh")
 TrailPath = NodePath("BoidTrail")
-BehaviourWeights = PoolRealArray( 0, 0, 0, 0, 0, 0 )
+BehaviourWeights = PoolRealArray( 0, 0, 0, 0, 0, 0, 0, 0 )
 DebugBoid = false
 DebugBoidScene = ExtResource( 11 )
 MaxVelocity = 250.0
@@ -62,3 +67,10 @@ stream = ExtResource( 7 )
 
 [node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
+
+[node name="SelectionIndicator" type="MeshInstance" parent="."]
+transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 )
+visible = false
+material_override = SubResource( 4 )
+mesh = ExtResource( 12 )
+material/0 = null

@@ -21,6 +21,7 @@ public class GameCamera : Camera
     private float _noiseY = 0.0f;
     private float _stateTransitionTimer;
     private Transform _initialTrans;
+    private Vector2 _cachedMousePos;
     
     public void AddTrauma(float trauma)
     {
@@ -90,9 +91,8 @@ public class GameCamera : Camera
         
         VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
         
-        Debug.Assert(_player != null);
-        
         // for clouds
+        Debug.Assert(_player != null);
         Vector3 basePos = _player.GlobalTransform.origin;
         basePos.y = GlobalTransform.origin.y;
         BaseTransform = new Transform(GlobalTransform.basis, basePos);
@@ -108,14 +108,32 @@ public class GameCamera : Camera
         {
             GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta);
         }
+
+        if (Input.IsActionJustReleased("zoom_in"))
+        {
+            _initialTrans = new Transform(_initialTrans.basis, _initialTrans.origin + Vector3.Down * 5.0f);
+        }
+        
+        if (Input.IsActionJustReleased("zoom_out"))
+        {
+            _initialTrans = new Transform(_initialTrans.basis, _initialTrans.origin + Vector3.Up * 5.0f);
+        }
     }
 
     private Transform GetTransform(StateMachine_Game.States state, float delta)
     {
         switch (state)
         {
-            case StateMachine_Game.States.Play:
             case StateMachine_Game.States.TacticalPause:
+            {
+                Vector2 cameraMouseOffset = _cachedMousePos - _player.GlobalPosition;
+                Vector2 cameraOffset = cameraMouseOffset * 0.33f;
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
+                cameraTransform.origin.y = _initialTrans.origin.y;
+
+                return cameraTransform;
+            }
+            case StateMachine_Game.States.Play:
             {
                 Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
@@ -154,5 +172,10 @@ public class GameCamera : Camera
     private void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {
         _stateTransitionTimer = _stateTransitionTime;
+
+        if (state == StateMachine_Game.States.TacticalPause)
+        {
+            _cachedMousePos = MousePosition();
+        }
     }
 }

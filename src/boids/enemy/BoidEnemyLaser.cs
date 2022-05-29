@@ -56,12 +56,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     {
         base._Process(delta);
 
-#if TOOLS
-        if (_target == null)
-            return;
-#endif
-
-        float distToTarget = (GlobalPosition - _target.GlobalPosition).Length();
+        float distToTarget = (GlobalPosition - TargetPos).Length();
         if (distToTarget < _targetLaserDist && _laserState == LaserState.Inactive)
         {
             MaxVelocity = 50.0f;

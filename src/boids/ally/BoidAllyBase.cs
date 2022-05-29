@@ -28,6 +28,19 @@ public class BoidAllyBase : BoidBase
         _baseScale = _mesh.Scale;
 
         _sfxShootPlayer = GetNode<AudioStreamPlayer2D>(_sfxShootPlayerPath);
+
+        SpatialMaterial mat = _selectedIndicator.GetActiveMaterial(0) as SpatialMaterial;
+        mat.AlbedoColor = ColourManager.Instance.Ally;
+    }
+
+    public override void _Process(float delta)
+    {
+        base._Process(delta);
+
+        if (_targetType == TargetType.None)
+        {
+            SetTarget(TargetType.Ally, _player);
+        }
     }
 
     protected virtual void _Shoot(Vector2 dir)

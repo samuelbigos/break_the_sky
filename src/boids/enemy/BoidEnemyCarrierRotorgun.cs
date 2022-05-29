@@ -39,10 +39,10 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
 
         if (!_destroyed)
         {
-            Vector2 toTarget = (_target.GlobalPosition - GlobalPosition).Normalized();
+            Vector2 toTarget = (TargetPos - GlobalPosition).Normalized();
             Vector2 awayParent = (_lock.GlobalTransform.origin.To2D() - GlobalPosition).Normalized();
             
-            float dist = (_target.GlobalPosition - GlobalPosition).Length();
+            float dist = (TargetPos - GlobalPosition).Length();
             _shotCooldown -= delta;
             if (toTarget.Dot(awayParent) > 0.0f && _shotCooldown < 0.0f && dist < _bulletRange)
             {
@@ -55,7 +55,7 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
     private void Shoot(Vector2 dir)
     {
         Bullet bullet = _bulletScene.Instance() as Bullet;
-        dir = (_target.GlobalPosition - GlobalPosition).Normalized();
+        dir = (TargetPos - GlobalPosition).Normalized();
         Vector2 spawnPos = GlobalPosition + dir * 80.0f;
         bullet.Init(spawnPos, dir * _bulletSpeed, Alignment, 1.0f);
         _game.AddChild(bullet);

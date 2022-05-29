@@ -17,6 +17,7 @@ uniform vec4 u_transparent_col : hint_color;
 uniform vec4 u_transparent_tex;
 
 // dither
+uniform bool u_do_dither = false;
 uniform sampler2D u_dither_tex;
 uniform int u_bit_depth = 32;
 uniform float u_contrast = 0;
@@ -130,6 +131,7 @@ void fragment()
 		vertPos.x = -vertPos.x;
 		
 	vec3 pos = scale_pos(vertPos);
+	vec3 col;
 	
 	// clouds
 	vec3 normal;
@@ -185,8 +187,7 @@ void fragment()
 		shadow = texture(u_boid_vel_tex, uv + 0.5).a;
 	}
 	
-	// dither 
-	vec3 dithered;
+	// dither
 	float dither_threshold;
 	{
 		lum = min(lum, 1.0 - shadow);
@@ -196,25 +197,18 @@ void fragment()
 		vec2 noise_uv = pos.xz * inv_noise_size * u_scale * float(u_dither_size);
 		dither_threshold = texture(u_dither_tex, noise_uv).r;
 		
-		dither_threshold = dither_threshold * 0.99 + 0.005;
-		
+		dither_threshold = dither_threshold * 0.99 + 0.005;		
 		float ramp_val = lum < dither_threshold ? 0.0f : 1.0f;
-		dithered = mix(u_colour_b.rgb, u_colour_a.rgb, step(ramp_val, 0.0));
+		
+		if (u_do_dither)
+		{
+			col = mix(u_colour_b.rgb, u_colour_a.rgb, step(ramp_val, 0.0));
+		}
+		else
+		{
+			col = mix(u_colour_b.rgb, u_colour_a.rgb, lum);
+		}
 	}
-	
-	// displacement
-	float displacement = 0.0;
-//	if (u_displace)
-//	{
-//		vec2 texSize = vec2(textureSize(u_displacement_map, 0));
-//		vec2 uv = UV - 0.5;
-//		uv.x *= (u_plane_size.x / texSize.x) * 2.0;
-//		uv.y *= (u_plane_size.y / texSize.y) * 2.0;
-//		uv.x += u_shadow_offset.x / u_plane_size.x;
-//		uv.y += u_shadow_offset.y / u_plane_size.y;
-//		displacement = texture(u_displacement_map, uv + 0.5).r;
-//		displacement *= 0.1;
-//	}
 
 	// transparency
 	float transparent;
@@ -232,11 +226,11 @@ void fragment()
 		uv.y += u_shadow_offset.y / u_plane_size.y;
 		transparent = texture(u_boid_vel_tex, uv + 0.5).a;
 		
-		transparent_col = mix(u_transparent_col.rgb, dithered, step(0.5, dither_threshold));
+		transparent_col = mix(u_transparent_col.rgb, col, step(0.5, dither_threshold));
 	}
 
 	//ALBEDO = mix(u_colour_a.rgb, u_colour_b.rgb, d);
-	ALBEDO = mix(dithered, transparent_col, transparent);
+	ALBEDO = mix(col, transparent_col, transparent);
 	//ALBEDO = mix(vec3(0.0), ALBEDO, edge);
 	//ALBEDO = vec3(edge);
 	ALPHA = clouds;

@@ -17,5 +17,6 @@ public partial class ColourManager : Singleton<ColourManager>
 	[Export] public Color Four;
 	[Export] public Color Accent;
 	[Export] public Color Red;
+	[Export] public Color Ally;
 	[Export] public Color White;
 }

@@ -23,32 +23,29 @@ public class BoidAllyBomber : BoidAllyBase
 
     public override void _Process(float delta)
     {
-        if (!IsInstanceValid(_target) || _target.Destroyed)
-            _target = _player;
-        
         base._Process(delta);
 
         // targeting
-        if (_canShoot && _target == _player)
+        if (_canShoot && _targetType == TargetType.Ally)
         {
             AcquireTarget();
         }
         
-        if (_target is BoidEnemyBase)
+        if (_targetType == TargetType.Enemy)
         {
             // disengage
-            float dist = (_target.GlobalPosition - GlobalPosition).LengthSquared();
+            float dist = (TargetPos - GlobalPosition).LengthSquared();
             if (dist > Mathf.Pow(_targetAcquireRadius, 2.0f))
             {
-                ((BoidEnemyBase) _target).IsTargetted = false;
-                _target = _player;
+                ((BoidEnemyBase) _targetBoid).IsTargetted = false;
+                SetTarget(TargetType.Ally, _player);
             }
             
             // shooting
-            float dot = Velocity.Normalized().Dot((_target.GlobalPosition - GlobalPosition).Normalized());
+            float dot = Velocity.Normalized().Dot((TargetPos - GlobalPosition).Normalized());
             if (_canShoot && dist < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
             {
-                _Shoot((_target.GlobalPosition - GlobalPosition).Normalized());
+                _Shoot((TargetPos - GlobalPosition).Normalized());
                 
                 SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Flee, true);
                 SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, false);
@@ -58,9 +55,9 @@ public class BoidAllyBomber : BoidAllyBase
 
         // resupply
         _shootCooldownTimer -= delta;
-        if (_target == _player)
+        if (_targetType == TargetType.Ally)
         {
-            float dist = (_target.GlobalPosition - GlobalPosition).LengthSquared();
+            float dist = (TargetPos - GlobalPosition).LengthSquared();
             if (!_canShoot && _shootCooldownTimer < 0.0f && dist < Mathf.Pow(_resupplyRadius, 2.0f))
             {
                 _canShoot = true;
@@ -68,11 +65,11 @@ public class BoidAllyBomber : BoidAllyBase
         }
         
         _fleeTimer -= delta;
-        if (!_canShoot && _fleeTimer <= 0.0f || _target == _player)
+        if (!_canShoot && _fleeTimer <= 0.0f || _targetType == TargetType.Ally)
         {
             SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Flee, false);
             SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
-            _target = _player;
+            SetTarget(TargetType.Ally, _player);
         }
     }
 
@@ -95,7 +92,7 @@ public class BoidAllyBomber : BoidAllyBase
         if (target != null)
         {
             target.IsTargetted = true;
-            _target = target;
+            SetTarget(TargetType.Enemy, target);
         }
     }
 
@@ -107,7 +104,7 @@ public class BoidAllyBomber : BoidAllyBase
         Debug.Assert(bullet != null);
         _game.AddChild(bullet);
         bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
-        bullet.Target = _target;
+        bullet.Target = _targetBoid;
         
         _canShoot = false;
         _shootCooldownTimer = _shootCooldown;

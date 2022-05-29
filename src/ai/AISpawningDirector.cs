@@ -347,18 +347,19 @@ public class AISpawningDirector : Node
     public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
     {
         // spawn at a random location around the spawning circle centred on the player
-        float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
-        Vector2 spawnPos = _player.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * _game.SpawningRadius;
-        return SpawnEnemy(id, spawnPos);
+        Vector2 spawnPos = Utils.RandPointOnEdge(_game.SpawningRect);
+        Vector2 spawnVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * 100.0f;
+        return SpawnEnemy(id, spawnPos, spawnVel);
     }
 
-    private BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos)
+    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
     {
         BoidEnemyBase enemy = id.Scene.Instance<BoidEnemyBase>();
         AddChild(enemy);
         enemy.GlobalPosition = pos;
-        enemy.Init(id.Name, _player, _game, _player, null);
-        _game.AddEnemy(enemy);
+        enemy.Init(id.Name, _player, _game, null);
+        _game.RegisterEnemyBoid(enemy);
+        FlockingManager.Instance.AddBoid(enemy, vel);
         _activeEnemies.Add(enemy);
         SaveDataPlayer.SetSeenEnemy(id.Name);
         return enemy;
@@ -373,7 +374,7 @@ public class AISpawningDirector : Node
             float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
             float escortRadius = 50.0f;
             Vector2 spawnPos = leader.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * escortRadius;
-            BoidEnemyBase escort = SpawnEnemy(id, spawnPos);
+            BoidEnemyBase escort = SpawnEnemy(id, spawnPos, Vector2.Zero);
             escortBoids.Add(escort);
             escort.SetupEscort(leader);
         }

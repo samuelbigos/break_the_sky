@@ -12,15 +12,25 @@ public partial class BoidBase : Area
         Enemy
     };
 
+    public enum TargetType
+    {
+        None,
+        Ally,
+        Enemy,
+        Position
+    }
+
     #region Export
 
-    [Export(PropertyHint.Flags, "Flock,Align,Separate,Arrive,Pursuit,Flee")] public int Behaviours;
+    [Export(PropertyHint.Flags, "Cohesion,Alignment,Separation,Arrive,Pursuit,Flee,Wander,EdgeRepulsion")] public int Behaviours;
     [Export] public float[] BehaviourWeights;
 
     [Export] public bool DebugBoid = true;
     [Export] public PackedScene DebugBoidScene;
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
+    [Export] public float FieldOfView = 360.0f;
+    
     [Export] public float TargetVectoringExponent = 1.0f;
     [Export] public float Damping = 0.05f;
     [Export] public float DestroyTime = 3.0f;
@@ -48,6 +58,7 @@ public partial class BoidBase : Area
     
     [Export] protected PackedScene _pickupMaterialScene;
     
+    [OnReadyGet] protected MeshInstance _selectedIndicator;
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
     [OnReadyGet] private BoidTrail _trail;
 
@@ -65,13 +76,38 @@ public partial class BoidBase : Area
     public bool Destroyed => _destroyed;    
     public string ID = "";
     public Vector2 Velocity;
-    public Vector2 Steering;
-    public Vector2 TargetPos;
+    public Vector2 Steering; 
     
     public Vector2 GlobalPosition
     {
         get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
         set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
+    }
+    
+    public bool Selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            _selectedIndicator.Visible = _selected;
+        }
+    }
+
+    public Vector2 TargetPos
+    {
+        get
+        {
+            switch (_targetType)
+            {
+                case TargetType.Ally:
+                case TargetType.Enemy:
+                    return _targetBoid.GlobalPosition;
+                case TargetType.Position:
+                    return _targetPos;
+            }
+            return GlobalPosition;
+        }
     }
 
     #endregion
@@ -80,7 +116,9 @@ public partial class BoidBase : Area
 
     protected BoidPlayer _player;
     protected Game _game;
-    protected BoidBase _target;
+    protected TargetType _targetType = TargetType.None;
+    protected BoidBase _targetBoid;
+    protected Vector2 _targetPos;
     protected bool _destroyed;
     protected Vector3 _baseScale;
     protected DebugBoid _debugBoid;
@@ -101,6 +139,7 @@ public partial class BoidBase : Area
     private AudioStreamPlayer2D _sfxOnDestroy;
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
+    private bool _selected;
     
     private Color MeshColour
     {
@@ -113,11 +152,10 @@ public partial class BoidBase : Area
 
     #endregion
 
-    public void Init(string id, BoidPlayer player, Game game, BoidBase target, Action<BoidBase> onDestroy)
+    public void Init(string id, BoidPlayer player, Game game, Action<BoidBase> onDestroy)
     {
         _player = player;
         _game = game;
-        _target = target;
         ID = id;
         OnBoidDestroyed += onDestroy;
     }
@@ -162,8 +200,12 @@ public partial class BoidBase : Area
     {
         base._Process(delta);
 
-        if (_target != null)
-            TargetPos = _target.GlobalTransform.origin.To2D();
+        if (_targetType == TargetType.Enemy || _targetType == TargetType.Ally)
+        {
+            if (!IsInstanceValid(_targetBoid) || _targetBoid.Destroyed)
+                SetTarget(TargetType.None);
+        }
+
         FlockingManager.Instance.UpdateBoid(this);
         
         if (!_destroyed)
@@ -214,15 +256,18 @@ public partial class BoidBase : Area
         
         _sfxOnHit.Play();
 
-        Particles hitParticles = _hitParticlesScene.Instance<Particles>();
-        _game.AddChild(hitParticles);
-        ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
-        Debug.Assert(mat != null);
-        Vector3 fromCentre = pos - GlobalTransform.origin;
-        mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
-        hitParticles.GlobalPosition(pos + Vector3.Up * 5.0f);
-        hitParticles.Emitting = true;
-        _hitParticles.Add(hitParticles);
+        if (bulletVel != Vector2.Zero)
+        {
+            Particles hitParticles = _hitParticlesScene.Instance<Particles>();
+            _game.AddChild(hitParticles);
+            ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
+            Debug.Assert(mat != null);
+            Vector3 fromCentre = pos - GlobalTransform.origin;
+            mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
+            hitParticles.GlobalPosition(pos + Vector3.Up * 5.0f);
+            hitParticles.Emitting = true;
+            _hitParticles.Add(hitParticles);
+        }
 
         // does this cause us to go past a new damage threshold?
         if (_damagedParticles.Count < _damageVfxCount)
@@ -282,16 +327,24 @@ public partial class BoidBase : Area
         }
     }
 
-    protected void SetSteeringBehaviourEnabled(FlockingManager.Behaviours behaviour, bool enabled)
+    protected void SetSteeringBehaviourEnabled(FlockingManager.Behaviours behaviour, bool enabled, float weight = 1.0f)
     {
         if (enabled)
         {
             Behaviours |= (1 << (int) behaviour);
+            BehaviourWeights[(int) behaviour] = weight;
         }
         else
         {
             Behaviours &= ~ (1 << (int) behaviour);
         }
+    }
+
+    public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2())
+    {
+        _targetType = type;
+        _targetBoid = boid;
+        _targetPos = pos;
     }
 
     public virtual void _OnBoidAreaEntered(Area area)
