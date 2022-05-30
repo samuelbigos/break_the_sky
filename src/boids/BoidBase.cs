@@ -25,8 +25,6 @@ public partial class BoidBase : Area
     [Export(PropertyHint.Flags, "Cohesion,Alignment,Separation,Arrive,Pursuit,Flee,Wander,EdgeRepulsion")] public int Behaviours;
     [Export] public float[] BehaviourWeights;
 
-    [Export] public bool DebugBoid = true;
-    [Export] public PackedScene DebugBoidScene;
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
     [Export] public float FieldOfView = 360.0f;
@@ -121,7 +119,6 @@ public partial class BoidBase : Area
     protected Vector2 _targetPos;
     protected bool _destroyed;
     protected Vector3 _baseScale;
-    protected DebugBoid _debugBoid;
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
     protected virtual Color BaseColour => ColourManager.Instance.Secondary;
@@ -183,17 +180,6 @@ public partial class BoidBase : Area
         
         if (Game.Instance != null)
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
-        
-#if TOOLS
-        if (DebugBoid)
-        {
-            _debugBoid = DebugBoidScene.Instance<DebugBoid>();
-            AddChild(_debugBoid);
-            _debugBoid.Owner = this;
-            _mesh.Visible = false;
-            _trail.Visible = false;
-        }
-#endif
     }
 
     public override void _Process(float delta)

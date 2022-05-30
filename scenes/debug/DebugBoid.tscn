@@ -1,6 +1,4 @@
-[gd_scene load_steps=3 format=2]
-
-[ext_resource path="res://src/debug/DebugBoid.cs" type="Script" id=1]
+[gd_scene load_steps=2 format=2]
 
 [sub_resource type="SpatialMaterial" id=1]
 flags_unshaded = true
@@ -9,4 +7,3 @@ vertex_color_use_as_albedo = true
 
 [node name="DebugBoid" type="ImmediateGeometry"]
 material_override = SubResource( 1 )
-script = ExtResource( 1 )

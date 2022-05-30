@@ -64,7 +64,7 @@ public class FlockingManager : Singleton<FlockingManager>
                 steering += Steering_Align(i, 50.0f, boid.Weights[(int) Behaviours.Alignment]);
 
             if ((boid.Behaviours & (1 << (int) Behaviours.Arrive)) != 0)
-                steering += Steering_Arrive(boid, boid.Target, 50.0f, boid.Weights[(int) Behaviours.Arrive]);
+                steering += Steering_Arrive(boid, boid.Target, 50.0f) * boid.Weights[(int) Behaviours.Arrive];
 
             if ((boid.Behaviours & (1 << (int) Behaviours.Pursuit)) != 0)
                 steering += Steering_Pursuit(boid, boid.Target, boid.Weights[(int) Behaviours.Pursuit]);
@@ -73,11 +73,15 @@ public class FlockingManager : Singleton<FlockingManager>
                 steering += Steering_EdgeRepulsion(boid, EdgeBounds, boid.Weights[(int) Behaviours.EdgeRepulsion]);
 
             if ((boid.Behaviours & (1 << (int) Behaviours.Separation)) != 0)
-                steering += Steering_Separate(i, 10.0f, boid.Weights[(int) Behaviours.Separation]);
+                steering += Steering_Separate(i, 10.0f) * boid.Weights[(int) Behaviours.Separation];
             
-            steering = steering.Truncate(boid.MaxForce);
+            // truncate by max force per unit time
+            // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
+            steering.Limit(boid.MaxForce * delta);
 
-            boid.Velocity = (boid.Velocity + steering).Truncate(boid.MaxSpeed);
+            boid.Velocity += steering;
+            boid.Velocity.Limit(boid.MaxSpeed);
+            
             boid.Steering = steering;
             if (boid.Velocity != Vector2.Zero)
                 boid.Heading = boid.Velocity.Normalized();
@@ -217,13 +221,26 @@ public class FlockingManager : Singleton<FlockingManager>
         return Mathf.Abs(angleRad) < Mathf.Deg2Rad(viewDegrees * 0.5f);
     }
 
-    private Vector2 Steering_Seek(Boid boid, Vector2 position)
+    private static Vector2 Steering_Seek(Boid boid, Vector2 position)
     {
-        Vector2 desired = (position - boid.Position);
+        Vector2 desired = position - boid.Position;
         desired *= boid.MaxSpeed / desired.Length();
 
         Vector2 force = desired - boid.Velocity;
-        return force * (boid.MaxForce / boid.MaxSpeed);
+        return force.Normalized() * boid.MaxForce;
+    }
+    
+    private static Vector2 Steering_Arrive(Boid boid, Vector2 position, float radius)
+    {
+        float dist = (boid.Position - position).Length();
+        if (dist > radius)
+        {
+            return Steering_Seek(boid, position);
+        }
+        Vector2 desired = position - boid.Position;
+        desired.SetMag(boid.MaxSpeed * (dist / radius));
+        Vector2 force = desired - boid.Velocity;
+        return force.Limit(boid.MaxForce);
     }
 
     private Vector2 Steering_Cohesion(int i, float radius, float weight)
@@ -269,10 +286,11 @@ public class FlockingManager : Singleton<FlockingManager>
             return Vector2.Zero;
 
         desired /= count;
-        return (desired - boid.Velocity).Truncate(boid.MaxForce) * weight;
+        Vector2 force = desired - boid.Velocity;
+        return force.Limit(boid.MaxForce) * weight;
     }
 
-    private Vector2 Steering_Separate(int i, float radius, float weight)
+    private Vector2 Steering_Separate(int i, float radius)
     {
         Boid boid = _boids[i];
 
@@ -313,23 +331,11 @@ public class FlockingManager : Singleton<FlockingManager>
         
         if (count == 0)
             return Vector2.Zero;
-        
-        return (desiredSum - boid.Velocity) * weight;
-    }
-    
-    private Vector2 Steering_Arrive(Boid boid, Vector2 position, float radius, float weight)
-    {
-        float dist = (boid.Position - position).Length();
-        if (dist > radius)
-        {
-            return Steering_Seek(boid, position) * weight;
-        }
 
-        Vector2 desired = position - boid.Position;
-        desired = desired.Normalized() * boid.MaxSpeed * (dist / radius);
-        return (desired - boid.Velocity) * weight;
+        Vector2 force = desiredSum - boid.Velocity;
+        return force.Limit(boid.MaxForce);
     }
-    
+
     private Vector2 Steering_Pursuit(Boid boid, Vector2 position, float weight)
     {
         return Steering_Seek(boid, position) * weight;
@@ -421,7 +427,7 @@ public class FlockingManager : Singleton<FlockingManager>
             _st.AddColor(Colors.Red);
             _st.AddVertex(boid.Position.To3D());
             _st.AddColor(Colors.Red);
-            _st.AddVertex((boid.Position + boid.Steering * 10.0f).To3D());
+            _st.AddVertex((boid.Position + boid.Steering * 0.25f / TimeSystem.Delta).To3D());
             
             _st.AddIndex(i * 4 + 0);
             _st.AddIndex(i * 4 + 1);

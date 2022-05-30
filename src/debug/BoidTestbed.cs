@@ -19,21 +19,25 @@ public partial class BoidTestbed : Spatial
 
         float[] weights = new[] {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
         float maxSpeed = 100.0f;
-        float maxForce = 1.0f;
+        float maxForce = 200.0f;
         
-        FlockingManager.Instance.EdgeBounds = new Rect2(-120.0f, -80.0f, 240.0f, 160.0f);
+        Vector2 screenBounds = GetViewport().Size - Vector2.One * 20.0f;
+        Vector3 origin = _camera.ProjectRayOrigin(screenBounds);
+        Vector3 normal = _camera.ProjectRayNormal(screenBounds);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
+        FlockingManager.Instance.EdgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
 
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     FlockingManager.Instance.AddBoid(new Vector2((i - 5) * 10.0f, 0.0f), Vector2.Up * 100.0f, maxSpeed, maxForce, behaviours,
-        //         weights, Vector2.Zero, 270.0f);
-        // }
+        for (int i = 0; i < 10; i++)
+        {
+            _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2((i - 5) * 10.0f, 0.0f), Vector2.Up * 100.0f, maxSpeed, maxForce, behaviours,
+                weights, Vector2.Zero, 270.0f));
+        }
         
-        // FlockingManager.Instance.AddBoid(new Vector2(-50.0f, 0.0f), Vector2.Right * 50.0f, maxSpeed, maxForce, behaviours,
-        //     weights, Vector2.Zero, 270.0f);
-
-        _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(50.0f, 0.0f), Vector2.Left * 50.0f, maxSpeed,
-            maxForce, behaviours, weights, Vector2.Zero, 270.0f));
+        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(-50.0f, 0.0f), Vector2.Right * 50.0f, maxSpeed, maxForce, behaviours,
+        //     weights, Vector2.Zero, 270.0f));
+        //
+        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(50.0f, 0.0f), Vector2.Left * 50.0f, maxSpeed,
+        //     maxForce, behaviours, weights, Vector2.Zero, 270.0f));
     }
 
     public override void _Process(float delta)
@@ -50,7 +54,6 @@ public partial class BoidTestbed : Spatial
                 Vector3 normal = _camera.ProjectRayNormal(pos);
                 Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
                 Vector2 target = new(hit.x, hit.z);
-                GD.Print(target);
                 boid.Target = target;
                 FlockingManager.Instance.SetBoid(boid);
             }

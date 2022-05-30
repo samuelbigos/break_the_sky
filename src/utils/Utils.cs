@@ -23,20 +23,7 @@ public static class Utils
     {
         return Rng.RandfRange(-1.0f, 1.0f);
     }
-    
-    public static Vector2 Truncate(this Vector2 vec, float vMax)
-    {
-        float length = vec.Length();
-        if (length == 0.0f)
-        {
-            return vec;
-        }
 
-        float i = vMax / vec.Length();
-        i = Mathf.Min(i, 1.0f);
-        return vec * i;
-    }
-    
     public static float Ease_CubicInOut(float t) 
     {
         return t < 0.5f
@@ -57,5 +44,25 @@ public static class Utils
         }
 
         return rect.Position + r * rect.Size;
+    }
+    
+    public static Vector2 Limit(ref this Vector2 vec, float vMax)
+    {
+        float length = vec.Length();
+        if (length == 0.0f)
+        {
+            return vec;
+        }
+
+        float i = vMax / length;
+        i = Mathf.Min(i, 1.0f);
+        vec *= i;
+        return vec;
+    }
+
+    public static Vector2 SetMag(ref this Vector2 vec, float vMag)
+    {
+        vec = vec.Normalized() * vMag;
+        return vec;
     }
 }

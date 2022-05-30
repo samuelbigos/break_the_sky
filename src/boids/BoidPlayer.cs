@@ -13,7 +13,6 @@ public class BoidPlayer : BoidBase
 
         _sfxPickup = GetNode<AudioStreamPlayer2D>(_sfxPickupPath);
 
-        _debugBoid?.QueueFree();
         _mesh.Visible = true;
     }
 
