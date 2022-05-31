@@ -3,12 +3,12 @@ using Godot;
 public static class Utils
 {
     public static RandomNumberGenerator Rng = new RandomNumberGenerator();
-    
+
     public static Vector2 To2D(this Vector3 vec)
     {
         return new Vector2(vec.x, vec.z);
     }
-    
+
     public static Vector3 To3D(this Vector2 vec)
     {
         return new Vector3(vec.x, 0.0f, vec.y);
@@ -24,7 +24,7 @@ public static class Utils
         return Rng.RandfRange(-1.0f, 1.0f);
     }
 
-    public static float Ease_CubicInOut(float t) 
+    public static float Ease_CubicInOut(float t)
     {
         return t < 0.5f
             ? 4.0f * t * t * t
@@ -45,7 +45,7 @@ public static class Utils
 
         return rect.Position + r * rect.Size;
     }
-    
+
     public static Vector2 Limit(ref this Vector2 vec, float vMax)
     {
         float length = vec.Length();
@@ -65,4 +65,16 @@ public static class Utils
         vec = vec.Normalized() * vMag;
         return vec;
     }
+
+    public static Vector2 ParallelComponent(this Vector2 vec, Vector2 unitBasis)
+    {
+        float projection = vec.Dot(unitBasis);
+        return unitBasis * projection;
+    }
+
+    public static Vector2 PerpendicularComponent(this Vector2 vec, Vector2 unitBasis)
+    {
+        return vec - vec.ParallelComponent(unitBasis);
+    }
+
 }

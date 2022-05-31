@@ -12,32 +12,71 @@ public partial class BoidTestbed : Spatial
     
     [OnReady] private void Ready()
     {
-        int behaviours = 0;
-        behaviours |= 1 << (int) FlockingManager.Behaviours.Separation;
-        behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
-        behaviours |= 1 << (int) FlockingManager.Behaviours.Arrive;
-
-        float[] weights = new[] {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-        float maxSpeed = 100.0f;
-        float maxForce = 200.0f;
-        
         Vector2 screenBounds = GetViewport().Size - Vector2.One * 20.0f;
         Vector3 origin = _camera.ProjectRayOrigin(screenBounds);
         Vector3 normal = _camera.ProjectRayNormal(screenBounds);
         Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
-        FlockingManager.Instance.EdgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
-
-        for (int i = 0; i < 10; i++)
+        Rect2 edgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
+        FlockingManager.Instance.EdgeBounds = edgeBounds;
+        
+        // allies
         {
-            _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2((i - 5) * 10.0f, 0.0f), Vector2.Up * 100.0f, maxSpeed, maxForce, behaviours,
-                weights, Vector2.Zero, 270.0f));
+            int behaviours = 0;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Separation;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Arrive;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Alignment;
+
+            float[] weights = new float[(int) FlockingManager.Behaviours.COUNT];
+            weights[(int) FlockingManager.Behaviours.Separation] = 2.0f;
+            weights[(int) FlockingManager.Behaviours.EdgeRepulsion] = 1.0f;
+            weights[(int) FlockingManager.Behaviours.Arrive] = 1.0f;
+            weights[(int) FlockingManager.Behaviours.Alignment] = 0.1f;
+        
+            float maxSpeed = 100.0f;
+            float maxForce = 200.0f;
+            
+            for (int i = 0; i < 10; i++)
+            {
+                _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2((i - 5) * 10.0f, 0.0f), Vector2.Up * 100.0f, maxSpeed, maxForce, behaviours,
+                    weights, Vector2.Zero, 360.0f, 0));
+            }
         }
         
-        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(-50.0f, 0.0f), Vector2.Right * 50.0f, maxSpeed, maxForce, behaviours,
+        // enemies
+        {
+            int behaviours = 0;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Separation;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Alignment;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Cohesion;
+
+            float[] weights = new float[(int) FlockingManager.Behaviours.COUNT];
+            weights[(int) FlockingManager.Behaviours.Separation] = 2.0f;
+            weights[(int) FlockingManager.Behaviours.EdgeRepulsion] = 1.0f;
+            weights[(int) FlockingManager.Behaviours.Arrive] = 1.0f;
+            weights[(int) FlockingManager.Behaviours.Alignment] = 0.1f;
+            weights[(int) FlockingManager.Behaviours.Cohesion] = 0.1f;
+        
+            float maxSpeed = 100.0f;
+            float maxForce = 200.0f;
+            
+            for (int i = 0; i < 25; i++)
+            {
+                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size;
+                Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * maxSpeed;
+                _boidIds.Add(FlockingManager.Instance.AddBoid(randPos, randVel, maxSpeed, maxForce, behaviours,
+                    weights, Vector2.Zero, 90.0f, 1));
+            }
+        }
+        
+        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(-10.0f, 0.0f), Vector2.Right * 25.0f, maxSpeed, maxForce, behaviours,
         //     weights, Vector2.Zero, 270.0f));
-        //
-        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(50.0f, 0.0f), Vector2.Left * 50.0f, maxSpeed,
+        
+        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(10.0f, 0.0f), Vector2.Left * 25.0f, maxSpeed,
         //     maxForce, behaviours, weights, Vector2.Zero, 270.0f));
+
+        //Engine.TimeScale = 0.1f;
     }
 
     public override void _Process(float delta)
