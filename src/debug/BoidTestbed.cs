@@ -9,6 +9,7 @@ public partial class BoidTestbed : Spatial
     [OnReadyGet] private Camera _camera;
     
     private List<int> _boidIds = new();
+    private List<int> _obstacleIds = new();
     
     [OnReady] private void Ready()
     {
@@ -23,9 +24,10 @@ public partial class BoidTestbed : Spatial
         {
             int behaviours = 0;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Separation;
-            behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
+            //behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Arrive;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Alignment;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Avoidance;
 
             float[] weights = new float[(int) FlockingManager.Behaviours.COUNT];
             weights[(int) FlockingManager.Behaviours.Separation] = 2.0f;
@@ -36,9 +38,10 @@ public partial class BoidTestbed : Spatial
             float maxSpeed = 100.0f;
             float maxForce = 200.0f;
             
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1; i++)
             {
-                _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2((i - 5) * 10.0f, 0.0f), Vector2.Up * 100.0f, maxSpeed, maxForce, behaviours,
+                Vector2 spawnPos = Vector2.Left * 50.0f;
+                _boidIds.Add(FlockingManager.Instance.AddBoid(spawnPos, Vector2.Zero, maxSpeed, maxForce, behaviours,
                     weights, Vector2.Zero, 360.0f, 0));
             }
         }
@@ -47,9 +50,10 @@ public partial class BoidTestbed : Spatial
         {
             int behaviours = 0;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Separation;
-            behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
+            //behaviours |= 1 << (int) FlockingManager.Behaviours.EdgeRepulsion;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Alignment;
             behaviours |= 1 << (int) FlockingManager.Behaviours.Cohesion;
+            behaviours |= 1 << (int) FlockingManager.Behaviours.Avoidance;
 
             float[] weights = new float[(int) FlockingManager.Behaviours.COUNT];
             weights[(int) FlockingManager.Behaviours.Separation] = 2.0f;
@@ -58,25 +62,29 @@ public partial class BoidTestbed : Spatial
             weights[(int) FlockingManager.Behaviours.Alignment] = 0.1f;
             weights[(int) FlockingManager.Behaviours.Cohesion] = 0.1f;
         
-            float maxSpeed = 100.0f;
+            float maxSpeed = 75.0f;
             float maxForce = 200.0f;
             
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 0; i++)
             {
-                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size;
+                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * maxSpeed;
                 _boidIds.Add(FlockingManager.Instance.AddBoid(randPos, randVel, maxSpeed, maxForce, behaviours,
                     weights, Vector2.Zero, 90.0f, 1));
             }
         }
         
-        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(-10.0f, 0.0f), Vector2.Right * 25.0f, maxSpeed, maxForce, behaviours,
-        //     weights, Vector2.Zero, 270.0f));
+        // obstacles
+        {
+            for (int i = 0; i < 1; i++)
+            {
+                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
+                randPos = Vector2.Zero;
+                _obstacleIds.Add(FlockingManager.Instance.AddObstacle(randPos, FlockingManager.ObstacleShape.Circle, 50.0f));
+            }
+        }
         
-        // _boidIds.Add(FlockingManager.Instance.AddBoid(new Vector2(10.0f, 0.0f), Vector2.Left * 25.0f, maxSpeed,
-        //     maxForce, behaviours, weights, Vector2.Zero, 270.0f));
-
-        //Engine.TimeScale = 0.1f;
+        //Engine.TimeScale = 0.5f;
     }
 
     public override void _Process(float delta)

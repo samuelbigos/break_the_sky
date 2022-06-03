@@ -23,7 +23,7 @@ BoidsMeshPath = NodePath("Boids")
 CameraPath = NodePath("Camera")
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 150, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 250, 0 )
 far = 500.0
 
 [node name="Boids" type="MeshInstance" parent="."]
