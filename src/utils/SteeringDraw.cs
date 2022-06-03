@@ -2,9 +2,9 @@ using Godot;
 using System;
 using System.Drawing.Drawing2D;
 
-public partial class FlockingManager : Singleton<FlockingManager>
+public partial class FlockingManager
 {
-    private SurfaceTool _st = new();
+    private readonly SurfaceTool _st = new();
 
     public void DrawSimulationToMesh(out Mesh mesh)
     {
@@ -28,20 +28,18 @@ public partial class FlockingManager : Singleton<FlockingManager>
             Line(_st, p2, p0, col, ref v);
             
             // separation radius
-            Circle(_st, boid.Position, 32, boid.SeparationRadius, Colors.Black, ref v);
+            Circle(_st, boid.Position, 32, boid.Radius, Colors.DarkSlateGray, ref v);
             
             // boid velocity/force
-            Line(_st, boid.Position, boid.Position + boid.Velocity * 15.0f / boid.MaxSpeed, Colors.Teal, ref v);
-            Line(_st, boid.Position, boid.Position + boid.Steering * 15.0f / boid.MaxForce / TimeSystem.Delta, Colors.Purple, ref v);
+            Line(_st, boid.Position, boid.Position + boid.Velocity * 25.0f / boid.MaxSpeed, col, ref v);
+            Line(_st, boid.Position, boid.Position + boid.Steering * 25.0f / boid.MaxForce / TimeSystem.Delta, Colors.Purple, ref v);
             
             // boid avoidance
-            //if (boid.Intersection.Intersect)
+            if (boid.Intersection.Intersect)
             {
-                Line(_st, boid.Position, boid.Position + forward * boid.Intersection.Range, Colors.Black, ref v);
-                
-                
-                Circle(_st, boid.Intersection.SurfacePoint, 8, 2.0f, Colors.Black, ref v);
-                Line(_st, boid.Intersection.SurfacePoint, boid.Intersection.SurfacePoint + boid.Intersection.SurfaceNormal * 10.0f, Colors.Green, ref v);
+                //Line(_st, boid.Position, boid.Position + forward * boid.LookAhead * boid.Speed, Colors.Black, ref v);
+                Circle(_st, boid.Intersection.SurfacePoint, 8, 1.0f, Colors.Black, ref v);
+                Line(_st,  boid.Intersection.SurfacePoint,  boid.Intersection.SurfacePoint +  boid.Intersection.SurfaceNormal * 10.0f, Colors.Black, ref v);
             }
         }
         
