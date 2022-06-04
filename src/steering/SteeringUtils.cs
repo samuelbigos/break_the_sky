@@ -3,19 +3,16 @@ using System;
 
 public partial class SteeringManager
 {
-    private static Vector2 AdjustRawSteering(Boid boid, Vector2 force, float minSpeed)
+    private static Vector2 ApplyMinimumSpeed(Boid boid, Vector2 force, float minSpeed)
     {
-        float speed = boid.Velocity.Length();
-        if (boid.Velocity.Length() > minSpeed || force == Vector2.Zero)
+        if (boid.Speed > minSpeed || force == Vector2.Zero || boid.Speed == 0.0f)
         {
             return force;
         }
-        else
-        {
-            float range = speed / minSpeed;
-            float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 50));
-            return VecLimitDeviationAngleUtility(true, force, cosine, boid.Velocity.Normalized());
-        }
+
+        float range = boid.Speed / minSpeed;
+        float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 5));
+        return VecLimitDeviationAngleUtility(true, force, cosine, boid.Velocity.Normalized());
     }
 
     private static Vector2 VecLimitDeviationAngleUtility(bool insideOrOutside, Vector2 source, float cosineOfConeAngle, Vector2 basis)

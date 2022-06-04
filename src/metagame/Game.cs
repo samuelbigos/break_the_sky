@@ -205,10 +205,5 @@ public partial class Game : Singleton<Game>
             }
             ImGui.EndTabItem();
         }
-        if (ImGui.BeginTabItem("Director"))
-        {
-            _aiSpawningDirector._OnImGuiLayout();
-            ImGui.EndTabItem();
-        }
     }
 }

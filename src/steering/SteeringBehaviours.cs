@@ -10,18 +10,19 @@ public partial class SteeringManager
         desired.SetMag(boid.MaxSpeed);
 
         Vector2 force = desired - boid.Velocity;
-        return force.SetMag(boid.MaxForce);
+        return force;
     }
     
-    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position, float radius)
+    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position)
     {
+        float radius = Mathf.Max(1.0f, boid.Speed * boid.LookAhead);
         float dist = (boid.Position - position).Length();
         if (dist > radius)
         {
             return Steering_Seek(boid, position);
         }
         Vector2 desired = position - boid.Position;
-        desired.SetMag(boid.MaxSpeed * (dist / radius));
+        //desired.Limit(boid.MaxSpeed * (dist / radius));
         Vector2 force = desired - boid.Velocity;
         return force;
     }
@@ -32,7 +33,7 @@ public partial class SteeringManager
         int count = 0;
         foreach (Boid other in boids)
         {
-            if (boid.ID == other.ID) continue;
+            if (boid.Id == other.Id) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
             if (!InView(boid, other, boid.ViewAngle)) continue;
             if (boid.Alignment != other.Alignment) continue;
@@ -54,7 +55,7 @@ public partial class SteeringManager
         int count = 0;
         foreach (Boid other in boids)
         {
-            if (boid.ID == other.ID) continue;
+            if (boid.Id == other.Id) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
             if (!InView(boid, other, boid.ViewAngle)) continue;
             if (boid.Alignment != other.Alignment) continue;
@@ -79,7 +80,7 @@ public partial class SteeringManager
         // boids
         foreach (Boid other in boids)
         {
-            if (boid.ID == other.ID) continue;
+            if (boid.Id == other.Id) continue;
             float dist = (boid.Position - other.Position).Length();
             float radius = boid.Radius + other.Radius;
             if (dist > radius)
@@ -87,7 +88,7 @@ public partial class SteeringManager
 
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 2.0f);
+            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
             Vector2 force = desired.Limit(boid.MaxForce * delta * t);
             forceSum += force;
             count++;
@@ -103,7 +104,7 @@ public partial class SteeringManager
 
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 2.0f);
+            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
             Vector2 force = desired.Limit(boid.MaxForce * delta * t);
             forceSum += force;
             count++;
@@ -128,13 +129,13 @@ public partial class SteeringManager
         return Steering_Seek(boid, closestPointOnEdge);
     }
     
-    private static Vector2 Steering_Avoidance(ref Boid boid, in List<Boid> boids, in List<Obstacle> obstacles)
+    private static Vector2 Steering_AvoidObstacles(ref Boid boid, in List<Obstacle> obstacles)
     {
         Intersection intersection = default;
         float nearestDistance = 999999.0f;
+        float range = boid.Speed * boid.LookAhead;
         
         // obstacles
-        float range = boid.Speed * boid.LookAhead;
         foreach (Obstacle obstacle in obstacles)
         {
             switch (obstacle.Shape)
@@ -166,17 +167,34 @@ public partial class SteeringManager
             }
         }
 
+        // if nearby intersection found, steer away from it, otherwise no steering
+        boid.Intersection = intersection;
+        if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)
+        {
+            Vector2 force = intersection.SurfaceNormal.PerpendicularComponent(boid.Heading);
+            force.SetMag(boid.MaxForce);
+            return force;
+        }
+        return Vector2.Zero;
+    }
+    
+    private static Vector2 Steering_AvoidBoids(ref Boid boid, in List<Boid> boids)
+    {
+        Intersection intersection = default;
+        float nearestDistance = 999999.0f;
+        float range = boid.Speed * boid.LookAhead;
+
         // boids
         if (!intersection.Intersect) // obstacles have priority
         {
             foreach (Boid other in boids)
             {
-                if (boid.ID == other.ID) continue;
+                if (boid.Id == other.Id) continue;
                 if ((other.Position - boid.Position).Length() > range + other.Radius + boid.Radius) continue;
                 if (!InView(boid, other, boid.ViewAngle)) continue;
-                if (boid.Alignment == 0 && other.Alignment == 0) continue; // allied boids don't avoid each other
+                if (boid.IgnoreAllyAvoidance && boid.Alignment == other.Alignment) continue;
             
-                bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity, boid.Radius, boid.Radius, 
+                bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity, boid.Radius, other.Radius, 
                     out Vector2 collisionPos, out Vector2 collisionNormal, out float collisionTime);
             
                 if (!collision)
@@ -208,6 +226,18 @@ public partial class SteeringManager
     private static Vector2 Steering_MaintainSpeed(in Boid boid)
     {
         Vector2 desired = boid.Heading * boid.DesiredSpeed;
+        Vector2 force = desired - boid.Velocity;
+        return force;
+    }
+    
+    private Vector2 Steering_Wander(ref Boid boid, float delta)
+    {
+        Vector2 circleCentre = boid.Position + boid.Heading * boid.WanderCircleDist;
+        float angle = -boid.Heading.AngleTo(Vector2.Right) + boid.WanderAngle;
+        Vector2 displacement = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).Normalized() * boid.WanderCircleRadius;
+        boid.WanderAngle += (Utils.Rng.Randf() - 0.5f) * delta * boid.WanderVariance;
+
+        Vector2 desired = (circleCentre + displacement) - boid.Position;
         Vector2 force = desired - boid.Velocity;
         return force;
     }

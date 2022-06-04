@@ -9,14 +9,16 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public enum Behaviours // in order of importance
     {
         Separation,
-        Avoidance,
+        AvoidObstacles,
+        AvoidBoids,
+        MaintainSpeed,
         Cohesion,
         Alignment,
         Arrive,
         Pursuit,
         Flee,
         EdgeRepulsion,
-        MaintainSpeed,
+        Wander,
         COUNT,
     }
 
@@ -28,7 +30,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public struct Boid
     {
         public bool Alive;
-        public int ID;
+        public int Id;
         public int Alignment;
         public Vector2 Position;
         public Vector2 Velocity;
@@ -37,14 +39,21 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float Speed;
         public float DesiredSpeed;
         public float MaxSpeed;
+        public float MinSpeed;
         public float MaxForce;
         public float Radius;
         public float LookAhead;
         public int Behaviours;
         public float[] Weights;
         public Vector2 Target;
+        public float ViewRange;
         public float ViewAngle;
         public Intersection Intersection;
+        public float WanderAngle;
+        public float WanderCircleDist;
+        public float WanderCircleRadius;
+        public float WanderVariance;
+        public bool IgnoreAllyAvoidance;
     }
 
     public struct Obstacle
@@ -111,14 +120,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
             }
             
             // adjust raw steering force
-            //totalForce = AdjustRawSteering(boid, totalForce, boid.MaxSpeed * 0.01f);
+            totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
             
             // TODO: Add smooth steering.
-
+            boid.Steering = totalForce;
+            
             boid.Velocity += boid.Steering;
             boid.Velocity.Limit(boid.MaxSpeed);
-            
-            boid.Steering = totalForce;
+
             boid.Speed = boid.Velocity.Length();
 
             // Smooth heading to eliminate rapid heading changes on small velocity adjustments
@@ -141,16 +150,16 @@ public partial class SteeringManager : Singleton<SteeringManager>
         switch (behaviour)
         {
             case Cohesion:
-                force += Steering_Cohesion(boid, _boids, 50.0f);
+                force += Steering_Cohesion(boid, _boids, boid.ViewRange);
                 break;
             case Alignment:
-                force += Steering_Align(boid, _boids, 50.0f);
+                force += Steering_Align(boid, _boids, boid.ViewRange);
                 break;
             case Separation:
                 force += Steering_Separate(boid, _boids, _obstacles, delta);
                 break;
             case Arrive:
-                force += Steering_Arrive(boid, boid.Target, 50.0f);
+                force += Steering_Arrive(boid, boid.Target);
                 break;
             case Pursuit:
                 force += Steering_Pursuit(boid, boid.Target);
@@ -160,11 +169,17 @@ public partial class SteeringManager : Singleton<SteeringManager>
             case EdgeRepulsion:
                 force += Steering_EdgeRepulsion(boid, EdgeBounds);
                 break;
-            case Avoidance:
-                force += Steering_Avoidance(ref boid, _boids, _obstacles);
+            case AvoidBoids:
+                force += Steering_AvoidBoids(ref boid, _boids);
+                break;
+            case AvoidObstacles:
+                force += Steering_AvoidObstacles(ref boid, _obstacles);
                 break;
             case MaintainSpeed:
                 force += Steering_MaintainSpeed(boid);
+                break;
+            case Wander:
+                force += Steering_Wander(ref boid, delta);
                 break;
             case COUNT:
                 break;
@@ -177,13 +192,13 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     private void RegisterBoid(Boid boid)
     {
-        Debug.Assert(!_boidIdToIndex.ContainsKey(boid.ID), $"Boid with this ID ({boid.ID}) already registered.");
-        if (_boidIdToIndex.ContainsKey(boid.ID))
+        Debug.Assert(!_boidIdToIndex.ContainsKey(boid.Id), $"Boid with this ID ({boid.Id}) already registered.");
+        if (_boidIdToIndex.ContainsKey(boid.Id))
             return;
         
         _boids.Add(boid);
-        _boidIdToIndex[boid.ID] = _boids.Count - 1;
-        _boidIndexToId[_boids.Count - 1] = boid.ID;
+        _boidIdToIndex[boid.Id] = _boids.Count - 1;
+        _boidIndexToId[_boids.Count - 1] = boid.Id;
     }
 
     private void RegisterObstacle(Obstacle obstacle)
@@ -197,31 +212,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _obstacleIndexToId[_boids.Count - 1] = obstacle.ID;
     }
     
-    public int AddBoid(Vector2 pos, Vector2 vel, float radius, float maxSpeed, float maxForce, 
-        int behaviours, float[] weights, Vector2 target, float fov, int alignment, float desiredSpeed = 0.0f)
+    public int AddBoid(Boid boid)
     {
-        Boid boid = new()
-        {
-            Alive = true,
-            ID = _boidIdGen,
-            Alignment = alignment,
-            Position = pos,
-            Steering = Vector2.Zero,
-            Velocity = vel,
-            Radius = radius,
-            Heading = Vector2.Up,
-            DesiredSpeed = desiredSpeed,
-            MaxSpeed = maxSpeed,
-            MaxForce = maxForce,
-            LookAhead = 0.5f,
-            Behaviours = behaviours,
-            Weights = weights,
-            Target = target,
-            ViewAngle = fov,
-        };
-        _boidIdGen++;
+        boid.Id = _boidIdGen++;
         RegisterBoid(boid);
-        return boid.ID;
+        return boid.Id;
     }
 
     public int AddObstacle(Vector2 pos, ObstacleShape shape, float size)
@@ -246,8 +241,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
     
     public void SetBoid(Boid boid)
     {
-        Debug.Assert(_boidIdToIndex.ContainsKey(boid.ID), $"Boid with ID doesn't exist.");
-        _boids[_boidIdToIndex[boid.ID]] = boid;
+        Debug.Assert(_boidIdToIndex.ContainsKey(boid.Id), $"Boid with ID doesn't exist.");
+        _boids[_boidIdToIndex[boid.Id]] = boid;
     }
 
     private int FindEmptyBoidIndex()

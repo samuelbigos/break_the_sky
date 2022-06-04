@@ -19,7 +19,7 @@ public class AISpawningDirector : Node
 
     [Export] private float _swarmRampUpTime = 15.0f; // time it takes to fill the budget when swarming
 
-    public enum SpawningState
+    private enum SpawningState
     {
         Idle,
         Swarming,
