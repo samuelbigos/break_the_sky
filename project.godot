@@ -40,21 +40,22 @@ DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
 DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
 DatabaseEnemyBoids="*res://scenes/database/DatabaseEnemyBoids.tscn"
 DatabaseWaves="*res://scenes/database/DatabaseWaves.tscn"
-DebugImGui="*res://scenes/debug/DebugImGui.tscn"
 SaveDataPlayer="*res://src/singletons/SaveDataPlayer.cs"
 SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
 SaveManager="*res://src/singletons/SaveManager.cs"
 TimeSystem="*res://src/singletons/TimeSystem.cs"
+DebugImGui="*res://scenes/debug/DebugImGui.tscn"
 
 [display]
 
-window/size/width=1280
-window/size/height=720
+window/size/width=1920
+window/size/height=1080
+window/size/borderless=true
 window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg" )
 
 [gd2cs]
 
@@ -170,10 +171,6 @@ zoom_out={
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":5,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
-
-[mono]
-
-profiler/enabled=true
 
 [physics]
 

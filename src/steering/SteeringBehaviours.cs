@@ -27,11 +27,11 @@ public partial class SteeringManager
         return force;
     }
 
-    private static Vector2 Steering_Cohesion(in Boid boid, in List<Boid> boids, float radius)
+    private static Vector2 Steering_Cohesion(in Boid boid, in Span<Boid> boids, float radius)
     {
         Vector2 centre = Vector2.Zero;
         int count = 0;
-        foreach (Boid other in boids)
+        foreach (ref readonly Boid other in boids)
         {
             if (boid.Id == other.Id) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
@@ -49,11 +49,11 @@ public partial class SteeringManager
         return Steering_Seek(boid, centre);
     }
 
-    private static Vector2 Steering_Align(in Boid boid, in List<Boid> boids, float radius)
+    private static Vector2 Steering_Align(in Boid boid, in Span<Boid> boids, float radius)
     {
         Vector2 desired = Vector2.Zero;
         int count = 0;
-        foreach (Boid other in boids)
+        foreach (ref readonly Boid other in boids)
         {
             if (boid.Id == other.Id) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
@@ -72,44 +72,45 @@ public partial class SteeringManager
         return force;
     }
 
-    private static Vector2 Steering_Separate(in Boid boid, in List<Boid> boids, in List<Obstacle> obstacles, float delta)
+    private static Vector2 Steering_Separate(in Boid boid, in Span<Boid> boids, in List<Obstacle> obstacles, float delta)
     {
         Vector2 forceSum = Vector2.Zero;
         int count = 0;
         
         // boids
-        foreach (Boid other in boids)
+        foreach (ref readonly Boid other in boids)
         {
             if (boid.Id == other.Id) continue;
-            float dist = (boid.Position - other.Position).Length();
-            float radius = boid.Radius + other.Radius;
-            if (dist > radius)
+            float distSq = (boid.Position - other.Position).LengthSquared();
+            float radiusSq = Sq(boid.Radius + other.Radius);
+            if (distSq > radiusSq)
                 continue;
 
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
-            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
-            forceSum += force;
-            count++;
-        } 
-        
-        // obstacles
-        foreach (Obstacle other in obstacles)
-        {
-            float dist = (boid.Position - other.Position).Length();
-            float radius = boid.Radius + other.Size;
-            if (dist > radius)
-                continue;
-
-            Vector2 desired = boid.Position - other.Position;
-            desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
+            float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
             Vector2 force = desired.Limit(boid.MaxForce * delta * t);
             forceSum += force;
             count++;
         }
-        
+
+        // obstacles
+        for (int i = 0; i < obstacles.Count; i++)
+        {
+            Obstacle other = obstacles[i];
+            float distSq = (boid.Position - other.Position).LengthSquared();
+            float radiusSq = boid.Radius + other.Size;
+            if (distSq > radiusSq)
+                continue;
+
+            Vector2 desired = boid.Position - other.Position;
+            desired.SetMag(boid.MaxSpeed);
+            float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
+            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
+            forceSum += force;
+            count++;
+        }
+
         return count == 0 ? Vector2.Zero : forceSum;
     }
 
@@ -136,21 +137,23 @@ public partial class SteeringManager
         float range = boid.Speed * boid.LookAhead;
         
         // obstacles
-        foreach (Obstacle obstacle in obstacles)
+        for (int i = 0; i < obstacles.Count; i++)
         {
+            Obstacle obstacle = obstacles[i];
             switch (obstacle.Shape)
             {
                 case ObstacleShape.Circle:
                 {
                     if ((obstacle.Position - boid.Position).Length() > range + obstacle.Size + boid.Radius)
                         continue;
-                    
-                    bool collision = CollisionDetection(boid.Position, obstacle.Position, boid.Velocity, Vector2.Zero, boid.Radius, obstacle.Size,
+
+                    bool collision = CollisionDetection(boid.Position, obstacle.Position, boid.Velocity, Vector2.Zero,
+                        boid.Radius, obstacle.Size,
                         out Vector2 collisionPos, out Vector2 collisionNormal, out float collisionTime);
-                    
+
                     if (!collision)
                         continue;
-                    
+
                     float dist = (collisionPos - boid.Position).LengthSquared();
                     if (dist < nearestDistance)
                     {
@@ -160,6 +163,7 @@ public partial class SteeringManager
                         intersection.IntersectTime = collisionTime;
                         intersection.Intersect = true;
                     }
+
                     break;
                 }
                 default:
@@ -178,7 +182,7 @@ public partial class SteeringManager
         return Vector2.Zero;
     }
     
-    private static Vector2 Steering_AvoidBoids(ref Boid boid, in List<Boid> boids)
+    private static Vector2 Steering_AvoidBoids(ref Boid boid, in Span<Boid> boids)
     {
         Intersection intersection = default;
         float nearestDistance = 999999.0f;
@@ -187,19 +191,20 @@ public partial class SteeringManager
         // boids
         if (!intersection.Intersect) // obstacles have priority
         {
-            foreach (Boid other in boids)
+            foreach (ref readonly Boid other in boids)
             {
                 if (boid.Id == other.Id) continue;
-                if ((other.Position - boid.Position).Length() > range + other.Radius + boid.Radius) continue;
+                if ((other.Position - boid.Position).LengthSquared() > Sq(range + other.Radius + boid.Radius)) continue;
                 if (!InView(boid, other, boid.ViewAngle)) continue;
                 if (boid.IgnoreAllyAvoidance && boid.Alignment == other.Alignment) continue;
-            
-                bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity, boid.Radius, other.Radius, 
+
+                bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity,
+                    boid.Radius, other.Radius,
                     out Vector2 collisionPos, out Vector2 collisionNormal, out float collisionTime);
-            
+
                 if (!collision)
                     continue;
-            
+
                 float dist = (collisionPos - boid.Position).LengthSquared();
                 if (dist < nearestDistance)
                 {

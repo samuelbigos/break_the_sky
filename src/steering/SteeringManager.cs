@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot.Collections;
 using static SteeringManager.Behaviours;
 
 public partial class SteeringManager : Singleton<SteeringManager>
@@ -74,24 +75,38 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public Rect2 EdgeBounds;
 
-    private List<Boid> _boids = new(1000);
+    private int _numBoids;
+    private Boid[] _boidPool = new Boid[1000];
     private List<Obstacle> _obstacles = new(100);
 
-    private Dictionary<int, int> _boidIdToIndex = new();
-    private Dictionary<int, int> _boidIndexToId = new();
-    private Dictionary<int, int> _obstacleIdToIndex = new();
-    private Dictionary<int, int> _obstacleIndexToId = new();
+    private System.Collections.Generic.Dictionary<int, int> _boidIdToIndex = new();
+    private System.Collections.Generic.Dictionary<int, int> _boidIndexToId = new();
+    private System.Collections.Generic.Dictionary<int, int> _obstacleIdToIndex = new();
+    private System.Collections.Generic.Dictionary<int, int> _obstacleIndexToId = new();
     
     private int _boidIdGen;
     private int _obstacleIdGen;
+    
+    private List<Vector3> _vertList = new();
+    private List<Color> _colList = new();
+    private List<int> _indexList = new();
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        _vertList.Capacity = 10000;
+        _colList.Capacity = 10000;
+        _indexList.Capacity = 20000;
+    }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
 
-        for (int i = 0; i < _boids.Count; i++)
-        {   
-            Boid boid = _boids[i];
+        Span<Boid> boids = _boidPool.AsSpan(0, _numBoids);
+        foreach (ref Boid boid in boids)
+        {
             if (!boid.Alive)
                 continue;
 
@@ -102,7 +117,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 if ((boid.Behaviours & (1 << j)) == 0)
                     continue;
                 
-                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, delta);
+                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, boids, delta);
 
                 // truncate by max force per unit time
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
@@ -139,24 +154,22 @@ public partial class SteeringManager : Singleton<SteeringManager>
             }
 
             boid.Position = WrapPosition(boid.Position + boid.Velocity * delta, EdgeBounds);
-
-            _boids[i] = boid;
         }
     }
 
-    private Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, float delta)
+    private Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, Span<Boid> boids, float delta)
     {
         Vector2 force = Vector2.Zero;
         switch (behaviour)
         {
             case Cohesion:
-                force += Steering_Cohesion(boid, _boids, boid.ViewRange);
+                force += Steering_Cohesion(boid, boids, boid.ViewRange);
                 break;
             case Alignment:
-                force += Steering_Align(boid, _boids, boid.ViewRange);
+                force += Steering_Align(boid, boids, boid.ViewRange);
                 break;
             case Separation:
-                force += Steering_Separate(boid, _boids, _obstacles, delta);
+                force += Steering_Separate(boid, boids, _obstacles, delta);
                 break;
             case Arrive:
                 force += Steering_Arrive(boid, boid.Target);
@@ -170,7 +183,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_EdgeRepulsion(boid, EdgeBounds);
                 break;
             case AvoidBoids:
-                force += Steering_AvoidBoids(ref boid, _boids);
+                force += Steering_AvoidBoids(ref boid, boids);
                 break;
             case AvoidObstacles:
                 force += Steering_AvoidObstacles(ref boid, _obstacles);
@@ -196,9 +209,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
         if (_boidIdToIndex.ContainsKey(boid.Id))
             return;
         
-        _boids.Add(boid);
-        _boidIdToIndex[boid.Id] = _boids.Count - 1;
-        _boidIndexToId[_boids.Count - 1] = boid.Id;
+        _boidPool[_numBoids++] = boid;
+        _boidIdToIndex[boid.Id] = _numBoids - 1;
+        _boidIndexToId[_numBoids - 1] = boid.Id;
     }
 
     private void RegisterObstacle(Obstacle obstacle)
@@ -209,7 +222,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         
         _obstacles.Add(obstacle);
         _obstacleIdToIndex[obstacle.ID] = _obstacles.Count - 1;
-        _obstacleIndexToId[_boids.Count - 1] = obstacle.ID;
+        _obstacleIndexToId[_obstacles.Count - 1] = obstacle.ID;
     }
     
     public int AddBoid(Boid boid)
@@ -236,23 +249,23 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public Boid GetBoid(int id)
     {
         Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid with ID doesn't exist.");
-        return _boids[_boidIdToIndex[id]];
+        return _boidPool[_boidIdToIndex[id]];
     }
     
     public void SetBoid(Boid boid)
     {
         Debug.Assert(_boidIdToIndex.ContainsKey(boid.Id), $"Boid with ID doesn't exist.");
-        _boids[_boidIdToIndex[boid.Id]] = boid;
+        _boidPool[_boidIdToIndex[boid.Id]] = boid;
     }
 
-    private int FindEmptyBoidIndex()
-    {
-        for (int i = 0; i < _boids.Count; i++)
-        {
-            if (!_boids[i].Alive)
-                return i;
-        }
-
-        return -1;
-    }
+    // private int FindEmptyBoidIndex()
+    // {
+    //     for (int i = 0; i < _boids.Count; i++)
+    //     {
+    //         if (!_boids[i].Alive)
+    //             return i;
+    //     }
+    //
+    //     return -1;
+    // }
 }
