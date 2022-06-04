@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class FlockingManager
+public partial class SteeringManager
 {
     private static Vector2 AdjustRawSteering(Boid boid, Vector2 force, float minSpeed)
     {

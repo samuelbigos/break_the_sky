@@ -359,7 +359,7 @@ public class AISpawningDirector : Node
         enemy.GlobalPosition = pos;
         enemy.Init(id.Name, _player, _game, null);
         _game.RegisterEnemyBoid(enemy);
-        //FlockingManager.Instance.AddBoid(enemy, vel);
+        //SteeringManager.Instance.AddBoid(enemy, vel);
         _activeEnemies.Add(enemy);
         SaveDataPlayer.SetSeenEnemy(id.Name);
         return enemy;

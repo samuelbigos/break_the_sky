@@ -47,8 +47,8 @@ public class BoidAllyBomber : BoidAllyBase
             {
                 _Shoot((TargetPos - GlobalPosition).Normalized());
                 
-                SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Flee, true);
-                SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, false);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, true);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
                 _fleeTimer = _fleeTime;
             }
         }
@@ -67,8 +67,8 @@ public class BoidAllyBomber : BoidAllyBase
         _fleeTimer -= delta;
         if (!_canShoot && _fleeTimer <= 0.0f || _targetType == TargetType.Ally)
         {
-            SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Flee, false);
-            SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
+            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, false);
+            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
             SetTarget(TargetType.Ally, _player);
         }
     }

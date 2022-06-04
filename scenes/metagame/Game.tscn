@@ -8,7 +8,7 @@
 [ext_resource path="res://scenes/rendering/Cloud.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/singletons/FabricateManager.cs" type="Script" id=7]
 [ext_resource path="res://assets/shader/post_process.shader" type="Shader" id=8]
-[ext_resource path="res://src/state_machines/game/StateMachine_Game.cs" type="Script" id=9]
+[ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 
 [sub_resource type="SphereMesh" id=4]

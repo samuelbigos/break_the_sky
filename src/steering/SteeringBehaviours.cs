@@ -1,39 +1,38 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
-public partial class FlockingManager
+public partial class SteeringManager
 {
-    private static Vector2 Steering_Seek(Boid boid, float delta, Vector2 position)
+    private static Vector2 Steering_Seek(in Boid boid, Vector2 position)
     {
         Vector2 desired = position - boid.Position;
-        desired *= boid.MaxSpeed / desired.Length();
+        desired.SetMag(boid.MaxSpeed);
 
         Vector2 force = desired - boid.Velocity;
-        return force.SetMag(boid.MaxForce * delta);
+        return force.SetMag(boid.MaxForce);
     }
     
-    private static Vector2 Steering_Arrive(Boid boid, float delta, Vector2 position, float radius)
+    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position, float radius)
     {
         float dist = (boid.Position - position).Length();
         if (dist > radius)
         {
-            return Steering_Seek(boid, delta, position);
+            return Steering_Seek(boid, position);
         }
         Vector2 desired = position - boid.Position;
         desired.SetMag(boid.MaxSpeed * (dist / radius));
         Vector2 force = desired - boid.Velocity;
-        return force.Limit(boid.MaxForce * delta);
+        return force;
     }
 
-    private Vector2 Steering_Cohesion(int i, float delta, float radius)
+    private static Vector2 Steering_Cohesion(in Boid boid, in List<Boid> boids, float radius)
     {
-        Boid boid = _boids[i];
         Vector2 centre = Vector2.Zero;
         int count = 0;
-        for (int j = 0; j < _boids.Count; j++)
+        foreach (Boid other in boids)
         {
-            Boid other = _boids[j];
-            if (i == j) continue;
+            if (boid.ID == other.ID) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
             if (!InView(boid, other, boid.ViewAngle)) continue;
             if (boid.Alignment != other.Alignment) continue;
@@ -46,18 +45,16 @@ public partial class FlockingManager
             return Vector2.Zero;
 
         centre /= count;
-        return Steering_Seek(boid, delta, centre);
+        return Steering_Seek(boid, centre);
     }
 
-    private Vector2 Steering_Align(int i, float delta, float radius)
+    private static Vector2 Steering_Align(in Boid boid, in List<Boid> boids, float radius)
     {
-        Boid boid = _boids[i];
         Vector2 desired = Vector2.Zero;
         int count = 0;
-        for (int j = 0; j < _boids.Count; j++)
+        foreach (Boid other in boids)
         {
-            Boid other = _boids[j];
-            if (i == j) continue;
+            if (boid.ID == other.ID) continue;
             if ((boid.Position - other.Position).LengthSquared() > radius * radius) continue;
             if (!InView(boid, other, boid.ViewAngle)) continue;
             if (boid.Alignment != other.Alignment) continue;
@@ -71,21 +68,18 @@ public partial class FlockingManager
 
         desired /= count;
         Vector2 force = desired - boid.Velocity;
-        return force.Limit(boid.MaxForce * delta);
+        return force;
     }
 
-    private Vector2 Steering_Separate(int i, float delta)
+    private static Vector2 Steering_Separate(in Boid boid, in List<Boid> boids, in List<Obstacle> obstacles, float delta)
     {
-        Boid boid = _boids[i];
-        
         Vector2 forceSum = Vector2.Zero;
         int count = 0;
         
         // boids
-        for (int j = 0; j < _boids.Count; j++)
+        foreach (Boid other in boids)
         {
-            if (i == j) continue;
-            Boid other = _boids[j];
+            if (boid.ID == other.ID) continue;
             float dist = (boid.Position - other.Position).Length();
             float radius = boid.Radius + other.Radius;
             if (dist > radius)
@@ -93,17 +87,15 @@ public partial class FlockingManager
 
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
+            float t = 1.0f - Mathf.Pow(dist / radius, 2.0f);
             Vector2 force = desired.Limit(boid.MaxForce * delta * t);
             forceSum += force;
             count++;
         } 
         
         // obstacles
-        for (int j = 0; j < _obstacles.Count; j++)
+        foreach (Obstacle other in obstacles)
         {
-            if (i == j) continue;
-            Obstacle other = _obstacles[j];
             float dist = (boid.Position - other.Position).Length();
             float radius = boid.Radius + other.Size;
             if (dist > radius)
@@ -111,24 +103,21 @@ public partial class FlockingManager
 
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
-            float t = 1.0f - Mathf.Pow(dist / radius, 3.0f);
+            float t = 1.0f - Mathf.Pow(dist / radius, 2.0f);
             Vector2 force = desired.Limit(boid.MaxForce * delta * t);
             forceSum += force;
             count++;
-        }   
+        }
         
-        if (count == 0)
-            return Vector2.Zero;
-
-        return forceSum.Limit(boid.MaxForce * delta);
+        return count == 0 ? Vector2.Zero : forceSum;
     }
 
-    private Vector2 Steering_Pursuit(Boid boid, float delta, Vector2 position)
+    private static Vector2 Steering_Pursuit(in Boid boid, Vector2 position)
     {
-        return Steering_Seek(boid, delta, position);
+        return Steering_Seek(boid, position);
     }
     
-    private Vector2 Steering_EdgeRepulsion(Boid boid, float delta, Rect2 bounds, float weight)
+    private static Vector2 Steering_EdgeRepulsion(in Boid boid, Rect2 bounds)
     {
         if (bounds.HasPoint(boid.Position))
             return Vector2.Zero;
@@ -136,17 +125,17 @@ public partial class FlockingManager
         Vector2 closestPointOnEdge = new(Mathf.Max(Mathf.Min(boid.Position.x, bounds.End.x), bounds.Position.x),
             Mathf.Max(Mathf.Min(boid.Position.y, bounds.End.y), bounds.Position.y));
 
-        return Steering_Seek(boid, delta, closestPointOnEdge) * weight;
+        return Steering_Seek(boid, closestPointOnEdge);
     }
     
-    private Vector2 Steering_Avoidance(ref Boid boid, int i, float delta)
+    private static Vector2 Steering_Avoidance(ref Boid boid, in List<Boid> boids, in List<Obstacle> obstacles)
     {
         Intersection intersection = default;
         float nearestDistance = 999999.0f;
         
         // obstacles
         float range = boid.Speed * boid.LookAhead;
-        foreach (Obstacle obstacle in _obstacles)
+        foreach (Obstacle obstacle in obstacles)
         {
             switch (obstacle.Shape)
             {
@@ -180,12 +169,9 @@ public partial class FlockingManager
         // boids
         if (!intersection.Intersect) // obstacles have priority
         {
-            for (int j = 0; j < _boids.Count; j++)
+            foreach (Boid other in boids)
             {
-                if (i == j)
-                    continue;
-            
-                Boid other = _boids[j];
+                if (boid.ID == other.ID) continue;
                 if ((other.Position - boid.Position).Length() > range + other.Radius + boid.Radius) continue;
                 if (!InView(boid, other, boid.ViewAngle)) continue;
                 if (boid.Alignment == 0 && other.Alignment == 0) continue; // allied boids don't avoid each other
@@ -213,9 +199,16 @@ public partial class FlockingManager
         if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)
         {
             Vector2 force = intersection.SurfaceNormal.PerpendicularComponent(boid.Heading);
-            force.SetMag(boid.MaxForce * delta);
+            force.SetMag(boid.MaxForce);
             return force;
         }
         return Vector2.Zero;
+    }
+
+    private static Vector2 Steering_MaintainSpeed(in Boid boid)
+    {
+        Vector2 desired = boid.Heading * boid.DesiredSpeed;
+        Vector2 force = desired - boid.Velocity;
+        return force;
     }
 }

@@ -20,10 +20,10 @@ public class BoidEnemyBase : BoidBase
 
         HitDamage = 9999.0f; // colliding with enemy boids should always destroy the allied boid.
         
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Cohesion, true);
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Alignment, true);
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separation, true, 10.0f);
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.EdgeRepulsion, true, 2.0f);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.EdgeRepulsion, true, 2.0f);
     }
 
     public override void _Process(float delta)
@@ -36,8 +36,8 @@ public class BoidEnemyBase : BoidBase
         //     if (distToPlayerSq < EngageRange * EngageRange)
         //     {
         //         SetTarget(TargetType.Enemy, _player);
-        //         SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
-        //         SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Wander, false);
+        //         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        //         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
         //     }
         // }
 
@@ -57,8 +57,8 @@ public class BoidEnemyBase : BoidBase
         _cachedBehaviours = Behaviours;
         Behaviours = 0;
         _escorting = true;
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(FlockingManager.Behaviours.Separation, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true);
     }
 
     private void DropEscortAndEngage()

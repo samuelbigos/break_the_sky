@@ -2,9 +2,9 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using static FlockingManager.Behaviours;
+using static SteeringManager.Behaviours;
 
-public partial class FlockingManager : Singleton<FlockingManager>
+public partial class SteeringManager : Singleton<SteeringManager>
 {
     public enum Behaviours // in order of importance
     {
@@ -16,6 +16,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
         Pursuit,
         Flee,
         EdgeRepulsion,
+        MaintainSpeed,
         COUNT,
     }
 
@@ -34,9 +35,10 @@ public partial class FlockingManager : Singleton<FlockingManager>
         public Vector2 Steering;
         public Vector2 Heading;
         public float Speed;
-        public float Radius;
+        public float DesiredSpeed;
         public float MaxSpeed;
         public float MaxForce;
+        public float Radius;
         public float LookAhead;
         public int Behaviours;
         public float[] Weights;
@@ -79,7 +81,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
         base._Process(delta);
 
         for (int i = 0; i < _boids.Count; i++)
-        {
+        {   
             Boid boid = _boids[i];
             if (!boid.Alive)
                 continue;
@@ -91,38 +93,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
                 if ((boid.Behaviours & (1 << j)) == 0)
                     continue;
                 
-                Behaviours behaviour = (Behaviours) j;
-                Vector2 force = Vector2.Zero;
-                switch (behaviour)
-                {
-                    case Cohesion:
-                        force += Steering_Cohesion(i, delta, 50.0f) * boid.Weights[(int) Cohesion];
-                        break;
-                    case Alignment:
-                        force += Steering_Align(i, delta, 50.0f) * boid.Weights[(int) Alignment];
-                        break;
-                    case Separation:
-                        force += Steering_Separate(i, delta) * boid.Weights[(int) Separation];
-                        break;
-                    case Arrive:
-                        force += Steering_Arrive(boid, delta, boid.Target, 50.0f) * boid.Weights[(int) Arrive];
-                        break;
-                    case Pursuit:
-                        force += Steering_Pursuit(boid, delta, boid.Target) * boid.Weights[(int) Pursuit];
-                        break;
-                    case Flee:
-                        break;
-                    case EdgeRepulsion:
-                        force += Steering_EdgeRepulsion(boid, delta, EdgeBounds, boid.Weights[(int) EdgeRepulsion]);
-                        break;
-                    case Avoidance:
-                        force += Steering_Avoidance(ref boid, i, delta) * boid.Weights[(int) EdgeRepulsion];
-                        break;
-                    case COUNT:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, delta);
 
                 // truncate by max force per unit time
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
@@ -150,6 +121,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
             boid.Steering = totalForce;
             boid.Speed = boid.Velocity.Length();
 
+            // Smooth heading to eliminate rapid heading changes on small velocity adjustments
             if (boid.Speed > boid.MaxSpeed * 0.025f)
             {
                 const float smoothing = 0.9f;
@@ -161,6 +133,46 @@ public partial class FlockingManager : Singleton<FlockingManager>
 
             _boids[i] = boid;
         }
+    }
+
+    private Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, float delta)
+    {
+        Vector2 force = Vector2.Zero;
+        switch (behaviour)
+        {
+            case Cohesion:
+                force += Steering_Cohesion(boid, _boids, 50.0f);
+                break;
+            case Alignment:
+                force += Steering_Align(boid, _boids, 50.0f);
+                break;
+            case Separation:
+                force += Steering_Separate(boid, _boids, _obstacles, delta);
+                break;
+            case Arrive:
+                force += Steering_Arrive(boid, boid.Target, 50.0f);
+                break;
+            case Pursuit:
+                force += Steering_Pursuit(boid, boid.Target);
+                break;
+            case Flee:
+                break;
+            case EdgeRepulsion:
+                force += Steering_EdgeRepulsion(boid, EdgeBounds);
+                break;
+            case Avoidance:
+                force += Steering_Avoidance(ref boid, _boids, _obstacles);
+                break;
+            case MaintainSpeed:
+                force += Steering_MaintainSpeed(boid);
+                break;
+            case COUNT:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return force.Limit(boid.MaxForce * delta) * boid.Weights[(int)behaviour];
     }
 
     private void RegisterBoid(Boid boid)
@@ -186,7 +198,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
     }
     
     public int AddBoid(Vector2 pos, Vector2 vel, float radius, float maxSpeed, float maxForce, 
-        int behaviours, float[] weights, Vector2 target, float fov, int alignment)
+        int behaviours, float[] weights, Vector2 target, float fov, int alignment, float desiredSpeed = 0.0f)
     {
         Boid boid = new()
         {
@@ -198,6 +210,7 @@ public partial class FlockingManager : Singleton<FlockingManager>
             Velocity = vel,
             Radius = radius,
             Heading = Vector2.Up,
+            DesiredSpeed = desiredSpeed,
             MaxSpeed = maxSpeed,
             MaxForce = maxForce,
             LookAhead = 0.5f,

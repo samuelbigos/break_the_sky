@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Drawing.Drawing2D;
 
-public partial class FlockingManager
+public partial class SteeringManager
 {
     private readonly SurfaceTool _st = new();
 

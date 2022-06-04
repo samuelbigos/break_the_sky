@@ -138,7 +138,7 @@ public partial class Game : Singleton<Game>
         boid.Init(droneData.Name, _player, this, _OnBoidDestroyed);
         boid.SetTarget(BoidBase.TargetType.Ally, _player);
         boid.GlobalPosition(_player.GlobalTransform.origin);
-        //FlockingManager.Instance.AddBoid(boid, Vector2.Zero);
+        //SteeringManager.Instance.AddBoid(boid, Vector2.Zero);
 
         return true;
     }
@@ -168,7 +168,7 @@ public partial class Game : Singleton<Game>
         _allBoids.Remove(boid);
         _destroyedBoids.Add(boid);
         
-        //FlockingManager.Instance.RemoveBoid(boid);
+        //SteeringManager.Instance.RemoveBoid(boid);
     }
     
     private void _OnImGuiLayout()

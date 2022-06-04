@@ -192,7 +192,7 @@ public partial class BoidBase : Area
                 SetTarget(TargetType.None);
         }
 
-        //FlockingManager.Instance.UpdateBoid(this);
+        //SteeringManager.Instance.UpdateBoid(this);
         
         if (!_destroyed)
         {
@@ -313,7 +313,7 @@ public partial class BoidBase : Area
         }
     }
 
-    protected void SetSteeringBehaviourEnabled(FlockingManager.Behaviours behaviour, bool enabled, float weight = 1.0f)
+    protected void SetSteeringBehaviourEnabled(SteeringManager.Behaviours behaviour, bool enabled, float weight = 1.0f)
     {
         if (enabled)
         {
