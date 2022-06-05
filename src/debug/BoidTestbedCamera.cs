@@ -2,13 +2,23 @@ using Godot;
 
 public class BoidTestbedCamera : Camera
 {
+    public static BoidTestbedCamera Instance;
+    
     private Transform _initialTrans;
 
-    private Vector2 MousePosition()
+    public Vector2 MousePosition()
     {
         Vector2 pos = GetViewport().GetMousePosition();
         Vector3 origin = ProjectRayOrigin(pos);
         Vector3 normal = ProjectRayNormal(pos);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
+        return new Vector2(hit.x, hit.z);
+    }
+    
+    public Vector2 ScreenPosition(Vector2 screen)
+    {
+        Vector3 origin = ProjectRayOrigin(screen);
+        Vector3 normal = ProjectRayNormal(screen);
         Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
         return new Vector2(hit.x, hit.z);
     }
@@ -20,6 +30,7 @@ public class BoidTestbedCamera : Camera
         VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
         
         _initialTrans = GlobalTransform;
+        Instance = this;
     }
 
     public override void _Process(float delta)

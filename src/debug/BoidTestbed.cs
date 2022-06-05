@@ -7,6 +7,8 @@ public partial class BoidTestbed : Spatial
 {
     [OnReadyGet] private MeshInstance _boidsMesh;
     [OnReadyGet] private Camera _camera;
+    [OnReadyGet] private FlowField _flowField;
+    
     [Export] private Rect2 _playArea;
     
     private List<int> _boidIds = new();
@@ -190,6 +192,9 @@ public partial class BoidTestbed : Spatial
             }
         }
         
+        // flow fields
+        SteeringManager.Instance.AddFlowField(_flowField);
+
         // _boidIds.Add(SteeringManager.Instance.AddBoid(new Vector2(-100.0f, 0.0f), new Vector2(100.0f, 0.0f), radius, maxSpeed, maxForce, behaviours,
         //     weights, Vector2.Zero, 360.0f, 1));
         

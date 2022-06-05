@@ -2,7 +2,7 @@ using Godot;
 
 public static class Utils
 {
-    public static RandomNumberGenerator Rng = new RandomNumberGenerator();
+    public static readonly RandomNumberGenerator Rng = new();
 
     public static Vector2 To2D(this Vector3 vec)
     {
@@ -75,5 +75,56 @@ public static class Utils
     public static Vector2 PerpendicularComponent(this Vector2 vec, Vector2 unitBasis)
     {
         return vec - vec.ParallelComponent(unitBasis);
+    }
+    
+    public static void Line(Vector3 p1, Vector3 p2, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    {
+        cols[v] = col;
+        verts[v] = p1;
+        indices[i++] = v++;
+        cols[v] = col;
+        verts[v] = p2;
+        indices[i++] = v++;
+        
+    }
+    
+    public static void Circle(Vector3 pos, int segments, float radius, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    {
+        for (int s = 0; s < segments; s++)
+        {
+            cols[v + s] = col;
+            float rad = Mathf.Pi * 2.0f * ((float) s / segments);
+            Vector3 vert = pos + new Vector3(Mathf.Sin(rad), 0.0f, Mathf.Cos(rad)) * radius;
+            verts[v + s] = vert;
+            indices[i++] = v + s;
+            indices[i++] = v + (s + 1) % segments;
+        }
+
+        v += segments;
+    }
+    
+    public static void CircleArc(Vector3 pos, int segments, float radius, float arcDeg, Vector2 heading, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    {
+        if (arcDeg >= 360.0f)
+        {
+            Circle(pos, segments, radius, col,ref v, ref i, verts, cols, indices);
+            return;
+        }
+        
+        float segmentArc = Mathf.Deg2Rad(arcDeg / (segments - 1));
+        float headingAngle = heading.AngleTo(Vector2.Down) - Mathf.Deg2Rad(arcDeg * 0.5f);
+        cols[v] = col;
+        verts[v] = pos;
+        v++;
+        for (int s = 0; s < segments; s++)
+        {
+            cols[v + s] = col;
+            float rad = headingAngle + segmentArc * s;
+            Vector3 vert = pos + new Vector3(Mathf.Sin(rad), 0.0f, Mathf.Cos(rad)) * radius;
+            verts[v + s] = vert;
+            indices[i++] = (v - 1 + (segments + s - 1) % segments);
+            indices[i++] = (v - 1 + (segments + s) % segments);
+        }
+        v += segments;
     }
 }

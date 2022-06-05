@@ -25,10 +25,11 @@ public partial class FlowFieldCreator : Spatial
     private Vector2 _mousePosLast;
     private Vector2 _mouseMoveVector;
     private bool _saving;
+    private int _brushMode;
     
-    private List<Vector3> _vertList = new();
-    private List<Color> _colList = new();
-    private List<int> _indexList = new();
+    private Vector3[] _vertList = new Vector3[50000];
+    private Color[] _colList = new Color[50000];
+    private int[] _indexList = new int[100000];
 
     [OnReady] private void Ready()
     {
@@ -47,18 +48,13 @@ public partial class FlowFieldCreator : Spatial
     {
         base._Process(delta);
 
-        if (_saving)
-        {
-            
-        }
-
         DrawVectors();
     }
 
-    private Vector2 MousePos()
+    private Vector3 MousePos()
     {
         Vector3 mousePos3D = _camera.ProjectPosition(GetViewport().GetMousePosition(), 0.0f);
-        return new Vector2(mousePos3D.x, mousePos3D.z);
+        return new Vector3(mousePos3D.x, 0.0f, mousePos3D.z);
     }
     
     public override void _Input(InputEvent evt)
@@ -70,7 +66,7 @@ public partial class FlowFieldCreator : Spatial
         }
         
         // process vectors
-        Vector2 mousePos = MousePos();
+        Vector2 mousePos = MousePos().To2D();
         if (Input.IsActionPressed("flowfield_tool_mouse") && !_saving)
         {
             if (!_wasMousePressed)
@@ -80,11 +76,11 @@ public partial class FlowFieldCreator : Spatial
             }
             else
             {
-                float smoothing = 0.5f;
+                float smoothing = 0.25f;
                 _mouseMoveVector = _mouseMoveVector * (1.0f - smoothing) + (mousePos - _mousePosLast).Normalized() * smoothing;
-                Vector2 mC = mousePos / _cellSize;
-
+                
                 // set vector for all cells covered by brush.
+                Vector2 mC = mousePos / _cellSize;
                 for (int x = (int) (mC.x - _brushSize * 0.5f); x < mC.x + _brushSize * 0.5f; x++)
                 {
                     for (int y = (int) (mC.y - _brushSize * 0.5f); y < mC.y + _brushSize * 0.5f; y++)
@@ -96,7 +92,21 @@ public partial class FlowFieldCreator : Spatial
                         if ((new Vector2(x, y) - mousePos / _cellSize).Length() > _brushSize * 0.5f)
                             continue;
                         
-                        _vectors[x, y] = _mouseMoveVector.Normalized();
+                        Vector2 vector = Vector2.Zero;
+                        Vector2 cellPos = new Vector2(x, y) * _cellSize;
+                        switch (_brushMode)
+                        {
+                            case 0:
+                                vector = _mouseMoveVector;
+                                break;
+                            case 1:
+                                vector = -(cellPos - _fieldSize * _cellSize * 0.5f).Normalized();
+                                break;
+                            case 2:
+                                vector = (cellPos - _fieldSize * _cellSize * 0.5f).Normalized();
+                                break;
+                        }
+                        _vectors[x, y] = vector.Normalized();
                     }
                 }
                 _mousePosLast = mousePos;
@@ -111,16 +121,27 @@ public partial class FlowFieldCreator : Spatial
     private void DrawVectors()
     {
         ArrayMesh outMesh = new();
-        int v = 0;
-
+        int v = 0, i = 0;
+        
+        // grid
+        Color gridCol = Color.Color8(150, 150, 150);
+        Vector3 p1 = new Vector3(0.0f, -1.0f, 0.0f);
+        Vector3 p2 = new Vector3(0.0f, -1.0f, _fieldSize.y);
+        Vector3 p3 = new Vector3(_fieldSize.x, -1.0f, _fieldSize.y);
+        Vector3 p4 = new Vector3(_fieldSize.x, -1.0f, 0.0f);
+        Utils.Line(p1, p2, gridCol, ref v, ref i, _vertList, _colList, _indexList);
+        Utils.Line(p2, p3, gridCol, ref v, ref i, _vertList, _colList, _indexList);
+        Utils.Line(p3, p4, gridCol, ref v, ref i, _vertList, _colList, _indexList);
+        Utils.Line(p4, p1, gridCol, ref v, ref i, _vertList, _colList, _indexList);
+        
         // flow field
         for (int x = 0; x < _fieldSize.x; x++)
         {
             for (int y = 0; y < _fieldSize.y; y++)
             {
-                Color lineCol = Color.Color8(30, 30, 30);
-                Line(new Vector2(x - 0.5f, y - 0.5f) * _cellSize, new Vector2(x + 0.5f, y - 0.5f) * _cellSize, lineCol, -1.0f, ref v);
-                Line(new Vector2(x - 0.5f, y - 0.5f) * _cellSize, new Vector2(x - 0.5f, y + 0.5f) * _cellSize, lineCol, -1.0f, ref v);
+                //Color lineCol = Color.Color8(30, 30, 30);
+                //Line(new Vector2(x - 0.5f, y - 0.5f) * _cellSize, new Vector2(x + 0.5f, y - 0.5f) * _cellSize, lineCol, -1.0f, ref v, ref i);
+                //Line(new Vector2(x - 0.5f, y - 0.5f) * _cellSize, new Vector2(x - 0.5f, y + 0.5f) * _cellSize, lineCol, -1.0f, ref v, ref i);
                 
                 if (_vectors[x, y] == Vector2.Zero)
                     continue;
@@ -130,31 +151,35 @@ public partial class FlowFieldCreator : Spatial
                     Mathf.Lerp(0.0f, 1.0f, dir.x * 0.5f + 0.5f),
                     Mathf.Lerp(0.0f, 1.0f, dir.y * 0.5f + 0.5f),
                     Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.y * 0.5f + 0.5f)));
-                Vector2 pos = new Vector2(x + 0.5f, y + 0.5f) * _cellSize;
-                Vector2 end = pos + dir * _cellSize;
-                Line(pos, end, col, 0.0f, ref v);
-                Circle(pos, 4, 1.0f, Color.Color8(225, 225, 225), 1.0f, ref v);
+                Vector3 pos = new Vector3(x + 0.5f, 1.0f, y + 0.5f) * _cellSize;
+                Vector3 end = pos + dir.To3D() * _cellSize;
+                Utils.Line(pos, end, col, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(pos, 3, 1.0f, Color.Color8(225, 225, 225),  ref v, ref i, _vertList, _colList, _indexList);
             }
         }
         
         // brush
-        Color brushCol = Color.Color8(100, 100, 100);
-        Circle(MousePos(), 32, _brushSize * _cellSize * 0.5f, brushCol, 1.0f, ref v);
+        Color brushCol = Color.Color8(200, 200, 200);
+        Utils.Circle(MousePos() + Vector3.Up, 32, _brushSize * _cellSize * 0.5f, brushCol, ref v, ref i, _vertList, _colList, _indexList);
+        
+        Debug.Assert(v < _vertList.Length, "v < _vertList.Length");
+        Debug.Assert(v < _colList.Length, "v < _colList.Length");
+        Debug.Assert(i < _indexList.Length, "i < _indexList.Length");
+
+        Span<Vector3> verts = _vertList.AsSpan(0, v);
+        Span<Color> colours = _colList.AsSpan(0, v);
+        Span<int> indices = _indexList.AsSpan(0, i);
         
         Array arrays = new();
         arrays.Resize((int) ArrayMesh.ArrayType.Max);
-        arrays[(int) ArrayMesh.ArrayType.Vertex] = _vertList;
-        arrays[(int) ArrayMesh.ArrayType.Color] = _colList;
-        arrays[(int) ArrayMesh.ArrayType.Index] = _indexList;
+        arrays[(int) ArrayMesh.ArrayType.Vertex] = verts.ToArray();
+        arrays[(int) ArrayMesh.ArrayType.Color] = colours.ToArray();
+        arrays[(int) ArrayMesh.ArrayType.Index] = indices.ToArray();
         
         if (v != 0)
         {
             outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
         }
-        
-        _vertList.Clear();
-        _colList.Clear();
-        _indexList.Clear();
 
         _mesh.Mesh = outMesh;
     }
@@ -187,7 +212,7 @@ public partial class FlowFieldCreator : Spatial
                 res.Vectors[y * res.X + x] = _vectors[x,y];
             }
         }
-        string ext = path.Contains(".tres") ? "" : ".tres";
+        string ext = path.Contains(".res") ? "" : ".res";
         GD.Print(ResourceSaver.Save($"{path}{ext}", res));
         
         _saving = false;
@@ -202,48 +227,25 @@ public partial class FlowFieldCreator : Spatial
         {
             for (int y = 0; y < res.Y; y++)
             {
-                _vectors[x, y] = res.Vectors[y * res.X + x];
+                _vectors[x, y] = res.VectorAt(x, y);
             }
         }
         
         _saving = false;
-    }
-    
-    private void Line(Vector2 p1, Vector2 p2, Color col, float z, ref int v)
-    {
-        _colList.Add(col);
-        _vertList.Add(new Vector3(p1.x, z, p1.y));
-        _colList.Add(col);
-        _vertList.Add(new Vector3(p2.x, z, p2.y));
-        _indexList.Add(v++);
-        _indexList.Add(v++);
-    }
-    
-    private void Circle(Vector2 pos, int segments, float radius, Color col, float z, ref int v)
-    {
-        for (int s = 0; s < segments; s++)
-        {
-            _colList.Add(col);
-            float rad = Mathf.Pi * 2.0f * ((float) s / segments);
-            Vector3 vert = (pos.To3D() + new Vector3(Mathf.Sin(rad), 0.0f, Mathf.Cos(rad)) * radius);
-            vert += Vector3.Up * z;
-            _vertList.Add(vert);
-            _indexList.Add(v + s);
-            _indexList.Add(v + (s + 1) % segments);
-        }
-        v += segments;
     }
 
     public override void _EnterTree()
     {
         base._EnterTree();
         DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.ManualInputHandling = true;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
         DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.ManualInputHandling = false;
     }
 
     private void _OnImGuiLayout()
@@ -252,6 +254,10 @@ public partial class FlowFieldCreator : Spatial
         {
             ImGui.Text("Modify");
             ImGui.SliderFloat("Brush size", ref _brushSize, 1.0f, 16.0f);
+            ImGui.Text("Brush Mode:");
+            ImGui.RadioButton("Stroke", ref _brushMode, 0);
+            ImGui.RadioButton("To Centre", ref _brushMode, 1);
+            ImGui.RadioButton("From Centre", ref _brushMode, 2);
             if (ImGui.Button("Clear"))
             {
                 _vectors = new Vector2[(int) _fieldSize.x, (int) _fieldSize.y];

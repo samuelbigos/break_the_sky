@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ImGuiNET;
 using Array = Godot.Collections.Array;
 
@@ -9,92 +10,132 @@ public partial class SteeringManager
     private bool _drawSeparation = true;
     private bool _drawSteering = true;
     private bool _drawVelocity = true;
-    private bool _drawVision = true;
+    private bool _drawVision = false;
     private bool _drawAvoidance = true;
     private bool _drawWander = true;
+    private bool _drawFlowFields = false;
     
-    private List<Vector3> _vertList = new();
-    private List<Color> _colList = new();
-    private List<int> _indexList = new();
+    private Vector3[] _vertList = new Vector3[50000];
+    private Color[] _colList = new Color[50000];
+    private int[] _indexList = new int[100000];
 
     public void DrawSimulationToMesh(out Mesh mesh)
     {
         ArrayMesh outMesh = new();
         int v = 0;
+        int i = 0;
 
         // boids
         Span<Boid> boids = _boidPool.AsSpan(0, _numBoids);
         foreach (ref readonly Boid boid in boids)
         {
             // body
-            Vector2 forward = boid.Heading;
-            Vector2 right = new(forward.y, -forward.x);
+            Vector3 boidPos = boid.Position.To3D();
+            Vector3 forward = boid.Heading.To3D();
+            Vector3 right = new(forward.y, 0.0f, -forward.x);
             Color col = boid.Alignment == 0 ? Colors.Blue : Colors.Red;
-            Vector2 p0 = boid.Position + forward * -2.5f + right * 3.0f;
-            Vector2 p1 = boid.Position + forward * 4.5f;
-            Vector2 p2 = boid.Position + forward * -2.5f - right * 3.0f;
-            Line(p0, p1, col, ref v);
-            Line(p1, p2, col, ref v);
-            Line(p2, p0, col, ref v);
-
+            Vector3 p0 = boidPos + forward * -2.5f + right * 3.0f;
+            Vector3 p1 = boidPos + forward * 4.5f;
+            Vector3 p2 = boidPos + forward * -2.5f - right * 3.0f;
+            Utils.Line(p0, p1, col, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(p1, p2, col, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(p2, p0, col, ref v, ref i, _vertList, _colList, _indexList);
+            
             // separation radius
             if (_drawSeparation)
             {
-                Circle(boid.Position, 32, boid.Radius, Colors.DarkSlateGray, ref v);
+                Utils.Circle(boidPos, 32, boid.Radius, Colors.DarkSlateGray, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // boid velocity/force
             if (_drawVelocity)
             {
-                Line(boid.Position, boid.Position + boid.Velocity * 25.0f / boid.MaxSpeed, col, ref v);
+                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, col, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)
             {
-                Line(boid.Position, boid.Position + boid.Steering * 25.0f / boid.MaxForce / TimeSystem.Delta,
-                    Colors.Purple, ref v);
+                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 25.0f / boid.MaxForce / TimeSystem.Delta,
+                    Colors.Purple, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // boid avoidance
             if (boid.Intersection.Intersect && _drawAvoidance)
             {
                 //Line(_st, boid.Position, boid.Position + forward * boid.LookAhead * boid.Speed, Colors.Black, ref v);
-                Circle(boid.Intersection.SurfacePoint, 8, 1.0f, Colors.Black, ref v);
-                Line(boid.Intersection.SurfacePoint,
-                    boid.Intersection.SurfacePoint + boid.Intersection.SurfaceNormal * 10.0f, Colors.Black, ref v);
+                Vector3 surface = boid.Intersection.SurfacePoint.To3D();
+                Utils.Circle(surface, 8, 1.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(surface, surface + boid.Intersection.SurfaceNormal.To3D() * 10.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // view range
             if (_drawVision)
             {
-                CircleArc(boid.Position, 64, boid.ViewRange, boid.ViewAngle, boid.Heading, Colors.DarkGray, ref v);
+                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // wander
             if (_drawWander)
             {
-                Vector2 circlePos = boid.Position + boid.Heading * boid.WanderCircleDist;
+                Vector3 circlePos = boidPos + boid.Heading.To3D() * boid.WanderCircleDist;
 
                 float angle = -boid.Heading.AngleTo(Vector2.Right) + boid.WanderAngle;
-                Vector2 displacement = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).Normalized() *
-                                       boid.WanderCircleRadius;
+                Vector3 displacement = new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle)).Normalized() *  boid.WanderCircleRadius;
 
-                Circle(circlePos, 32, boid.WanderCircleRadius, Colors.Black, ref v);
-                Line(circlePos, circlePos + displacement, Colors.Black, ref v);
+                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(circlePos, circlePos + displacement, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+            }
+        }
+        
+        // flow fields
+        if (_drawFlowFields)
+        {
+            float flowFieldVisCellSize = 10.0f;
+            Vector2 topLeft = BoidTestbedCamera.Instance.ScreenPosition(Vector2.Zero);
+            Vector2 botRight = BoidTestbedCamera.Instance.ScreenPosition(GetViewport().Size);
+            
+            for (float x = topLeft.x; x < botRight.x; x += flowFieldVisCellSize)
+            {
+                for (float y = topLeft.y; y < botRight.y; y += flowFieldVisCellSize)
+                {
+                    Vector3 pos = new Vector3(x, 0.0f, y) / flowFieldVisCellSize;
+                    pos = pos.Floor();
+                    pos *= flowFieldVisCellSize;
+                    
+                    Vector3 dir = Vector3.Zero;
+                    int count = 0;
+                    foreach (FlowField flowField in _flowFields)
+                    {
+                        Vector2 ff = flowField.GetFieldAtPosition(pos.To2D());
+                        dir.x += ff.x;
+                        dir.z += ff.y;
+                        count += ff == Vector2.Zero ? 0 : 1;
+                    }
+
+                    if (count > 0)
+                        dir /= count;
+
+                    Color col = new(
+                        Mathf.Lerp(0.0f, 1.0f, dir.x * 0.5f + 0.5f),
+                        Mathf.Lerp(0.0f, 1.0f, dir.y * 0.5f + 0.5f),
+                        Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.y * 0.5f + 0.5f)));
+                    
+                    Utils.Line(pos, pos + dir * flowFieldVisCellSize, col, ref v, ref i, _vertList, _colList, _indexList);
+                }
             }
         }
 
         // edges
         {
-            Vector2 p0 = new(EdgeBounds.Position);
-            Vector2 p1 = new(EdgeBounds.End.x, EdgeBounds.Position.y);
-            Vector2 p2 = new(EdgeBounds.End);
-            Vector2 p3 = new(EdgeBounds.Position.x, EdgeBounds.End.y);
+            Vector3 p0 = new(EdgeBounds.Position.To3D());
+            Vector3 p1 = new(EdgeBounds.End.x, 0.0f, EdgeBounds.Position.y);
+            Vector3 p2 = new(EdgeBounds.End.To3D());
+            Vector3 p3 = new(EdgeBounds.Position.x, 0.0f, EdgeBounds.End.y);
 
-            Line(p0, p1, Colors.Black, ref v);
-            Line(p1, p2, Colors.Black, ref v);
-            Line(p2, p3, Colors.Black, ref v);
-            Line(p3, p0, Colors.Black, ref v);
+            Utils.Line(p0, p1, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(p1, p2, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(p2, p3, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(p3, p0, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
 
             // obstacles
             foreach (Obstacle obstacle in _obstacles)
@@ -103,7 +144,7 @@ public partial class SteeringManager
                 {
                     case ObstacleShape.Circle:
                     {
-                        Circle(obstacle.Position, 32, obstacle.Size, Colors.Brown, ref v);
+                        Utils.Circle(obstacle.Position.To3D(), 32, obstacle.Size, Colors.Brown, ref v, ref i, _vertList, _colList, _indexList);
                         break;
                     }
                     default:
@@ -112,67 +153,23 @@ public partial class SteeringManager
             } 
         }
         
+        Debug.Assert(v < _vertList.Length, "v < _vertList.Length");
+        Debug.Assert(v < _colList.Length, "v < _colList.Length");
+        Debug.Assert(i < _indexList.Length, "i < _indexList.Length");
+
+        Span<Vector3> verts = _vertList.AsSpan(0, v);
+        Span<Color> colours = _colList.AsSpan(0, v);
+        Span<int> indices = _indexList.AsSpan(0, i);
+        
         Array arrays = new();
         arrays.Resize((int) ArrayMesh.ArrayType.Max);
-        arrays[(int) ArrayMesh.ArrayType.Vertex] = _vertList;
-        arrays[(int) ArrayMesh.ArrayType.Color] = _colList;
-        arrays[(int) ArrayMesh.ArrayType.Index] = _indexList;
+        arrays[(int) ArrayMesh.ArrayType.Vertex] = verts.ToArray();
+        arrays[(int) ArrayMesh.ArrayType.Color] = colours.ToArray();
+        arrays[(int) ArrayMesh.ArrayType.Index] = indices.ToArray();
 
         outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
-        
-        _vertList.Clear();
-        _colList.Clear();
-        _indexList.Clear();
 
         mesh = outMesh;
-    }
-
-    private void Circle(Vector2 pos, int segments, float radius, Color col, ref int v)
-    {
-        for (int s = 0; s < segments; s++)
-        {
-            _colList.Add(col);
-            float rad = Mathf.Pi * 2.0f * ((float) s / segments);
-            Vector3 vert = (pos + new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)) * radius).To3D();
-            _vertList.Add(vert);
-            _indexList.Add(v + s);
-            _indexList.Add(v + (s + 1) % segments);
-        }
-        v += segments;
-    }
-    
-    private void CircleArc(Vector2 pos, int segments, float radius, float arcDeg, Vector2 heading, Color col, ref int v)
-    {
-        if (arcDeg >= 360.0f)
-        {
-            Circle(pos, segments, radius, col, ref v);
-            return;
-        }
-        
-        float segmentArc = Mathf.Deg2Rad(arcDeg / (segments - 1));
-        float headingAngle = heading.AngleTo(Vector2.Down) - Mathf.Deg2Rad(arcDeg * 0.5f);
-        _colList.Add(col);
-        _vertList.Add(pos.To3D());
-        for (int s = 0; s < segments; s++)
-        {
-            _colList.Add(col);
-            float rad = headingAngle + segmentArc * s;
-            Vector3 vert = (pos + new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)) * radius).To3D();
-            _vertList.Add(vert);
-            _indexList.Add(v + (segments + s - 1) % segments);
-            _indexList.Add(v + (segments + s) % segments);
-        }
-        v += segments + 1;
-    }
-
-    private void Line(Vector2 p1, Vector2 p2, Color col, ref int v)
-    {
-        _colList.Add(col);
-        _vertList.Add(p1.To3D());
-        _colList.Add(col);
-        _vertList.Add(p2.To3D());
-        _indexList.Add(v++);
-        _indexList.Add(v++);
     }
     
     public override void _EnterTree()
@@ -197,6 +194,7 @@ public partial class SteeringManager
             ImGui.Checkbox("Draw Vision", ref _drawVision);
             ImGui.Checkbox("Draw Avoidance", ref _drawAvoidance);
             ImGui.Checkbox("Draw Wander", ref _drawWander);
+            ImGui.Checkbox("Draw FlowFields", ref _drawFlowFields);
             ImGui.EndTabItem();
         }
     }

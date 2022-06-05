@@ -119,15 +119,6 @@ public partial class Game : Singleton<Game>
         Debug.Assert(_allyBoids.Count + _enemyBoids.Count == _allBoids.Count, "Error in boid references.");
     }
 
-    public override void _Input(InputEvent evt)
-    {
-        if (ImGuiGD.ProcessInput(evt))
-        {
-            GetTree().SetInputAsHandled();
-            return;
-        }
-    }
-
     public void FreeBoid(BoidBase boid)
     {
         _destroyedBoids.Remove(boid);

@@ -7,6 +7,8 @@ public class DebugImGui : Singleton<DebugImGui>
     [Export] private PackedScene _initialScene;
     
     public static Action DrawImGui = null;
+    public static bool ManualInputHandling = false;
+    
     private float _fps = 0.0f;
 
     public override void _Ready()
@@ -25,6 +27,14 @@ public class DebugImGui : Singleton<DebugImGui>
         {
             float fps = 1.0f / delta;
             _fps = 0.033f * fps + 0.966f * _fps;
+        }
+    }
+    
+    public override void _Input(InputEvent evt)
+    {
+        if (ImGuiGD.ProcessInput(evt) && !ManualInputHandling)
+        {
+            GetTree().SetInputAsHandled();
         }
     }
 

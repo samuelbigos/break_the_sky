@@ -1,7 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/debug/BoidTestbed.cs" type="Script" id=1]
 [ext_resource path="res://src/debug/BoidTestbedCamera.cs" type="Script" id=2]
+[ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=3]
+[ext_resource path="res://src/steering/FlowField.cs" type="Script" id=4]
 
 [sub_resource type="SpatialMaterial" id=1]
 flags_unshaded = true
@@ -22,6 +24,7 @@ albedo_color = Color( 0.87451, 0.87451, 0.87451, 1 )
 script = ExtResource( 1 )
 BoidsMeshPath = NodePath("Boids")
 CameraPath = NodePath("Camera")
+FlowFieldPath = NodePath("FlowField")
 _playArea = Rect2( -1000, -1000, 2000, 2000 )
 
 [node name="Camera" type="Camera" parent="."]
@@ -40,3 +43,8 @@ transform = Transform( 5000, 0, 0, 0, 5000, 0, 0, 0, 5000, 0, -5, 0 )
 material_override = SubResource( 2 )
 mesh = SubResource( 3 )
 material/0 = null
+
+[node name="FlowField" type="Spatial" parent="."]
+script = ExtResource( 4 )
+_flowField = ExtResource( 3 )
+_size = Vector2( 300, 300 )

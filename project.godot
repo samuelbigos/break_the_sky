@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/tools/FlowFieldCreator.tscn"
+run/main_scene="res://scenes/debug/BoidTestbed.tscn"
 config/icon="res://icon.png"
 config/save_version=1
 

@@ -78,6 +78,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private int _numBoids;
     private Boid[] _boidPool = new Boid[1000];
     private List<Obstacle> _obstacles = new(100);
+    private List<FlowField> _flowFields = new();
 
     private System.Collections.Generic.Dictionary<int, int> _boidIdToIndex = new();
     private System.Collections.Generic.Dictionary<int, int> _boidIndexToId = new();
@@ -90,10 +91,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public override void _Ready()
     {
         base._Ready();
-
-        _vertList.Capacity = 10000;
-        _colList.Capacity = 10000;
-        _indexList.Capacity = 20000;
     }
 
     public override void _Process(float delta)
@@ -220,6 +217,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _obstacleIdToIndex[obstacle.ID] = _obstacles.Count - 1;
         _obstacleIndexToId[_obstacles.Count - 1] = obstacle.ID;
     }
+
+    private void RegisterFlowField(FlowField flowField)
+    {
+        _flowFields.Add(flowField);
+    }
     
     public int AddBoid(Boid boid)
     {
@@ -240,6 +242,12 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _obstacleIdGen++;
         RegisterObstacle(obstacle);
         return obstacle.ID;
+    }
+
+    public int AddFlowField(FlowField flowField)
+    {
+        RegisterFlowField(flowField);
+        return _flowFields.Count - 1;
     }
 
     public Boid GetBoid(int id)
