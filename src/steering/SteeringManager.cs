@@ -86,10 +86,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
     
     private int _boidIdGen;
     private int _obstacleIdGen;
-    
-    private List<Vector3> _vertList = new();
-    private List<Color> _colList = new();
-    private List<int> _indexList = new();
 
     public override void _Ready()
     {

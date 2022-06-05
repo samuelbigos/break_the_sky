@@ -43,14 +43,6 @@ public class ImGuiNode : Node2D
         }
     }
 
-    public override void _Input(InputEvent evt)
-    {
-        if (Visible && ImGuiGD.ProcessInput(evt))
-        {
-            GetTree().SetInputAsHandled();
-        }
-    }
-
     public override void _ExitTree()
     {
         ImGuiGD.Shutdown();

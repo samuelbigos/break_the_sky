@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/debug/BoidTestbed.tscn"
+run/main_scene="res://scenes/tools/FlowFieldCreator.tscn"
 config/icon="res://icon.png"
 config/save_version=1
 
@@ -48,10 +48,8 @@ DebugImGui="*res://scenes/debug/DebugImGui.tscn"
 
 [display]
 
-window/size/width=1920
-window/size/height=1080
-window/size/borderless=true
-window/stretch/mode="viewport"
+window/size/width=1280
+window/size/height=720
 
 [editor_plugins]
 
@@ -171,6 +169,11 @@ zoom_out={
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":5,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
+flowfield_tool_mouse={
+"deadzone": 0.5,
+"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
 
 [physics]
 
@@ -179,4 +182,5 @@ common/enable_pause_aware_picking=true
 [rendering]
 
 quality/shadows/filter_mode=0
+quality/filters/msaa=3
 environment/default_environment="res://assets/Environment.tres"

@@ -2,12 +2,11 @@ using Godot;
 using System;
 using ImGuiNET;
 
-public class DebugImGui : Node
+public class DebugImGui : Singleton<DebugImGui>
 {
     [Export] private PackedScene _initialScene;
     
     public static Action DrawImGui = null;
-    
     private float _fps = 0.0f;
 
     public override void _Ready()

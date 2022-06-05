@@ -1,19 +1,21 @@
 using Godot;
 using System;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using Godot.Collections;
+using System.Collections.Generic;
 using ImGuiNET;
 using Array = Godot.Collections.Array;
 
 public partial class SteeringManager
 {
-    private static bool _drawSeparation = true;
-    private static bool _drawSteering = true;
-    private static bool _drawVelocity = true;
-    private static bool _drawVision = true;
-    private static bool _drawAvoidance = true;
-    private static bool _drawWander = true;
+    private bool _drawSeparation = true;
+    private bool _drawSteering = true;
+    private bool _drawVelocity = true;
+    private bool _drawVision = true;
+    private bool _drawAvoidance = true;
+    private bool _drawWander = true;
+    
+    private List<Vector3> _vertList = new();
+    private List<Color> _colList = new();
+    private List<int> _indexList = new();
 
     public void DrawSimulationToMesh(out Mesh mesh)
     {
@@ -107,22 +109,22 @@ public partial class SteeringManager
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }
-
-            Array arrays = new();
-            arrays.Resize((int) ArrayMesh.ArrayType.Max);
-            arrays[(int) ArrayMesh.ArrayType.Vertex] = _vertList;
-            arrays[(int) ArrayMesh.ArrayType.Color] = _colList;
-            arrays[(int) ArrayMesh.ArrayType.Index] = _indexList;
-            
-            _vertList.Clear();
-            _colList.Clear();
-            _indexList.Clear();
-
-            outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
-
-            mesh = outMesh;
+            } 
         }
+        
+        Array arrays = new();
+        arrays.Resize((int) ArrayMesh.ArrayType.Max);
+        arrays[(int) ArrayMesh.ArrayType.Vertex] = _vertList;
+        arrays[(int) ArrayMesh.ArrayType.Color] = _colList;
+        arrays[(int) ArrayMesh.ArrayType.Index] = _indexList;
+
+        outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
+        
+        _vertList.Clear();
+        _colList.Clear();
+        _indexList.Clear();
+
+        mesh = outMesh;
     }
 
     private void Circle(Vector2 pos, int segments, float radius, Color col, ref int v)
@@ -185,7 +187,7 @@ public partial class SteeringManager
         DebugImGui.DrawImGui -= _OnImGuiLayout;
     }
 
-    private static void _OnImGuiLayout()
+    private void _OnImGuiLayout()
     {
         if (ImGui.BeginTabItem("Steering"))
         {

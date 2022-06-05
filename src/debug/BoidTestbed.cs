@@ -7,6 +7,7 @@ public partial class BoidTestbed : Spatial
 {
     [OnReadyGet] private MeshInstance _boidsMesh;
     [OnReadyGet] private Camera _camera;
+    [Export] private Rect2 _playArea;
     
     private List<int> _boidIds = new();
     private List<int> _obstacleIds = new();
@@ -18,7 +19,9 @@ public partial class BoidTestbed : Spatial
         Vector3 normal = _camera.ProjectRayNormal(screenBounds);
         Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
         Rect2 edgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
-        SteeringManager.Instance.EdgeBounds = edgeBounds;
+
+        edgeBounds = _playArea;
+        SteeringManager.Instance.EdgeBounds = _playArea;
         
         float maxSpeed = 50.0f;
         float maxForce = 100.0f;
@@ -113,7 +116,7 @@ public partial class BoidTestbed : Spatial
         
         // enemies
         {
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 0; i++)
             {
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * maxSpeed;
