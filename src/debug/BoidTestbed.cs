@@ -7,7 +7,6 @@ public partial class BoidTestbed : Spatial
 {
     [OnReadyGet] private MeshInstance _boidsMesh;
     [OnReadyGet] private Camera _camera;
-    [OnReadyGet] private FlowField _flowField;
     
     [Export] private Rect2 _playArea;
     
@@ -23,18 +22,7 @@ public partial class BoidTestbed : Spatial
         Rect2 edgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
 
         edgeBounds = _playArea;
-        SteeringManager.Instance.EdgeBounds = _playArea;
-        
-        float maxSpeed = 50.0f;
-        float maxForce = 100.0f;
-        float radius = 5.0f;
-        
-        int behaviours = 0;
-        behaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
-        behaviours |= 1 << (int) SteeringManager.Behaviours.Alignment;
-        behaviours |= 1 << (int) SteeringManager.Behaviours.AvoidObstacles;
-        behaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
-        behaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
+        SteeringManager.EdgeBounds = _playArea;
         
         float[] weights = new float[(int) SteeringManager.Behaviours.COUNT];
         weights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
@@ -45,6 +33,7 @@ public partial class BoidTestbed : Spatial
         weights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
         weights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
         weights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
+        weights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
         
         // allies
         {
@@ -66,10 +55,10 @@ public partial class BoidTestbed : Spatial
                     Alignment = 0,
                     Position = spawnPos,
                     Velocity = Vector2.Zero,
-                    Radius = radius,
+                    Radius = 5.0f,
                     Heading = Vector2.Up,
-                    MaxSpeed = maxSpeed,
-                    MaxForce = maxForce,
+                    MaxSpeed = 75.0f,
+                    MaxForce = 125.0f,
                     LookAhead = 0.5f,
                     Behaviours = droneBehaviours,
                     Weights = weights,
@@ -78,7 +67,7 @@ public partial class BoidTestbed : Spatial
                     ViewAngle = 360.0f,
                     IgnoreAllyAvoidance = true,
                 };
-                _boidIds.Add(SteeringManager.Instance.AddBoid(boid));
+                _boidIds.Add(SteeringManager.Instance.RegisterBoid(boid));
             }
             
             // bombers
@@ -91,7 +80,7 @@ public partial class BoidTestbed : Spatial
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.Arrive;
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
             
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 0; i++)
             {
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
                 SteeringManager.Boid boid = new()
@@ -100,7 +89,7 @@ public partial class BoidTestbed : Spatial
                     Alignment = 0,
                     Position = randPos,
                     Velocity = Vector2.Zero,
-                    Radius = radius,
+                    Radius = 5.0f,
                     Heading = Vector2.Up,
                     MaxSpeed = 150.0f,
                     MinSpeed = 50.0f,
@@ -112,39 +101,50 @@ public partial class BoidTestbed : Spatial
                     ViewRange = 50.0f,
                     ViewAngle = 360.0f,
                 };
-                _boidIds.Add(SteeringManager.Instance.AddBoid(boid));
+                _boidIds.Add(SteeringManager.Instance.RegisterBoid(boid));
             }
         }
         
         // enemies
         {
-            for (int i = 0; i < 0; i++)
+            int enemyBehaviours = 0;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Alignment;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidObstacles;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.MaintainSpeed;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.FlowFieldFollow;
+            
+            for (int i = 0; i < 50; i++)
             {
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
-                Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * maxSpeed;
+                Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 75.0f;
                 SteeringManager.Boid boid = new()
                 {
                     Alive = true,
                     Alignment = 1,
                     Position = randPos,
                     Velocity = randVel,
-                    Radius = radius,
+                    Radius = 5.0f,
                     Heading = Vector2.Up,
-                    MaxSpeed = maxSpeed,
-                    DesiredSpeed = maxSpeed,
-                    MaxForce = maxForce,
+                    MaxSpeed = 75.0f,
+                    DesiredSpeed = 75.0f,
+                    MaxForce = 125.0f,
                     LookAhead = 0.5f,
-                    Behaviours = behaviours | 1 << (int) SteeringManager.Behaviours.MaintainSpeed,
+                    Behaviours = enemyBehaviours,
                     Weights = weights,
                     Target = Vector2.Zero,
                     ViewRange = 50.0f,
                     ViewAngle = 240.0f,
+                    //FlowFieldDist = 25.0f,
                 };
-                _boidIds.Add(SteeringManager.Instance.AddBoid(boid));
+                _boidIds.Add(SteeringManager.Instance.RegisterBoid(boid));
             }
         }
         
         // leaders
+        int leaderId = 0;
         {
             int leaderBehaviours = 0;
             //leaderBehaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
@@ -156,18 +156,18 @@ public partial class BoidTestbed : Spatial
             for (int i = 0; i < 1; i++)
             {
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
-                Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * maxSpeed;
+                Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 25.0f;
                 SteeringManager.Boid boid = new()
                 {
                     Alive = true,
                     Alignment = 1,
                     Position = randPos,
                     Velocity = randVel,
-                    Radius = radius * 3.0f,
+                    Radius = 15.0f,
                     Heading = Vector2.Up,
-                    MaxSpeed = maxSpeed * 0.5f,
-                    DesiredSpeed = maxSpeed * 0.5f,
-                    MaxForce = maxForce,
+                    MaxSpeed = 25.0f,
+                    DesiredSpeed = 25.0f,
+                    MaxForce = 100.0f,
                     LookAhead = 0.5f,
                     Behaviours = leaderBehaviours,
                     Weights = weights,
@@ -178,7 +178,7 @@ public partial class BoidTestbed : Spatial
                     WanderCircleRadius = 5.0f,
                     WanderVariance = 50.0f,
                 };
-                _boidIds.Add(SteeringManager.Instance.AddBoid(boid));
+                leaderId = SteeringManager.Instance.RegisterBoid(boid);
             }
         }
         
@@ -188,12 +188,24 @@ public partial class BoidTestbed : Spatial
             {
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
                 float randRad = (Utils.Rng.Randf() + 0.5f) * 40.0f;
-                _obstacleIds.Add(SteeringManager.Instance.AddObstacle(randPos, SteeringManager.ObstacleShape.Circle, randRad));
+                SteeringManager.Obstacle obstacle = new()
+                {
+                    Position = randPos,
+                    Shape = SteeringManager.ObstacleShape.Circle,
+                    Size = randRad
+                };
+                _obstacleIds.Add(SteeringManager.Instance.RegisterObstacle(obstacle));
             }
         }
         
         // flow fields
-        SteeringManager.Instance.AddFlowField(_flowField);
+        SteeringManager.FlowField flowField = new()
+        {
+            Resource = ResourceLoader.Load<FlowFieldResource>("res://assets/flowfields/circle.res"),
+            TrackID = leaderId,
+            Size = new Vector2(400, 400),
+        };
+        SteeringManager.Instance.RegisterFlowField(flowField);
 
         // _boidIds.Add(SteeringManager.Instance.AddBoid(new Vector2(-100.0f, 0.0f), new Vector2(100.0f, 0.0f), radius, maxSpeed, maxForce, behaviours,
         //     weights, Vector2.Zero, 360.0f, 1));

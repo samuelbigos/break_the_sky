@@ -72,7 +72,7 @@ public partial class SteeringManager
         return force;
     }
 
-    private static Vector2 Steering_Separate(in Boid boid, in Span<Boid> boids, in List<Obstacle> obstacles, float delta)
+    private static Vector2 Steering_Separate(in Boid boid, in Span<Boid> boids, in Span<Obstacle> obstacles, float delta)
     {
         Vector2 forceSum = Vector2.Zero;
         int count = 0;
@@ -95,7 +95,7 @@ public partial class SteeringManager
         }
 
         // obstacles
-        for (int i = 0; i < obstacles.Count; i++)
+        for (int i = 0; i < obstacles.Length; i++)
         {
             Obstacle other = obstacles[i];
             float distSq = (boid.Position - other.Position).LengthSquared();
@@ -130,14 +130,14 @@ public partial class SteeringManager
         return Steering_Seek(boid, closestPointOnEdge);
     }
     
-    private static Vector2 Steering_AvoidObstacles(ref Boid boid, in List<Obstacle> obstacles)
+    private static Vector2 Steering_AvoidObstacles(ref Boid boid, in Span<Obstacle> obstacles)
     {
         Intersection intersection = default;
         float nearestDistance = 999999.0f;
         float range = boid.Speed * boid.LookAhead;
         
         // obstacles
-        for (int i = 0; i < obstacles.Count; i++)
+        for (int i = 0; i < obstacles.Length; i++)
         {
             Obstacle obstacle = obstacles[i];
             switch (obstacle.Shape)
@@ -235,7 +235,7 @@ public partial class SteeringManager
         return force;
     }
     
-    private Vector2 Steering_Wander(ref Boid boid, float delta)
+    private static Vector2 Steering_Wander(ref Boid boid, float delta)
     {
         Vector2 circleCentre = boid.Position + boid.Heading * boid.WanderCircleDist;
         float angle = -boid.Heading.AngleTo(Vector2.Right) + boid.WanderAngle;
@@ -245,5 +245,27 @@ public partial class SteeringManager
         Vector2 desired = (circleCentre + displacement) - boid.Position;
         Vector2 force = desired - boid.Velocity;
         return force;
+    }
+
+    private static Vector2 Steering_FlowFieldFollow(in Boid boid, Span<FlowField> flowFields)
+    {
+        Vector2 desired = Vector2.Zero;
+        int count = 0;
+        foreach (FlowField flowField in flowFields)
+        {
+            Vector2 pos = boid.Position + boid.Heading * 10.0f;
+            if (TryGetFieldAtPosition(flowField, boid.Position, out Vector2 v))
+            {
+                desired += v;
+                count++;
+            }
+        }
+
+        if (count == 0)
+            return Vector2.Zero;
+
+        desired /= count;
+        desired.SetMag(boid.MaxSpeed);
+        return desired - boid.Velocity;
     }
 }

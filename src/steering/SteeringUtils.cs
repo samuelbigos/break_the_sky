@@ -131,4 +131,22 @@ public partial class SteeringManager
         collisionNormal = (collisionPos - (pB + vB * collisionTime)).Normalized();
         return true;
     }
+
+    public static bool TryGetFieldAtPosition(FlowField flowField, Vector2 pos, out Vector2 field)
+    {
+        field = Vector2.Zero;
+        if (!flowField.Bounds.HasPoint(pos))
+            return false;
+        
+        Vector2 flowFieldSize = new(flowField.Resource.X, flowField.Resource.Y);
+        Vector2 uv = pos - flowField.Position;
+        uv.x /= flowField.Size.x / flowField.Resource.X;
+        uv.y /= flowField.Size.y / flowField.Resource.Y;
+        uv += flowFieldSize * 0.5f;
+
+        uv.x = Mathf.Clamp(uv.x, 0, flowField.Resource.X - 1);
+        uv.y = Mathf.Clamp(uv.y, 0, flowField.Resource.Y - 1);
+        field = flowField.Resource.VectorAt((int) uv.x, (int) uv.y);
+        return true;
+    }
 }

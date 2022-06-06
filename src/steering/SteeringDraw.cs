@@ -32,7 +32,7 @@ public partial class SteeringManager
             // body
             Vector3 boidPos = boid.Position.To3D();
             Vector3 forward = boid.Heading.To3D();
-            Vector3 right = new(forward.y, 0.0f, -forward.x);
+            Vector3 right = new(forward.z, 0.0f, -forward.x);
             Color col = boid.Alignment == 0 ? Colors.Blue : Colors.Red;
             Vector3 p0 = boidPos + forward * -2.5f + right * 3.0f;
             Vector3 p1 = boidPos + forward * 4.5f;
@@ -85,6 +85,12 @@ public partial class SteeringManager
                 Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
                 Utils.Line(circlePos, circlePos + displacement, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
             }
+
+            if (_drawFlowFields)
+            {
+                Utils.Line(boidPos, boidPos + forward * boid.FlowFieldDist, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(boidPos + forward * boid.FlowFieldDist, 8, 2.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+            }
         }
         
         // flow fields
@@ -98,18 +104,21 @@ public partial class SteeringManager
             {
                 for (float y = topLeft.y; y < botRight.y; y += flowFieldVisCellSize)
                 {
-                    Vector3 pos = new Vector3(x, 0.0f, y) / flowFieldVisCellSize;
-                    pos = pos.Floor();
-                    pos *= flowFieldVisCellSize;
+                    Vector3 pos = new Vector3(x, 0.0f, y);// / flowFieldVisCellSize;
+                    // pos = pos.Floor();
+                    // pos *= flowFieldVisCellSize;
                     
                     Vector3 dir = Vector3.Zero;
                     int count = 0;
-                    foreach (FlowField flowField in _flowFields)
+                    for (int ff = 0; ff < _numFlowFields; ff++)
                     {
-                        Vector2 ff = flowField.GetFieldAtPosition(pos.To2D());
-                        dir.x += ff.x;
-                        dir.z += ff.y;
-                        count += ff == Vector2.Zero ? 0 : 1;
+                        FlowField flowField = _flowFieldPool[ff];
+                        if (TryGetFieldAtPosition(flowField, pos.To2D(), out Vector2 vector))
+                        {
+                            dir.x += vector.x;
+                            dir.z += vector.y;
+                            count++;
+                        }
                     }
 
                     if (count > 0)
@@ -138,7 +147,7 @@ public partial class SteeringManager
             Utils.Line(p3, p0, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
 
             // obstacles
-            foreach (Obstacle obstacle in _obstacles)
+            foreach (Obstacle obstacle in _obstaclePool)
             {
                 switch (obstacle.Shape)
                 {

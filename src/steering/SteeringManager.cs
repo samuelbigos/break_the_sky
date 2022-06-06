@@ -20,6 +20,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         Flee,
         EdgeRepulsion,
         Wander,
+        FlowFieldFollow,
         COUNT,
     }
 
@@ -55,6 +56,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float WanderCircleRadius;
         public float WanderVariance;
         public bool IgnoreAllyAvoidance;
+        public float FlowFieldDist;
     }
 
     public struct Obstacle
@@ -65,6 +67,16 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float Size;
     }
 
+    public struct FlowField
+    {
+        public int ID;
+        public FlowFieldResource Resource;
+        public int TrackID;
+        public Vector2 Position;
+        public Vector2 Size;
+        public Rect2 Bounds;
+    }
+
     public struct Intersection
     {
         public bool Intersect;
@@ -73,31 +85,45 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 SurfaceNormal;
     }
 
-    public Rect2 EdgeBounds;
+    public static Rect2 EdgeBounds;
 
     private int _numBoids;
     private Boid[] _boidPool = new Boid[1000];
-    private List<Obstacle> _obstacles = new(100);
-    private List<FlowField> _flowFields = new();
+    private int _numObstacles;
+    private Obstacle[] _obstaclePool = new Obstacle[100];
+    private int _numFlowFields;
+    private FlowField[] _flowFieldPool = new FlowField[100];
 
     private System.Collections.Generic.Dictionary<int, int> _boidIdToIndex = new();
     private System.Collections.Generic.Dictionary<int, int> _boidIndexToId = new();
     private System.Collections.Generic.Dictionary<int, int> _obstacleIdToIndex = new();
     private System.Collections.Generic.Dictionary<int, int> _obstacleIndexToId = new();
+    private System.Collections.Generic.Dictionary<int, int> _flowFieldIdToIndex = new();
+    private System.Collections.Generic.Dictionary<int, int> _flowFieldIndexToId = new();
     
-    private int _boidIdGen;
-    private int _obstacleIdGen;
-
-    public override void _Ready()
-    {
-        base._Ready();
-    }
+    private int _boidIdGen = 1;
+    private int _obstacleIdGen = 1;
+    private int _flowFieldIdGen = 1;
 
     public override void _Process(float delta)
     {
         base._Process(delta);
 
         Span<Boid> boids = _boidPool.AsSpan(0, _numBoids);
+        Span<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
+        Span<FlowField> flowFields = _flowFieldPool.AsSpan(0, _numFlowFields);
+        
+        foreach (ref FlowField flowField in flowFields)
+        {
+            flowField.Bounds.Position = flowField.Position - flowField.Size * 0.5f;
+            flowField.Bounds.Size = flowField.Size;
+            
+            if (flowField.TrackID != 0)
+            {
+                flowField.Position = _boidPool[_boidIdToIndex[flowField.TrackID]].Position;
+            }
+        }
+        
         foreach (ref Boid boid in boids)
         {
             if (!boid.Alive)
@@ -110,7 +136,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 if ((boid.Behaviours & (1 << j)) == 0)
                     continue;
                 
-                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, boids, delta);
+                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, boids, obstacles, flowFields, delta);
 
                 // truncate by max force per unit time
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
@@ -150,7 +176,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         }
     }
 
-    private Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, Span<Boid> boids, float delta)
+    private static Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, Span<Boid> boids, Span<Obstacle> obstacles, Span<FlowField> flowFields, float delta)
     {
         Vector2 force = Vector2.Zero;
         switch (behaviour)
@@ -162,7 +188,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_Align(boid, boids, boid.ViewRange);
                 break;
             case Separation:
-                force += Steering_Separate(boid, boids, _obstacles, delta);
+                force += Steering_Separate(boid, boids, obstacles, delta);
                 break;
             case Arrive:
                 force += Steering_Arrive(boid, boid.Target);
@@ -179,13 +205,16 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_AvoidBoids(ref boid, boids);
                 break;
             case AvoidObstacles:
-                force += Steering_AvoidObstacles(ref boid, _obstacles);
+                force += Steering_AvoidObstacles(ref boid, obstacles);
                 break;
             case MaintainSpeed:
                 force += Steering_MaintainSpeed(boid);
                 break;
             case Wander:
                 force += Steering_Wander(ref boid, delta);
+                break;
+            case FlowFieldFollow:
+                force += Steering_FlowFieldFollow(boid, flowFields);
                 break;
             case COUNT:
                 break;
@@ -196,58 +225,43 @@ public partial class SteeringManager : Singleton<SteeringManager>
         return force.Limit(boid.MaxForce * delta) * boid.Weights[(int)behaviour];
     }
 
-    private void RegisterBoid(Boid boid)
+    public int RegisterBoid(Boid boid)
     {
         Debug.Assert(!_boidIdToIndex.ContainsKey(boid.Id), $"Boid with this ID ({boid.Id}) already registered.");
         if (_boidIdToIndex.ContainsKey(boid.Id))
-            return;
+            return -1;
         
+        boid.Id = _boidIdGen++;
         _boidPool[_numBoids++] = boid;
         _boidIdToIndex[boid.Id] = _numBoids - 1;
         _boidIndexToId[_numBoids - 1] = boid.Id;
-    }
-
-    private void RegisterObstacle(Obstacle obstacle)
-    {
-        Debug.Assert(!_obstacleIdToIndex.ContainsKey(obstacle.ID), $"Obstacle with this ID ({obstacle.ID}) already registered.");
-        if (_obstacleIdToIndex.ContainsKey(obstacle.ID))
-            return;
-        
-        _obstacles.Add(obstacle);
-        _obstacleIdToIndex[obstacle.ID] = _obstacles.Count - 1;
-        _obstacleIndexToId[_obstacles.Count - 1] = obstacle.ID;
-    }
-
-    private void RegisterFlowField(FlowField flowField)
-    {
-        _flowFields.Add(flowField);
-    }
-    
-    public int AddBoid(Boid boid)
-    {
-        boid.Id = _boidIdGen++;
-        RegisterBoid(boid);
         return boid.Id;
     }
 
-    public int AddObstacle(Vector2 pos, ObstacleShape shape, float size)
+    public int RegisterObstacle(Obstacle obstacle)
     {
-        Obstacle obstacle = new()
-        {
-            ID = _obstacleIdGen,
-            Position = pos,
-            Shape = shape,
-            Size = size
-        };
-        _obstacleIdGen++;
-        RegisterObstacle(obstacle);
+        Debug.Assert(!_obstacleIdToIndex.ContainsKey(obstacle.ID), $"Obstacle with this ID ({obstacle.ID}) already registered.");
+        if (_obstacleIdToIndex.ContainsKey(obstacle.ID))
+            return -1;
+        
+        obstacle.ID =  _obstacleIdGen++;
+        _obstaclePool[_numObstacles++] = obstacle;
+        _obstacleIdToIndex[obstacle.ID] = _numObstacles - 1;
+        _obstacleIndexToId[_numObstacles - 1] = obstacle.ID;
         return obstacle.ID;
     }
 
-    public int AddFlowField(FlowField flowField)
+    public int RegisterFlowField(FlowField flowField)
     {
-        RegisterFlowField(flowField);
-        return _flowFields.Count - 1;
+        Debug.Assert(!_flowFieldIdToIndex.ContainsKey(flowField.ID), $"Obstacle with this ID ({flowField.ID}) already registered.");
+        if (_flowFieldIdToIndex.ContainsKey(flowField.ID))
+            return -1;
+
+        flowField.ID = _flowFieldIdGen++;
+        _flowFieldPool[_numFlowFields++] = flowField;
+        _flowFieldIdToIndex[flowField.ID] = _numFlowFields - 1;
+        _flowFieldIndexToId[_numFlowFields - 1] = flowField.ID;
+        return flowField.ID;
     }
 
     public Boid GetBoid(int id)
