@@ -40,20 +40,43 @@ public class BoidTestbedCamera : Camera
         VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
         
         Vector2 cameraMouseOffset = MousePosition() - Vector2.Zero;
-        Vector2 cameraOffset = cameraMouseOffset * 0.33f;
+        Vector2 cameraOffset = cameraMouseOffset * 0.5f;
         Transform cameraTransform = new(GlobalTransform.basis, cameraOffset.To3D());
         cameraTransform.origin.y = _initialTrans.origin.y;
-        GlobalTransform = cameraTransform;
+        //GlobalTransform = cameraTransform;
 
         Vector3 pos = _initialTrans.origin;
+        
+        Vector3 offset = Vector3.Zero;
         if (Input.IsActionJustReleased("zoom_in"))
         {
             pos.y = Mathf.Max(pos.y - 10.0f, 100.0f);
+            offset += Vector3.Forward * delta * 10.0f;
         }
         if (Input.IsActionJustReleased("zoom_out"))
         {
             pos.y = Mathf.Min(pos.y + 10.0f, 999.0f);
+            offset += Vector3.Back * delta * 10.0f;
         }
         _initialTrans = new Transform(_initialTrans.basis,  pos);
+
+        if (Input.IsActionPressed("w"))
+        {
+            offset += Vector3.Up * delta;
+        }
+        if (Input.IsActionPressed("a"))
+        {
+            offset += Vector3.Left * delta;
+        }
+        if (Input.IsActionPressed("s"))
+        {
+            offset += Vector3.Down * delta;
+        }
+        if (Input.IsActionPressed("d"))
+        {
+            offset += Vector3.Right * delta;
+        }
+
+        GlobalTransform = GlobalTransform.Translated(offset * 100.0f);
     }
 }

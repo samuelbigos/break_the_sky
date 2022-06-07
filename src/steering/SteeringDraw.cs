@@ -11,13 +11,13 @@ public partial class SteeringManager
     private bool _drawSteering = true;
     private bool _drawVelocity = true;
     private bool _drawVision = false;
-    private bool _drawAvoidance = true;
-    private bool _drawWander = true;
+    private bool _drawAvoidance = false;
+    private bool _drawWander = false;
     private bool _drawFlowFields = false;
     
-    private Vector3[] _vertList = new Vector3[50000];
-    private Color[] _colList = new Color[50000];
-    private int[] _indexList = new int[100000];
+    private Vector3[] _vertList = new Vector3[60000];
+    private Color[] _colList = new Color[60000];
+    private int[] _indexList = new int[150000];
 
     public void DrawSimulationToMesh(out Mesh mesh)
     {
@@ -34,9 +34,11 @@ public partial class SteeringManager
             Vector3 forward = boid.Heading.To3D();
             Vector3 right = new(forward.z, 0.0f, -forward.x);
             Color col = boid.Alignment == 0 ? Colors.Blue : Colors.Red;
-            Vector3 p0 = boidPos + forward * -2.5f + right * 3.0f;
-            Vector3 p1 = boidPos + forward * 4.5f;
-            Vector3 p2 = boidPos + forward * -2.5f - right * 3.0f;
+            col = Color.Color8(230, 230, 230);
+            float size = boid.Radius;
+            Vector3 p0 = boidPos + forward * -size * 0.33f + right * size * 0.5f;
+            Vector3 p1 = boidPos + forward * size * 0.66f;
+            Vector3 p2 = boidPos + forward * -size * 0.33f - right * size * 0.5f;
             Utils.Line(p0, p1, col, ref v, ref i, _vertList, _colList, _indexList);
             Utils.Line(p1, p2, col, ref v, ref i, _vertList, _colList, _indexList);
             Utils.Line(p2, p0, col, ref v, ref i, _vertList, _colList, _indexList);
@@ -44,13 +46,13 @@ public partial class SteeringManager
             // separation radius
             if (_drawSeparation)
             {
-                Utils.Circle(boidPos, 32, boid.Radius, Colors.DarkSlateGray, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(boidPos, 32, boid.Radius, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // boid velocity/force
             if (_drawVelocity)
             {
-                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, col, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)
@@ -71,7 +73,8 @@ public partial class SteeringManager
             // view range
             if (_drawVision)
             {
-                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
+                Color visCol = Color.Color8(30, 30, 30);
+                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, visCol, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // wander
@@ -82,14 +85,14 @@ public partial class SteeringManager
                 float angle = -boid.Heading.AngleTo(Vector2.Right) + boid.WanderAngle;
                 Vector3 displacement = new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle)).Normalized() *  boid.WanderCircleRadius;
 
-                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-                Utils.Line(circlePos, circlePos + displacement, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.SlateGray, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(circlePos, circlePos + displacement, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             if (_drawFlowFields)
             {
-                Utils.Line(boidPos, boidPos + forward * boid.FlowFieldDist, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-                Utils.Circle(boidPos + forward * boid.FlowFieldDist, 8, 2.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                //Utils.Line(boidPos, boidPos + forward * boid.FlowFieldDist, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
+                //Utils.Circle(boidPos + forward * boid.FlowFieldDist, 8, 2.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
             }
         }
         
@@ -104,7 +107,7 @@ public partial class SteeringManager
             {
                 for (float y = topLeft.y; y < botRight.y; y += flowFieldVisCellSize)
                 {
-                    Vector3 pos = new Vector3(x, 0.0f, y);// / flowFieldVisCellSize;
+                    Vector3 pos = new Vector3(x, -1.0f, y);// / flowFieldVisCellSize;
                     // pos = pos.Floor();
                     // pos *= flowFieldVisCellSize;
                     
@@ -126,8 +129,9 @@ public partial class SteeringManager
 
                     Color col = new(
                         Mathf.Lerp(0.0f, 1.0f, dir.x * 0.5f + 0.5f),
-                        Mathf.Lerp(0.0f, 1.0f, dir.y * 0.5f + 0.5f),
-                        Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.y * 0.5f + 0.5f)));
+                        Mathf.Lerp(0.0f, 1.0f, dir.z * 0.5f + 0.5f),
+                        Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.z * 0.5f + 0.5f)));
+                    col.a = 0.5f;
                     
                     Utils.Line(pos, pos + dir * flowFieldVisCellSize, col, ref v, ref i, _vertList, _colList, _indexList);
                 }

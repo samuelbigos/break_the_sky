@@ -46,7 +46,7 @@ public partial class BoidTestbed : Spatial
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Arrive;
             
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 0; i++)
             {
                 Vector2 spawnPos = Vector2.Left * 50.0f;
                 SteeringManager.Boid boid = new()
@@ -116,9 +116,9 @@ public partial class BoidTestbed : Spatial
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.MaintainSpeed;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.FlowFieldFollow;
             
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 100; i++)
             {
-                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
+                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.33f;
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 75.0f;
                 SteeringManager.Boid boid = new()
                 {
@@ -126,7 +126,7 @@ public partial class BoidTestbed : Spatial
                     Alignment = 1,
                     Position = randPos,
                     Velocity = randVel,
-                    Radius = 5.0f,
+                    Radius = 7.0f,
                     Heading = Vector2.Up,
                     MaxSpeed = 75.0f,
                     DesiredSpeed = 75.0f,
@@ -155,7 +155,7 @@ public partial class BoidTestbed : Spatial
             
             for (int i = 0; i < 1; i++)
             {
-                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
+                Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.1f;
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 25.0f;
                 SteeringManager.Boid boid = new()
                 {
@@ -166,7 +166,7 @@ public partial class BoidTestbed : Spatial
                     Radius = 15.0f,
                     Heading = Vector2.Up,
                     MaxSpeed = 25.0f,
-                    DesiredSpeed = 25.0f,
+                    DesiredSpeed = 15.0f,
                     MaxForce = 100.0f,
                     LookAhead = 0.5f,
                     Behaviours = leaderBehaviours,
@@ -201,9 +201,9 @@ public partial class BoidTestbed : Spatial
         // flow fields
         SteeringManager.FlowField flowField = new()
         {
-            Resource = ResourceLoader.Load<FlowFieldResource>("res://assets/flowfields/circle.res"),
+            Resource = ResourceLoader.Load<FlowFieldResource>("res://assets/flowfields/star.res"),
             TrackID = leaderId,
-            Size = new Vector2(400, 400),
+            Size = new Vector2(500, 500),
         };
         SteeringManager.Instance.RegisterFlowField(flowField);
 
