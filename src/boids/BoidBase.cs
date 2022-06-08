@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using Godot;
 using GodotOnReady.Attributes;
+using Vector2 = Godot.Vector2;
+using Vector3 = Godot.Vector3;
 
 public partial class BoidBase : Area
 {
@@ -22,7 +25,7 @@ public partial class BoidBase : Area
 
     #region Export
 
-    [Export(PropertyHint.Flags, "Cohesion,Alignment,Separation,Arrive,Pursuit,Flee,Wander,EdgeRepulsion")] public int Behaviours;
+    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidBoids,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] public int Behaviours;
     [Export] public float[] BehaviourWeights;
 
     [Export] public float MaxVelocity = 500.0f;
@@ -70,18 +73,23 @@ public partial class BoidBase : Area
 
     #region Public
 
-    public virtual BoidAlignment Alignment => BoidAlignment.Ally;
+    protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;    
-    public string ID = "";
-    public Vector2 Velocity;
-    public Vector2 Steering; 
+    public string Id = "";
     
     public Vector2 GlobalPosition
     {
-        get { return new Vector2(GlobalTransform.origin.x, GlobalTransform.origin.z); }
-        set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
+        get => new(GlobalTransform.origin.x, GlobalTransform.origin.z);
+        private set
+        {
+            if (SteeringManager.Instance.HasBoid(_steeringId))
+            {
+                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
+                boid.Position = value;
+            }
+        }
     }
-    
+
     public bool Selected
     {
         get => _selected;
@@ -112,8 +120,6 @@ public partial class BoidBase : Area
 
     #region Protected
 
-    protected BoidPlayer _player;
-    protected Game _game;
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
@@ -121,6 +127,7 @@ public partial class BoidBase : Area
     protected Vector3 _baseScale;
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
+    protected Vector2 _cachedVelocity;
     protected virtual Color BaseColour => ColourManager.Instance.Secondary;
 
     #endregion
@@ -137,6 +144,9 @@ public partial class BoidBase : Area
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
+
+    private int _steeringId;
+    private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
     
     private Color MeshColour
     {
@@ -149,12 +159,48 @@ public partial class BoidBase : Area
 
     #endregion
 
-    public void Init(string id, BoidPlayer player, Game game, Action<BoidBase> onDestroy)
+    public void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
-        _player = player;
-        _game = game;
-        ID = id;
+        Id = id;
         OnBoidDestroyed += onDestroy;
+        GlobalPosition = position;
+        RegisterSteeringBoid(velocity);
+    }
+
+    protected virtual void RegisterSteeringBoid(Vector2 velocity)
+    {
+        _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidBoids] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.EdgeRepulsion] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
+
+        SteeringManager.Boid boid = new()
+        {
+            Alive = true,
+            Alignment = 1,
+            Position = GlobalPosition,
+            Velocity = velocity,
+            Radius = 7.0f,
+            Heading = Vector2.Up,
+            MaxSpeed = 75.0f,
+            DesiredSpeed = 75.0f,
+            MaxForce = 125.0f,
+            LookAhead = 0.5f,
+            Behaviours = Behaviours,
+            Weights = _steeringWeights,
+            Target = Vector2.Zero,
+            ViewRange = 50.0f,
+            ViewAngle = 240.0f,
+        };
+        _steeringId = SteeringManager.Instance.RegisterBoid(boid);
     }
 
     [OnReady] private void Ready()
@@ -192,8 +238,14 @@ public partial class BoidBase : Area
                 SetTarget(TargetType.None);
         }
 
-        //SteeringManager.Instance.UpdateBoid(this);
-        
+        // update position and cache velocity from steering boid
+        if (SteeringManager.Instance.HasBoid(_steeringId))
+        {
+            SteeringManager.Boid steeringBoid = SteeringManager.Instance.GetBoid(_steeringId);
+            GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.To3D());
+            _cachedVelocity = steeringBoid.Velocity;
+        }
+
         if (!_destroyed)
         {
             // DoSteering(delta);
@@ -226,11 +278,11 @@ public partial class BoidBase : Area
                 {
                     p.QueueFree();
                 }
-                _game.FreeBoid(this);
+                BoidFactory.Instance.FreeBoid(this);
             }
         }
 
-        _altMaterial.SetShaderParam("u_velocity", Velocity);
+        _altMaterial.SetShaderParam("u_velocity", _cachedVelocity);
     }
 
     protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
@@ -245,7 +297,7 @@ public partial class BoidBase : Area
         if (bulletVel != Vector2.Zero)
         {
             Particles hitParticles = _hitParticlesScene.Instance<Particles>();
-            _game.AddChild(hitParticles);
+            Game.Instance.AddChild(hitParticles);
             ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
             Debug.Assert(mat != null);
             Vector3 fromCentre = pos - GlobalTransform.origin;
@@ -349,7 +401,7 @@ public partial class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(HitDamage, false, Velocity, GlobalTransform.origin);
+            boid._OnHit(HitDamage, false, _cachedVelocity, GlobalTransform.origin);
             return;
         }
         

@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Break The Sky"
-run/main_scene="res://scenes/tools/FlowFieldCreator.tscn"
+run/main_scene="res://scenes/metagame/Game.tscn"
 config/icon="res://icon.png"
 config/save_version=1
 
@@ -45,6 +45,7 @@ SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
 SaveManager="*res://src/singletons/SaveManager.cs"
 TimeSystem="*res://src/singletons/TimeSystem.cs"
 DebugImGui="*res://scenes/debug/DebugImGui.tscn"
+BoidFactory="*res://src/boids/BoidFactory.cs"
 
 [display]
 

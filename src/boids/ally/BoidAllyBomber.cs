@@ -38,11 +38,11 @@ public class BoidAllyBomber : BoidAllyBase
             if (dist > Mathf.Pow(_targetAcquireRadius, 2.0f))
             {
                 ((BoidEnemyBase) _targetBoid).IsTargetted = false;
-                SetTarget(TargetType.Ally, _player);
+                SetTarget(TargetType.Ally, Game.Instance.Player);
             }
             
             // shooting
-            float dot = Velocity.Normalized().Dot((TargetPos - GlobalPosition).Normalized());
+            float dot = _cachedVelocity.Normalized().Dot((TargetPos - GlobalPosition).Normalized());
             if (_canShoot && dist < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
             {
                 _Shoot((TargetPos - GlobalPosition).Normalized());
@@ -69,14 +69,14 @@ public class BoidAllyBomber : BoidAllyBase
         {
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, false);
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-            SetTarget(TargetType.Ally, _player);
+            SetTarget(TargetType.Ally, Game.Instance.Player);
         }
     }
 
     private void AcquireTarget()
     {
         BoidEnemyBase target = null;
-        foreach (BoidEnemyBase enemy in _game.EnemyBoids)
+        foreach (BoidEnemyBase enemy in BoidFactory.Instance.EnemyBoids)
         {
             if ((enemy.GlobalPosition - GlobalPosition).LengthSquared() > Mathf.Pow(_targetAcquireRadius, 2.0f))
                 continue;
@@ -102,8 +102,8 @@ public class BoidAllyBomber : BoidAllyBase
         
         BulletBomber bullet = _bulletScene.Instance() as BulletBomber;
         Debug.Assert(bullet != null);
-        _game.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * _game.BaseBulletSpeed, Alignment, _game.BaseBoidDamage);
+        Game.Instance.AddChild(bullet);
+        bullet.Init(GlobalPosition, dir * Game.Instance.BaseBulletSpeed, Alignment, Game.Instance.BaseBoidDamage);
         bullet.Target = _targetBoid;
         
         _canShoot = false;

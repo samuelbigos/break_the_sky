@@ -52,6 +52,18 @@ public class AISpawningDirector : Node
     {
         ChangeState(SpawningState.Idle);
     }
+    
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        DebugImGui.DrawImGui += _OnImGuiLayout;
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        DebugImGui.DrawImGui -= _OnImGuiLayout;
+    }
 
     public override void _Process(float delta)
     {
@@ -133,7 +145,7 @@ public class AISpawningDirector : Node
                 continue;
             }
 
-            activeBudget += Database.EnemyBoids.FindEntry<DataEnemyBoid>(_swarmingEnemies[i].ID).SpawningCost;
+            activeBudget += Database.EnemyBoids.FindEntry<DataEnemyBoid>(_swarmingEnemies[i].Id).SpawningCost;
         }
         
         while (activeBudget < budgetGoal)
@@ -339,12 +351,7 @@ public class AISpawningDirector : Node
         return possibleTypes;
     }
 
-    public void OnEnemyDestroyed(BoidEnemyBase enemy)
-    {
-        _totalBudgetDestoyed += Database.EnemyBoid(enemy.ID).SpawningCost;
-    }
-
-    public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
+    private BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
     {
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = Utils.RandPointOnEdge(_game.SpawningRect);
@@ -352,16 +359,11 @@ public class AISpawningDirector : Node
         return SpawnEnemy(id, spawnPos, spawnVel);
     }
 
-    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
+    private BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
     {
-        BoidEnemyBase enemy = id.Scene.Instance<BoidEnemyBase>();
-        AddChild(enemy);
-        enemy.GlobalPosition = pos;
-        enemy.Init(id.Name, _player, _game, null);
-        _game.RegisterEnemyBoid(enemy);
-        //SteeringManager.Instance.AddBoid(enemy, vel);
+        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(id, pos, vel);
         _activeEnemies.Add(enemy);
-        SaveDataPlayer.SetSeenEnemy(id.Name);
+        enemy.OnBoidDestroyed += _OnEnemyDestroyed;
         return enemy;
     }
 
@@ -415,48 +417,56 @@ public class AISpawningDirector : Node
                 throw new ArgumentOutOfRangeException();
         }
     }
+    
+    private void _OnEnemyDestroyed(BoidBase enemy)
+    {
+        _totalBudgetDestoyed += Database.EnemyBoid(enemy.Id).SpawningCost;
+    }
 
     public void _OnImGuiLayout()
     {
-        int secondsToPlot = 60 * 10;
-        float[] points = new float[secondsToPlot];
-        for (int i = 0; i < secondsToPlot; i++)
+        if (ImGui.BeginTabItem("AI"))
         {
-            points[i] = CalcIntensity(i);
+            int secondsToPlot = 60 * 10;
+            float[] points = new float[secondsToPlot];
+            for (int i = 0; i < secondsToPlot; i++)
+            {
+                points[i] = CalcIntensity(i);
+            }
+
+            ImGui.Text($"[{_state}] for {_timeInState:F2}");
+            ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
+            ImGui.Text($"{_totalTime:F2} TotalTime");
+            ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Current Budget");
+            ImGui.Text($"{_totalBudgetDestoyed:F1} Total Budget Destroyed");
+        
+            ImGui.Spacing();
+
+            if (ImGui.Button("+10s"))
+            {
+                _totalTime += 10.0f;
+                _timeInState += 10.0f;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("+60s"))
+            {
+                _totalTime += 60.0f;
+                _timeInState += 60.0f;
+            }
+
+            ImGui.Checkbox("Enabled", ref _enabled);
+        
+            ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
+                0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));
+
+            ImGui.SliderFloat("Wavelength", ref _intensityWavelength, 0.0f, 0.1f);
+            ImGui.SliderFloat("WavelengthScale", ref _intensityWavelengthScaling, -0.1f, 0.1f);
+        
+            ImGui.SliderFloat("Amplitude", ref _intensityAmplitude, 0.0f, 10.0f);
+            ImGui.SliderFloat("AmplitudeScale", ref _intensityAmplitudeScaling, 0.0f, 0.5f);
+        
+            ImGui.SliderFloat("Offset", ref _intensityOffset, -1.0f, 1.0f);
+            ImGui.SliderFloat("OffsetScale", ref _intensityOffsetScale, 0.0f, 0.01f);
         }
-
-        ImGui.Text($"[{_state}] for {_timeInState:F2}");
-        ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
-        ImGui.Text($"{_totalTime:F2} TotalTime");
-        ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Current Budget");
-        ImGui.Text($"{_totalBudgetDestoyed:F1} Total Budget Destroyed");
-        
-        ImGui.Spacing();
-
-        if (ImGui.Button("+10s"))
-        {
-            _totalTime += 10.0f;
-            _timeInState += 10.0f;
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("+60s"))
-        {
-            _totalTime += 60.0f;
-            _timeInState += 60.0f;
-        }
-
-        ImGui.Checkbox("Enabled", ref _enabled);
-        
-        ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
-            0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));
-
-        ImGui.SliderFloat("Wavelength", ref _intensityWavelength, 0.0f, 0.1f);
-        ImGui.SliderFloat("WavelengthScale", ref _intensityWavelengthScaling, -0.1f, 0.1f);
-        
-        ImGui.SliderFloat("Amplitude", ref _intensityAmplitude, 0.0f, 10.0f);
-        ImGui.SliderFloat("AmplitudeScale", ref _intensityAmplitudeScaling, 0.0f, 0.5f);
-        
-        ImGui.SliderFloat("Offset", ref _intensityOffset, -1.0f, 1.0f);
-        ImGui.SliderFloat("OffsetScale", ref _intensityOffsetScale, 0.0f, 0.01f);
     }
 }

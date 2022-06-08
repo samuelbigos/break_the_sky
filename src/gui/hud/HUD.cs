@@ -73,7 +73,7 @@ public partial class HUD : Singleton<HUD>
 #endif
         
         // warning indicators
-        foreach (BoidEnemyBase boid in Game.Instance.EnemyBoids)
+        foreach (BoidEnemyBase boid in BoidFactory.Instance.EnemyBoids)
         {
             _warningIndicators.TryGetValue(boid, out WarningIndicator indicator);
             if (BoidOffScreen(boid, out Vector2 pos, 0.05f))

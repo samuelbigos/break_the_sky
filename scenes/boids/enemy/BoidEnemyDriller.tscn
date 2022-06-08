@@ -18,6 +18,7 @@ shader_param/blend_depth = 0.003
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
+Behaviours = 1087
 MaxVelocity = 100.0
 MinVelocity = 50.0
 FieldOfView = 270.0
@@ -36,5 +37,3 @@ transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0 )
 material_override = SubResource( 2 )
 mesh = ExtResource( 2 )
 material/0 = null
-
-[node name="Skeleton" type="Skeleton" parent="." index="5"]

@@ -39,8 +39,8 @@ public class BoidEnemyCarrier : BoidEnemyBase
         for (int i = 0; i < _rotorgunsPaths.Count; i++)
         {
             _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
-            _rotorguns[i].Init("rotorgun", _player, _game, _OnRotorgunDestroyed);
-            _rotorguns[i].SetTarget(TargetType.Enemy, _player);
+            _rotorguns[i].Init("rotorgun", _OnRotorgunDestroyed, _rotorguns[i].GlobalPosition, Vector2.Zero);
+            _rotorguns[i].SetTarget(TargetType.Enemy, Game.Instance.Player);
             _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
         
@@ -88,22 +88,16 @@ public class BoidEnemyCarrier : BoidEnemyBase
     private void _SpawnDrone()
     {
         DataEnemyBoid enemyData = Database.EnemyBoids.FindEntry<DataEnemyBoid>(_droneId);
-        BoidEnemyBase enemy = enemyData.Scene.Instance<BoidEnemyBase>();
         _droneSpawnSide = (_droneSpawnSide + 1) % 2;
+        Vector2 pos;
         if (_droneSpawnSide == 0)
-        {
-            enemy.GlobalPosition = (GetNode("SpawnLeft") as Spatial).GlobalTransform.origin.To2D();
-        }
+            pos = (GetNode("SpawnLeft") as Spatial).GlobalTransform.origin.To2D();
         else
-        {
-            enemy.GlobalPosition = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
-        }
-
-        enemy.Init(null, _player, _game, _OnRotorgunDestroyed);
-        enemy.SetTarget(TargetType.Enemy, _player);
-        _game.AddChild(enemy);
-        _game.RegisterEnemyBoid(enemy);
-        //enemy.Velocity = enemy.MaxVelocity * (enemy.GlobalPosition - GlobalPosition).Normalized().To3D();
+            pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
+        Vector2 vel = 100.0f * (pos - GlobalPosition).Normalized();
+        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(enemyData, pos, vel);
+        enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
+        enemy.SetTarget(TargetType.Enemy, Game.Instance.Player);
     }
 
     private void _OnRotorgunDestroyed(BoidBase boid)

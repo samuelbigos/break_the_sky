@@ -4,8 +4,6 @@ using System.Diagnostics;
 using Godot;
 using GodotOnReady.Attributes;
 using ImGuiNET;
-using Array = Godot.Collections.Array;
-using Dictionary = Godot.Collections.Dictionary;
 
 public partial class Game : Singleton<Game>
 {
@@ -30,22 +28,8 @@ public partial class Game : Singleton<Game>
     [Export] public int ScoreMultiMax = 10;
     [Export] public float ScoreMultiIncrement = 0.5f;
     
-    private int _score = 0;
-    private float _scoreMulti = 1.0f;
-    private float _scoreMultiTimer;
-
-    private List<BoidBase> _allBoids = new();
-    private List<BoidBase> _destroyedBoids = new();
-    private List<BoidEnemyBase> _enemyBoids = new();
-    private List<BoidAllyBase> _allyBoids = new();
-    private int _addedAllyCounter;
     private bool _initialSpawn;
-
-    public List<BoidBase> AllBoids => _allBoids;
-    public List<BoidBase> DestroyedBoids => _destroyedBoids;
-    public List<BoidAllyBase> AllyBoids => _allyBoids;
-    public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
-    public int NumBoids => _allyBoids.Count;
+    
     public BoidPlayer Player => _player;
     public Rect2 SpawningRect => new(Player.GlobalPosition - AreaRect.Size * 0.5f, AreaRect.Size);
     
@@ -53,16 +37,16 @@ public partial class Game : Singleton<Game>
     {
         base._Ready();
         
-        _player.Init("player", _player, this, _OnBoidDestroyed);
+        SteeringManager.EdgeBounds = AreaRect;
+        
+        _player.Init("player", _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
         
         _aiSpawningDirector.Init(this, _player);
 
-        //AddScore(0, _player.GlobalPosition, false);
         GD.Randomize();
 
         GameCamera.Instance.Init(_player);
         MusicPlayer.Instance.PlayGame();
-        //PauseManager.Instance.Init(this);
         
         StateMachine_Game.Instance.SendInitialStateChange();
     }
@@ -85,102 +69,33 @@ public partial class Game : Singleton<Game>
 
         if (!_initialSpawn)
         {
-            // for (int i = 0; i < 50; i++)
-            // {
-            //     BoidEnemyBase boid = _aiSpawningDirector.SpawnEnemyRandom(Database.EnemyBoid("driller"));
-            // }
-            
-            _aiSpawningDirector.SpawnEnemy(Database.EnemyBoid("driller"), new Vector2(100.0f, 0.0f), new Vector2(-50.0f, 0.0f));
-            _aiSpawningDirector.SpawnEnemy(Database.EnemyBoid("driller"), new Vector2(-100.0f, 0.0f), new Vector2(50.0f, 0.0f));
+            // BoidFactory.Instance.CreateEnemyBoid(Database.EnemyBoid("driller"), new Vector2(100.0f, 0.0f), new Vector2(-50.0f, 0.0f));
+            // BoidFactory.Instance.CreateEnemyBoid(Database.EnemyBoid("driller"), new Vector2(-100.0f, 0.0f), new Vector2(50.0f, 0.0f));
             
             _initialSpawn = true;
         }
+    }
+
+    public void RegisterPickup(PickupMaterial pickup)
+    {
+        AddChild(pickup);
+        Player.RegisterPickup(pickup);
+    }
+
+    private void _OnPlayerDestroyed(BoidBase player)
+    {
         
-        _scoreMultiTimer -= delta;
-        if (_scoreMultiTimer < 0.0f)
-        {
-            _scoreMulti = 1.0f;
-        }
-
-        for (int i = _allBoids.Count - 1; i >= 0; i--)
-        {
-            if (!IsInstanceValid(_allBoids[i]))
-            {
-                if (_allBoids[i] is BoidAllyBase)
-                    _allyBoids.Remove(_allBoids[i] as BoidAllyBase);
-                
-                if (_allBoids[i] is BoidEnemyBase)
-                    _enemyBoids.Remove(_allBoids[i] as BoidEnemyBase);
-                
-                _allBoids.Remove(_allBoids[i]);
-            }
-        }
-        
-        Debug.Assert(_allyBoids.Count + _enemyBoids.Count == _allBoids.Count, "Error in boid references.");
-    }
-
-    public void FreeBoid(BoidBase boid)
-    {
-        _destroyedBoids.Remove(boid);
-        boid.QueueFree();
-    }
-
-    public bool AddAllyBoid(string boidId)
-    {
-        if (_allyBoids.Count >= SaveDataPlayer.MaxAllyCount)
-            return false;
-            
-        DataAllyBoid droneData = Database.AllyBoids.FindEntry<DataAllyBoid>(boidId);
-        BoidAllyBase boid = droneData.Scene.Instance<BoidAllyBase>();
-        AddChild(boid);
-        _allyBoids.Add(boid);
-        _allBoids.Add(boid);
-        boid.Init(droneData.Name, _player, this, _OnBoidDestroyed);
-        boid.SetTarget(BoidBase.TargetType.Ally, _player);
-        boid.GlobalPosition(_player.GlobalTransform.origin);
-        //SteeringManager.Instance.AddBoid(boid, Vector2.Zero);
-
-        return true;
-    }
-
-    public void RegisterEnemyBoid(BoidEnemyBase enemy)
-    {
-        _enemyBoids.Add(enemy);
-        _allBoids.Add(enemy);
-        enemy.OnBoidDestroyed += _OnBoidDestroyed;
-    }
-
-    private void _OnBoidDestroyed(BoidBase boid)
-    {
-        switch (boid)
-        {
-            case BoidAllyBase @base:
-            {
-                _allyBoids.Remove(@base);
-                _scoreMulti = Mathf.Max(1.0f, _scoreMulti * 0.5f);
-                break;
-            }
-            case BoidEnemyBase @base:
-                _enemyBoids.Remove(@base);
-                _aiSpawningDirector.OnEnemyDestroyed(@base);
-                break;
-        }
-        _allBoids.Remove(boid);
-        _destroyedBoids.Add(boid);
-        
-        //SteeringManager.Instance.RemoveBoid(boid);
     }
     
     private void _OnImGuiLayout()
     {
         if (ImGui.BeginTabItem("Spawn Fabricants"))
         {
-            ImGui.Text("Enemies");
             foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
                 {
-                    AddAllyBoid(boid.Name);
+                    BoidFactory.Instance.CreateAllyBoid(boid);
                 }
             }
             ImGui.EndTabItem();
@@ -192,7 +107,9 @@ public partial class Game : Singleton<Game>
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
                 {
-                    _aiSpawningDirector.SpawnEnemyRandom(boid);
+                    Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * AreaRect.Size * 0.33f;
+                    Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 75.0f;
+                    BoidFactory.Instance.CreateEnemyBoid(boid, randPos, randVel);
                 }
             }
             ImGui.Text("Waves");

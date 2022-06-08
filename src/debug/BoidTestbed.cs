@@ -224,14 +224,17 @@ public partial class BoidTestbed : Spatial
         {
             foreach (int id in _boidIds)
             {
-                SteeringManager.Boid boid = SteeringManager.Instance.GetBoid(id);
-                Vector2 pos = GetViewport().GetMousePosition();
-                Vector3 origin = _camera.ProjectRayOrigin(pos);
-                Vector3 normal = _camera.ProjectRayNormal(pos);
-                Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
-                Vector2 target = new(hit.x, hit.z);
-                boid.Target = target;
-                SteeringManager.Instance.SetBoid(boid);
+                if (SteeringManager.Instance.HasBoid(id))
+                {
+                    SteeringManager.Boid boid = SteeringManager.Instance.GetBoid(id);
+                    Vector2 pos = GetViewport().GetMousePosition();
+                    Vector3 origin = _camera.ProjectRayOrigin(pos);
+                    Vector3 normal = _camera.ProjectRayNormal(pos);
+                    Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
+                    Vector2 target = new(hit.x, hit.z);
+                    boid.Target = target;
+                    //SteeringManager.Instance.SetBoid(boid);
+                }
             }
         }
 

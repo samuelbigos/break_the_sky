@@ -58,6 +58,6 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
         dir = (TargetPos - GlobalPosition).Normalized();
         Vector2 spawnPos = GlobalPosition + dir * 80.0f;
         bullet.Init(spawnPos, dir * _bulletSpeed, Alignment, 1.0f);
-        _game.AddChild(bullet);
+        Game.Instance.AddChild(bullet);
     }
 }

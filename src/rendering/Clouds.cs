@@ -88,7 +88,7 @@ public class Clouds : Spatial
             float displaceRadius = 12.5f;
             List<BoidBase> boids = new List<BoidBase>();
             float cloudY = _cloudLayers[1].GlobalTransform.origin.y;
-            foreach (BoidBase boid in Game.Instance.DestroyedBoids)
+            foreach (BoidBase boid in BoidFactory.Instance.DestroyedBoids)
             {
                 float boidY = boid.GlobalTransform.origin.y;
                 if (boidY < cloudY + displaceRadius && boidY > cloudY - displaceRadius)

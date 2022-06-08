@@ -6,6 +6,7 @@ public class BoidPlayer : BoidBase
     [Export] private NodePath _sfxPickupPath;
 
     private AudioStreamPlayer2D _sfxPickup;
+    private Vector2 _velocity;
 
     public override void _Ready()
     {
@@ -14,6 +15,10 @@ public class BoidPlayer : BoidBase
         _sfxPickup = GetNode<AudioStreamPlayer2D>(_sfxPickupPath);
 
         _mesh.Visible = true;
+    }
+
+    protected override void RegisterSteeringBoid(Vector2 velocity)
+    {
     }
 
     public override void _Process(float delta)
@@ -52,12 +57,12 @@ public class BoidPlayer : BoidBase
             {
                 dir = dir.Normalized();
                 dir *= MaxVelocity * delta;
-                Velocity += dir;
+                _velocity += dir;
             }
             
-            GlobalTranslate(Velocity.To3D() * delta);
+            GlobalTranslate(_velocity.To3D() * delta);
 
-            Velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
+            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
         }
     }
 

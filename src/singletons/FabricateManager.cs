@@ -34,7 +34,7 @@ public class FabricateManager : Singleton<FabricateManager>
         if (_queue.Count > 0)
         {
             _queue[0].TimeLeft -= delta;
-            if (_queue[0].TimeLeft <= 0.0f && Game.Instance.AddAllyBoid(_queue[0].BoidId))
+            if (_queue[0].TimeLeft <= 0.0f && BoidFactory.Instance.CreateAllyBoid(Database.AllyBoid(_queue[0].BoidId)) != null)
             {
                 RemoveFromQueue(0);
             }

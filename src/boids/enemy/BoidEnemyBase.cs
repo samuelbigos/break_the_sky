@@ -8,7 +8,7 @@ public class BoidEnemyBase : BoidBase
 
     public bool IsTargetted = false;
 
-    public override BoidAlignment Alignment => BoidAlignment.Enemy;
+    protected override BoidAlignment Alignment => BoidAlignment.Enemy;
     protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     private int _cachedBehaviours;
@@ -20,10 +20,9 @@ public class BoidEnemyBase : BoidBase
 
         HitDamage = 9999.0f; // colliding with enemy boids should always destroy the allied boid.
         
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, true);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, true);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.EdgeRepulsion, true, 2.0f);
+        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, true);
+        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, true);
+        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
     }
 
     public override void _Process(float delta)
@@ -41,14 +40,14 @@ public class BoidEnemyBase : BoidBase
         //     }
         // }
 
-        if (_escorting)
-        {
-            float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
-            if (distToPlayerSq < EngageRange * EngageRange)
-            {
-                DropEscortAndEngage();
-            }
-        }
+        // if (_escorting)
+        // {
+        //     float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
+        //     if (distToPlayerSq < EngageRange * EngageRange)
+        //     {
+        //         DropEscortAndEngage();
+        //     }
+        // }
     }
 
     public void SetupEscort(BoidEnemyBase leader)
@@ -63,9 +62,9 @@ public class BoidEnemyBase : BoidBase
 
     private void DropEscortAndEngage()
     {
-        Behaviours = _cachedBehaviours;
-        SetTarget(TargetType.Enemy, _player);
-        _escorting = false;
+        // Behaviours = _cachedBehaviours;
+        // SetTarget(TargetType.Enemy, _player);
+        // _escorting = false;
     }
 
     protected override void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
@@ -89,15 +88,14 @@ public class BoidEnemyBase : BoidBase
         
         base._Destroy(score, hitDir, hitStrength);
 
-        DataEnemyBoid data = Database.EnemyBoids.FindEntry<DataEnemyBoid>(ID);
+        DataEnemyBoid data = Database.EnemyBoids.FindEntry<DataEnemyBoid>(Id);
         for (int i = 0; i < data.MaterialDropCount; i++)
         {
             PickupMaterial drop = _pickupMaterialScene.Instance<PickupMaterial>();
-            _game.AddChild(drop);
-            _player.RegisterPickup(drop);
+            Game.Instance.RegisterPickup(drop);
             drop.GlobalTransform = GlobalTransform;
             float eject = 25.0f;
-            drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, _player);
+            drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, Game.Instance.Player);
         }
     }
 }

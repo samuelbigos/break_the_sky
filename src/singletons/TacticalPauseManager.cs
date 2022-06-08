@@ -42,7 +42,7 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
             _dragging = true;
             _dragTextureRect.Visible = true;
 
-            foreach (BoidAllyBase boid in Game.Instance.AllyBoids)
+            foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
             {
                 boid.Selected = false;
             }
@@ -68,7 +68,7 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
             Rect2 worldRect = new Rect2();
             worldRect.Position = GameCamera.Instance.ProjectToZero(dragRect.Position).To2D();
             worldRect.End = GameCamera.Instance.ProjectToZero(dragRect.End).To2D();
-            foreach (BoidAllyBase boid in Game.Instance.AllyBoids)
+            foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
             {
                 if (boid.GlobalPosition.x > worldRect.Position.x && boid.GlobalPosition.y > worldRect.Position.y
                                                                  && boid.GlobalPosition.x < worldRect.End.x &&
@@ -98,7 +98,7 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
         _selectedBoids.Clear();
         if (prevState == StateMachine_Game.States.TacticalPause)
         {
-            foreach (BoidAllyBase boid in Game.Instance.AllyBoids)
+            foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
             {
                 boid.Selected = false;
             }

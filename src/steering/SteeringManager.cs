@@ -105,6 +105,21 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private int _obstacleIdGen = 1;
     private int _flowFieldIdGen = 1;
 
+    public MeshInstance _debugMesh;
+
+    public override void _Ready()
+    {
+        base._Ready();
+
+        _debugMesh = new MeshInstance();
+        SpatialMaterial mat = new();
+        mat.FlagsUnshaded = true;
+        mat.VertexColorUseAsAlbedo = true;
+        mat.VertexColorIsSrgb = true;
+        _debugMesh.MaterialOverride = mat;
+        AddChild(_debugMesh);
+    }
+
     public override void _Process(float delta)
     {
         base._Process(delta);
@@ -174,6 +189,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
             boid.Position = WrapPosition(boid.Position + boid.Velocity * delta, EdgeBounds);
         }
+        
+        DrawSimulationToMesh(out Mesh mesh);
+        _debugMesh.Mesh = mesh;
     }
 
     private static Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, Span<Boid> boids, Span<Obstacle> obstacles, Span<FlowField> flowFields, float delta)
@@ -264,16 +282,15 @@ public partial class SteeringManager : Singleton<SteeringManager>
         return flowField.ID;
     }
 
-    public Boid GetBoid(int id)
+    public bool HasBoid(int id)
+    {
+        return _boidIdToIndex.ContainsKey(id);
+    }
+
+    public ref Boid GetBoid(int id)
     {
         Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid with ID doesn't exist.");
-        return _boidPool[_boidIdToIndex[id]];
-    }
-    
-    public void SetBoid(Boid boid)
-    {
-        Debug.Assert(_boidIdToIndex.ContainsKey(boid.Id), $"Boid with ID doesn't exist.");
-        _boidPool[_boidIdToIndex[boid.Id]] = boid;
+        return ref _boidPool[_boidIdToIndex[id]];
     }
 
     // private int FindEmptyBoidIndex()

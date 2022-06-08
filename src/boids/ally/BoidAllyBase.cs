@@ -18,7 +18,7 @@ public class BoidAllyBase : BoidBase
     [Export] private NodePath _sfxShootPlayerPath;
     private AudioStreamPlayer2D _sfxShootPlayer;
 
-    public override BoidAlignment Alignment => BoidAlignment.Ally;
+    protected override BoidAlignment Alignment => BoidAlignment.Ally;
     protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     public override void _Ready()
@@ -39,13 +39,13 @@ public class BoidAllyBase : BoidBase
 
         if (_targetType == TargetType.None)
         {
-            SetTarget(TargetType.Ally, _player);
+            SetTarget(TargetType.Ally, Game.Instance.Player);
         }
     }
 
     protected virtual void _Shoot(Vector2 dir)
     {
-        float traumaMod = 1.0f - Mathf.Clamp(_game.NumBoids / 100.0f, 0.0f, 0.5f);
+        float traumaMod = 1.0f - Mathf.Clamp(BoidFactory.Instance.NumBoids / 100.0f, 0.0f, 0.5f);
         GameCamera.Instance.AddTrauma(_shootTrauma * traumaMod);
         
         _sfxShootPlayer.Play();
@@ -58,7 +58,7 @@ public class BoidAllyBase : BoidBase
         
         // can shoot if there are no other boids in the shoot direction
         bool blocked = false;
-        foreach (BoidAllyBase boid in _game.AllyBoids)
+        foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
         {
             if (boid == this || boid.Destroyed || !boid.BlocksShots)
                 continue;

@@ -101,7 +101,7 @@ public class BoidEnemyBeacon : BoidEnemyBase
             Vector2 dir = new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized();
             Vector2 spawnPos = GlobalPosition + dir * 32.0f;
             bullet.Init(spawnPos, dir * BulletSpeed, Alignment, 1.0f);
-            _game.AddChild(bullet);
+            Game.Instance.AddChild(bullet);
             _sfxBeaconFire.Play();
         }
     }

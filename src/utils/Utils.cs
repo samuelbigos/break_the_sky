@@ -24,6 +24,11 @@ public static class Utils
         return Rng.RandfRange(-1.0f, 1.0f);
     }
 
+    public static Vector2 RandV2()
+    {
+        return new Vector2(RandfUnit(), RandfUnit()).Normalized();
+    }
+
     public static float Ease_CubicInOut(float t)
     {
         return t < 0.5f
