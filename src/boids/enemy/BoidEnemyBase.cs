@@ -52,12 +52,12 @@ public class BoidEnemyBase : BoidBase
 
     public void SetupEscort(BoidEnemyBase leader)
     {
-        SetTarget(TargetType.Ally, leader);
-        _cachedBehaviours = Behaviours;
-        Behaviours = 0;
-        _escorting = true;
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true);
+        // SetTarget(TargetType.Ally, leader);
+        // _cachedBehaviours = _behaviours;
+        // _behaviours = 0;
+        // _escorting = true;
+        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true);
     }
 
     private void DropEscortAndEngage()

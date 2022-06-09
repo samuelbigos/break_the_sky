@@ -12,6 +12,13 @@ public class BoidAllyDrone : BoidAllyBase
         base._Ready();
     }
 
+    public override void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    {
+        base.Init(id, onDestroy, position, velocity);
+        
+        SetTarget(TargetType.Ally, Game.Instance.Player);
+    }
+
     public override void _Process(float delta)
     {
         base._Process(delta);

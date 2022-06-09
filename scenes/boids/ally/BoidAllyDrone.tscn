@@ -19,8 +19,7 @@ shader_param/blend_depth = 0.003
 
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
-Behaviours = 12
-BehaviourWeights = PoolRealArray( 1, 1, 5, 1, 0, 0, 0, 0 )
+_behaviours = 1143
 MaxVelocity = 200.0
 Damping = 0.0
 SeparationRadius = 10.0

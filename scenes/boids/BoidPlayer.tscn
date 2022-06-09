@@ -18,6 +18,8 @@ rings = 4
 
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
+_behaviours = 0
+_steeringRadius = 10.0
 _sfxPickupPath = NodePath("SFXPickup")
 
 [node name="Mesh" parent="." index="1"]

@@ -18,7 +18,7 @@ shader_param/blend_depth = 0.003
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
-Behaviours = 1087
+_behaviours = 1087
 MaxVelocity = 100.0
 MinVelocity = 50.0
 FieldOfView = 270.0

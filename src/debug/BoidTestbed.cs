@@ -51,7 +51,6 @@ public partial class BoidTestbed : Spatial
                 Vector2 spawnPos = Vector2.Left * 50.0f;
                 SteeringManager.Boid boid = new()
                 {
-                    Alive = true,
                     Alignment = 0,
                     Position = spawnPos,
                     Velocity = Vector2.Zero,
@@ -85,7 +84,6 @@ public partial class BoidTestbed : Spatial
                 Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * edgeBounds.Size * 0.25f;
                 SteeringManager.Boid boid = new()
                 {
-                    Alive = true,
                     Alignment = 0,
                     Position = randPos,
                     Velocity = Vector2.Zero,
@@ -122,7 +120,6 @@ public partial class BoidTestbed : Spatial
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 75.0f;
                 SteeringManager.Boid boid = new()
                 {
-                    Alive = true,
                     Alignment = 1,
                     Position = randPos,
                     Velocity = randVel,
@@ -159,7 +156,6 @@ public partial class BoidTestbed : Spatial
                 Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 25.0f;
                 SteeringManager.Boid boid = new()
                 {
-                    Alive = true,
                     Alignment = 1,
                     Position = randPos,
                     Velocity = randVel,

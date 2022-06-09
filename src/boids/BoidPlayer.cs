@@ -17,12 +17,10 @@ public class BoidPlayer : BoidBase
         _mesh.Visible = true;
     }
 
-    protected override void RegisterSteeringBoid(Vector2 velocity)
-    {
-    }
-
     public override void _Process(float delta)
     {
+        base._Process(delta);
+        
         if (!_destroyed && _acceptInput)
         {
             Vector2 mousePos = GameCamera.Instance.MousePosition();
@@ -59,10 +57,10 @@ public class BoidPlayer : BoidBase
                 dir *= MaxVelocity * delta;
                 _velocity += dir;
             }
-            
-            GlobalTranslate(_velocity.To3D() * delta);
-
             _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
+
+            ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
+            boid.Position += _velocity * delta;
         }
     }
 

@@ -25,8 +25,9 @@ public partial class BoidBase : Area
 
     #region Export
 
-    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidBoids,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] public int Behaviours;
-    [Export] public float[] BehaviourWeights;
+    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidBoids,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] private int _behaviours;
+    [Export] private float _steeringRadius = 5.0f;
+    [Export] private bool _ignoreAllyAvoidance;
 
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
@@ -76,11 +77,12 @@ public partial class BoidBase : Area
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _destroyed;    
     public string Id = "";
+    public int SteeringId => _steeringId;
     
     public Vector2 GlobalPosition
     {
         get => new(GlobalTransform.origin.x, GlobalTransform.origin.z);
-        private set
+        protected set
         {
             if (SteeringManager.Instance.HasBoid(_steeringId))
             {
@@ -120,6 +122,7 @@ public partial class BoidBase : Area
 
     #region Protected
 
+    protected int _steeringId;
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
@@ -144,8 +147,7 @@ public partial class BoidBase : Area
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
-
-    private int _steeringId;
+    
     private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
     
     private Color MeshColour
@@ -159,7 +161,7 @@ public partial class BoidBase : Area
 
     #endregion
 
-    public void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    public virtual void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
         Id = id;
         OnBoidDestroyed += onDestroy;
@@ -184,21 +186,22 @@ public partial class BoidBase : Area
 
         SteeringManager.Boid boid = new()
         {
-            Alive = true,
             Alignment = 1,
             Position = GlobalPosition,
             Velocity = velocity,
-            Radius = 7.0f,
+            Radius = _steeringRadius,
             Heading = Vector2.Up,
             MaxSpeed = 75.0f,
             DesiredSpeed = 75.0f,
             MaxForce = 125.0f,
             LookAhead = 0.5f,
-            Behaviours = Behaviours,
+            Behaviours = _behaviours,
             Weights = _steeringWeights,
             Target = Vector2.Zero,
             ViewRange = 50.0f,
             ViewAngle = 240.0f,
+            IgnoreAllyAvoidance = _ignoreAllyAvoidance,
+            TargetIndex = -1,
         };
         _steeringId = SteeringManager.Instance.RegisterBoid(boid);
     }
@@ -241,7 +244,7 @@ public partial class BoidBase : Area
         // update position and cache velocity from steering boid
         if (SteeringManager.Instance.HasBoid(_steeringId))
         {
-            SteeringManager.Boid steeringBoid = SteeringManager.Instance.GetBoid(_steeringId);
+            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
             GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.To3D());
             _cachedVelocity = steeringBoid.Velocity;
         }
@@ -334,6 +337,9 @@ public partial class BoidBase : Area
             _sfxOnDestroy.Play();
             _destroyed = true;
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
+            
+            // unregister steering boid
+            SteeringManager.Instance.RemoveBoid(_steeringId);
 
             // convert to rigid body for 'ragdoll' death physics.
             Vector3 pos = GlobalTransform.origin;
@@ -369,17 +375,37 @@ public partial class BoidBase : Area
     {
         if (enabled)
         {
-            Behaviours |= (1 << (int) behaviour);
-            BehaviourWeights[(int) behaviour] = weight;
+            _behaviours |= (1 << (int) behaviour);
         }
         else
         {
-            Behaviours &= ~ (1 << (int) behaviour);
+            _behaviours &= ~ (1 << (int) behaviour);
         }
+
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        steeringBoid.Behaviours = _behaviours;
     }
 
     public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2())
     {
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        switch (type)
+        {
+            case TargetType.Ally:
+            case TargetType.Enemy:
+                Debug.Assert(boid != null);
+                steeringBoid.TargetIndex = boid.SteeringId;
+                break;
+            case TargetType.Position:
+                steeringBoid.Position = pos;
+                steeringBoid.TargetIndex = -1;
+                break;
+            case TargetType.None:
+                steeringBoid.TargetIndex = -1;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
         _targetType = type;
         _targetBoid = boid;
         _targetPos = pos;

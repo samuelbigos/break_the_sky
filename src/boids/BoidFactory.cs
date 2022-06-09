@@ -46,7 +46,7 @@ public class BoidFactory : Singleton<BoidFactory>
     public BoidEnemyBase CreateEnemyBoid(DataEnemyBoid boid, Vector2 pos, Vector2 vel)
     {
         BoidEnemyBase enemy = boid.Scene.Instance<BoidEnemyBase>();
-        AddChild(enemy);
+        Game.Instance.AddChild(enemy);
         enemy.Init(boid.Name, _OnBoidDestroyed, pos, vel);
         
         SaveDataPlayer.SetSeenEnemy(boid.Name);
@@ -62,7 +62,7 @@ public class BoidFactory : Singleton<BoidFactory>
             return null;
             
         BoidAllyBase ally = boid.Scene.Instance<BoidAllyBase>();
-        AddChild(boid);
+        Game.Instance.AddChild(ally);
 
         Vector2 pos = Game.Instance.Player.GlobalPosition + Utils.RandV2() * 30.0f;
         ally.Init(ally.Name, _OnBoidDestroyed, pos, Vector2.Zero);

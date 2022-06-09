@@ -26,7 +26,7 @@ public partial class SteeringManager
         int i = 0;
 
         // boids
-        Span<Boid> boids = _boidPool.AsSpan(0, _numBoids);
+        Span<Boid> boids = _boidPool.AsSpan();
         foreach (ref readonly Boid boid in boids)
         {
             // body

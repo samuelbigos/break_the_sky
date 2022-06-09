@@ -31,7 +31,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public struct Boid
     {
-        public bool Alive;
         public int Id;
         public int Alignment;
         public Vector2 Position;
@@ -48,6 +47,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public int Behaviours;
         public float[] Weights;
         public Vector2 Target;
+        public int TargetIndex;
         public float ViewRange;
         public float ViewAngle;
         public Intersection Intersection;
@@ -87,15 +87,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public static Rect2 EdgeBounds;
 
-    private int _numBoids;
-    private Boid[] _boidPool = new Boid[1000];
+    private StructPool<Boid> _boidPool = new(1000);
     private int _numObstacles;
     private Obstacle[] _obstaclePool = new Obstacle[100];
     private int _numFlowFields;
     private FlowField[] _flowFieldPool = new FlowField[100];
 
     private System.Collections.Generic.Dictionary<int, int> _boidIdToIndex = new();
-    private System.Collections.Generic.Dictionary<int, int> _boidIndexToId = new();
+    
     private System.Collections.Generic.Dictionary<int, int> _obstacleIdToIndex = new();
     private System.Collections.Generic.Dictionary<int, int> _obstacleIndexToId = new();
     private System.Collections.Generic.Dictionary<int, int> _flowFieldIdToIndex = new();
@@ -124,7 +123,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         base._Process(delta);
 
-        Span<Boid> boids = _boidPool.AsSpan(0, _numBoids);
+        Span<Boid> boids = _boidPool.AsSpan();
         Span<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
         Span<FlowField> flowFields = _flowFieldPool.AsSpan(0, _numFlowFields);
         
@@ -135,16 +134,20 @@ public partial class SteeringManager : Singleton<SteeringManager>
             
             if (flowField.TrackID != 0)
             {
-                flowField.Position = _boidPool[_boidIdToIndex[flowField.TrackID]].Position;
+                flowField.Position = boids[_boidIdToIndex[flowField.TrackID]].Position;
             }
         }
         
         foreach (ref Boid boid in boids)
         {
-            if (!boid.Alive)
+            if (boid.Id == 0)
                 continue;
-
+            
             Vector2 totalForce = Vector2.Zero;
+            
+            // update target
+            if (boid.TargetIndex != -1)
+                boid.Target = boids[_boidIdToIndex[boid.TargetIndex]].Position;
 
             for (int j = 0; j < (int) COUNT; j++)
             {
@@ -248,11 +251,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
         Debug.Assert(!_boidIdToIndex.ContainsKey(boid.Id), $"Boid with this ID ({boid.Id}) already registered.");
         if (_boidIdToIndex.ContainsKey(boid.Id))
             return -1;
-        
+
         boid.Id = _boidIdGen++;
-        _boidPool[_numBoids++] = boid;
-        _boidIdToIndex[boid.Id] = _numBoids - 1;
-        _boidIndexToId[_numBoids - 1] = boid.Id;
+        int index = _boidPool.Add(boid);
+        _boidIdToIndex[boid.Id] = index;
         return boid.Id;
     }
 
@@ -289,18 +291,15 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public ref Boid GetBoid(int id)
     {
-        Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid with ID doesn't exist.");
-        return ref _boidPool[_boidIdToIndex[id]];
+        Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid with ID {id} doesn't exist.");
+        return ref _boidPool.AsSpan()[_boidIdToIndex[id]];
     }
 
-    // private int FindEmptyBoidIndex()
-    // {
-    //     for (int i = 0; i < _boids.Count; i++)
-    //     {
-    //         if (!_boids[i].Alive)
-    //             return i;
-    //     }
-    //
-    //     return -1;
-    // }
+    public void RemoveBoid(int id)
+    {
+        Debug.Assert(HasBoid(id));
+        int i = _boidIdToIndex[id];
+        _boidPool.Remove(i);
+        _boidIdToIndex.Remove(id);
+    }
 }
