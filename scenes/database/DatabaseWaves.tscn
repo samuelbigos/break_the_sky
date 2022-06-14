@@ -25,3 +25,9 @@ TriggerTimeMinutes = 5.0
 TriggerBudget = 150.0
 PrimarySpawns = [ "beacon" ]
 SecondarySpawns = [ "driller", "driller", "driller", "laser", "laser" ]
+
+[node name="DebugBigDriller" type="Node" parent="."]
+script = ExtResource( 2 )
+TriggerTimeMinutes = 999.0
+PrimarySpawns = [ "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller", "driller" ]
+SecondarySpawns = [  ]

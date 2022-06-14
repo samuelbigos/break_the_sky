@@ -14,6 +14,7 @@ public class GameCamera : Camera
     [Export] private float _stateTransitionTime = 0.5f;
 
     public Transform BaseTransform;
+    public Vector2 MousePosition => _cachedMousePos;
 
     private OpenSimplexNoise _noise = new OpenSimplexNoise();
     private float _trauma = 0.0f;
@@ -22,6 +23,7 @@ public class GameCamera : Camera
     private float _stateTransitionTimer;
     private Transform _initialTrans;
     private Vector2 _cachedMousePos;
+    private Vector2 _cachedMousePosOnTacticalPauseEnter;
     
     public void AddTrauma(float trauma)
     {
@@ -33,13 +35,13 @@ public class GameCamera : Camera
         _player = player;
     }
 
-    public Vector2 MousePosition()
+    private void UpdateMousePosition()
     {
         Vector2 pos = GetViewport().GetMousePosition();
         Vector3 origin = ProjectRayOrigin(pos);
         Vector3 normal = ProjectRayNormal(pos);
         Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
-        return new Vector2(hit.x, hit.z);
+        _cachedMousePos = new Vector2(hit.x, hit.z);
     }
 
     public Vector3 ProjectToZero(Vector2 screen)
@@ -85,6 +87,8 @@ public class GameCamera : Camera
     public override void _Process(float delta)
     {
         base._Process(delta);
+
+        UpdateMousePosition();
         
         // ignore timescale
         delta = TimeSystem.UnscaledDelta;
@@ -126,7 +130,7 @@ public class GameCamera : Camera
         {
             case StateMachine_Game.States.TacticalPause:
             {
-                Vector2 cameraMouseOffset = _cachedMousePos - _player.GlobalPosition;
+                Vector2 cameraMouseOffset = _cachedMousePosOnTacticalPauseEnter - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
                 Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
                 cameraTransform.origin.y = _initialTrans.origin.y;
@@ -135,7 +139,7 @@ public class GameCamera : Camera
             }
             case StateMachine_Game.States.Play:
             {
-                Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+                Vector2 cameraMouseOffset = MousePosition - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
                 Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
                 cameraTransform.origin.y = _initialTrans.origin.y;
@@ -157,7 +161,7 @@ public class GameCamera : Camera
             }
             case StateMachine_Game.States.Construct:
             {
-                Vector2 cameraMouseOffset = MousePosition() - _player.GlobalPosition;
+                Vector2 cameraMouseOffset = MousePosition - _player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.1f + Vector2.Right * 30.0f;
                 Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
                 cameraTransform.origin.y = _initialTrans.origin.y * 0.5f;
@@ -175,7 +179,7 @@ public class GameCamera : Camera
 
         if (state == StateMachine_Game.States.TacticalPause)
         {
-            _cachedMousePos = MousePosition();
+            _cachedMousePosOnTacticalPauseEnter = MousePosition;
         }
     }
 }

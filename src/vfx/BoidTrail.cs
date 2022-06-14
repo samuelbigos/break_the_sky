@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using Vector3 = Godot.Vector3;
 
-public class BoidTrail : MeshInstance
+public class BoidTrail : Spatial
 {
     public enum TrailType
     {
@@ -18,13 +18,19 @@ public class BoidTrail : MeshInstance
     [Export] private Curve _lineWidthCurve;
     [Export] private NodePath _burstParticlesPath;
 
-    private SurfaceTool _st = new();
+    public int LinePoints => _linePoints;
+    public Vector3[] TrailPositions => _trailPositions;
+    public int TrailIdx => _trailIdx;
+    public Curve LineWidthCurve => _lineWidthCurve;
+    public float LineWidth => _lineWidth;
+    
     private int _trailIdx;
     private Vector3[] _trailPositions;
     private Spatial _parent;
     private float _updateTimer;
     private Particles _burstParticles;
     private bool _initialised;
+    private bool _registered;
 
     public override void _Ready()
     {
@@ -33,6 +39,16 @@ public class BoidTrail : MeshInstance
         _burstParticles = GetNode<Particles>(_burstParticlesPath);
 
         _initialised = false;
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+
+        if (_type == TrailType.Smooth && _registered)
+        {
+            TrailRenderer.Instance.UnRegister(this);
+        }
     }
 
     public override void _Process(float delta)
@@ -51,6 +67,11 @@ public class BoidTrail : MeshInstance
                         _trailPositions[i] = _parent.GlobalTransform.origin;
                     }
                     _burstParticles.Visible = false;
+                    if (Visible)
+                    {
+                        TrailRenderer.Instance.Register(this);
+                        _registered = true;
+                    }
                     break;
                 case TrailType.Burst:
                     _burstParticles.Visible = true;
@@ -91,38 +112,6 @@ public class BoidTrail : MeshInstance
             _trailPositions[_trailIdx] = _parent.GlobalTransform.origin;
             _updateTimer = _lineInterval;
         }
-
-        _st.Begin(Mesh.PrimitiveType.Triangles);
-        
-        for (int i = 0; i < _linePoints; i++)
-        {
-            int idx = (_trailIdx - i + _linePoints) % _linePoints;
-            Vector3 pos = _trailPositions[idx];
-            Vector3 posLast = _trailPositions[(idx - 1 + _linePoints) % _linePoints];
-            Vector3 dir = -(pos - posLast).Normalized();
-
-            float w = _lineWidth * _lineWidthCurve.Interpolate((float)i / _linePoints) * 0.5f;
-
-            Vector3 cross = dir.Cross(Vector3.Up) * w;
-            _st.AddColor(ColourManager.Instance.White);
-            _st.AddVertex(pos - cross);
-            _st.AddColor(ColourManager.Instance.White);
-            _st.AddVertex(pos + cross);
-
-            if (i > 0)
-            {
-                int v = i * 2;
-                _st.AddIndex(v - 2); // t1
-                _st.AddIndex(v);
-                _st.AddIndex(v + 1);
-                _st.AddIndex(v + 1); // t2
-                _st.AddIndex(v - 1);
-                _st.AddIndex(v - 2);
-            }
-        }
-        
-        Mesh = _st.Commit();
-
         GlobalTransform = new Transform(Basis.Identity, Vector3.Zero);
     }
 }

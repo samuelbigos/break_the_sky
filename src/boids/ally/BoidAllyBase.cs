@@ -33,14 +33,14 @@ public class BoidAllyBase : BoidBase
         mat.AlbedoColor = ColourManager.Instance.Ally;
     }
 
-    public override void _Process(float delta)
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
-
         if (_targetType == TargetType.None)
         {
             SetTarget(TargetType.Ally, Game.Player);
         }
+        
+        base.ProcessAlive(delta);
     }
 
     protected virtual void _Shoot(Vector2 dir)
@@ -53,7 +53,7 @@ public class BoidAllyBase : BoidBase
 
     protected virtual bool _CanShoot(Vector2 dir)
     {
-        if (_destroyed || !_acceptInput)
+        if (!_acceptInput)
             return false;
         
         // can shoot if there are no other boids in the shoot direction

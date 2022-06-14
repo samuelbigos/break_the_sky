@@ -23,6 +23,12 @@ public partial class BoidBase : Area
         Position
     }
 
+    public enum State
+    {
+        Alive,
+        Destroyed
+    }
+
     #region Export
 
     [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] protected int _behaviours;
@@ -74,7 +80,7 @@ public partial class BoidBase : Area
     #region Public
 
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
-    public bool Destroyed => _destroyed;    
+    public bool Destroyed => _state == State.Destroyed;    
     public string Id = "";
     public int SteeringId => _steeringId;
     
@@ -125,12 +131,12 @@ public partial class BoidBase : Area
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
-    protected bool _destroyed;
     protected Vector3 _baseScale;
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
     protected Vector2 _cachedVelocity;
     protected virtual Color BaseColour => ColourManager.Instance.Secondary;
+    protected State _state;
 
     #endregion
 
@@ -162,6 +168,7 @@ public partial class BoidBase : Area
 
     public virtual void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
+        _state = State.Alive;
         Id = id;
         OnBoidDestroyed += onDestroy;
         RegisterSteeringBoid(velocity);
@@ -234,44 +241,55 @@ public partial class BoidBase : Area
     {
         base._Process(delta);
 
-        if (!_destroyed)
+        switch (_state)
         {
-            // update position and cache velocity from steering boid
-            Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
-            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-            GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.To3D());
-            _cachedVelocity = steeringBoid.Velocity;
-
-            // hit flash
-            _hitFlashTimer -= delta;
-            if (_hitFlashTimer < 0.0)
-            {
-                if (!_destroyed)
-                {
-                    MeshColour = BaseColour;
-                }
-            }
-
-            if (_health < 0.0f && !_destroyed)
-            {
-                _Destroy(Points > 0, _cachedLastHitDir, _cachedLastHitDamage);
-            }
-            _cachedLastHitDir = Vector3.Zero;
-            _cachedLastHitDamage = 0.0f;
-        }
-        else
-        {
-            if (GlobalTransform.origin.y < -100.0f)
-            {
-                foreach (Particles p in _hitParticles)
-                {
-                    p.QueueFree();
-                }
-                BoidFactory.Instance.FreeBoid(this);
-            }
+            case State.Alive:
+                ProcessAlive(delta);
+                break;
+            case State.Destroyed:
+                ProcessDestroyed(delta);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
-        _altMaterial.SetShaderParam("u_velocity", _cachedVelocity);
+        //_altMaterial.SetShaderParam("u_velocity", _cachedVelocity);
+    }
+
+    protected virtual void ProcessAlive(float delta)
+    {
+        // update position and cache velocity from steering boid
+        Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.To3D());
+        _cachedVelocity = steeringBoid.Velocity;
+
+        // hit flash
+        if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
+        {
+            MeshColour = BaseColour;
+        }
+        _hitFlashTimer -= delta;
+
+        if (_health < 0.0f)
+        {
+            _Destroy(Points > 0, _cachedLastHitDir, _cachedLastHitDamage);
+            return;
+        }
+        _cachedLastHitDir = Vector3.Zero;
+        _cachedLastHitDamage = 0.0f;
+    }
+    
+    protected virtual void ProcessDestroyed(float delta)
+    {
+        if (GlobalTransform.origin.y < -100.0f)
+        {
+            foreach (Particles p in _hitParticles)
+            {
+                p.QueueFree();
+            }
+            BoidFactory.Instance.FreeBoid(this);
+        }
     }
 
     protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
@@ -316,13 +334,18 @@ public partial class BoidBase : Area
     
     protected virtual void _Destroy(bool score, Vector3 hitDir, float hitStrength)
     {
-        if (!_destroyed)
+        Debug.Assert(_state != State.Destroyed, "_state != State.Destroyed");
+        if (_state != State.Destroyed)
         {
+            _state = State.Destroyed;
+            
             MeshColour = BaseColour;
             
             _sfxOnDestroy.Play();
-            _destroyed = true;
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
+            
+            // clear target
+            SetTarget(TargetType.None);
             
             // unregister steering boid
             SteeringManager.Instance.RemoveBoid(_steeringId);
@@ -375,6 +398,11 @@ public partial class BoidBase : Area
     public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2())
     {
         Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
+
+        if (_targetBoid != null)
+        {
+            _targetBoid.OnBoidDestroyed -= _OnTargetBoidDestroyed;
+        }
         
         _targetType = type;
         _targetBoid = boid;
@@ -387,6 +415,7 @@ public partial class BoidBase : Area
             case TargetType.Enemy:
                 Debug.Assert(boid != null);
                 steeringBoid.TargetIndex = boid.SteeringId;
+                _targetBoid.OnBoidDestroyed += _OnTargetBoidDestroyed;
                 break;
             case TargetType.Position:
                 steeringBoid.Position = pos;
@@ -446,6 +475,15 @@ public partial class BoidBase : Area
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
+        }
+    }
+
+    protected virtual void _OnTargetBoidDestroyed(BoidBase boid)
+    {
+        if (_targetType is TargetType.Ally or TargetType.Enemy)
+        {
+            boid.OnBoidDestroyed -= _OnTargetBoidDestroyed;
+            SetTarget(TargetType.None);
         }
     }
 }

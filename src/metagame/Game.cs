@@ -98,6 +98,11 @@ public partial class Game : Singleton<Game>
                 {
                     BoidFactory.Instance.CreateAllyBoid(boid);
                 }
+                if (ImGui.Button($"{boid.DisplayName} x10"))
+                {
+                    for (int i = 0; i < 10; i++)
+                        BoidFactory.Instance.CreateAllyBoid(boid);
+                }
             }
 
             ImGui.Text("Enemies");
@@ -106,6 +111,11 @@ public partial class Game : Singleton<Game>
                 if (ImGui.Button($"{boid.DisplayName}"))
                 {
                     _aiSpawningDirector.SpawnEnemyRandom(boid);
+                }
+                if (ImGui.Button($"{boid.DisplayName} x10"))
+                {
+                    for (int i = 0; i < 10; i++)
+                        _aiSpawningDirector.SpawnEnemyRandom(boid);
                 }
             }
 

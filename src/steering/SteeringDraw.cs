@@ -7,6 +7,7 @@ using Array = Godot.Collections.Array;
 
 public partial class SteeringManager
 {
+    private bool _draw = false;
     private bool _drawSeparation = true;
     private bool _drawSteering = true;
     private bool _drawVelocity = true;
@@ -22,6 +23,12 @@ public partial class SteeringManager
     public void DrawSimulationToMesh(out Mesh mesh)
     {
         ArrayMesh outMesh = new();
+        if (!_draw)
+        {
+            mesh = outMesh;
+            return;
+        }
+
         int v = 0;
         int i = 0;
 
@@ -201,6 +208,7 @@ public partial class SteeringManager
     {
         if (ImGui.BeginTabItem("Steering"))
         {
+            ImGui.Checkbox("Draw", ref _draw);
             ImGui.Checkbox("Draw Separation", ref _drawSeparation);
             ImGui.Checkbox("Draw Steering", ref _drawSteering);
             ImGui.Checkbox("Draw Velocity", ref _drawVelocity);

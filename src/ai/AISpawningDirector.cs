@@ -389,7 +389,15 @@ public class AISpawningDirector : Node
         switch (wave.WaveType)
         {
             case DataWave.Type.Standard:
+            {
+                // spawn
+                foreach (string enemy in wave.PrimarySpawns)
+                {
+                    DataEnemyBoid data = Database.EnemyBoid(enemy);
+                    primaryList.Add(SpawnEnemyRandom(data));
+                }
                 break;
+            }
             case DataWave.Type.Escort:
             {
                 // get leader

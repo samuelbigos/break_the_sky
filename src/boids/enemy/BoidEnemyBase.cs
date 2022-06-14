@@ -29,52 +29,36 @@ public class BoidEnemyBase : BoidBase
         // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
     }
 
-    public override void _Process(float delta)
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
-
-        if (!_destroyed)
+        switch (_targetType)
         {
-            switch (_targetType)
+            case TargetType.None:
             {
-                case TargetType.None:
+                List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
+                foreach (BoidAllyBase boid in allyBoids)
                 {
-                    List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
-                    foreach (BoidAllyBase boid in allyBoids)
+                    float distSq = (boid.GlobalPosition - GlobalPosition).LengthSquared();
+                    if (distSq < EngageRange * EngageRange)
                     {
-                        float distSq = (boid.GlobalPosition - GlobalPosition).LengthSquared();
-                        if (distSq < EngageRange * EngageRange)
-                        {
-                            SetTarget(TargetType.Enemy, boid);
-                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
-                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, false);
-                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, false);
-                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.FlowFieldFollow, false);
-                        }
+                        SetTarget(TargetType.Enemy, boid);
+                        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+                        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
+                        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, false);
+                        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, false);
+                        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.FlowFieldFollow, false);
                     }
-                    break;
                 }
-                case TargetType.Ally:
-                case TargetType.Enemy:
-                {
-                    // update target
-                    if (!IsInstanceValid(_targetBoid) || _targetBoid.Destroyed)
-                    {
-                        SetTarget(TargetType.None);
-                        _behaviours = _cachedBehaviours;
-                        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-                        steeringBoid.Behaviours = _behaviours;
-                    }
-                    break;
-                }
-                case TargetType.Position:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                break;
             }
+            case TargetType.Ally:
+            case TargetType.Enemy:
+            case TargetType.Position:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-
+        
         // if (_escorting)
         // {
         //     float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
@@ -83,6 +67,8 @@ public class BoidEnemyBase : BoidBase
         //         DropEscortAndEngage();
         //     }
         // }
+        
+        base.ProcessAlive(delta);
     }
 
     public void SetupEscort(BoidEnemyBase leader)
@@ -111,16 +97,6 @@ public class BoidEnemyBase : BoidBase
     
     protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
     {
-        if (!_destroyed)
-        {
-            GameCamera.Instance.AddTrauma(DestroyTrauma);
-            
-            if (score && !_destroyed)
-            {
-                //_game.AddScore(Points, GlobalPosition, true);
-            }
-        }
-        
         base._Destroy(score, hitDir, hitStrength);
 
         DataEnemyBoid data = Database.EnemyBoids.FindEntry<DataEnemyBoid>(Id);
@@ -132,5 +108,14 @@ public class BoidEnemyBase : BoidBase
             float eject = 25.0f;
             drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, Game.Player);
         }
+    }
+
+    protected override void _OnTargetBoidDestroyed(BoidBase boid)
+    {
+        base._OnTargetBoidDestroyed(boid);
+        
+        _behaviours = _cachedBehaviours;
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        steeringBoid.Behaviours = _behaviours;
     }
 }

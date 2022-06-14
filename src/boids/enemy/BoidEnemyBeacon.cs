@@ -38,58 +38,55 @@ public class BoidEnemyBeacon : BoidEnemyBase
         _rotorMesh = GetNode<MeshInstance>(_rotorMeshPath);
     }
 
-    public override void _Process(float delta)
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
-        
         float distToTarget = (GlobalPosition - TargetPos).Length();
         
-        if (!_destroyed)
+        if (_beaconState == BeaconState.Inactive)
         {
-            if (_beaconState == BeaconState.Inactive)
+            _beaconCooldown -= delta;
+            if (distToTarget < TargetBeaconDist && _beaconCooldown < 0.0f)
             {
-                _beaconCooldown -= delta;
-                if (distToTarget < TargetBeaconDist && _beaconCooldown < 0.0f)
-                {
-                    _beaconState = BeaconState.Charging;
-                    _beaconCharge = BeaconCharge;
-                }
+                _beaconState = BeaconState.Charging;
+                _beaconCharge = BeaconCharge;
             }
-
-            if (_beaconState == BeaconState.Charging)
-            {
-                _beaconCharge -= delta;
-                if (_beaconCharge < 0.0f)
-                {
-                    _beaconState = BeaconState.Firing;
-                    _beaconDuration = 0.0f;
-                    _pulses = Pulses;
-                }
-            }
-
-            if (_beaconState == BeaconState.Firing)
-            {
-                _beaconDuration -= delta;
-                if (_beaconDuration < 0.0f)
-                {
-                    _pulses -= 1;
-                    if (_pulses < 0)
-                    {
-                        _beaconState = BeaconState.Inactive;
-                        _beaconCooldown = BeaconCooldown;
-                    }
-                    else
-                    {
-                        FirePulse();
-                        _beaconDuration = BeaconPulseDuration;
-                    }
-                }
-            }
-            
-            Vector3 rot = _rotorMesh.Rotation;
-            rot.y = Mathf.PosMod(_rotorMesh.Rotation.y + 25.0f * delta, Mathf.Pi * 2.0f);
-            _rotorMesh.Rotation = rot;
         }
+
+        if (_beaconState == BeaconState.Charging)
+        {
+            _beaconCharge -= delta;
+            if (_beaconCharge < 0.0f)
+            {
+                _beaconState = BeaconState.Firing;
+                _beaconDuration = 0.0f;
+                _pulses = Pulses;
+            }
+        }
+
+        if (_beaconState == BeaconState.Firing)
+        {
+            _beaconDuration -= delta;
+            if (_beaconDuration < 0.0f)
+            {
+                _pulses -= 1;
+                if (_pulses < 0)
+                {
+                    _beaconState = BeaconState.Inactive;
+                    _beaconCooldown = BeaconCooldown;
+                }
+                else
+                {
+                    FirePulse();
+                    _beaconDuration = BeaconPulseDuration;
+                }
+            }
+        }
+            
+        Vector3 rot = _rotorMesh.Rotation;
+        rot.y = Mathf.PosMod(_rotorMesh.Rotation.y + 25.0f * delta, Mathf.Pi * 2.0f);
+        _rotorMesh.Rotation = rot;
+        
+        base.ProcessAlive(delta);
     }
 
     private void FirePulse()

@@ -17,13 +17,11 @@ public class BoidPlayer : BoidBase
         _mesh.Visible = true;
     }
 
-    public override void _Process(float delta)
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
-        
-        if (!_destroyed && _acceptInput)
+        if (_acceptInput)
         {
-            Vector2 mousePos = GameCamera.Instance.MousePosition();
+            Vector2 mousePos = GameCamera.Instance.MousePosition;
             Vector2 lookAt = mousePos - GlobalPosition;
             Rotation = new Vector3(0.0f, -Mathf.Atan2(lookAt.x, -lookAt.y), 0.0f);
 
@@ -62,6 +60,8 @@ public class BoidPlayer : BoidBase
             ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
             boid.Position += _velocity * delta;
         }
+        
+        base.ProcessAlive(delta);
     }
 
     public void RegisterPickup(PickupMaterial pickup)

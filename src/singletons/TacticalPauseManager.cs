@@ -88,7 +88,7 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
         {
             foreach (BoidBase boid in _selectedBoids)
             {
-                boid.SetTarget(BoidBase.TargetType.Position, null, GameCamera.Instance.MousePosition());
+                boid.SetTarget(BoidBase.TargetType.Position, null, GameCamera.Instance.MousePosition);
             }
         }
     }

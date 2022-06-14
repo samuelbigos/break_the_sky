@@ -293,7 +293,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public ref Boid GetBoid(int id)
     {
-        Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid with ID {id} doesn't exist.");
+        Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid doesn't exist.");
         return ref _boidPool.AsSpan()[_boidIdToIndex[id]];
     }
 

@@ -36,20 +36,22 @@ public class BoidEnemyCarrierRotorgun : BoidEnemyBase
         Vector3 rotRot = _rotorMesh.Rotation;
         rotRot.y = Mathf.PosMod(_rotorMesh.Rotation.y + 100.0f * delta, Mathf.Pi * 2.0f);
         _rotorMesh.Rotation = rotRot;
+    }
 
-        if (!_destroyed)
-        {
-            Vector2 toTarget = (TargetPos - GlobalPosition).Normalized();
-            Vector2 awayParent = (_lock.GlobalTransform.origin.To2D() - GlobalPosition).Normalized();
+    protected override void ProcessAlive(float delta)
+    {
+        Vector2 toTarget = (TargetPos - GlobalPosition).Normalized();
+        Vector2 awayParent = (_lock.GlobalTransform.origin.To2D() - GlobalPosition).Normalized();
             
-            float dist = (TargetPos - GlobalPosition).Length();
-            _shotCooldown -= delta;
-            if (toTarget.Dot(awayParent) > 0.0f && _shotCooldown < 0.0f && dist < _bulletRange)
-            {
-                Shoot(new Vector2());
-                _shotCooldown = _bulletCooldown;
-            }
+        float dist = (TargetPos - GlobalPosition).Length();
+        _shotCooldown -= delta;
+        if (toTarget.Dot(awayParent) > 0.0f && _shotCooldown < 0.0f && dist < _bulletRange)
+        {
+            Shoot(new Vector2());
+            _shotCooldown = _bulletCooldown;
         }
+        
+        base.ProcessAlive(delta);
     }
 
     private void Shoot(Vector2 dir)

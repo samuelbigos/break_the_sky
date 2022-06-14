@@ -51,11 +51,9 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         SpatialMaterial mat = _laserMesh.GetActiveMaterial(0) as SpatialMaterial;
         mat.AlbedoColor = ColourManager.Instance.White;
     }
-
-    public override void _Process(float delta)
+    
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
-
         float distToTarget = (GlobalPosition - TargetPos).Length();
         if (distToTarget < _targetLaserDist && _laserState == LaserState.Inactive)
         {
@@ -65,53 +63,52 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         {
             MaxVelocity = _maxVelBase;
         }
-
-        if (!_destroyed)
+        
+        if (_laserState == LaserState.Inactive)
         {
-            if (_laserState == LaserState.Inactive)
+            _laserCooldownTimer -= delta;
+            if (distToTarget < _targetLaserDist && _laserCooldownTimer < 0.0f)
             {
-                _laserCooldownTimer -= delta;
-                if (distToTarget < _targetLaserDist && _laserCooldownTimer < 0.0f)
-                {
-                    _laserState = LaserState.Charging;
-                    _laserChargeTimer = _laserCharge;
-                    LaserCharging();
-                }
+                _laserState = LaserState.Charging;
+                _laserChargeTimer = _laserCharge;
+                LaserCharging();
             }
-
-            if (_laserState == LaserState.Charging)
-            {
-                _laserChargeTimer -= delta;
-                _flashingTimer -= delta;
-                if (_flashingTimer < 0.0f)
-                {
-                    _flashingTimer = 0.1f;
-                    _laserWarningMesh.Visible = _flashState == 1;
-                    _flashState = (_flashState + 1) % 2;
-                }
-                if (_laserChargeTimer < 0.0f)
-                {
-                    _laserState = LaserState.Firing;
-                    _laserDurationTimer = _laserDuration;
-                    LaserFiring();
-                }
-            }
-
-            if (_laserState == LaserState.Firing)
-            {
-                _laserDurationTimer -= delta;
-                if (_laserDurationTimer < 0.0f)
-                {
-                    _laserState = LaserState.Inactive;
-                    _laserCooldownTimer = _laserCooldown;
-                    LaserInactive();
-                }
-            }
-
-            Vector3 rot = _rotor.Rotation;
-            rot.y = Mathf.PosMod(_rotor.Rotation.y + 50.0f * delta, Mathf.Pi * 2.0f);
-            _rotor.Rotation = rot;
         }
+
+        if (_laserState == LaserState.Charging)
+        {
+            _laserChargeTimer -= delta;
+            _flashingTimer -= delta;
+            if (_flashingTimer < 0.0f)
+            {
+                _flashingTimer = 0.1f;
+                _laserWarningMesh.Visible = _flashState == 1;
+                _flashState = (_flashState + 1) % 2;
+            }
+            if (_laserChargeTimer < 0.0f)
+            {
+                _laserState = LaserState.Firing;
+                _laserDurationTimer = _laserDuration;
+                LaserFiring();
+            }
+        }
+
+        if (_laserState == LaserState.Firing)
+        {
+            _laserDurationTimer -= delta;
+            if (_laserDurationTimer < 0.0f)
+            {
+                _laserState = LaserState.Inactive;
+                _laserCooldownTimer = _laserCooldown;
+                LaserInactive();
+            }
+        }
+
+        Vector3 rot = _rotor.Rotation;
+        rot.y = Mathf.PosMod(_rotor.Rotation.y + 50.0f * delta, Mathf.Pi * 2.0f);
+        _rotor.Rotation = rot;
+        
+        base.ProcessAlive(delta);
     }
 
     private void LaserCharging()

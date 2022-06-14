@@ -30,9 +30,8 @@ height = 0.5
 radial_segments = 16
 rings = 4
 
-[node name="BoidTrail" type="MeshInstance"]
+[node name="BoidTrail" type="Spatial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
-layers = 3
 script = ExtResource( 1 )
 _linePoints = 10
 _lineWidth = 1.0

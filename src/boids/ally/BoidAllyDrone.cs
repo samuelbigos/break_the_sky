@@ -5,7 +5,8 @@ public class BoidAllyDrone : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
     
-    private float _shootCooldown; 
+    private float _shootCooldown;
+    private bool _cachedShoot;
     
     public override void _Ready()
     {
@@ -23,10 +24,10 @@ public class BoidAllyDrone : BoidAllyBase
     {
         base._Process(delta);
         
-        Vector2 shootDir = (GameCamera.Instance.MousePosition() - GlobalPosition).Normalized();
+        Vector2 shootDir = (GameCamera.Instance.MousePosition - GlobalPosition).Normalized();
         
         _shootCooldown -= delta;
-        if (Input.IsActionPressed("shoot") && _shootCooldown <= 0.0)
+        if (_cachedShoot)
         {
             if (_CanShoot(shootDir))
             {
@@ -43,6 +44,27 @@ public class BoidAllyDrone : BoidAllyBase
         }
     }
     
+
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        if (@event.IsActionPressed("shoot"))
+        {
+            _cachedShoot = true;
+        }
+
+        if (@event.IsActionReleased("shoot"))
+        {
+            _cachedShoot = false;
+        }
+    }
+
+    protected override bool _CanShoot(Vector2 dir)
+    {
+        return _shootCooldown <= 0.0 && base._CanShoot(dir);
+    }
+
     protected override void _Shoot(Vector2 dir)
     {
         base._Shoot(dir);
