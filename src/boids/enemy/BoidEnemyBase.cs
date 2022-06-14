@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 
 public class BoidEnemyBase : BoidBase
@@ -19,7 +21,9 @@ public class BoidEnemyBase : BoidBase
         base._Ready();
 
         HitDamage = 9999.0f; // colliding with enemy boids should always destroy the allied boid.
-        
+
+        _cachedBehaviours = _behaviours;
+
         // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, true);
         // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, true);
         // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
@@ -29,16 +33,47 @@ public class BoidEnemyBase : BoidBase
     {
         base._Process(delta);
 
-        // if (_targetType == TargetType.None)
-        // {
-        //     float distToPlayerSq = (_player.GlobalPosition - GlobalPosition).LengthSquared();
-        //     if (distToPlayerSq < EngageRange * EngageRange)
-        //     {
-        //         SetTarget(TargetType.Enemy, _player);
-        //         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-        //         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
-        //     }
-        // }
+        if (!_destroyed)
+        {
+            switch (_targetType)
+            {
+                case TargetType.None:
+                {
+                    List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
+                    foreach (BoidAllyBase boid in allyBoids)
+                    {
+                        float distSq = (boid.GlobalPosition - GlobalPosition).LengthSquared();
+                        if (distSq < EngageRange * EngageRange)
+                        {
+                            SetTarget(TargetType.Enemy, boid);
+                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
+                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, false);
+                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, false);
+                            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.FlowFieldFollow, false);
+                        }
+                    }
+                    break;
+                }
+                case TargetType.Ally:
+                case TargetType.Enemy:
+                {
+                    // update target
+                    if (!IsInstanceValid(_targetBoid) || _targetBoid.Destroyed)
+                    {
+                        SetTarget(TargetType.None);
+                        _behaviours = _cachedBehaviours;
+                        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+                        steeringBoid.Behaviours = _behaviours;
+                    }
+                    break;
+                }
+                case TargetType.Position:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         // if (_escorting)
         // {
@@ -95,7 +130,7 @@ public class BoidEnemyBase : BoidBase
             Game.Instance.RegisterPickup(drop);
             drop.GlobalTransform = GlobalTransform;
             float eject = 25.0f;
-            drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, Game.Instance.Player);
+            drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, Game.Player);
         }
     }
 }

@@ -40,7 +40,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
         {
             _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
             _rotorguns[i].Init("rotorgun", _OnRotorgunDestroyed, _rotorguns[i].GlobalPosition, Vector2.Zero);
-            _rotorguns[i].SetTarget(TargetType.Enemy, Game.Instance.Player);
+            _rotorguns[i].SetTarget(TargetType.Enemy, Game.Player);
             _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
         
@@ -97,7 +97,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
         Vector2 vel = 100.0f * (pos - GlobalPosition).Normalized();
         BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(enemyData, pos, vel);
         enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
-        enemy.SetTarget(TargetType.Enemy, Game.Instance.Player);
+        enemy.SetTarget(TargetType.Enemy, Game.Player);
     }
 
     private void _OnRotorgunDestroyed(BoidBase boid)

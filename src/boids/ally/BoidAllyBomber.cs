@@ -38,7 +38,7 @@ public class BoidAllyBomber : BoidAllyBase
             if (dist > Mathf.Pow(_targetAcquireRadius, 2.0f))
             {
                 ((BoidEnemyBase) _targetBoid).IsTargetted = false;
-                SetTarget(TargetType.Ally, Game.Instance.Player);
+                SetTarget(TargetType.Ally, Game.Player);
             }
             
             // shooting
@@ -69,7 +69,7 @@ public class BoidAllyBomber : BoidAllyBase
         {
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, false);
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-            SetTarget(TargetType.Ally, Game.Instance.Player);
+            SetTarget(TargetType.Ally, Game.Player);
         }
     }
 

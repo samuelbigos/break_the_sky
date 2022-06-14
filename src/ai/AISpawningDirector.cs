@@ -351,10 +351,10 @@ public class AISpawningDirector : Node
         return possibleTypes;
     }
 
-    private BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
+    public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
     {
         // spawn at a random location around the spawning circle centred on the player
-        Vector2 spawnPos = Utils.RandPointOnEdge(_game.SpawningRect);
+        Vector2 spawnPos = _game.SpawningRect.RandPointOnEdge();
         Vector2 spawnVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * 100.0f;
         return SpawnEnemy(id, spawnPos, spawnVel);
     }

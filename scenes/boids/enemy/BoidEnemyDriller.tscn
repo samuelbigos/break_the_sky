@@ -18,8 +18,8 @@ shader_param/blend_depth = 0.003
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
-_behaviours = 1087
-MaxVelocity = 100.0
+_behaviours = 2171
+MaxVelocity = 75.0
 MinVelocity = 50.0
 FieldOfView = 270.0
 Damping = 0.0
@@ -27,6 +27,7 @@ SeparationRadius = 10.0
 MaxAngularVelocity = 100.0
 MaxHealth = 3.0
 HitFlashTime = 0.0333333
+EngageRange = 200.0
 
 [node name="CollisionShape" parent="." index="0"]
 transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, -1.41208 )

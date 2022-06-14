@@ -11,7 +11,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         Separation,
         AvoidObstacles,
-        AvoidBoids,
+        AvoidAllies,
+        AvoidEnemies,
         MaintainSpeed,
         Cohesion,
         Alignment,
@@ -55,8 +56,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float WanderCircleDist;
         public float WanderCircleRadius;
         public float WanderVariance;
-        public bool IgnoreAllyAvoidance;
-        public float FlowFieldDist;
     }
 
     public struct Obstacle
@@ -222,8 +221,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
             case EdgeRepulsion:
                 force += Steering_EdgeRepulsion(boid, EdgeBounds);
                 break;
-            case AvoidBoids:
-                force += Steering_AvoidBoids(ref boid, boids);
+            case AvoidAllies:
+                force += Steering_AvoidAllies(ref boid, boids);
+                break;
+            case AvoidEnemies:
+                force += Steering_AvoidEnemies(ref boid, boids);
                 break;
             case AvoidObstacles:
                 force += Steering_AvoidObstacles(ref boid, obstacles);

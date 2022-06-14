@@ -39,7 +39,7 @@ public class BoidAllyBase : BoidBase
 
         if (_targetType == TargetType.None)
         {
-            SetTarget(TargetType.Ally, Game.Instance.Player);
+            SetTarget(TargetType.Ally, Game.Player);
         }
     }
 

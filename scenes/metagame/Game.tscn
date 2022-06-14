@@ -58,7 +58,6 @@ script = ExtResource( 10 )
 script = ExtResource( 9 )
 
 [node name="BoidPlayer" parent="." instance=ExtResource( 3 )]
-_behaviours = 0
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 175, 0 )

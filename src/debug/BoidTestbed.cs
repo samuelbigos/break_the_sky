@@ -27,7 +27,8 @@ public partial class BoidTestbed : Spatial
         float[] weights = new float[(int) SteeringManager.Behaviours.COUNT];
         weights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
         weights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
-        weights[(int) SteeringManager.Behaviours.AvoidBoids] = 1.0f;
+        weights[(int) SteeringManager.Behaviours.AvoidAllies] = 1.0f;
+        weights[(int) SteeringManager.Behaviours.AvoidEnemies] = 1.0f;
         weights[(int) SteeringManager.Behaviours.Arrive] = 1.0f;
         weights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
         weights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
@@ -42,7 +43,8 @@ public partial class BoidTestbed : Spatial
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Alignment;
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidObstacles;
-            droneBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
+            //droneBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidAllies;
+            droneBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidEnemies;
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
             droneBehaviours |= 1 << (int) SteeringManager.Behaviours.Arrive;
             
@@ -64,7 +66,6 @@ public partial class BoidTestbed : Spatial
                     Target = Vector2.Zero,
                     ViewRange = 50.0f,
                     ViewAngle = 360.0f,
-                    IgnoreAllyAvoidance = true,
                 };
                 _boidIds.Add(SteeringManager.Instance.RegisterBoid(boid));
             }
@@ -74,10 +75,10 @@ public partial class BoidTestbed : Spatial
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.Alignment;
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidObstacles;
-            bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
+            bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidAllies;
+            bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidEnemies;
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
             bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.Arrive;
-            bomberBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
             
             for (int i = 0; i < 0; i++)
             {
@@ -109,7 +110,8 @@ public partial class BoidTestbed : Spatial
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Separation;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Alignment;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidObstacles;
-            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidBoids;
+            enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidAllies;
+            //enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.AvoidEnemies;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.Cohesion;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.MaintainSpeed;
             enemyBehaviours |= 1 << (int) SteeringManager.Behaviours.FlowFieldFollow;

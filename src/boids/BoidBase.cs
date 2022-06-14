@@ -25,10 +25,9 @@ public partial class BoidBase : Area
 
     #region Export
 
-    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidBoids,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] private int _behaviours;
+    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] protected int _behaviours;
     [Export] private float _steeringRadius = 5.0f;
-    [Export] private bool _ignoreAllyAvoidance;
-
+    
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
     [Export] public float FieldOfView = 360.0f;
@@ -165,15 +164,16 @@ public partial class BoidBase : Area
     {
         Id = id;
         OnBoidDestroyed += onDestroy;
-        GlobalPosition = position;
         RegisterSteeringBoid(velocity);
+        GlobalPosition = position;
     }
 
-    protected virtual void RegisterSteeringBoid(Vector2 velocity)
+    protected void RegisterSteeringBoid(Vector2 velocity)
     {
         _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidBoids] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
@@ -200,7 +200,6 @@ public partial class BoidBase : Area
             Target = Vector2.Zero,
             ViewRange = 50.0f,
             ViewAngle = 240.0f,
-            IgnoreAllyAvoidance = _ignoreAllyAvoidance,
             TargetIndex = -1,
         };
         _steeringId = SteeringManager.Instance.RegisterBoid(boid);
@@ -235,27 +234,14 @@ public partial class BoidBase : Area
     {
         base._Process(delta);
 
-        if (_targetType == TargetType.Enemy || _targetType == TargetType.Ally)
+        if (!_destroyed)
         {
-            if (!IsInstanceValid(_targetBoid) || _targetBoid.Destroyed)
-                SetTarget(TargetType.None);
-        }
-
-        // update position and cache velocity from steering boid
-        if (SteeringManager.Instance.HasBoid(_steeringId))
-        {
+            // update position and cache velocity from steering boid
+            Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
             ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
             GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.To3D());
             _cachedVelocity = steeringBoid.Velocity;
-        }
 
-        if (!_destroyed)
-        {
-            // DoSteering(delta);
-            // GlobalTranslate(_velocity * delta);
-            // _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f); // damping
-            // Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.z), 0.0f);
-            
             // hit flash
             _hitFlashTimer -= delta;
             if (_hitFlashTimer < 0.0)
@@ -388,6 +374,12 @@ public partial class BoidBase : Area
 
     public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2())
     {
+        Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
+        
+        _targetType = type;
+        _targetBoid = boid;
+        _targetPos = pos;
+        
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
         switch (type)
         {
@@ -406,9 +398,6 @@ public partial class BoidBase : Area
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
-        _targetType = type;
-        _targetBoid = boid;
-        _targetPos = pos;
     }
 
     public virtual void _OnBoidAreaEntered(Area area)

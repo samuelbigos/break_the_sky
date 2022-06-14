@@ -69,6 +69,11 @@ public class BoidPlayer : BoidBase
         pickup.OnCollected += _OnPickupCollected;
     }
 
+    protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    {
+        // TODO: do something when player destroyed.
+    }
+
     public override void _OnBoidAreaEntered(Area area)
     {
     }

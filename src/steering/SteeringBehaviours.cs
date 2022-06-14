@@ -181,8 +181,18 @@ public partial class SteeringManager
         }
         return Vector2.Zero;
     }
+
+    private static Vector2 Steering_AvoidAllies(ref Boid boid, in Span<Boid> boids)
+    {
+        return Steering_AvoidBoids(ref boid, boids, true);
+    }
     
-    private static Vector2 Steering_AvoidBoids(ref Boid boid, in Span<Boid> boids)
+    private static Vector2 Steering_AvoidEnemies(ref Boid boid, in Span<Boid> boids)
+    {
+        return Steering_AvoidBoids(ref boid, boids, false);
+    }
+
+    private static Vector2 Steering_AvoidBoids(ref Boid boid, in Span<Boid> boids, bool avoidAllies)
     {
         Intersection intersection = default;
         float nearestDistance = 999999.0f;
@@ -196,8 +206,9 @@ public partial class SteeringManager
                 if (boid.Id == other.Id) continue;
                 if ((other.Position - boid.Position).LengthSquared() > Sq(range + other.Radius + boid.Radius)) continue;
                 if (!InView(boid, other, boid.ViewAngle)) continue;
-                if (boid.IgnoreAllyAvoidance && boid.Alignment == other.Alignment) continue;
-
+                if (avoidAllies && boid.Alignment != other.Alignment) continue;
+                if (!avoidAllies && boid.Alignment == other.Alignment) continue;
+                
                 bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity,
                     boid.Radius, other.Radius,
                     out Vector2 collisionPos, out Vector2 collisionNormal, out float collisionTime);

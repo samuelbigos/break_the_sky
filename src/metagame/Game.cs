@@ -30,7 +30,7 @@ public partial class Game : Singleton<Game>
     
     private bool _initialSpawn;
     
-    public BoidPlayer Player => _player;
+    public static BoidPlayer Player => Instance._player;
     public Rect2 SpawningRect => new(Player.GlobalPosition - AreaRect.Size * 0.5f, AreaRect.Size);
     
     [OnReady] private void Ready()
@@ -86,11 +86,12 @@ public partial class Game : Singleton<Game>
     {
         
     }
-    
+
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("Spawn Fabricants"))
+        if (ImGui.BeginTabItem("Spawn"))
         {
+            ImGui.Text("Fabricants");
             foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
@@ -98,20 +99,16 @@ public partial class Game : Singleton<Game>
                     BoidFactory.Instance.CreateAllyBoid(boid);
                 }
             }
-            ImGui.EndTabItem();
-        }
-        if (ImGui.BeginTabItem("Spawn Enemies"))
-        {
+
             ImGui.Text("Enemies");
             foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
                 {
-                    Vector2 randPos = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * AreaRect.Size * 0.33f;
-                    Vector2 randVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()) * 75.0f;
-                    BoidFactory.Instance.CreateEnemyBoid(boid, randPos, randVel);
+                    _aiSpawningDirector.SpawnEnemyRandom(boid);
                 }
             }
+
             ImGui.Text("Waves");
             foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
             {
@@ -120,6 +117,7 @@ public partial class Game : Singleton<Game>
                     _aiSpawningDirector.SpawnWave(wave, new List<BoidEnemyBase>(), new List<BoidEnemyBase>());
                 }
             }
+
             ImGui.EndTabItem();
         }
     }

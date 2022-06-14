@@ -64,7 +64,7 @@ public class BoidFactory : Singleton<BoidFactory>
         BoidAllyBase ally = boid.Scene.Instance<BoidAllyBase>();
         Game.Instance.AddChild(ally);
 
-        Vector2 pos = Game.Instance.Player.GlobalPosition + Utils.RandV2() * 30.0f;
+        Vector2 pos = Game.Player.GlobalPosition + Utils.RandV2() * 1.0f;
         ally.Init(ally.Name, _OnBoidDestroyed, pos, Vector2.Zero);
         
         _allyBoids.Add(ally);
@@ -94,7 +94,5 @@ public class BoidFactory : Singleton<BoidFactory>
         }
         _allBoids.Remove(boid);
         _destroyedBoids.Add(boid);
-        
-        //SteeringManager.Instance.RemoveBoid(boid);
     }
 }
