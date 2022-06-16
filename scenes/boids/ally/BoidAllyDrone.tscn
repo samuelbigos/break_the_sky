@@ -1,11 +1,10 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
 [ext_resource path="res://assets/mesh/allies/ally_drone_2.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=5]
-[ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=6]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -37,21 +36,6 @@ mesh = ExtResource( 2 )
 material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.5, 1 )
-_lineInterval = 0.016
-_lineWidth = 0.5
-
-[node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource( 6 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.5, -1 )
-_lineInterval = 0.016
-_lineWidth = 0.5
-
-[node name="BoidTrail3" parent="Mesh" index="2" instance=ExtResource( 6 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.5, 1 )
-_lineInterval = 0.016
-_lineWidth = 0.5
-
-[node name="BoidTrail4" parent="Mesh" index="3" instance=ExtResource( 6 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.5, -1 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 _lineInterval = 0.016
 _lineWidth = 0.5

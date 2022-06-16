@@ -13,7 +13,7 @@ public class SaveDataPlayer : Saveable
     {
         {"level", 1},
         {"materialCount", 10},
-        {"maxAllyCount", 50},
+        {"maxAllyCount", 500},
         {"initialAllyCount", 1},
         {"unlockedAllies", new Array()},
         {"seenEnemies", new Dictionary()},

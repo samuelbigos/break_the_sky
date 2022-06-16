@@ -14,7 +14,6 @@ public partial class Game : Singleton<Game>
 
     [Export] public Rect2 AreaRect;
     [Export] public float WaveCooldown = 5.0f;
-    [Export] public int MaxDrones = 100;
 
     [Export] public float BaseBoidReload = 1.75f;
     [Export] public int BaseBoidReinforce = 3;
@@ -93,7 +92,8 @@ public partial class Game : Singleton<Game>
     {
         if (ImGui.BeginTabItem("Spawn"))
         {
-            ImGui.Text("Fabricants");
+            ImGui.Text($"Boids: {BoidFactory.Instance.AllBoids.Count}");
+            ImGui.Text(" ### Fabricants");
             foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
@@ -107,7 +107,7 @@ public partial class Game : Singleton<Game>
                 }
             }
 
-            ImGui.Text("Enemies");
+            ImGui.Text(" ### Enemies");
             foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
             {
                 if (ImGui.Button($"{boid.DisplayName}"))
@@ -121,7 +121,7 @@ public partial class Game : Singleton<Game>
                 }
             }
 
-            ImGui.Text("Waves");
+            ImGui.Text(" ### Waves");
             foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
             {
                 if (ImGui.Button($"{wave.Name}"))

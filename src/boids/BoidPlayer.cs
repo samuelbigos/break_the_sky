@@ -58,7 +58,7 @@ public class BoidPlayer : BoidBase
                 {
                     BoidBase ally = boidCols[x][y];
                     ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(ally.SteeringId);
-                    boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f);
+                    boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f).ToNumerics();
                 }
             }
         }
@@ -102,8 +102,8 @@ public class BoidPlayer : BoidBase
             _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
 
             ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
-            boid.Position += _velocity * delta;
-            boid.Heading = lookAt;
+            boid.Position += (_velocity * delta).ToNumerics();
+            boid.Heading = lookAt.ToNumerics();
         }
         
         base.ProcessAlive(delta);

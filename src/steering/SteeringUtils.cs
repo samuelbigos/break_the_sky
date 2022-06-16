@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Vector2 = System.Numerics.Vector2;
 
 public partial class SteeringManager
 {
@@ -12,7 +13,7 @@ public partial class SteeringManager
 
         float range = boid.Speed / minSpeed;
         float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 5));
-        return VecLimitDeviationAngleUtility(true, force, cosine, boid.Velocity.Normalized());
+        return VecLimitDeviationAngleUtility(true, force, cosine, Vector2.Normalize(boid.Velocity));
     }
 
     private static Vector2 VecLimitDeviationAngleUtility(bool insideOrOutside, Vector2 source, float cosineOfConeAngle, Vector2 basis)
@@ -23,7 +24,7 @@ public partial class SteeringManager
 
         // measure the angular diviation of "source" from "basis"
         Vector2 direction = source / sourceLength;
-        float cosineOfSourceAngle = direction.Dot(basis);
+        float cosineOfSourceAngle = Vector2.Dot(direction, basis);
 
         // Simply return "source" if it already meets the angle criteria.
         // (note: we hope this top "if" gets compiled out since the flag
@@ -43,7 +44,7 @@ public partial class SteeringManager
         Vector2 perp = source.PerpendicularComponent(basis);
 
         // normalize that perpendicular
-        Vector2 unitPerp = perp.Normalized();
+        Vector2 unitPerp = Vector2.Normalize(perp);
 
         // construct a new vector whose length equals the source vector,
         // and lies on the intersection of a plane (formed the source and
@@ -57,23 +58,23 @@ public partial class SteeringManager
 
     private static Vector2 WrapPosition(Vector2 pos, Rect2 edge)
     {
-        pos -= edge.Position;
-        pos += edge.Size;
-        pos.x %= edge.Size.x;
-        pos.y %= edge.Size.y;
-        pos += edge.Position;
+        pos -= edge.Position.ToNumerics();
+        pos += edge.Size.ToNumerics();
+        pos.X %= edge.Size.x;
+        pos.Y %= edge.Size.y;
+        pos += edge.Position.ToNumerics();
         return pos;
     }
     
-    // TODO: optimise to not use AngleTo
     private static bool InView(Boid boid, Boid other, float viewDegrees)
     {
+        if (viewDegrees >= 360.0f)
+            return true;
+        
         Vector2 toOther = other.Position - boid.Position;
-        Vector2 viewDir = Vector2.Up;
-        if (boid.Velocity != Vector2.Zero)
-            viewDir = boid.Velocity.Normalized();
-        float angleRad = viewDir.AngleTo(toOther);
-        return Mathf.Abs(angleRad) < Mathf.Deg2Rad(viewDegrees * 0.5f);
+        float dot = Vector2.Dot(boid.Heading, toOther);
+        dot = dot * 0.5f + 0.5f;
+        return dot > Mathf.InverseLerp(0.0f, 360.0f, viewDegrees);
     }
     
     private static float Sq(float x)
@@ -93,9 +94,9 @@ public partial class SteeringManager
         Vector2 pAB = pA - pB;
         Vector2 vAB = vA - vB;
 
-        float a = vAB.Dot(vAB);
-        float b = pAB.Dot(vAB) * 2.0f;
-        float c = pAB.Dot(pAB) - Sq(rA + rB);
+        float a = Vector2.Dot(vAB, vAB);
+        float b = Vector2.Dot(pAB, vAB) * 2.0f;
+        float c = Vector2.Dot(pAB, pAB) - Sq(rA + rB);
         
         float discriminant = Sq(b) - (4 * a * c);
         
@@ -121,33 +122,33 @@ public partial class SteeringManager
         if (t1 < 0.0f && t2 > 0.0f)
         {
             collisionPos = pA + (pB - pA) * (rA / (rA + rB));
-            collisionNormal = (pA - pB).Normalized();
+            collisionNormal = Vector2.Normalize(pA - pB);
             return true;
         }
 
         Vector2 cA = pA + vA * collisionTime;
         Vector2 cB = pB + vB * collisionTime;
 
-        collisionPos = cA + (cB - cA).Normalized() * rA;
-        collisionNormal = (collisionPos - (pB + vB * collisionTime)).Normalized();
+        collisionPos = cA + Vector2.Normalize(cB - cA) * rA;
+        collisionNormal = Vector2.Normalize(collisionPos - (pB + vB * collisionTime));
         return true;
     }
 
     public static bool TryGetFieldAtPosition(FlowField flowField, Vector2 pos, out Vector2 field)
     {
         field = Vector2.Zero;
-        if (!flowField.Bounds.HasPoint(pos))
+        if (!flowField.HasPoint(pos))
             return false;
         
         Vector2 flowFieldSize = new(flowField.Resource.X, flowField.Resource.Y);
         Vector2 uv = pos - flowField.Position;
-        uv.x /= flowField.Size.x / flowField.Resource.X;
-        uv.y /= flowField.Size.y / flowField.Resource.Y;
+        uv.X /= flowField.Size.X / flowField.Resource.X;
+        uv.Y /= flowField.Size.Y / flowField.Resource.Y;
         uv += flowFieldSize * 0.5f;
 
-        uv.x = Mathf.Clamp(uv.x, 0, flowField.Resource.X - 1);
-        uv.y = Mathf.Clamp(uv.y, 0, flowField.Resource.Y - 1);
-        field = flowField.Resource.VectorAt((int) uv.x, (int) uv.y);
+        uv.X = Mathf.Clamp(uv.X, 0, flowField.Resource.X - 1);
+        uv.Y = Mathf.Clamp(uv.Y, 0, flowField.Resource.Y - 1);
+        field = flowField.Resource.VectorAt((int) uv.X, (int) uv.Y);
         return true;
     }
 }

@@ -1,20 +1,33 @@
+using System;
 using Godot;
+using Vector2 = System.Numerics.Vector2;
+using Vector3 = System.Numerics.Vector3;
 
 public static class Utils
 {
     public static readonly RandomNumberGenerator Rng = new();
 
+    public static Godot.Vector2 To2D(this Godot.Vector3 vec)
+    {
+        return new Godot.Vector2(vec.x, vec.z);
+    }
+
+    public static Godot.Vector3 To3D(this Godot.Vector2 vec)
+    {
+        return new Godot.Vector3(vec.x, 0.0f, vec.y);
+    }
+    
     public static Vector2 To2D(this Vector3 vec)
     {
-        return new Vector2(vec.x, vec.z);
+        return new Vector2(vec.X, vec.Z);
     }
-
+    
     public static Vector3 To3D(this Vector2 vec)
     {
-        return new Vector3(vec.x, 0.0f, vec.y);
+        return new Vector3(vec.X, 0.0f, vec.X);
     }
 
-    public static void GlobalPosition(this Spatial spatial, Vector3 position)
+    public static void GlobalPosition(this Spatial spatial, Godot.Vector3 position)
     {
         spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
     }
@@ -24,9 +37,9 @@ public static class Utils
         return Rng.RandfRange(-1.0f, 1.0f);
     }
 
-    public static Vector2 RandV2()
+    public static Godot.Vector2 RandV2()
     {
-        return new Vector2(RandfUnit(), RandfUnit()).Normalized();
+        return new Godot.Vector2(RandfUnit(), RandfUnit()).Normalized();
     }
 
     public static float Ease_CubicInOut(float t)
@@ -36,9 +49,9 @@ public static class Utils
             : 0.5f * Mathf.Pow(2.0f * t - 2.0f, 3.0f) + 1.0f;
     }
 
-    public static Vector2 RandPointOnEdge(this Rect2 rect)
+    public static Godot.Vector2 RandPointOnEdge(this Rect2 rect)
     {
-        Vector2 r = new Vector2(Rng.Randf(), Rng.Randf());
+        Godot.Vector2 r = new(Rng.Randf(), Rng.Randf());
         if (Rng.Randf() > 0.5f)
         {
             r.x = Mathf.Floor(Rng.Randf() + 0.5f);
@@ -65,15 +78,50 @@ public static class Utils
         return vec;
     }
 
+    public static Godot.Vector2 ToGodot(this Vector2 vec)
+    {
+        return new Godot.Vector2(vec.X, vec.Y);
+    }
+    
+    public static Godot.Vector3 ToGodot(this Vector3 vec)
+    {
+        return new Godot.Vector3(vec.X, vec.Y, vec.Z);
+    }
+    
+    public static Vector2 ToNumerics(this Godot.Vector2 vec)
+    {
+        return new Vector2(vec.x, vec.y);
+    }
+    
+    public static Vector3 ToNumerics(this Godot.Vector3 vec)
+    {
+        return new Vector3(vec.x, vec.y, vec.z);
+    }
+
+    public static float Angle(this Vector2 vec)
+    {
+        return (float) Math.Atan2(vec.Y, vec.X);
+    }
+    
+    public static float AngleTo(this Vector2 v1, Vector2 v2)
+    {
+        return Mathf.Atan2(v1.Cross(v2), Vector2.Dot(v1, v2));
+    }
+
+    public static float Cross(this Vector2 v1, Vector2 v2)
+    {
+        return (v1.X * v2.Y) - (v1.Y * v2.X);
+    }
+
     public static Vector2 SetMag(ref this Vector2 vec, float vMag)
     {
-        vec = vec.Normalized() * vMag;
+        vec = Vector2.Normalize(vec) * vMag;
         return vec;
     }
 
     public static Vector2 ParallelComponent(this Vector2 vec, Vector2 unitBasis)
     {
-        float projection = vec.Dot(unitBasis);
+        float projection = Vector2.Dot(vec, unitBasis);
         return unitBasis * projection;
     }
 
@@ -84,8 +132,8 @@ public static class Utils
     
     public static Vector2 LocaliseDirection(Vector2 globalDirection, Vector2 forward, Vector2 side)
     {
-        return new Vector2(globalDirection.Dot(side),
-            globalDirection.Dot(forward));
+        return new Vector2(Vector2.Dot(globalDirection, side),
+            Vector2.Dot(globalDirection, forward));
     }
     
     public static Vector2 LocalisePosition(Vector2 globalPosition, Vector2 localPosition, Vector2 forward, Vector2 side)
@@ -101,7 +149,7 @@ public static class Utils
 
     public static Vector2 GlobaliseOffset(Vector2 localOffset, Vector2 forward, Vector2 side)
     {
-        return localOffset.x * side + localOffset.y * forward;
+        return localOffset.X * side + localOffset.Y * forward;
     }
 
     public static void Line(Vector3 p1, Vector3 p2, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
@@ -138,7 +186,7 @@ public static class Utils
         }
         
         float segmentArc = Mathf.Deg2Rad(arcDeg / (segments - 1));
-        float headingAngle = heading.AngleTo(Vector2.Down) - Mathf.Deg2Rad(arcDeg * 0.5f);
+        float headingAngle = heading.AngleTo(-Vector2.UnitY) - Mathf.Deg2Rad(arcDeg * 0.5f);
         cols[v] = col;
         verts[v] = pos;
         v++;
