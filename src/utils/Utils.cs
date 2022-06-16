@@ -82,6 +82,28 @@ public static class Utils
         return vec - vec.ParallelComponent(unitBasis);
     }
     
+    public static Vector2 LocaliseDirection(Vector2 globalDirection, Vector2 forward, Vector2 side)
+    {
+        return new Vector2(globalDirection.Dot(side),
+            globalDirection.Dot(forward));
+    }
+    
+    public static Vector2 LocalisePosition(Vector2 globalPosition, Vector2 localPosition, Vector2 forward, Vector2 side)
+    {
+        Vector2 globalOffset = globalPosition - localPosition;
+        return LocaliseDirection(globalOffset, forward, side);
+    }
+    
+    public static Vector2 LocaliseOffset(Vector2 globalOffset, Vector2 forward, Vector2 side)
+    {
+        return LocaliseDirection(globalOffset, forward, side);
+    }
+
+    public static Vector2 GlobaliseOffset(Vector2 localOffset, Vector2 forward, Vector2 side)
+    {
+        return localOffset.x * side + localOffset.y * forward;
+    }
+
     public static void Line(Vector3 p1, Vector3 p2, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
     {
         cols[v] = col;
@@ -90,7 +112,6 @@ public static class Utils
         cols[v] = col;
         verts[v] = p2;
         indices[i++] = v++;
-        
     }
     
     public static void Circle(Vector3 pos, int segments, float radius, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)

@@ -9,8 +9,6 @@ resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/u_primary_colour = null
 shader_param/u_secondary_colour = null
-shader_param/threshold_depth = -6.304
-shader_param/blend_depth = 0.003
 
 [sub_resource type="SphereMesh" id=2]
 radial_segments = 8
@@ -19,7 +17,6 @@ rings = 4
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _behaviours = 0
-_steeringRadius = 10.0
 _sfxPickupPath = NodePath("SFXPickup")
 
 [node name="Mesh" parent="." index="1"]
@@ -27,7 +24,7 @@ material_override = SubResource( 3 )
 mesh = SubResource( 2 )
 material/0 = null
 
-[node name="BoidTrail" parent="." index="2"]
+[node name="BoidTrail" parent="Mesh" index="0"]
 visible = false
 
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="5"]

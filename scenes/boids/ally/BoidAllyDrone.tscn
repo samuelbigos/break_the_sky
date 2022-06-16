@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
 [ext_resource path="res://assets/mesh/allies/ally_drone_2.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=5]
+[ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=6]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -14,16 +15,17 @@ resource_local_to_scene = true
 shader = ExtResource( 5 )
 shader_param/u_primary_colour = null
 shader_param/u_secondary_colour = null
-shader_param/threshold_depth = -6.304
-shader_param/blend_depth = 0.003
 
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
 _behaviours = 2187
-MaxVelocity = 200.0
+_steeringRadius = 3.0
+MaxVelocity = 100.0
+MaxForce = 200.0
+Bank360 = true
+BankingRate = 2.0
+BankingAmount = 1.75
 Damping = 0.0
-SeparationRadius = 10.0
-MaxAngularVelocity = 250.0
 _bulletScene = ExtResource( 3 )
 
 [node name="CollisionShape" parent="." index="0"]
@@ -34,5 +36,22 @@ material_override = SubResource( 2 )
 mesh = ExtResource( 2 )
 material/0 = null
 
-[node name="BoidTrail" parent="." index="2"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
+[node name="BoidTrail" parent="Mesh" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.5, 1 )
+_lineInterval = 0.016
+_lineWidth = 0.5
+
+[node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.5, -1 )
+_lineInterval = 0.016
+_lineWidth = 0.5
+
+[node name="BoidTrail3" parent="Mesh" index="2" instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.5, 1 )
+_lineInterval = 0.016
+_lineWidth = 0.5
+
+[node name="BoidTrail4" parent="Mesh" index="3" instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.5, -1 )
+_lineInterval = 0.016
+_lineWidth = 0.5

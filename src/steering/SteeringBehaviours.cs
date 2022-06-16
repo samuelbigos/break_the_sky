@@ -4,27 +4,21 @@ using System.Collections.Generic;
 
 public partial class SteeringManager
 {
-    private static Vector2 Steering_Seek(in Boid boid, Vector2 position)
+    private static Vector2 Steering_Seek(in Boid boid, Vector2 position, float limit = 1.0f)
     {
         Vector2 desired = position - boid.Position;
-        desired.SetMag(boid.MaxSpeed);
+        desired.SetMag(boid.MaxSpeed * limit);
 
         Vector2 force = desired - boid.Velocity;
         return force;
     }
     
-    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position)
+    private static Vector2 Steering_Arrive(in Boid boid)
     {
-        float radius = Mathf.Max(1.0f, boid.Speed * boid.LookAhead);
+        Vector2 position = boid.Target;
+        float radius = 25.0f;//Mathf.Max(1.0f, boid.Speed * boid.LookAhead);
         float dist = (boid.Position - position).Length();
-        if (dist > radius)
-        {
-            return Steering_Seek(boid, position);
-        }
-        Vector2 desired = position - boid.Position;
-        //desired.Limit(boid.MaxSpeed * (dist / radius));
-        Vector2 force = desired - boid.Velocity;
-        return force;
+        return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f));
     }
 
     private static Vector2 Steering_Cohesion(in Boid boid, in Span<Boid> boids, float radius)
@@ -114,9 +108,9 @@ public partial class SteeringManager
         return count == 0 ? Vector2.Zero : forceSum;
     }
 
-    private static Vector2 Steering_Pursuit(in Boid boid, Vector2 position)
+    private static Vector2 Steering_Pursuit(in Boid boid)
     {
-        return Steering_Seek(boid, position);
+        return Steering_Seek(boid, boid.Target);
     }
     
     private static Vector2 Steering_EdgeRepulsion(in Boid boid, Rect2 bounds)

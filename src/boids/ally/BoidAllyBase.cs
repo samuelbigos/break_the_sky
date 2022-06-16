@@ -19,7 +19,6 @@ public class BoidAllyBase : BoidBase
     private AudioStreamPlayer2D _sfxShootPlayer;
 
     protected override BoidAlignment Alignment => BoidAlignment.Ally;
-    protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     public override void _Ready()
     {

@@ -11,11 +11,16 @@ public class BoidEnemyBase : BoidBase
     public bool IsTargetted = false;
 
     protected override BoidAlignment Alignment => BoidAlignment.Enemy;
-    protected override Color BaseColour => ColourManager.Instance.Secondary;
 
     private int _cachedBehaviours;
     private bool _escorting;
     
+    protected override void SetMeshColour()
+    {
+        _meshMaterial?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
+        _meshMaterial?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Red);
+    }
+
     public override void _Ready()
     {
         base._Ready();

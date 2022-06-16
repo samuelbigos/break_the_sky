@@ -49,6 +49,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float[] Weights;
         public Vector2 Target;
         public int TargetIndex;
+        public Vector2 TargetOffset;
         public float ViewRange;
         public float ViewAngle;
         public Intersection Intersection;
@@ -122,6 +123,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         base._Process(delta);
 
+        // move area
+        EdgeBounds.Position = Game.Player.GlobalPosition - EdgeBounds.Size * 0.5f;
+
         Span<Boid> boids = _boidPool.AsSpan();
         Span<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
         Span<FlowField> flowFields = _flowFieldPool.AsSpan(0, _numFlowFields);
@@ -146,7 +150,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
             
             // update target
             if (boid.TargetIndex != -1)
-                boid.Target = boids[_boidIdToIndex[boid.TargetIndex]].Position;
+            {
+                Boid targetBoid = boids[_boidIdToIndex[boid.TargetIndex]];
+                Vector2 side = new(targetBoid.Heading.y, -targetBoid.Heading.x);
+                boid.Target = targetBoid.Position - Utils.GlobaliseOffset(boid.TargetOffset, targetBoid.Heading, side);
+            }
 
             for (int j = 0; j < (int) COUNT; j++)
             {
@@ -159,7 +167,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
                 float totalForceLength = totalForce.Length();
                 float forceLength = force.Length();
-                float frameMaxForce = boid.MaxForce * delta;
+                float frameMaxForce = boid.MaxForce * delta * 2.0f;
                 if (totalForceLength + forceLength > frameMaxForce)
                 {
                     force.Limit(frameMaxForce - totalForceLength);
@@ -211,10 +219,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_Separate(boid, boids, obstacles, delta);
                 break;
             case Arrive:
-                force += Steering_Arrive(boid, boid.Target);
+                force += Steering_Arrive(boid);
                 break;
             case Pursuit:
-                force += Steering_Pursuit(boid, boid.Target);
+                force += Steering_Pursuit(boid);
                 break;
             case Flee:
                 break;

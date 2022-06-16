@@ -26,7 +26,6 @@ public class BoidTrail : Spatial
     
     private int _trailIdx;
     private Vector3[] _trailPositions;
-    private Spatial _parent;
     private float _updateTimer;
     private Particles _burstParticles;
     private bool _initialised;
@@ -61,10 +60,9 @@ public class BoidTrail : Spatial
             {
                 case TrailType.Smooth:
                     _trailPositions = new Vector3[_linePoints];
-                    _parent = GetParent<Spatial>();
                     for (int i = 0; i < _linePoints; i++)
                     {
-                        _trailPositions[i] = _parent.GlobalTransform.origin;
+                        _trailPositions[i] = GlobalTransform.origin;
                     }
                     _burstParticles.Visible = false;
                     if (Visible)
@@ -109,9 +107,8 @@ public class BoidTrail : Spatial
         if (_updateTimer < 0.0f)
         {
             _trailIdx = (_trailIdx + 1) % _linePoints;
-            _trailPositions[_trailIdx] = _parent.GlobalTransform.origin;
+            _trailPositions[_trailIdx] = GlobalTransform.origin;
             _updateTimer = _lineInterval;
         }
-        GlobalTransform = new Transform(Basis.Identity, Vector3.Zero);
     }
 }

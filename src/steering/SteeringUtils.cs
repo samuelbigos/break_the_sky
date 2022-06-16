@@ -65,6 +65,7 @@ public partial class SteeringManager
         return pos;
     }
     
+    // TODO: optimise to not use AngleTo
     private static bool InView(Boid boid, Boid other, float viewDegrees)
     {
         Vector2 toOther = other.Position - boid.Position;

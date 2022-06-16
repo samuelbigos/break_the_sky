@@ -4,14 +4,11 @@ using System;
 public class BoidAllyDrone : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
+
+    public float ShootCooldown => _shootCooldown;
     
     private float _shootCooldown;
     private bool _cachedShoot;
-    
-    public override void _Ready()
-    {
-        base._Ready();
-    }
 
     public override void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
@@ -20,10 +17,11 @@ public class BoidAllyDrone : BoidAllyBase
         SetTarget(TargetType.Ally, Game.Player);
     }
 
-    public override void _Process(float delta)
+    protected override void ProcessAlive(float delta)
     {
-        base._Process(delta);
+        base.ProcessAlive(delta);
         
+        // shooting
         Vector2 shootDir = (GameCamera.Instance.MousePosition - GlobalPosition).Normalized();
         
         _shootCooldown -= delta;
@@ -43,7 +41,6 @@ public class BoidAllyDrone : BoidAllyBase
             _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
         }
     }
-    
 
     public override void _Input(InputEvent @event)
     {

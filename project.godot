@@ -49,8 +49,9 @@ BoidFactory="*res://src/boids/BoidFactory.cs"
 
 [display]
 
-window/size/width=1280
-window/size/height=720
+window/size/width=1920
+window/size/height=1080
+window/size/borderless=true
 window/vsync/use_vsync=false
 
 [editor_plugins]

@@ -70,7 +70,7 @@ script = ExtResource( 11 )
 [node name="BoidPlayer" parent="." instance=ExtResource( 3 )]
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 175, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 250, 0 )
 cull_mask = 1047553
 current = true
 near = 1.0

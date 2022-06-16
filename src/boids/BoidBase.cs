@@ -23,7 +23,7 @@ public partial class BoidBase : Area
         Position
     }
 
-    public enum State
+    protected enum State
     {
         Alive,
         Destroyed
@@ -36,16 +36,14 @@ public partial class BoidBase : Area
     
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
+    [Export] public float MaxForce = 150.0f;
     [Export] public float FieldOfView = 360.0f;
+    [Export] public bool Bank360 = false;
+    [Export] public float BankingRate = 2.5f;
+    [Export] public float BankingAmount = 2.5f;
     
-    [Export] public float TargetVectoringExponent = 1.0f;
     [Export] public float Damping = 0.05f;
     [Export] public float DestroyTime = 3.0f;
-    [Export] public float SlowingRadius = 100.0f;
-    [Export] public float AlignmentRadius = 20.0f;
-    [Export] public float SeparationRadius = 10.0f;
-    [Export] public float CohesionRadius = 50.0f;
-    [Export] public float MaxAngularVelocity = 500.0f;
     [Export] public float HitDamage = 3.0f;
     [Export] public float MaxHealth = 1.0f;
     [Export] public float HitFlashTime = 1.0f / 30.0f;
@@ -67,7 +65,6 @@ public partial class BoidBase : Area
     
     [OnReadyGet] protected MeshInstance _selectedIndicator;
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
-    [OnReadyGet] private BoidTrail _trail;
 
     #endregion
 
@@ -135,7 +132,6 @@ public partial class BoidBase : Area
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
     protected Vector2 _cachedVelocity;
-    protected virtual Color BaseColour => ColourManager.Instance.Secondary;
     protected State _state;
 
     #endregion
@@ -145,23 +141,25 @@ public partial class BoidBase : Area
     private float _health;
     private float _hitFlashTimer;
     private List<Particles> _damagedParticles = new();
-    private ShaderMaterial _meshMaterial;
+    protected ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
     private List<Particles> _hitParticles = new();
     private AudioStreamPlayer2D _sfxOnDestroy;
     private Vector3 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
+    private Vector2 _smoothSteering;
     
     private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
-    
-    private Color MeshColour
+
+    protected virtual void SetMeshColour()
     {
-        set
-        {
-            _meshMaterial.SetShaderParam("u_primary_colour", value);
-            _meshMaterial.SetShaderParam("u_secondary_colour", value);
-        }
+        _meshMaterial?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
+        _meshMaterial?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Ally);
+    }
+    private void SetMeshColour(Color col)
+    {
+        _meshMaterial?.SetShaderParam("u_primary_colour", col);
     }
 
     #endregion
@@ -179,12 +177,12 @@ public partial class BoidBase : Area
     {
         _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.EdgeRepulsion] = 1.0f;
@@ -198,10 +196,11 @@ public partial class BoidBase : Area
             Velocity = velocity,
             Radius = _steeringRadius,
             Heading = Vector2.Up,
-            MaxSpeed = 75.0f,
+            MaxSpeed = MaxVelocity,
+            MinSpeed = MinVelocity,
+            MaxForce = MaxForce,
             DesiredSpeed = 75.0f,
-            MaxForce = 125.0f,
-            LookAhead = 0.5f,
+            LookAhead = 1.0f,
             Behaviours = _behaviours,
             Weights = _steeringWeights,
             Target = Vector2.Zero,
@@ -226,10 +225,10 @@ public partial class BoidBase : Area
         List<MeshInstance> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
         _meshMaterial = _mesh.MaterialOverride as ShaderMaterial;
-        Debug.Assert(_meshMaterial != null, $"_meshMaterial is null on {Name}");
         _mesh.SetSurfaceMaterial(0, _meshMaterial);
         _altMaterial = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
-        MeshColour = BaseColour;
+        
+        SetMeshColour();
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
@@ -267,7 +266,7 @@ public partial class BoidBase : Area
         // hit flash
         if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
         {
-            MeshColour = BaseColour;
+            SetMeshColour();
         }
         _hitFlashTimer -= delta;
 
@@ -278,6 +277,14 @@ public partial class BoidBase : Area
         }
         _cachedLastHitDir = Vector3.Zero;
         _cachedLastHitDamage = 0.0f;
+        
+        // banking
+        Vector2 right = new(steeringBoid.Heading.y, -steeringBoid.Heading.x);
+        Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
+        _smoothSteering = _smoothSteering.LinearInterpolate(localSteering, Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
+        _mesh.Rotation = Bank360 ? 
+            new Vector3(_smoothSteering.Dot(Vector2.Up) * BankingAmount, 0.0f,_smoothSteering.Dot(Vector2.Right) * BankingAmount) : 
+            new Vector3(0.0f, 0.0f, _smoothSteering.Dot(Vector2.Right) * BankingAmount);
     }
     
     protected virtual void ProcessDestroyed(float delta)
@@ -296,7 +303,7 @@ public partial class BoidBase : Area
     {
         _health -= damage;
 
-        MeshColour = ColourManager.Instance.White;
+        SetMeshColour(ColourManager.Instance.White);
         _hitFlashTimer = HitFlashTime;
         
         _sfxOnHit.Play();
@@ -339,7 +346,7 @@ public partial class BoidBase : Area
         {
             _state = State.Destroyed;
             
-            MeshColour = BaseColour;
+            SetMeshColour();
             
             _sfxOnDestroy.Play();
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
@@ -395,7 +402,7 @@ public partial class BoidBase : Area
         steeringBoid.Behaviours = _behaviours;
     }
 
-    public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2())
+    public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2(), Vector2 offset = new Vector2())
     {
         Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
 
@@ -415,10 +422,12 @@ public partial class BoidBase : Area
             case TargetType.Enemy:
                 Debug.Assert(boid != null);
                 steeringBoid.TargetIndex = boid.SteeringId;
+                steeringBoid.TargetOffset = offset;
                 _targetBoid.OnBoidDestroyed += _OnTargetBoidDestroyed;
                 break;
             case TargetType.Position:
                 steeringBoid.Position = pos;
+                steeringBoid.TargetOffset = offset;
                 steeringBoid.TargetIndex = -1;
                 break;
             case TargetType.None:

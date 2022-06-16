@@ -66,6 +66,8 @@ public partial class Game : Singleton<Game>
     public override void _Process(float delta)
     {
         base._Process(delta);
+        
+        SteeringManager.EdgeBounds = SpawningRect;
 
         if (!_initialSpawn)
         {
@@ -84,7 +86,7 @@ public partial class Game : Singleton<Game>
 
     private void _OnPlayerDestroyed(BoidBase player)
     {
-        
+        // TODO: game over
     }
 
     private void _OnImGuiLayout()
