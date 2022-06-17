@@ -359,7 +359,7 @@ public class AISpawningDirector : Node
         return SpawnEnemy(id, spawnPos, spawnVel);
     }
 
-    private BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
+    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
     {
         BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(id, pos, vel);
         _activeEnemies.Add(enemy);

@@ -24,7 +24,7 @@ public static class Utils
     
     public static Vector3 To3D(this Vector2 vec)
     {
-        return new Vector3(vec.X, 0.0f, vec.X);
+        return new Vector3(vec.X, 0.0f, vec.Y);
     }
 
     public static void GlobalPosition(this Spatial spatial, Godot.Vector3 position)
@@ -113,9 +113,14 @@ public static class Utils
         return (v1.X * v2.Y) - (v1.Y * v2.X);
     }
 
+    public static Vector2 NormalizeSafe(this Vector2 vec)
+    {
+        return vec == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(vec);
+    }
+
     public static Vector2 SetMag(ref this Vector2 vec, float vMag)
     {
-        vec = Vector2.Normalize(vec) * vMag;
+        vec = vec.NormalizeSafe() * vMag;
         return vec;
     }
 
@@ -152,24 +157,24 @@ public static class Utils
         return localOffset.X * side + localOffset.Y * forward;
     }
 
-    public static void Line(Vector3 p1, Vector3 p2, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    public static void Line(Vector3 p1, Vector3 p2, Color col, ref int v, ref int i, Godot.Vector3[] verts, Color[] cols, int[] indices)
     {
         cols[v] = col;
-        verts[v] = p1;
+        verts[v] = p1.ToGodot();
         indices[i++] = v++;
         cols[v] = col;
-        verts[v] = p2;
+        verts[v] = p2.ToGodot();
         indices[i++] = v++;
     }
     
-    public static void Circle(Vector3 pos, int segments, float radius, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    public static void Circle(Vector3 pos, int segments, float radius, Color col, ref int v, ref int i, Godot.Vector3[] verts, Color[] cols, int[] indices)
     {
         for (int s = 0; s < segments; s++)
         {
             cols[v + s] = col;
             float rad = Mathf.Pi * 2.0f * ((float) s / segments);
             Vector3 vert = pos + new Vector3(Mathf.Sin(rad), 0.0f, Mathf.Cos(rad)) * radius;
-            verts[v + s] = vert;
+            verts[v + s] = vert.ToGodot();
             indices[i++] = v + s;
             indices[i++] = v + (s + 1) % segments;
         }
@@ -177,7 +182,7 @@ public static class Utils
         v += segments;
     }
     
-    public static void CircleArc(Vector3 pos, int segments, float radius, float arcDeg, Vector2 heading, Color col, ref int v, ref int i, Vector3[] verts, Color[] cols, int[] indices)
+    public static void CircleArc(Vector3 pos, int segments, float radius, float arcDeg, Vector2 heading, Color col, ref int v, ref int i, Godot.Vector3[] verts, Color[] cols, int[] indices)
     {
         if (arcDeg >= 360.0f)
         {
@@ -188,14 +193,14 @@ public static class Utils
         float segmentArc = Mathf.Deg2Rad(arcDeg / (segments - 1));
         float headingAngle = heading.AngleTo(-Vector2.UnitY) - Mathf.Deg2Rad(arcDeg * 0.5f);
         cols[v] = col;
-        verts[v] = pos;
+        verts[v] = pos.ToGodot();
         v++;
         for (int s = 0; s < segments; s++)
         {
             cols[v + s] = col;
             float rad = headingAngle + segmentArc * s;
             Vector3 vert = pos + new Vector3(Mathf.Sin(rad), 0.0f, Mathf.Cos(rad)) * radius;
-            verts[v + s] = vert;
+            verts[v + s] = vert.ToGodot();
             indices[i++] = (v - 1 + (segments + s - 1) % segments);
             indices[i++] = (v - 1 + (segments + s) % segments);
         }

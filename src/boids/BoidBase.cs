@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
 using Godot;
 using GodotOnReady.Attributes;
 using Vector2 = Godot.Vector2;
@@ -33,7 +30,7 @@ public partial class BoidBase : Area
 
     #region Export
 
-    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Flee,Wander,FlowFieldFollow")] protected int _behaviours;
+    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
     [Export] private float _steeringRadius = 5.0f;
     
     [Export] public float MaxVelocity = 500.0f;
@@ -82,8 +79,6 @@ public partial class BoidBase : Area
     public bool Destroyed => _state == State.Destroyed;    
     public string Id = "";
     public short SteeringId => _steeringId;
-    public ref SteeringManager.BoidSharedProperties SharedProperties =>
-        ref SteeringManager.Instance.GetSharedProperties(_sharedPropertiesId);
     
     public Vector2 GlobalPosition
     {
@@ -189,43 +184,27 @@ public partial class BoidBase : Area
         _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.EdgeRepulsion] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
-        
-        MD5 md5 = MD5.Create();
-        string className = GetType().AssemblyQualifiedName;
-        _sharedPropertiesId = BitConverter.ToInt32(md5.ComputeHash(Encoding.UTF8.GetBytes(className)), 0);
-
-        short sharedPropertiesIdx = SteeringManager.Instance.FindSharedPropertiesById(_sharedPropertiesId);
-        if (sharedPropertiesIdx == -1)
-        {
-            SteeringManager.BoidSharedProperties boidSharedProperties = new()
-            {
-                Id = _sharedPropertiesId,
-                MaxSpeed = MaxVelocity,
-                MinSpeed = MinVelocity,
-                MaxForce = MaxForce,
-                DesiredSpeed = 75.0f,
-                LookAhead = 1.0f,
-                Weights = _steeringWeights,
-                ViewRange = 50.0f,
-                ViewAngle = 240.0f,
-            };
-            sharedPropertiesIdx = SteeringManager.Instance.RegisterSharedProperties(boidSharedProperties);
-        }
 
         SteeringManager.Boid boid = new()
         {
-            SharedPropertiesIdx = sharedPropertiesIdx,
-            Alignment = 1,
+            Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
             Radius = _steeringRadius,
             Position = GlobalPosition.ToNumerics(),
-            Velocity = System.Numerics.Vector2.Zero,
+            Velocity = velocity.ToNumerics(),
             Heading = System.Numerics.Vector2.UnitY,
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = -1,
             Behaviours = _behaviours,
+            MaxSpeed = MaxVelocity,
+            MinSpeed = MinVelocity,
+            MaxForce = MaxForce,
+            DesiredSpeed = 75.0f,
+            LookAhead = 1.0f,
+            Weights = _steeringWeights,
+            ViewRange = 50.0f,
+            ViewAngle = 240.0f,
         };
         
         _steeringId = SteeringManager.Instance.RegisterBoid(boid);
@@ -299,14 +278,19 @@ public partial class BoidBase : Area
         _cachedLastHitDamage = 0.0f;
         
         // banking
-        System.Numerics.Vector2 right = new(steeringBoid.Heading.Y, -steeringBoid.Heading.X);
-        System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
-        localSteering /= delta;
-        localSteering /= 100.0f;
-        _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
-        _mesh.Rotation = Bank360 ? 
-            new Vector3(_smoothSteering.Dot(Vector2.Up) * BankingAmount, 0.0f,_smoothSteering.Dot(Vector2.Right) * BankingAmount) : 
-            new Vector3(0.0f, 0.0f, _smoothSteering.Dot(Vector2.Right) * BankingAmount);
+        if (delta > 0.0f)
+        {
+            System.Numerics.Vector2 right = new(steeringBoid.Heading.Y, -steeringBoid.Heading.X);
+            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
+            localSteering /= delta;
+            localSteering /= 100.0f;
+            _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
+            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
+            float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
+            _mesh.Rotation = Bank360 ? 
+                new Vector3(bankX, 0.0f, bankZ) : 
+                new Vector3(0.0f, 0.0f, bankZ);
+        }
     }
     
     protected virtual void ProcessDestroyed(float delta)

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Diagnostics;
+using Vector3 = System.Numerics.Vector3;
 
 public class BoidAllyBomber : BoidAllyBase
 {
@@ -15,6 +16,7 @@ public class BoidAllyBomber : BoidAllyBase
     private bool _canShoot = false;
     private float _shootCooldownTimer;
     private float _fleeTimer;
+    private BulletBomber _bomb;
     
     public override void _Ready()
     {
@@ -24,7 +26,10 @@ public class BoidAllyBomber : BoidAllyBase
     public override void _Process(float delta)
     {
         base._Process(delta);
+    }
 
+    protected override void ProcessAlive(float delta)
+    {
         // targeting
         if (_canShoot && _targetType == TargetType.Ally)
         {
@@ -60,7 +65,7 @@ public class BoidAllyBomber : BoidAllyBase
             float dist = (TargetPos - GlobalPosition).LengthSquared();
             if (!_canShoot && _shootCooldownTimer < 0.0f && dist < Mathf.Pow(_resupplyRadius, 2.0f))
             {
-                _canShoot = true;
+                Resupply();
             }
         }
         
@@ -71,6 +76,16 @@ public class BoidAllyBomber : BoidAllyBase
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
             SetTarget(TargetType.Ally, Game.Player);
         }
+        
+        base.ProcessAlive(delta);
+    }
+
+    private void Resupply()
+    {
+        _canShoot = true;
+        _bomb = _bulletScene.Instance() as BulletBomber;
+        AddChild(_bomb);
+        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D(), Vector2.Zero, BoidAlignment.Ally, 0.0f);
     }
 
     private void AcquireTarget()
@@ -100,11 +115,13 @@ public class BoidAllyBomber : BoidAllyBase
     {
         base._Shoot(dir);
         
-        BulletBomber bullet = _bulletScene.Instance() as BulletBomber;
-        Debug.Assert(bullet != null);
-        Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * Game.Instance.BaseBulletSpeed, Alignment, Game.Instance.BaseBoidDamage);
-        bullet.Target = _targetBoid;
+        Debug.Assert(_bomb != null);
+        Vector2 pos = _bomb.GlobalPosition;
+        RemoveChild(_bomb);
+        Game.Instance.AddChild(_bomb);
+        _bomb.Init(pos, dir * Game.Instance.BaseBulletSpeed, Alignment, Game.Instance.BaseBoidDamage);
+        _bomb.Target = _targetBoid;
+        _bomb = null;
         
         _canShoot = false;
         _shootCooldownTimer = _shootCooldown;

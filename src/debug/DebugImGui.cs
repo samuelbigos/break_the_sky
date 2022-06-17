@@ -11,12 +11,15 @@ public class DebugImGui : Singleton<DebugImGui>
     public static bool ManualInputHandling = false;
     
     private float _fps = 0.0f;
+    private float _timescale;
 
     public override void _Ready()
     {
         base._Ready();
         
         GetNode<ImGuiNode>("ImGuiNode").Connect("IGLayout", this, nameof(_OnImGuiLayout));
+
+        _timescale = Engine.TimeScale;
     }
 
     public override void _Process(float delta)
@@ -48,6 +51,10 @@ public class DebugImGui : Singleton<DebugImGui>
 
             if (ImGui.BeginTabItem("Debug"))
             {
+                if (ImGui.SliderFloat("Timescale", ref _timescale, 0.0f, 1.0f))
+                {
+                    Engine.TimeScale = _timescale;
+                }
                 if (ImGui.Button("Reset Save"))
                 {
                     SaveManager.Instance.Reset();

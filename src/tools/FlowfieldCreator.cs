@@ -29,7 +29,7 @@ public partial class FlowFieldCreator : Spatial
     private bool _saving;
     private int _brushMode;
     
-    private Vector3[] _vertList = new Vector3[50000];
+    private Godot.Vector3[] _vertList = new Godot.Vector3[50000];
     private Color[] _colList = new Color[50000];
     private int[] _indexList = new int[100000];
 
@@ -197,7 +197,7 @@ public partial class FlowFieldCreator : Spatial
         Debug.Assert(v < _colList.Length, "v < _colList.Length");
         Debug.Assert(i < _indexList.Length, "i < _indexList.Length");
 
-        Span<Vector3> verts = _vertList.AsSpan(0, v);
+        Span<Godot.Vector3> verts = _vertList.AsSpan(0, v);
         Span<Color> colours = _colList.AsSpan(0, v);
         Span<int> indices = _indexList.AsSpan(0, i);
         

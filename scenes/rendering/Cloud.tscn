@@ -7,7 +7,7 @@
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
 
 [sub_resource type="PlaneMesh" id=1]
-size = Vector2( 640, 512 )
+size = Vector2( 1024, 640 )
 
 [sub_resource type="ViewportTexture" id=8]
 viewport_path = NodePath("BoidVelMapViewport")
@@ -27,7 +27,7 @@ shader_param/u_density = 0.306
 shader_param/u_transparent = true
 shader_param/u_transparent_col = null
 shader_param/u_transparent_tex = null
-shader_param/u_do_dither = true
+shader_param/u_do_dither = false
 shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
@@ -64,7 +64,7 @@ shader_param/u_density = 1.0
 shader_param/u_transparent = null
 shader_param/u_transparent_col = null
 shader_param/u_transparent_tex = null
-shader_param/u_do_dither = true
+shader_param/u_do_dither = false
 shader_param/u_bit_depth = 32
 shader_param/u_contrast = 0.0
 shader_param/u_offset = 0.0
@@ -127,7 +127,7 @@ render_target_v_flip = true
 cull_mask = 1047554
 projection = 1
 size = 512.0
-far = 200.0
+far = 1000.0
 
 [node name="BoidTransparentMapViewport" type="Viewport" parent="."]
 size = Vector2( 1024, 1024 )
@@ -139,7 +139,7 @@ render_target_v_flip = true
 [node name="Camera" type="Camera" parent="BoidTransparentMapViewport"]
 cull_mask = 1047554
 size = 512.0
-far = 200.0
+far = 1000.0
 
 [node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
 size = Vector2( 1024, 1024 )

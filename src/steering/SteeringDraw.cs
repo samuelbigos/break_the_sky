@@ -21,7 +21,7 @@ public partial class SteeringManager
     private bool _drawWander = false;
     private bool _drawFlowFields = false;
     
-    private Vector3[] _vertList = new Vector3[60000];
+    private Godot.Vector3[] _vertList = new Godot.Vector3[60000];
     private Color[] _colList = new Color[60000];
     private int[] _indexList = new int[150000];
 
@@ -39,12 +39,9 @@ public partial class SteeringManager
 
         // boids
         Span<Boid> boids = _boidPool.AsSpan();
-        Span<BoidSharedProperties> boidSharedProperties = _boidSharedPropertiesPool.AsSpan();
         
         foreach (ref readonly Boid boid in boids)
         {
-            ref readonly BoidSharedProperties shared = ref boidSharedProperties[boid.SharedPropertiesIdx];
-            
             // body
             Vector3 boidPos = boid.Position.To3D();
             Vector3 forward = boid.Heading.To3D();
@@ -68,12 +65,12 @@ public partial class SteeringManager
             // boid velocity/force
             if (_drawVelocity)
             {
-                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / shared.MaxSpeed, Colors.Red, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)
             {
-                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / shared.MaxForce / TimeSystem.Delta,
+                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / boid.MaxForce / TimeSystem.Delta,
                     Colors.Purple, ref v, ref i, _vertList, _colList, _indexList);
             }
 
@@ -92,18 +89,18 @@ public partial class SteeringManager
             if (_drawVision)
             {
                 Color visCol = Color.Color8(30, 30, 30);
-                Utils.CircleArc(boidPos, 32, shared.ViewRange, shared.ViewAngle, boid.Heading, visCol, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, visCol, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             // wander
             if (_drawWander)
             {
-                Vector3 circlePos = boidPos + boid.Heading.To3D() * shared.WanderCircleDist;
+                Vector3 circlePos = boidPos + boid.Heading.To3D() * boid.WanderCircleDist;
 
-                float angle = -boid.Heading.AngleTo(System.Numerics.Vector2.UnitX) + shared.WanderAngle;
-                Vector3 displacement = Vector3.Normalize(new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle))) *  shared.WanderCircleRadius;
+                float angle = -boid.Heading.AngleTo(System.Numerics.Vector2.UnitX) + boid.WanderAngle;
+                Vector3 displacement = Vector3.Normalize(new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle))) *  boid.WanderCircleRadius;
 
-                Utils.Circle(circlePos, 32, shared.WanderCircleRadius, Colors.SlateGray, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.SlateGray, ref v, ref i, _vertList, _colList, _indexList);
                 Utils.Line(circlePos, circlePos + displacement, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
             }
 
@@ -169,26 +166,28 @@ public partial class SteeringManager
             Utils.Line(p3, p0, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
 
             // obstacles
-            foreach (Obstacle obstacle in _obstaclePool)
+            for (int j = 0; j < _numObstacles; j++)
             {
+                Obstacle obstacle = _obstaclePool[j];
                 switch (obstacle.Shape)
                 {
                     case ObstacleShape.Circle:
                     {
-                        Utils.Circle(obstacle.Position.To3D(), 32, obstacle.Size, Colors.Brown, ref v, ref i, _vertList, _colList, _indexList);
+                        Utils.Circle(obstacle.Position.To3D(), 32, obstacle.Size, Colors.Brown, ref v, ref i, _vertList,
+                            _colList, _indexList);
                         break;
                     }
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            } 
+            }
         }
         
         Debug.Assert(v < _vertList.Length, "v < _vertList.Length");
         Debug.Assert(v < _colList.Length, "v < _colList.Length");
         Debug.Assert(i < _indexList.Length, "i < _indexList.Length");
 
-        Span<Vector3> verts = _vertList.AsSpan(0, v);
+        Span<Godot.Vector3> verts = _vertList.AsSpan(0, v);
         Span<Color> colours = _colList.AsSpan(0, v);
         Span<int> indices = _indexList.AsSpan(0, i);
         

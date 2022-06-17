@@ -20,7 +20,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         public short Id;
         public byte Alignment;
-        public short SharedPropertiesIdx;
         public Vector2 Position; // TODO: Separate position.
         public Vector2 Velocity;
         public Vector2 Steering;
@@ -31,14 +30,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public short TargetIndex;
         public Vector2 TargetOffset;
         public int Behaviours;
-#if !EXPORT
-        public Intersection Intersection;
-#endif
-    }
-
-    public struct BoidSharedProperties
-    {
-        public int Id;
         public float DesiredSpeed;
         public float MaxSpeed;
         public float MinSpeed;
@@ -51,6 +42,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float WanderCircleDist;
         public float WanderCircleRadius;
         public float WanderVariance;
+#if !EXPORT
+        public Intersection Intersection;
+#endif
     }
 
     public struct Obstacle
@@ -107,8 +101,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private Dictionary<int, int> _flowFieldIdToIndex = new();
     private Dictionary<int, int> _flowFieldIndexToId = new();
 
-    private StructPool<BoidSharedProperties> _boidSharedPropertiesPool = new(100);
-
+    private Vector2[] _boidPositions = new Vector2[500];
+    private byte[] _boidAlignments = new byte[500];
+    
     private int _boidIdGen = 1;
     private int _obstacleIdGen = 1;
     private int _flowFieldIdGen = 1;
@@ -136,8 +131,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         EdgeBounds.Position = Game.Player.GlobalPosition - EdgeBounds.Size * 0.5f;
 
         Span<Boid> boids = _boidPool.AsSpan();
-        Span<BoidSharedProperties> sharedProperties = _boidSharedPropertiesPool.AsSpan();
-        Span<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
+        ReadOnlySpan<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
         Span<FlowField> flowFields = _flowFieldPool.AsSpan(0, _numFlowFields);
         
         foreach (ref FlowField flowField in flowFields)
@@ -147,15 +141,23 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 flowField.Position = boids[_boidIdToIndex[flowField.TrackID]].Position;
             }
         }
-        
-        foreach (ref Boid boid in boids)
+
+        Span<Vector2> boidPositions = _boidPositions.AsSpan(0, _boidPool.Count);
+        Span<byte> boidAlignments = _boidAlignments.AsSpan(0, _boidPool.Count);
+        for (int i = 0; i < boidPositions.Length; i++)
         {
+            boidPositions[i] = boids[i].Position;
+            boidAlignments[i] = boids[i].Alignment;
+        }
+
+        for (int i = 0; i < boids.Length; i++)
+        {
+            ref Boid boid = ref boids[i];
             if (boid.Id == 0)
                 continue;
 
             Vector2 totalForce = Vector2.Zero;
-            ref readonly BoidSharedProperties shared = ref sharedProperties[boid.SharedPropertiesIdx];
-            
+
             // update target
             if (boid.TargetIndex != -1)
             {
@@ -168,14 +170,20 @@ public partial class SteeringManager : Singleton<SteeringManager>
             {
                 if ((boid.Behaviours & (1 << j)) == 0)
                     continue;
-                
-                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, shared, boids, obstacles, flowFields, sharedProperties, delta);
+
+                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, i, boids, boidPositions, boidAlignments, 
+                    obstacles, flowFields, delta);
+
+                if (float.IsNaN(force.X) || float.IsInfinity(force.X))
+                {
+                    Debug.Assert(!float.IsNaN(force.X) && !float.IsInfinity(force.X), "NaN in steering calculation!");
+                }
 
                 // truncate by max force per unit time
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
                 float totalForceLength = totalForce.Length();
                 float forceLength = force.Length();
-                float frameMaxForce =  sharedProperties[boid.SharedPropertiesIdx].MaxForce * delta * 2.0f;
+                float frameMaxForce = boid.MaxForce * delta * 2.0f;
                 if (totalForceLength + forceLength > frameMaxForce)
                 {
                     force.Limit(frameMaxForce - totalForceLength);
@@ -185,20 +193,20 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
                 totalForce += force;
             }
-            
+
             // adjust raw steering force
-            totalForce = ApplyMinimumSpeed(boid, totalForce, sharedProperties[boid.SharedPropertiesIdx].MinSpeed);
-            
+            totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
+
             // TODO: Add smooth steering.
             boid.Steering = totalForce;
-            
+
             boid.Velocity += boid.Steering;
-            boid.Velocity.Limit(sharedProperties[boid.SharedPropertiesIdx].MaxSpeed);
+            boid.Velocity.Limit(boid.MaxSpeed);
 
             boid.Speed = boid.Velocity.Length();
 
             // Smooth heading to eliminate rapid heading changes on small velocity adjustments
-            if (boid.Speed > sharedProperties[boid.SharedPropertiesIdx].MaxSpeed * 0.025f)
+            if (boid.Speed > boid.MaxSpeed * 0.025f)
             {
                 const float smoothing = 0.9f;
                 boid.Heading = Vector2.Normalize(boid.Velocity) * (1.0f - smoothing) + boid.Heading * smoothing;
@@ -207,54 +215,52 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
             boid.Position = WrapPosition(boid.Position + boid.Velocity * delta, EdgeBounds);
         }
-        
+
         DrawSimulationToMesh(out Mesh mesh);
         _debugMesh.Mesh = mesh;
     }
 
-    private static Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, in BoidSharedProperties shared, Span<Boid> boids, Span<Obstacle> obstacles, 
-        Span<FlowField> flowFields, Span<BoidSharedProperties> shareds, float delta)
+    private static Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, int index, ReadOnlySpan<Boid> boids, 
+        in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<byte> boidAlignments, ReadOnlySpan<Obstacle> obstacles, ReadOnlySpan<FlowField> flowFields, float delta)
     {
         Vector2 force = Vector2.Zero;
         switch (behaviour)
         {
             case Cohesion:
-                force += Steering_Cohesion(boid, boids, shareds);
+                force += Steering_Cohesion(boid, boids);
                 break;
             case Alignment:
-                force += Steering_Align(boid, boids, shareds);
+                force += Steering_Align(boid, boids);
                 break;
             case Separation:
-                force += Steering_Separate(boid, shared, boids, obstacles, delta);
+                force += Steering_Separate(boid, boids, boidPositions, obstacles, delta);
                 break;
             case Arrive:
-                force += Steering_Arrive(boid, shareds);
+                force += Steering_Arrive(boid);
                 break;
             case Pursuit:
-                force += Steering_Pursuit(boid, shareds);
+                force += Steering_Pursuit(boid);
                 break;
             case Flee:
-                break;
-            case EdgeRepulsion:
-                force += Steering_EdgeRepulsion(boid, shareds, EdgeBounds);
+                force += Steering_Flee(boid);
                 break;
             case AvoidAllies:
-                force += Steering_AvoidAllies(ref boid, boids, shareds);
+                force += Steering_AvoidAllies(ref boid, index, boids, boidPositions, boidAlignments);
                 break;
             case AvoidEnemies:
-                force += Steering_AvoidEnemies(ref boid, boids, shareds);
+                force += Steering_AvoidEnemies(ref boid, index, boids, boidPositions, boidAlignments);
                 break;
             case AvoidObstacles:
-                force += Steering_AvoidObstacles(ref boid, obstacles, shareds);
+                force += Steering_AvoidObstacles(ref boid, obstacles);
                 break;
             case MaintainSpeed:
-                force += Steering_MaintainSpeed(boid, shareds);
+                force += Steering_MaintainSpeed(boid);
                 break;
             case Wander:
-                force += Steering_Wander(ref boid, shareds, delta);
+                force += Steering_Wander(ref boid, delta);
                 break;
             case FlowFieldFollow:
-                force += Steering_FlowFieldFollow(boid, flowFields, shareds);
+                force += Steering_FlowFieldFollow(boid, flowFields);
                 break;
             case COUNT:
                 break;
@@ -262,7 +268,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 throw new ArgumentOutOfRangeException();
         }
 
-        return force.Limit(shared.MaxForce * delta) * shared.Weights[(int)behaviour];
+        return force.Limit(boid.MaxForce * delta) * boid.Weights[(int)behaviour];
     }
 
     public short RegisterBoid(Boid boid)
@@ -301,32 +307,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _flowFieldIdToIndex[flowField.ID] = _numFlowFields - 1;
         _flowFieldIndexToId[_numFlowFields - 1] = flowField.ID;
         return flowField.ID;
-    }
-
-    public short RegisterSharedProperties(BoidSharedProperties sharedProperties)
-    {
-        _boidSharedPropertiesPool.Add(sharedProperties);
-        return (short) (_boidSharedPropertiesPool.Count - 1);
-    }
-
-    public short FindSharedPropertiesById(int id)
-    {
-        Span<BoidSharedProperties> span = _boidSharedPropertiesPool.AsSpan();
-        for (short i = 0; i < span.Length; i++)
-        {
-            BoidSharedProperties sharedProperty = span[i];
-            if (sharedProperty.Id == id)
-                return i;
-        }
-
-        return -1;
-    }
-    
-    public ref BoidSharedProperties GetSharedProperties(int id)
-    {
-        int idx = FindSharedPropertiesById(id);
-        Debug.Assert(idx != -1, $"SharedProperties ID doesn't exist.");
-        return ref _boidSharedPropertiesPool.AsSpan()[idx];
     }
 
     public bool HasBoid(int id)

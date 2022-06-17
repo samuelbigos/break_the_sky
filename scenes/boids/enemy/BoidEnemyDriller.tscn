@@ -12,19 +12,15 @@ resource_local_to_scene = true
 shader = ExtResource( 4 )
 shader_param/u_primary_colour = null
 shader_param/u_secondary_colour = null
-shader_param/threshold_depth = -6.304
-shader_param/blend_depth = 0.003
 
 [node name="BoidEnemyDriller" instance=ExtResource( 1 )]
 transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
-_behaviours = 2171
+_behaviours = 2279
 MaxVelocity = 75.0
 MinVelocity = 50.0
 FieldOfView = 270.0
 Damping = 0.0
-SeparationRadius = 10.0
-MaxAngularVelocity = 100.0
 MaxHealth = 3.0
 HitFlashTime = 0.0333333
 EngageRange = 200.0

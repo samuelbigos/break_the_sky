@@ -21,10 +21,12 @@ shader_param/u_velocity = null
 
 [node name="BoidAllyBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
-_behaviours = 143
-MaxVelocity = 125.0
+_behaviours = 15
+MaxVelocity = 75.0
 MinVelocity = 75.0
-MaxForce = 50.0
+MaxForce = 100.0
+BankingRate = 2.0
+BankingAmount = 1.5
 BlocksShots = false
 _bulletScene = ExtResource( 6 )
 _targetAcquireRadius = 300.0
