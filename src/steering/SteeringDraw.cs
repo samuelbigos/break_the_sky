@@ -205,28 +205,25 @@ public partial class SteeringManager
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.Instance.RegisterWindow("steering", "Steering Behaviours", _OnImGuiLayout);
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("steering", _OnImGuiLayout);
     }
 
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("Steering"))
-        {
-            ImGui.Checkbox("Draw", ref _draw);
-            ImGui.Checkbox("Draw Separation", ref _drawSeparation);
-            ImGui.Checkbox("Draw Steering", ref _drawSteering);
-            ImGui.Checkbox("Draw Velocity", ref _drawVelocity);
-            ImGui.Checkbox("Draw Vision", ref _drawVision);
-            ImGui.Checkbox("Draw Avoidance", ref _drawAvoidance);
-            ImGui.Checkbox("Draw Wander", ref _drawWander);
-            ImGui.Checkbox("Draw FlowFields", ref _drawFlowFields);
-            ImGui.EndTabItem();
-        }
+        ImGui.Checkbox("Draw", ref _draw);
+        ImGui.Checkbox("Draw Separation", ref _drawSeparation);
+        ImGui.Checkbox("Draw Steering", ref _drawSteering);
+        ImGui.Checkbox("Draw Velocity", ref _drawVelocity);
+        ImGui.Checkbox("Draw Vision", ref _drawVision);
+        ImGui.Checkbox("Draw Avoidance", ref _drawAvoidance);
+        ImGui.Checkbox("Draw Wander", ref _drawWander);
+        ImGui.Checkbox("Draw FlowFields", ref _drawFlowFields);
+        ImGui.EndTabItem();
     }
 }

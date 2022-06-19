@@ -41,13 +41,13 @@ public partial class Game : Singleton<Game>
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.Instance.RegisterWindow("spawning", "Spawning", _OnImGuiLayoutWindow);
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("spawning", _OnImGuiLayoutWindow);
     }
 
     public override void _Process(float delta)
@@ -76,55 +76,46 @@ public partial class Game : Singleton<Game>
         // TODO: game over
     }
 
-    private void _OnImGuiLayout()
+    private void _OnImGuiLayoutWindow()
     {
-        if (ImGui.BeginTabItem("Spawn"))
+        ImGui.Text($"Boids: {BoidFactory.Instance.AllBoids.Count}");
+        ImGui.Text(" ### Fabricants");
+        foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
         {
-            ImGui.Text($"Boids: {BoidFactory.Instance.AllBoids.Count}");
-            ImGui.Text(" ### Fabricants");
-            foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
+            if (ImGui.Button($"{boid.DisplayName}"))
             {
-                if (ImGui.Button($"{boid.DisplayName}"))
-                {
+                BoidFactory.Instance.CreateAllyBoid(boid);
+            }
+
+            if (ImGui.Button($"{boid.DisplayName} x10"))
+            {
+                for (int i = 0; i < 10; i++)
                     BoidFactory.Instance.CreateAllyBoid(boid);
-                }
-                if (ImGui.Button($"{boid.DisplayName} x10"))
-                {
-                    for (int i = 0; i < 10; i++)
-                        BoidFactory.Instance.CreateAllyBoid(boid);
-                }
             }
-
-            ImGui.Text(" ### Enemies");
-            foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
-            {
-                if (ImGui.Button($"{boid.DisplayName}"))
-                {
-                    _aiSpawningDirector.SpawnEnemyRandom(boid);
-                }
-                if (ImGui.Button($"{boid.DisplayName} x10"))
-                {
-                    for (int i = 0; i < 10; i++)
-                        _aiSpawningDirector.SpawnEnemyRandom(boid);
-                }
-            }
-
-            ImGui.Text(" ### Waves");
-            foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
-            {
-                if (ImGui.Button($"{wave.Name}"))
-                {
-                    _aiSpawningDirector.SpawnWave(wave, new List<BoidEnemyBase>(), new List<BoidEnemyBase>());
-                }
-            }
-
-            ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("GameSettings"))
+        ImGui.Text(" ### Enemies");
+        foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
         {
-            Resources.Instance.GameSettings._OnImGuiLayout();
-            ImGui.EndTabItem();
+            if (ImGui.Button($"{boid.DisplayName}"))
+            {
+                _aiSpawningDirector.SpawnEnemyRandom(boid);
+            }
+
+            if (ImGui.Button($"{boid.DisplayName} x10"))
+            {
+                for (int i = 0; i < 10; i++)
+                    _aiSpawningDirector.SpawnEnemyRandom(boid);
+            }
+        }
+
+        ImGui.Text(" ### Waves");
+        foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
+        {
+            if (ImGui.Button($"{wave.Name}"))
+            {
+                _aiSpawningDirector.SpawnWave(wave, new List<BoidEnemyBase>(), new List<BoidEnemyBase>());
+            }
         }
     }
 }

@@ -7,9 +7,9 @@ public class SaveManager : Singleton<SaveManager>
 {
 	private const string SAVE_FOLDER = "user://savegame";
 	private bool _loadedThisSession = false;
-	
-	public static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
-	public static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
+
+	private static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
+	private static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
 
 	public override void _Ready()
 	{
@@ -18,7 +18,7 @@ public class SaveManager : Singleton<SaveManager>
 		DoLoad();
 	}
 
-	public void DoSave()
+	public static void DoSave()
 	{
 		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 		
@@ -36,7 +36,7 @@ public class SaveManager : Singleton<SaveManager>
 
 		// then store each persistent node
 		Dictionary saveData = new Dictionary();
-		foreach (Node node in GetTree().GetNodesInGroup("persistent"))
+		foreach (Node node in Instance.GetTree().GetNodesInGroup("persistent"))
 		{
 			Saveable saveableNode = node as Saveable;
 			if (saveableNode == null)
@@ -48,14 +48,14 @@ public class SaveManager : Singleton<SaveManager>
 		saveGame.Close();
 	}
 
-	private void DoLoad()
+	private static void DoLoad()
 	{
 		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
 
 		File saveGame = new File();
 		string path = SavePath;
 		if (!saveGame.FileExists(path))
-			CreateSave();
+			Instance.CreateSave();
 		
 		saveGame.Open(path, File.ModeFlags.Read);
 		
@@ -67,7 +67,7 @@ public class SaveManager : Singleton<SaveManager>
 		
 		Dictionary saveData = (Dictionary) JSON.Parse(saveGame.GetLine()).Result;
 		
-		foreach (Node node in GetTree().GetNodesInGroup("persistent"))
+		foreach (Node node in Instance.GetTree().GetNodesInGroup("persistent"))
 		{
 			Saveable saveableNode = node as Saveable;
 			if (saveableNode == null)

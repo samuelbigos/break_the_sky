@@ -4,13 +4,13 @@ using ImGuiNET;
 
 public class GameSettingsResource : Resource
 {
-    [Export] public float ExperiencePerLevelBase;
+    [Export] public int ExperiencePerLevelBase;
     [Export] public float ExperiencePerLevelExponent;
 
     public void _OnImGuiLayout()
     {
-        ImGui.Text($"ExperiencePerLevelBase: {ExperiencePerLevelBase}");
-        ImGui.Text($"ExperiencePerLevelBase: {ExperiencePerLevelExponent}");
+        ImGui.InputInt("ExperiencePerLevelBase", ref ExperiencePerLevelBase);
+        ImGui.SliderFloat("ExperiencePerLevelExponent", ref ExperiencePerLevelExponent, 1.0f, 1.5f);
         
         ImGui.Text("Level Curve");
         const int levelsToPlot = 50;

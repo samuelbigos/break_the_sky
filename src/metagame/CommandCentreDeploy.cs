@@ -109,7 +109,7 @@ public class CommandCentreDeploy : Node
             {
                 SaveDataPlayer.UnlockedAllies.Add(_droneList[i].Name);
             }
-            SaveManager.Instance.DoSave();
+            SaveManager.DoSave();
         }
     }
 }

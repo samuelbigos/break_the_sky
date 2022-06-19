@@ -10,8 +10,8 @@ public class SaveDataSettings : Saveable
 
     private Dictionary<string, object> _defaults = new()
     {
-        {"fullscreen", false},
-        {"windowed_resolution", new Vector2(1280, 720) },
+        { "fullscreen", false },
+        { "windowed_resolution", new Vector2(1280, 720) },
     };
 
     private static bool Fullscreen
@@ -58,17 +58,16 @@ public class SaveDataSettings : Saveable
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
-
+        DebugImGui.Instance.RegisterWindow("savedata_settings", "Settings", _OnImGuiLayout);
         GetViewport().Connect("size_changed", this, nameof(_OnWindowSizeChanged));
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("savedata_settings", _OnImGuiLayout);
     }
-    
+
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
@@ -105,18 +104,15 @@ public class SaveDataSettings : Saveable
 
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("SaveDataSettings"))
+        foreach (string key in _defaults.Keys)
         {
-            foreach (string key in _defaults.Keys)
-            {
-                ImGui.Text($"{key}: {_data[key]}");
-            }
-
-            if (ImGui.Button("Toggle Fullscreen"))
-            {
-                SetFullscreen(!Fullscreen);
-            }
-            ImGui.EndTabItem();
+            ImGui.Text($"{key}: {_data[key]}");
         }
+
+        if (ImGui.Button("Toggle Fullscreen"))
+        {
+            SetFullscreen(!Fullscreen);
+        }
+        ImGui.EndTabItem();
     }
 }

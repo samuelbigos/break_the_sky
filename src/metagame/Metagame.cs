@@ -85,7 +85,7 @@ public class Metagame : Saveable
         }
 
         CurrentState = state;
-        SaveManager.Instance.DoSave();
+        SaveManager.DoSave();
     }
 
     private void EnterMap(GameState from)

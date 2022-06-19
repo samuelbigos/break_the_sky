@@ -14,14 +14,14 @@ public class SaveDataPlayer : Saveable
 
     private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
-        {"level", 0},
-        {"totalExperience", 0},
-        {"skillPoints", 0},
-        {"materialCount", 10},
-        {"maxAllyCount", 500},
-        {"initialAllyCount", 1},
-        {"unlockedAllies", new Array()},
-        {"seenEnemies", new Dictionary()},
+        { "level", 0 },
+        { "totalExperience", 0 },
+        { "skillPoints", 0 },
+        { "materialCount", 10 },
+        { "maxAllyCount", 500 },
+        { "initialAllyCount", 1 },
+        { "unlockedAllies", new Array() },
+        { "seenEnemies", new Dictionary() },
     };
 
     public static int MaxAllyCount
@@ -149,50 +149,47 @@ public class SaveDataPlayer : Saveable
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.Instance.RegisterWindow("savedata_player", "Player Data", _OnImGuiLayout);
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("savedata_player", _OnImGuiLayout);
     }
 
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("SaveDataPlayer"))
+        foreach (string key in _defaults.Keys)
         {
-            foreach (string key in _defaults.Keys)
-            {
-                ImGui.Text($"{key}: {_data[key]}");
-            }
-
-            if (ImGui.Button("Add Skill Point"))
-            {
-                SkillPoints++;
-            }
-            
-            if (ImGui.Button("Add Materials x100"))
-            {
-                MaterialCount += 100;
-            }
-            
-            if (ImGui.Button("Add Experience x10"))
-            {
-                Experience += 10;
-            }
-            
-            if (ImGui.Button("Add Experience x100"))
-            {
-                Experience += 100;
-            }
-            
-            if (ImGui.Button("Add Experience x1000"))
-            {
-                Experience += 1000;
-            }
-            
-            ImGui.EndTabItem();
+            ImGui.Text($"{key}: {_data[key]}");
         }
+
+        if (ImGui.Button("Add Skill Point"))
+        {
+            SkillPoints++;
+        }
+        
+        if (ImGui.Button("Add Materials x100"))
+        {
+            MaterialCount += 100;
+        }
+        
+        if (ImGui.Button("Add Experience x10"))
+        {
+            Experience += 10;
+        }
+        
+        if (ImGui.Button("Add Experience x100"))
+        {
+            Experience += 100;
+        }
+        
+        if (ImGui.Button("Add Experience x1000"))
+        {
+            Experience += 1000;
+        }
+        
+        ImGui.EndTabItem();
     }
 }

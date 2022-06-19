@@ -268,57 +268,54 @@ public partial class FlowFieldCreator : Spatial
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.Instance.RegisterWindow("flowfield_creator", "Flowfield", _OnImGuiLayout);
         DebugImGui.ManualInputHandling = true;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("flowfield_creator", _OnImGuiLayout);
         DebugImGui.ManualInputHandling = false;
     }
 
     private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("FlowField"))
+        ImGui.Text("Modify");
+        ImGui.SliderFloat("Brush size", ref _brushSize, 1.0f, 16.0f);
+        ImGui.Text("Brush Mode:");
+        ImGui.RadioButton("Stroke", ref _brushMode, 0);
+        
+        ImGui.RadioButton("To Centre", ref _brushMode, 1); ImGui.SameLine();
+        if (ImGui.Button("Fill To Centre"))
         {
-            ImGui.Text("Modify");
-            ImGui.SliderFloat("Brush size", ref _brushSize, 1.0f, 16.0f);
-            ImGui.Text("Brush Mode:");
-            ImGui.RadioButton("Stroke", ref _brushMode, 0);
-            
-            ImGui.RadioButton("To Centre", ref _brushMode, 1); ImGui.SameLine();
-            if (ImGui.Button("Fill To Centre"))
-            {
-                FillToCentre();
-            }
-            
-            ImGui.RadioButton("From Centre", ref _brushMode, 2); ImGui.SameLine();
-            if (ImGui.Button("Fill From Centre"))
-            {
-                FillFromCentre();
-            }
-            
-            if (ImGui.Button("Clear"))
-            {
-                _vectors = new Vector2[(int) _fieldSize.X, (int) _fieldSize.Y];
-            }
-            ImGui.Text("File");
-            if (ImGui.Button("Open"))
-            {
-                LoadFlowField();
-            }
-            if (ImGui.Button("Save As"))
-            {
-                SaveFlowField();
-            }
-            ImGui.Spacing();
-            if (ImGui.Button("Test"))
-            {
-                GetTree().ChangeScene("res://scenes/debug/BoidTestbed.tscn");
-            }
-            ImGui.EndTabItem();
+            FillToCentre();
         }
+        
+        ImGui.RadioButton("From Centre", ref _brushMode, 2); ImGui.SameLine();
+        if (ImGui.Button("Fill From Centre"))
+        {
+            FillFromCentre();
+        }
+        
+        if (ImGui.Button("Clear"))
+        {
+            _vectors = new Vector2[(int) _fieldSize.X, (int) _fieldSize.Y];
+        }
+        ImGui.Text("File");
+        if (ImGui.Button("Open"))
+        {
+            LoadFlowField();
+        }
+        if (ImGui.Button("Save As"))
+        {
+            SaveFlowField();
+        }
+        ImGui.Spacing();
+        if (ImGui.Button("Test"))
+        {
+            GetTree().ChangeScene("res://scenes/debug/BoidTestbed.tscn");
+        }
+        ImGui.EndTabItem();
     }
 }

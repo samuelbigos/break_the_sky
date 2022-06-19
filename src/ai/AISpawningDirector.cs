@@ -56,13 +56,13 @@ public class AISpawningDirector : Node
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugImGui.DrawImGui += _OnImGuiLayout;
+        DebugImGui.Instance.RegisterWindow("aidirector", "AI Director", _OnImGuiLayout);
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        DebugImGui.DrawImGui -= _OnImGuiLayout;
+        DebugImGui.Instance.UnRegisterWindow("aidirector", _OnImGuiLayout);
     }
 
     public override void _Process(float delta)
@@ -431,49 +431,46 @@ public class AISpawningDirector : Node
         _totalBudgetDestoyed += Database.EnemyBoid(enemy.Id).SpawningCost;
     }
 
-    public void _OnImGuiLayout()
+    private void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("AI Director"))
+        ImGui.Text($"[{_state}] for {_timeInState:F2}");
+        ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
+        ImGui.Text($"{_totalTime:F2} TotalTime");
+        ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Current Budget");
+        ImGui.Text($"{_totalBudgetDestoyed:F1} Total Budget Destroyed");
+    
+        ImGui.Spacing();
+
+        if (ImGui.Button("+10s"))
         {
-            ImGui.Text($"[{_state}] for {_timeInState:F2}");
-            ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
-            ImGui.Text($"{_totalTime:F2} TotalTime");
-            ImGui.Text($"{CalcBudget(CalcIntensity(_totalTime)):F2} Current Budget");
-            ImGui.Text($"{_totalBudgetDestoyed:F1} Total Budget Destroyed");
-        
-            ImGui.Spacing();
-
-            if (ImGui.Button("+10s"))
-            {
-                _totalTime += 10.0f;
-                _timeInState += 10.0f;
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("+60s"))
-            {
-                _totalTime += 60.0f;
-                _timeInState += 60.0f;
-            }
-
-            ImGui.Checkbox("Enabled", ref _enabled);
-        
-            int secondsToPlot = 60 * 10;
-            float[] points = new float[secondsToPlot];
-            for (int i = 0; i < secondsToPlot; i++)
-            {
-                points[i] = CalcIntensity(i);
-            }
-            ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
-                0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));
-
-            ImGui.SliderFloat("Wavelength", ref _intensityWavelength, 0.0f, 0.1f);
-            ImGui.SliderFloat("WavelengthScale", ref _intensityWavelengthScaling, -0.1f, 0.1f);
-        
-            ImGui.SliderFloat("Amplitude", ref _intensityAmplitude, 0.0f, 10.0f);
-            ImGui.SliderFloat("AmplitudeScale", ref _intensityAmplitudeScaling, 0.0f, 0.5f);
-        
-            ImGui.SliderFloat("Offset", ref _intensityOffset, -1.0f, 1.0f);
-            ImGui.SliderFloat("OffsetScale", ref _intensityOffsetScale, 0.0f, 0.01f);
+            _totalTime += 10.0f;
+            _timeInState += 10.0f;
         }
+        ImGui.SameLine();
+        if (ImGui.Button("+60s"))
+        {
+            _totalTime += 60.0f;
+            _timeInState += 60.0f;
+        }
+
+        ImGui.Checkbox("Enabled", ref _enabled);
+    
+        int secondsToPlot = 60 * 10;
+        float[] points = new float[secondsToPlot];
+        for (int i = 0; i < secondsToPlot; i++)
+        {
+            points[i] = CalcIntensity(i);
+        }
+        ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
+            0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));
+
+        ImGui.SliderFloat("Wavelength", ref _intensityWavelength, 0.0f, 0.1f);
+        ImGui.SliderFloat("WavelengthScale", ref _intensityWavelengthScaling, -0.1f, 0.1f);
+    
+        ImGui.SliderFloat("Amplitude", ref _intensityAmplitude, 0.0f, 10.0f);
+        ImGui.SliderFloat("AmplitudeScale", ref _intensityAmplitudeScaling, 0.0f, 0.5f);
+    
+        ImGui.SliderFloat("Offset", ref _intensityOffset, -1.0f, 1.0f);
+        ImGui.SliderFloat("OffsetScale", ref _intensityOffsetScale, 0.0f, 0.01f);
     }
 }
