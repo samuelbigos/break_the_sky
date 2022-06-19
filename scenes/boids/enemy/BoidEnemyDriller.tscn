@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/mesh/enemies/enemy_drone.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyDriller.cs" type="Script" id=3]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=4]
+[ext_resource path="res://scenes/database/stats/StatsEnemy_Driller.tres" type="Resource" id=5]
 
 [sub_resource type="CapsuleShape" id=1]
 
@@ -17,12 +18,12 @@ shader_param/u_secondary_colour = null
 transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
 _behaviours = 2279
-MaxVelocity = 75.0
+MaxVelocity = 50.0
 MinVelocity = 50.0
 FieldOfView = 270.0
 Damping = 0.0
-MaxHealth = 3.0
 HitFlashTime = 0.0333333
+_baseStats = ExtResource( 5 )
 EngageRange = 200.0
 
 [node name="CollisionShape" parent="." index="0"]

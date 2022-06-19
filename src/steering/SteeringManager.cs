@@ -45,6 +45,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
 #if !EXPORT
         public Intersection Intersection;
 #endif
+        
+        public bool HasBehaviour(Behaviours behaviour)
+        {
+            return (Behaviours & (1 << (int) behaviour)) > 0;
+        }
     }
 
     public struct Obstacle
@@ -127,6 +132,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         base._Process(delta);
 
+#if TOOLS
+        if (Game.Instance == null)
+            return;
+#endif
+
         // move area
         EdgeBounds.Position = Game.Player.GlobalPosition - EdgeBounds.Size * 0.5f;
 
@@ -153,7 +163,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         for (int i = 0; i < boids.Length; i++)
         {
             ref Boid boid = ref boids[i];
-            if (boid.Id == 0)
+            if (boid.Id == 0 || boid.Behaviours == 0)
                 continue;
 
             Vector2 totalForce = Vector2.Zero;
@@ -166,12 +176,12 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 boid.Target = targetBoid.Position - Utils.GlobaliseOffset(boid.TargetOffset, targetBoid.Heading, side);
             }
 
-            for (int j = 0; j < (int) COUNT; j++)
+            for (Behaviours j = 0; j < COUNT; j++)
             {
-                if ((boid.Behaviours & (1 << j)) == 0)
+                if (!boid.HasBehaviour(j))
                     continue;
 
-                Vector2 force = CalculateSteeringForce((Behaviours) j, ref boid, i, boids, boidPositions, boidAlignments, 
+                Vector2 force = CalculateSteeringForce(j, ref boid, i, boids, boidPositions, boidAlignments, 
                     obstacles, flowFields, delta);
 
                 if (float.IsNaN(force.X) || float.IsInfinity(force.X))
@@ -193,6 +203,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
                 totalForce += force;
             }
+            
+            //GD.Print($"{totalForce.Length() / (boid.MaxForce * delta * 2.0f)}");
 
             // adjust raw steering force
             totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
@@ -214,6 +226,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
             }
 
             boid.Position = WrapPosition(boid.Position + boid.Velocity * delta, EdgeBounds);
+            if (float.IsNaN(boid.Position.X))
+            {
+                Debug.Assert(!float.IsNaN(boid.Position.X), "!float.IsNaN(boid.Position.X)");
+            }
         }
 
         DrawSimulationToMesh(out Mesh mesh);

@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/BoidPlayer.cs" type="Script" id=2]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=3]
+[ext_resource path="res://scenes/database/stats/StatsAlly_Player.tres" type="Resource" id=4]
 
 [sub_resource type="ShaderMaterial" id=3]
 resource_local_to_scene = true
@@ -17,6 +18,7 @@ rings = 4
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _behaviours = 0
+_baseStats = ExtResource( 4 )
 _sfxPickupPath = NodePath("SFXPickup")
 
 [node name="Mesh" parent="." index="1"]

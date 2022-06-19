@@ -206,7 +206,7 @@ void fragment()
 		}
 		else
 		{
-			col = mix(u_colour_b.rgb, u_colour_a.rgb, lum);
+			col = mix(u_colour_b.rgb, u_colour_a.rgb, step(lum, 0.0));
 		}
 	}
 

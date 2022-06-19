@@ -13,19 +13,6 @@ public partial class Game : Singleton<Game>
     [OnReadyGet] private HUD _hud;
 
     [Export] public Rect2 AreaRect;
-    [Export] public float WaveCooldown = 5.0f;
-
-    [Export] public float BaseBoidReload = 1.75f;
-    [Export] public int BaseBoidReinforce = 3;
-    [Export] public float BaseBoidGrouping = 10.0f;
-    [Export] public float BaseBoidDamage = 1.0f;
-    [Export] public float BaseBoidSpread = 0.1f;
-    [Export] public float BaseBulletSpeed = 500.0f;
-    [Export] public bool BaseMicroturrets;
-
-    [Export] public float ScoreMultiTimeout = 10.0f;
-    [Export] public int ScoreMultiMax = 10;
-    [Export] public float ScoreMultiIncrement = 0.5f;
     
     private bool _initialSpawn;
     

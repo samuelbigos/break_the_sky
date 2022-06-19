@@ -13,7 +13,7 @@ public partial class SteeringManager
 
         float range = boid.Speed / minSpeed;
         float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 5));
-        return VecLimitDeviationAngleUtility(true, force, cosine, Vector2.Normalize(boid.Velocity));
+        return VecLimitDeviationAngleUtility(true, force, cosine, boid.Velocity.NormalizeSafe());
     }
 
     private static Vector2 VecLimitDeviationAngleUtility(bool insideOrOutside, Vector2 source, float cosineOfConeAngle, Vector2 basis)
@@ -44,7 +44,7 @@ public partial class SteeringManager
         Vector2 perp = source.PerpendicularComponent(basis);
 
         // normalize that perpendicular
-        Vector2 unitPerp = Vector2.Normalize(perp);
+        Vector2 unitPerp = perp.NormalizeSafe();
 
         // construct a new vector whose length equals the source vector,
         // and lies on the intersection of a plane (formed the source and
@@ -122,15 +122,15 @@ public partial class SteeringManager
         if (t1 < 0.0f && t2 > 0.0f)
         {
             collisionPos = pA + (pB - pA) * (rA / (rA + rB));
-            collisionNormal = Vector2.Normalize(pA - pB);
+            collisionNormal = (pA - pB).NormalizeSafe();
             return true;
         }
 
         Vector2 cA = pA + vA * collisionTime;
         Vector2 cB = pB + vB * collisionTime;
 
-        collisionPos = cA + Vector2.Normalize(cB - cA) * rA;
-        collisionNormal = Vector2.Normalize(collisionPos - (pB + vB * collisionTime));
+        collisionPos = cA + (cB - cA).NormalizeSafe() * rA;
+        collisionNormal = (collisionPos - (pB + vB * collisionTime)).NormalizeSafe();
         return true;
     }
 

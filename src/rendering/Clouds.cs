@@ -86,7 +86,7 @@ public class Clouds : Spatial
         if (Game.Instance != null)
         {
             float displaceRadius = 12.5f;
-            List<BoidBase> boids = new List<BoidBase>();
+            List<BoidBase> boids = new();
             float cloudY = _cloudLayers[1].GlobalTransform.origin.y;
             foreach (BoidBase boid in BoidFactory.Instance.DestroyedBoids)
             {

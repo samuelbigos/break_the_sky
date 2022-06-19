@@ -15,11 +15,12 @@ public class BoidFactory : Singleton<BoidFactory>
     private List<BoidBase> _destroyedBoids = new();
     private List<BoidEnemyBase> _enemyBoids = new();
     private List<BoidAllyBase> _allyBoids = new();
-    private int _addedAllyCounter;
 
     public override void _Ready()
     {
         base._Ready();
+
+        SceneTransitionManager.OnSceneTransitionInitiated += _OnSceneChanged;
     }
 
     public override void _Process(float delta)
@@ -84,15 +85,21 @@ public class BoidFactory : Singleton<BoidFactory>
         switch (boid)
         {
             case BoidAllyBase @base:
-            {
                 _allyBoids.Remove(@base);
                 break;
-            }
             case BoidEnemyBase @base:
                 _enemyBoids.Remove(@base);
                 break;
         }
         _allBoids.Remove(boid);
         _destroyedBoids.Add(boid);
+    }
+
+    private void _OnSceneChanged()
+    {
+        _allBoids.Clear();
+        _allyBoids.Clear();
+        _enemyBoids.Clear();
+        _destroyedBoids.Clear();
     }
 }

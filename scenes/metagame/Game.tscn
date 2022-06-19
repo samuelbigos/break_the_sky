@@ -46,9 +46,6 @@ PlayerPath = NodePath("BoidPlayer")
 AiSpawningDirectorPath = NodePath("AISpawningDirector")
 HudPath = NodePath("HUD")
 AreaRect = Rect2( -300, -300, 600, 600 )
-BaseBoidGrouping = 15.0
-BaseBoidDamage = 3.0
-BaseBulletSpeed = 150.0
 
 [node name="AISpawningDirector" type="Node" parent="."]
 script = ExtResource( 5 )
@@ -87,7 +84,6 @@ directional_shadow_max_distance = 250.0
 [node name="MouseCursor" type="MeshInstance" parent="."]
 visible = false
 mesh = SubResource( 4 )
-material/0 = null
 
 [node name="HUD" parent="." instance=ExtResource( 1 )]
 

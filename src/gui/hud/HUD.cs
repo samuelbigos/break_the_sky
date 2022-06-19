@@ -37,11 +37,12 @@ public partial class HUD : Singleton<HUD>
 
         Refresh();
         
-        FabricateManager.Instance.OnPushQueue += _OnPushQueue;
-        FabricateManager.Instance.OnPopQueue += _OnPopQueue;
-        
         if (Game.Instance != null)
+        {
+            FabricateManager.Instance.OnPushQueue += _OnPushQueue;
+            FabricateManager.Instance.OnPopQueue += _OnPopQueue;
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
+        }
     }
 
     private void Refresh()

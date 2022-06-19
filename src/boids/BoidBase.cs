@@ -43,10 +43,9 @@ public partial class BoidBase : Area
     
     [Export] public float Damping = 0.05f;
     [Export] public float DestroyTime = 3.0f;
-    [Export] public float HitDamage = 3.0f;
-    [Export] public float MaxHealth = 1.0f;
     [Export] public float HitFlashTime = 1.0f / 30.0f;
-    [Export] public int Points = 10;
+
+    [Export] private StatsResource _baseStats;
     
     [Export] private int _damageVfxCount = 2;
     
@@ -89,6 +88,7 @@ public partial class BoidBase : Area
             {
                 ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
                 boid.Position = value.ToNumerics();
+                GlobalTransform = new Transform(new Basis(Vector3.Down, boid.Heading.Angle() + Mathf.Pi * 0.5f), value.To3D());
             }
         }
     }
@@ -123,6 +123,7 @@ public partial class BoidBase : Area
 
     #region Protected
 
+    protected StatsResource _stats;
     protected short _steeringId;
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
@@ -131,6 +132,7 @@ public partial class BoidBase : Area
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
     protected System.Numerics.Vector2 _cachedVelocity;
+    protected System.Numerics.Vector2 _cachedHeading;
     protected State _state;
 
     #endregion
@@ -197,14 +199,17 @@ public partial class BoidBase : Area
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = -1,
             Behaviours = _behaviours,
-            MaxSpeed = MaxVelocity,
+            MaxSpeed = MaxVelocity * _stats.MoveSpeed,
             MinSpeed = MinVelocity,
-            MaxForce = MaxForce,
-            DesiredSpeed = 75.0f,
+            MaxForce = MaxForce * _stats.MoveSpeed,
+            DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
             Weights = _steeringWeights,
             ViewRange = 50.0f,
             ViewAngle = 240.0f,
+            WanderCircleDist = 25.0f,
+            WanderCircleRadius = 5.0f,
+            WanderVariance = 50.0f,
         };
         
         _steeringId = SteeringManager.Instance.RegisterBoid(boid);
@@ -212,7 +217,10 @@ public partial class BoidBase : Area
 
     [OnReady] private void Ready()
     {
-        _health = MaxHealth;
+        Debug.Assert(_baseStats != null, "_baseStats != null");
+        _OnSkillsChanged(new List<SkillNodeResource>());
+        
+        _health = _stats.MaxHealth;
 
         //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
         _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
@@ -261,6 +269,7 @@ public partial class BoidBase : Area
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
         GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.ToGodot().To3D());
         _cachedVelocity = steeringBoid.Velocity;
+        _cachedHeading = steeringBoid.Heading;
 
         // hit flash
         if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
@@ -269,9 +278,9 @@ public partial class BoidBase : Area
         }
         _hitFlashTimer -= delta;
 
-        if (_health < 0.0f)
+        if (_health <= 0.0f)
         {
-            _Destroy(Points > 0, _cachedLastHitDir, _cachedLastHitDamage);
+            _Destroy(false, _cachedLastHitDir, _cachedLastHitDamage);
             return;
         }
         _cachedLastHitDir = Vector3.Zero;
@@ -332,7 +341,7 @@ public partial class BoidBase : Area
         {
             float damageVfxThresholds = 1.0f / (_damageVfxCount + 1.0f);
             float nextThreshold = 1.0f - (_damagedParticles.Count + 1.0f) * damageVfxThresholds;
-            if (_health / MaxHealth < nextThreshold)
+            if (_health / _stats.MaxHealth < nextThreshold)
             {
                 Particles particles = _damagedParticlesScene.Instance<Particles>();
                 _damagedParticles.Add(particles);
@@ -460,13 +469,13 @@ public partial class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(HitDamage, false, _cachedVelocity.ToGodot(), GlobalTransform.origin);
+            boid._OnHit(_stats.CollisionDamage, false, _cachedVelocity.ToGodot(), GlobalTransform.origin);
             return;
         }
         
         if (area.IsInGroup("laser") && Alignment != BoidAlignment.Enemy)
         {
-            _OnHit(_health, Alignment == BoidAlignment.Enemy, Vector2.Zero, Vector3.Zero);
+            _OnHit(_health, Alignment == BoidAlignment.Enemy, Vector2.Zero, GlobalPosition.To3D());
             return;
         }
 
@@ -499,6 +508,22 @@ public partial class BoidBase : Area
         {
             boid.OnBoidDestroyed -= _OnTargetBoidDestroyed;
             SetTarget(TargetType.None);
+        }
+    }
+
+    private void _OnSkillsChanged(List<SkillNodeResource> skillNodes)
+    {
+        _stats = _baseStats.Duplicate() as StatsResource;
+        Debug.Assert(_stats != null, "_stats != null");
+        foreach (SkillNodeResource skill in skillNodes)
+        {
+            _stats.AttackDamage *= skill.AttackDamage;
+            _stats.AttackCooldown *= skill.AttackCooldown;
+            _stats.AttackSpread *= skill.AttackSpread;
+            _stats.AttackVelocity *= skill.AttackVelocity;
+            _stats.MoveSpeed *= skill.MoveSpeed;
+            _stats.MaxHealth *= skill.MaxHealth;
+            _stats.Regeneration += skill.Regeneration;
         }
     }
 }

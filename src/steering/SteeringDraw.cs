@@ -93,7 +93,7 @@ public partial class SteeringManager
             }
 
             // wander
-            if (_drawWander)
+            if (_drawWander && boid.HasBehaviour(Behaviours.Wander))
             {
                 Vector3 circlePos = boidPos + boid.Heading.To3D() * boid.WanderCircleDist;
 

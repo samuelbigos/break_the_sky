@@ -7,14 +7,10 @@ public class BoidAllyBase : BoidBase
     [Export] private float _shootSize = 1.5f;
     [Export] private float _shootTrauma = 0.05f;
     [Export] private float _destroyTrauma = 0.1f;
-    [Export] private float _microBulletCd = 1.0f;
-    [Export] private float _microBulletRange = 400.0f;
-    [Export] private float _microBulletDamageMod = 0.25f;
     
     [Export] public bool BlocksShots = true;
     
     [Export] private NodePath _sfxHitMicroPlayerNode;
-    
     [Export] private NodePath _sfxShootPlayerPath;
     private AudioStreamPlayer2D _sfxShootPlayer;
 

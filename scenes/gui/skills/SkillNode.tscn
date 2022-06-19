@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://src/gui/SkillNode.cs" type="Script" id=1]
+[ext_resource path="res://assets/gui/skills/skill_power.png" type="Texture" id=2]
+[ext_resource path="res://assets/skills/Skill_Power.tres" type="Resource" id=3]
+[ext_resource path="res://assets/gui/9-patch.png" type="Texture" id=4]
+
+[node name="SkillNode" type="Button"]
+anchor_left = 0.00390625
+anchor_top = 0.00694444
+anchor_right = 0.0273438
+anchor_bottom = 0.0486111
+icon = ExtResource( 2 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": true
+}
+Skill = ExtResource( 3 )
+_activeIndicatorPath = NodePath("ActiveIndicator")
+_rootPath = NodePath("")
+
+[node name="ActiveIndicator" type="NinePatchRect" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 4 )
+patch_margin_left = 3
+patch_margin_top = 3
+patch_margin_right = 3
+patch_margin_bottom = 3

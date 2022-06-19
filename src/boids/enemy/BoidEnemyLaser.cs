@@ -32,7 +32,6 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     private float _laserCooldownTimer;
     private float _laserChargeTimer;
     private float _laserDurationTimer;
-    private float _maxVelBase;
     private float _flashingTimer;
     private int _flashState;
 
@@ -43,7 +42,6 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
-        _maxVelBase = MaxVelocity;
         _laserCooldownTimer = _laserCooldown * 0.5f;
 
         LaserInactive();
@@ -54,20 +52,10 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     
     protected override void ProcessAlive(float delta)
     {
-        float distToTarget = (GlobalPosition - TargetPos).Length();
-        if (distToTarget < _targetLaserDist && _laserState == LaserState.Inactive)
-        {
-            MaxVelocity = 50.0f;
-        }
-        else
-        {
-            MaxVelocity = _maxVelBase;
-        }
-        
         if (_laserState == LaserState.Inactive)
         {
             _laserCooldownTimer -= delta;
-            if (distToTarget < _targetLaserDist && _laserCooldownTimer < 0.0f)
+            if (_laserCooldownTimer < 0.0f && CanFire())
             {
                 _laserState = LaserState.Charging;
                 _laserChargeTimer = _laserCharge;
@@ -111,10 +99,19 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         base.ProcessAlive(delta);
     }
 
+    private bool CanFire()
+    {
+        if (_targetType != TargetType.Enemy)
+            return false;
+
+        return (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Dot(_cachedHeading.ToGodot()) > 0.99f;
+    }
+
     private void LaserCharging()
     {
         _sfxLaserCharge.Play();
         _laserWarningMesh.Visible = true;
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
     }
 
     private void LaserFiring()
@@ -129,17 +126,9 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     {
         _laserMesh.Visible = false;
         _laserArea.Monitorable = false;
+        if (_targetType == TargetType.Enemy)
+            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
     }
-
-    // protected override Vector2 _SteeringPursuit(Vector2 targetPos, Vector2 targetVel)
-    // {
-    //     if (_laserState == LaserState.Charging || _laserState == LaserState.Firing)
-    //     {
-    //         return new Vector2(0.0f, 0.0f);
-    //     }
-    //
-    //     return base._SteeringPursuit(targetPos, targetVel);
-    // }
 
     protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
     {

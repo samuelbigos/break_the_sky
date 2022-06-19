@@ -25,13 +25,7 @@ public class BoidEnemyBase : BoidBase
     {
         base._Ready();
 
-        HitDamage = 9999.0f; // colliding with enemy boids should always destroy the allied boid.
-
         _cachedBehaviours = _behaviours;
-
-        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, true);
-        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, true);
-        // SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Separation, true, 10.0f);
     }
 
     protected override void ProcessAlive(float delta)
@@ -40,6 +34,7 @@ public class BoidEnemyBase : BoidBase
         {
             case TargetType.None:
             {
+                // TODO: optimise
                 List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
                 foreach (BoidAllyBase boid in allyBoids)
                 {

@@ -35,7 +35,7 @@ public class BoidAllyDrone : BoidAllyBase
 
         if (_shootCooldown > 0.0f)
         {
-            float t = _shootCooldown / Game.Instance.BaseBoidReload;
+            float t = _shootCooldown / _stats.AttackCooldown;
             t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
             Vector3 from = _baseScale * 2.0f;
             _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
@@ -65,12 +65,10 @@ public class BoidAllyDrone : BoidAllyBase
     protected override void _Shoot(Vector2 dir)
     {
         base._Shoot(dir);
-        
-        _shootCooldown = Game.Instance.BaseBoidReload;
+
+        _shootCooldown = _stats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
-        float spread = Game.Instance.BaseBoidSpread;
-        dir += new Vector2(-dir.y, dir.x) * (float) GD.RandRange(-spread, spread);
         Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * Game.Instance.BaseBulletSpeed, Alignment, Game.Instance.BaseBoidDamage);
+        bullet.Init(GlobalPosition, dir * _stats.AttackVelocity, Alignment, _stats.AttackDamage);
     }
 }

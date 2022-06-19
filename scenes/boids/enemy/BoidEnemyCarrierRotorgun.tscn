@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/boids/enemy/BoidEnemyCarrierRotorgun.cs" type="Script" id=1]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=2]
@@ -6,14 +6,15 @@
 [ext_resource path="res://assets/mesh/enemies/enemy_carrier_rotorgun.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=5]
 [ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=6]
+[ext_resource path="res://scenes/database/stats/StatsEnemy_CarrierRotorgun.tres" type="Resource" id=7]
+
+[sub_resource type="CylinderShape" id=2]
 
 [sub_resource type="ShaderMaterial" id=3]
 resource_local_to_scene = true
 shader = ExtResource( 6 )
-shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
+shader_param/u_primary_colour = null
 shader_param/u_secondary_colour = null
-
-[sub_resource type="CylinderShape" id=2]
 
 [sub_resource type="CylinderMesh" id=1]
 top_radius = 0.5
@@ -24,8 +25,7 @@ height = 7.0
 script = ExtResource( 1 )
 _behaviours = 12
 MaxVelocity = 0.0
-_meshMaterial = SubResource( 3 )
-MaxAngularVelocity = 500.0
+_baseStats = ExtResource( 7 )
 _bulletScene = ExtResource( 2 )
 _rotorMeshPath = NodePath("RotorMesh")
 
@@ -34,6 +34,7 @@ transform = Transform( 5.1447, 0, 0, 0, 1, 0, 0, 0, 5.1447, 0, 0, 0 )
 shape = SubResource( 2 )
 
 [node name="Mesh" parent="." index="1"]
+material_override = SubResource( 3 )
 mesh = ExtResource( 4 )
 material/0 = null
 

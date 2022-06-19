@@ -18,7 +18,7 @@ surfaces/0 = {
 [sub_resource type="ViewportTexture" id=2]
 viewport_path = NodePath("ViewportContainer/Viewport")
 
-[node name="MarginContainer" type="MarginContainer"]
+[node name="BoidIcon" type="MarginContainer"]
 margin_right = 40.0
 margin_bottom = 40.0
 size_flags_vertical = 0
@@ -53,7 +53,6 @@ size = 10.0
 
 [node name="MeshInstance" type="MeshInstance" parent="ViewportContainer/Viewport"]
 mesh = SubResource( 1 )
-material/0 = null
 
 [node name="Button" type="Button" parent="."]
 margin_left = 5.0

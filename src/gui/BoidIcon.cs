@@ -8,6 +8,7 @@ public class BoidIcon : Control
     [Export] private NodePath _buttonPath;
     [Export] private NodePath _progressPath;
     [Export] private float _rotSpeed = 5.0f;
+    [Export] private bool _showProgress = true;
 
     public Action<BoidIcon> OnPressed;
 
@@ -34,7 +35,7 @@ public class BoidIcon : Control
         DataAllyBoid data = Database.AllyBoids.FindEntry<DataAllyBoid>(boidId);
         _mesh.Mesh = data.Mesh;
         _id = data.Name;
-        _progress.Visible = showProgress;
+        _progress.Visible = showProgress && _showProgress;
     }
 
     public void UpdateProgress(float progress)

@@ -31,6 +31,7 @@ default_bus_layout="res://assets/sfx/default_bus_layout.tres"
 
 [autoload]
 
+SceneTransitionManager="*res://src/singletons/SceneTransitionManager.cs"
 MusicPlayer="*res://src/singletons/MusicPlayer.cs"
 ColourManager="*res://scenes/singletons/ColourManager.tscn"
 Resources="*res://scenes/singletons/Resources.tscn"
@@ -49,14 +50,13 @@ BoidFactory="*res://src/boids/BoidFactory.cs"
 
 [display]
 
-window/size/width=1920
-window/size/height=1080
-window/size/borderless=true
+window/size/width=1280
+window/size/height=720
 window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg", "res://addons/imgui-godot/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg" )
 
 [gd2cs]
 

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://assets/gui/skills/skill_speed.png" type="Texture" id=1]
+[ext_resource path="res://src/data/SkillNodeResource.cs" type="Script" id=2]
+
+[resource]
+script = ExtResource( 2 )
+Icon = ExtResource( 1 )
+AttackDamage = 1.0
+AttackCooldown = 0.9
+AttackSpread = 1.0
+AttackVelocity = 1.0
+MoveSpeed = 1.25
+MaxHealth = 1.0
+Regeneration = 0.0
+Microbullets = false
+Penetration = 0
+AreaDamage = false
