@@ -12,7 +12,7 @@ public class SaveDataPlayer : Saveable
 
     public static Action<int> OnLevelUp;
 
-    private Godot.Collections.Dictionary<string, object> _defaults = new Godot.Collections.Dictionary<string, object>()
+    private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
         {"level", 0},
         {"totalExperience", 0},

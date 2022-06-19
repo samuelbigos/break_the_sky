@@ -72,7 +72,13 @@ public class SaveManager : Singleton<SaveManager>
 			Saveable saveableNode = node as Saveable;
 			if (saveableNode == null)
 				continue;
-			
+
+			if (!saveData.Contains(saveableNode.Name))
+			{
+				saveableNode.InitialiseSaveData();
+				saveableNode.DoSave();
+				continue;
+			}
 			saveableNode.DoLoad(saveData[saveableNode.Name] as Dictionary);
 		}
 		

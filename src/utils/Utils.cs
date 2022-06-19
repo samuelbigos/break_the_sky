@@ -206,4 +206,10 @@ public static class Utils
         }
         v += segments;
     }
+
+    public static Godot.Vector2 Vector2FromString(string s)
+    {
+        string[] split = s.Split('(')[1].Split(')')[0].Split(',');
+        return new Godot.Vector2(split[0].ToFloat(), split[1].ToFloat());
+    }
 }

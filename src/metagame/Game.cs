@@ -71,17 +71,6 @@ public partial class Game : Singleton<Game>
         Player.RegisterPickup(pickup);
     }
 
-    public override void _Input(InputEvent @event)
-    {
-        base._Input(@event);
-
-        if (@event.IsActionPressed("toggle_fullscreen"))
-        {
-            OS.WindowBorderless = true;
-            
-        }
-    }
-
     private void _OnPlayerDestroyed(BoidBase player)
     {
         // TODO: game over
