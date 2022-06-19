@@ -13,6 +13,7 @@ AttackVelocity = 1.0
 MoveSpeed = 1.25
 MaxHealth = 1.0
 Regeneration = 0.0
+Size = 1.0
 Microbullets = false
 Penetration = 0
 AreaDamage = false

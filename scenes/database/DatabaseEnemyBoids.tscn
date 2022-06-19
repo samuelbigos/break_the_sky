@@ -17,6 +17,7 @@ DisplayName = "Driller"
 Scene = ExtResource( 2 )
 SpawningCost = 1.0
 MaterialDropCount = 3
+Experience = 10
 
 [node name="laser" type="Node" parent="."]
 script = ExtResource( 6 )
@@ -24,6 +25,7 @@ DisplayName = "Laser"
 Scene = ExtResource( 4 )
 SpawningCost = 5.0
 MaterialDropCount = 8
+Experience = 50
 
 [node name="beacon" type="Node" parent="."]
 script = ExtResource( 6 )
@@ -31,6 +33,7 @@ DisplayName = "Beacon"
 Scene = ExtResource( 3 )
 SpawningCost = 10.0
 MaterialDropCount = 12
+Experience = 100
 
 [node name="carrier" type="Node" parent="."]
 script = ExtResource( 6 )
@@ -38,6 +41,7 @@ DisplayName = "Carrier"
 Scene = ExtResource( 5 )
 SpawningCost = 20.0
 MaterialDropCount = 25
+Experience = 500
 
 [node name="dummy" type="Node" parent="."]
 script = ExtResource( 6 )

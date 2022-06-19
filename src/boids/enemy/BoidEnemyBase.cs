@@ -108,6 +108,8 @@ public class BoidEnemyBase : BoidBase
             float eject = 25.0f;
             drop.Init(new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * eject, Game.Player);
         }
+
+        SaveDataPlayer.Experience += data.Experience;
     }
 
     protected override void _OnTargetBoidDestroyed(BoidBase boid)

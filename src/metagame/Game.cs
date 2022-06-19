@@ -15,6 +15,7 @@ public partial class Game : Singleton<Game>
     [Export] public Rect2 AreaRect;
     
     private bool _initialSpawn;
+    private bool _fullScreen = false;
     
     public static BoidPlayer Player => Instance._player;
     public Rect2 SpawningRect => new(Player.GlobalPosition - AreaRect.Size * 0.5f, AreaRect.Size);
@@ -70,6 +71,17 @@ public partial class Game : Singleton<Game>
         Player.RegisterPickup(pickup);
     }
 
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        if (@event.IsActionPressed("toggle_fullscreen"))
+        {
+            OS.WindowBorderless = true;
+            
+        }
+    }
+
     private void _OnPlayerDestroyed(BoidBase player)
     {
         // TODO: game over
@@ -117,6 +129,12 @@ public partial class Game : Singleton<Game>
                 }
             }
 
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem("GameSettings"))
+        {
+            Resources.Instance.GameSettings._OnImGuiLayout();
             ImGui.EndTabItem();
         }
     }

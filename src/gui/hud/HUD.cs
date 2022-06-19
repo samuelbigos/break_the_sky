@@ -9,6 +9,11 @@ public partial class HUD : Singleton<HUD>
     [Export] private PackedScene _warningIndicatorScene;
     [Export] private PackedScene _boidIconScene;
     
+    // level
+    [OnReadyGet] private Button _openSkillTreeButton;
+    [OnReadyGet] private ProgressBar _levelBar;
+    [OnReadyGet] private Label _progressLabel;
+
     // resources
     [Export] private NodePath _materialsValuePath;
     
@@ -17,8 +22,13 @@ public partial class HUD : Singleton<HUD>
     [Export] private NodePath _fabicateMenuPath;
     [Export] private NodePath _fabricateQueuePath;
     
+    // skill trees
+    [OnReadyGet] private Label _skillPointsValue;
+
     public Action<string> OnFabricateButtonPressed;
     public Action<int> OnQueueButtonPressed;
+
+    public bool RequestShowConstructMenu;
     
     private Dictionary<BoidEnemyBase, WarningIndicator> _warningIndicators = new Dictionary<BoidEnemyBase, WarningIndicator>();
 
@@ -43,6 +53,8 @@ public partial class HUD : Singleton<HUD>
             FabricateManager.Instance.OnPopQueue += _OnPopQueue;
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
         }
+
+        _openSkillTreeButton.Connect("pressed", this, nameof(_OnOpenSkillTreeButtonPressed));
     }
 
     private void Refresh()
@@ -102,7 +114,16 @@ public partial class HUD : Singleton<HUD>
         
         // hud values
         _materialValue.Text = $"{SaveDataPlayer.MaterialCount}";
+        _skillPointsValue.Text = $"{SaveDataPlayer.SkillPoints}";
         
+        // level
+        _openSkillTreeButton.Visible = SaveDataPlayer.SkillPoints > 0 && StateMachine_Game.CurrentState == StateMachine_Game.States.Play;
+        float expInLevel = SaveDataPlayer.Experience - SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level);
+        float expRequiredForLevel = SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level + 1) -
+                                    SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level);
+        _levelBar.Value = expInLevel / expRequiredForLevel;
+        _progressLabel.Text = $"{(int)expInLevel} / {(int)expRequiredForLevel}";
+
         // queue progress
         for (int i = 0; i < _queueIcons.Count; i++)
         {
@@ -160,6 +181,7 @@ public partial class HUD : Singleton<HUD>
                 _tabUIContainer.Visible = false;
                 break;
             case StateMachine_Game.States.Construct:
+                RequestShowConstructMenu = false;
                 _tabUIContainer.Visible = true;
                 break;
             default:
@@ -176,5 +198,10 @@ public partial class HUD : Singleton<HUD>
     {
         Debug.Assert(_queueIcons.Contains(icon), "Clicking icon that doesn't exist in queue list.");
         OnQueueButtonPressed?.Invoke(_queueIcons.IndexOf(icon));
+    }
+
+    private void _OnOpenSkillTreeButtonPressed()
+    {
+        RequestShowConstructMenu = true;
     }
 }

@@ -21,6 +21,10 @@ public class GameState_Construct : BaseState<StateMachine_Game.States>
                 when Input.IsActionJustReleased("toggle_construct_ui"):
                 return true;
             
+            case StateMachine_Game.States.Play
+                when HUD.Instance.RequestShowConstructMenu:
+                return true;
+            
             default:
                 return false;
         }

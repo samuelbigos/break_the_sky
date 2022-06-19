@@ -13,6 +13,7 @@ public class SkillNodeResource : Resource
     [Export] public float MoveSpeed = 1.0f;
     [Export] public float MaxHealth = 1.0f;
     [Export] public float Regeneration = 0.0f;
+    [Export] public float Size = 1.0f;
 
     [Export] public bool Microbullets = false;
     [Export] public int Penetration = 0;

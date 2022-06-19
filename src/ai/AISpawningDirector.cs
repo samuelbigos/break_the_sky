@@ -433,15 +433,8 @@ public class AISpawningDirector : Node
 
     public void _OnImGuiLayout()
     {
-        if (ImGui.BeginTabItem("AI"))
+        if (ImGui.BeginTabItem("AI Director"))
         {
-            int secondsToPlot = 60 * 10;
-            float[] points = new float[secondsToPlot];
-            for (int i = 0; i < secondsToPlot; i++)
-            {
-                points[i] = CalcIntensity(i);
-            }
-
             ImGui.Text($"[{_state}] for {_timeInState:F2}");
             ImGui.Text($"{CalcIntensity(_totalTime):F2} Intensity");
             ImGui.Text($"{_totalTime:F2} TotalTime");
@@ -464,6 +457,12 @@ public class AISpawningDirector : Node
 
             ImGui.Checkbox("Enabled", ref _enabled);
         
+            int secondsToPlot = 60 * 10;
+            float[] points = new float[secondsToPlot];
+            for (int i = 0; i < secondsToPlot; i++)
+            {
+                points[i] = CalcIntensity(i);
+            }
             ImGui.PlotHistogram("", ref points[0], secondsToPlot, 
                 0, "", 0.0f, 1.0f, new System.Numerics.Vector2(200, 200));
 

@@ -5,4 +5,5 @@ using System.Diagnostics;
 public class Resources : Singleton<Resources>
 {
     [Export] public PackedScene Tooltip;
+    [Export] public GameSettingsResource GameSettings;
 }

@@ -28,6 +28,8 @@ public class BoidIcon : Control
         _progress = GetNode<ProgressBar>(_progressPath);
 
         _button.Connect("pressed", this, nameof(_OnPressed));
+        
+        _progress.Visible = _showProgress;
     }
     
     public void Init(string boidId, bool showProgress)
