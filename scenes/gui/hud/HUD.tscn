@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scenes/gui/hud/WarningIndicator.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/gui/hud/HUD.cs" type="Script" id=2]
@@ -7,9 +7,11 @@
 [ext_resource path="res://scenes/gui/BoidIcon.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/gui/skills/skill_speed.png" type="Texture" id=6]
 [ext_resource path="res://assets/gui/skills/skill_accuracy.png" type="Texture" id=7]
-[ext_resource path="res://assets/data/skills/skill_speed.tres" type="Resource" id=8]
-[ext_resource path="res://assets/data/skills/skill_accuracy.tres" type="Resource" id=9]
+[ext_resource path="res://assets/data/skills/skill_minor_speed.tres" type="Resource" id=8]
+[ext_resource path="res://assets/data/skills/skill_minor_accuracy.tres" type="Resource" id=9]
 [ext_resource path="res://src/gui/skills/SkillNodeConnectionGraph.cs" type="Script" id=10]
+[ext_resource path="res://assets/gui/skills/skill_microbullets.png" type="Texture" id=11]
+[ext_resource path="res://assets/data/skills/skill_major_microturrets.tres" type="Resource" id=12]
 
 [node name="HUD" type="Spatial"]
 script = ExtResource( 2 )
@@ -104,6 +106,7 @@ anchor_right = 0.525408
 anchor_bottom = 0.520032
 margin_bottom = -1.47195
 IsRoot = true
+AllyType = "drone"
 Connections = [ NodePath("../Power1"), NodePath("../Speed1"), NodePath("../Accuracy1") ]
 _rootPath = NodePath(".")
 
@@ -138,6 +141,9 @@ anchor_left = 0.6534
 anchor_top = 0.207975
 anchor_right = 0.704216
 anchor_bottom = 0.250611
+rect_min_size = Vector2( 34, 34 )
+icon = ExtResource( 11 )
+Skill = ExtResource( 12 )
 Connections = [ NodePath("../Power2"), NodePath("../Power4") ]
 _rootPath = NodePath("../RootNode")
 

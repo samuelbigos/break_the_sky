@@ -24,6 +24,8 @@ public class SaveDataPlayer : Saveable
         { "seenEnemies", new Dictionary() },
     };
 
+    private System.Collections.Generic.Dictionary<string, List<SkillNodeResource>> _activeSkills = new();
+
     public static int MaxAllyCount
     {
         get => Convert.ToInt32(Instance._data["maxAllyCount"]);
@@ -86,6 +88,33 @@ public class SaveDataPlayer : Saveable
         return false;
     }
 
+    public static List<SkillNodeResource> GetActiveSkills(string allyType)
+    {
+        return Instance._activeSkills[allyType];
+        
+        // Dictionary dict = Instance._data["skills"] as Dictionary;
+        // List<SkillNodeResource> skills = new();
+        // foreach (object skill in dict[allyType] as Array)
+        // {
+        //     skills.Add(skill as SkillNodeResource);
+        // }
+        //
+        // return skills;
+    }
+    
+    public static void UpdateActiveSkills(string allyType, List<SkillNodeResource> nodes)
+    {
+        Instance._activeSkills[allyType] = nodes;
+
+        // Dictionary dict = Instance._data["skills"] as Dictionary;
+        // Array array = new();
+        // foreach (SkillNodeResource skill in nodes)
+        // {
+        //     array.Add(skill);
+        // }
+        // dict[allyType] = array;
+    }
+
     private void DetermineLevelup()
     {
         bool tryLevelup = true;
@@ -130,7 +159,24 @@ public class SaveDataPlayer : Saveable
             if (!_data.Contains(key))
             {
                 _data[key] = _defaults[key];
+
+                // if (key == "skills")
+                // {
+                //     foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
+                //     {
+                //         Dictionary dict = _data[key] as Dictionary;
+                //         if (dict.Contains(boid.Name))
+                //             continue;
+                //         
+                //         dict.Add(boid.Name, new Array());
+                //     }
+                // }
             }
+        }
+
+        foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
+        {
+            _activeSkills.Add(boid.Name, new List<SkillNodeResource>());
         }
     }
 

@@ -94,6 +94,7 @@ public class SaveDataSettings : Saveable
             OS.WindowSize = WindowedResolution;
         }
         Fullscreen = fullscreen;
+        SaveManager.DoSave();
     }
 
     private void _OnWindowSizeChanged()

@@ -66,7 +66,7 @@ public class BoidFactory : Singleton<BoidFactory>
         Game.Instance.AddChild(ally);
 
         Vector2 pos = Game.Player.GlobalPosition + Utils.RandV2() * 1.0f;
-        ally.Init(ally.Name, _OnBoidDestroyed, pos, Vector2.Zero);
+        ally.Init(boid.Name, _OnBoidDestroyed, pos, Vector2.Zero);
         
         _allyBoids.Add(ally);
         _allBoids.Add(ally);

@@ -174,51 +174,11 @@ public partial class BoidBase : Area
         GlobalPosition = position;
     }
 
-    protected void RegisterSteeringBoid(Vector2 velocity)
-    {
-        _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
-
-        SteeringManager.Boid boid = new()
-        {
-            Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
-            Radius = _steeringRadius,
-            Position = GlobalPosition.ToNumerics(),
-            Velocity = velocity.ToNumerics(),
-            Heading = System.Numerics.Vector2.UnitY,
-            Target = System.Numerics.Vector2.Zero,
-            TargetIndex = -1,
-            Behaviours = _behaviours,
-            MaxSpeed = MaxVelocity * _stats.MoveSpeed,
-            MinSpeed = MinVelocity,
-            MaxForce = MaxForce * _stats.MoveSpeed,
-            DesiredSpeed = 0.0f,
-            LookAhead = 1.0f,
-            Weights = _steeringWeights,
-            ViewRange = 50.0f,
-            ViewAngle = 240.0f,
-            WanderCircleDist = 25.0f,
-            WanderCircleRadius = 5.0f,
-            WanderVariance = 50.0f,
-        };
-        
-        _steeringId = SteeringManager.Instance.RegisterBoid(boid);
-    }
-
     [OnReady] private void Ready()
     {
         Debug.Assert(_baseStats != null, "_baseStats != null");
-        _OnSkillsChanged(new List<SkillNodeResource>());
+        _stats = _baseStats.Duplicate() as StatsResource;
+        //_OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
         
         _health = _stats.MaxHealth;
 
@@ -312,6 +272,47 @@ public partial class BoidBase : Area
             }
             BoidFactory.Instance.FreeBoid(this);
         }
+    }
+    
+    protected void RegisterSteeringBoid(Vector2 velocity)
+    {
+        _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 2.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
+        _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
+
+        SteeringManager.Boid boid = new()
+        {
+            Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
+            Radius = _steeringRadius,
+            Position = GlobalPosition.ToNumerics(),
+            Velocity = velocity.ToNumerics(),
+            Heading = System.Numerics.Vector2.UnitY,
+            Target = System.Numerics.Vector2.Zero,
+            TargetIndex = -1,
+            Behaviours = _behaviours,
+            MaxSpeed = MaxVelocity * _stats.MoveSpeed,
+            MinSpeed = MinVelocity,
+            MaxForce = MaxForce * _stats.MoveSpeed,
+            DesiredSpeed = 0.0f,
+            LookAhead = 1.0f,
+            Weights = _steeringWeights,
+            ViewRange = 50.0f,
+            ViewAngle = 240.0f,
+            WanderCircleDist = 25.0f,
+            WanderCircleRadius = 5.0f,
+            WanderVariance = 50.0f,
+        };
+        
+        _steeringId = SteeringManager.Instance.RegisterBoid(boid);
     }
 
     protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
@@ -486,7 +487,7 @@ public partial class BoidBase : Area
         }
     }
     
-    private void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
+    protected virtual void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {
         switch (state)
         {
@@ -511,7 +512,7 @@ public partial class BoidBase : Area
         }
     }
 
-    private void _OnSkillsChanged(List<SkillNodeResource> skillNodes)
+    protected virtual void _OnSkillsChanged(List<SkillNodeResource> skillNodes)
     {
         _stats = _baseStats.Duplicate() as StatsResource;
         Debug.Assert(_stats != null, "_stats != null");
@@ -524,6 +525,11 @@ public partial class BoidBase : Area
             _stats.MoveSpeed *= skill.MoveSpeed;
             _stats.MaxHealth *= skill.MaxHealth;
             _stats.Regeneration += skill.Regeneration;
+            _stats.MicroTurrets |= skill.MicroTurrets;
+            _stats.MicroTurretRange *= skill.MicroTurretRange;
+            _stats.MicroTurretBallistics |= skill.MicroTurretBallistics;
+            _stats.MicroTurretDamage *= skill.MicroTurretDamage;
+            _stats.MicroTurretVelocity *= skill.MicroTurretVelocity;
         }
     }
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
 [ext_resource path="res://src/bullets/Bullet.cs" type="Script" id=2]
@@ -11,30 +11,16 @@
 flip_faces = true
 radial_segments = 16
 
-[sub_resource type="CapsuleMesh" id=3]
-flip_faces = true
-radius = 1.5
-radial_segments = 16
-
-[sub_resource type="SpatialMaterial" id=4]
-flags_unshaded = true
-
 [node name="Bullet" type="Area"]
 script = ExtResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 shape = SubResource( 1 )
 
-[node name="InsideMesh" type="MeshInstance" parent="."]
+[node name="Mesh" type="MeshInstance" parent="."]
 material_override = ExtResource( 3 )
 mesh = SubResource( 2 )
-material/0 = null
 script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
 _meshMaterials = [ ExtResource( 4 ) ]
-
-[node name="OutsideMesh" type="MeshInstance" parent="."]
-visible = false
-mesh = SubResource( 3 )
-material/0 = SubResource( 4 )

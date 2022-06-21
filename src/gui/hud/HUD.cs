@@ -30,12 +30,12 @@ public partial class HUD : Singleton<HUD>
 
     public bool RequestShowConstructMenu;
     
-    private Dictionary<BoidEnemyBase, WarningIndicator> _warningIndicators = new Dictionary<BoidEnemyBase, WarningIndicator>();
+    private Dictionary<BoidEnemyBase, WarningIndicator> _warningIndicators = new();
 
     private Control _fabricateQueue;
     private Control _fabricateMenu;
     private Label _materialValue;
-    private List<BoidIcon> _queueIcons = new List<BoidIcon>();
+    private List<BoidIcon> _queueIcons = new();
 
     [OnReady] private void Ready()
     {

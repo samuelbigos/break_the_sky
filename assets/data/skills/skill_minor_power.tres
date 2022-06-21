@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource( 2 )
 Icon = ExtResource( 1 )
+Major = false
 AttackDamage = 1.25
 AttackCooldown = 1.0
 AttackSpread = 1.0
@@ -14,6 +15,11 @@ MoveSpeed = 1.0
 MaxHealth = 1.25
 Regeneration = 0.0
 Size = 1.0
-Microbullets = false
+MicroTurretRange = 1.0
+MicroTurretCooldown = 1.0
+MicroTurretBallistics = false
+MicroTurretDamage = 1.0
+MicroTurretVelocity = 1.0
+MicroTurrets = false
 Penetration = 0
 AreaDamage = false
