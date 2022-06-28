@@ -4,10 +4,7 @@ using GodotOnReady.Attributes;
 public partial class BoidEnemyLaser : BoidEnemyBase
 {
     [Export] private float _targetLaserDist = 250.0f;
-    [Export] private float _laserCooldown = 5.0f;
-    [Export] private float _laserCharge = 1.0f;
-    [Export] private float _laserDuration = 2.0f;
-
+    
     [Export] private NodePath _sfxLaserChargeNode;
     [Export] private NodePath _sfxLaserFireNode;
     [Export] private NodePath _rotorNode;
@@ -34,6 +31,10 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     private float _laserDurationTimer;
     private float _flashingTimer;
     private int _flashState;
+    
+    private float _laserCooldown;
+    private float _laserCharge;
+    private float _laserDuration;
 
     [OnReady] private void Ready()
     {
@@ -42,6 +43,10 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
+        _laserCooldown = _stats.AttackCooldown;
+        _laserCharge = _stats.AttackCharge;
+        _laserDuration = _stats.AttackDuration;
+            
         _laserCooldownTimer = _laserCooldown * 0.5f;
 
         LaserInactive();

@@ -16,7 +16,7 @@ script = ExtResource( 6 )
 DisplayName = "Driller"
 Scene = ExtResource( 2 )
 SpawningCost = 1.0
-MaterialDropCount = 3
+MaterialDropCount = 1
 Experience = 10
 
 [node name="laser" type="Node" parent="."]

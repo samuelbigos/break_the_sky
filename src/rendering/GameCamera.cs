@@ -13,6 +13,8 @@ public class GameCamera : Camera
     [Export] public float MaxTrauma = 0.75f;
     [Export] private float _stateTransitionTime = 0.5f;
 
+    public static Action OnPostCameraTransformed;
+    
     public Transform BaseTransform;
     public Vector2 MousePosition => _cachedMousePos;
 
@@ -46,7 +48,12 @@ public class GameCamera : Camera
 
     public Vector3 ProjectToZero(Vector2 screen)
     {
-        return ProjectPosition(screen, GlobalTransform.origin.y);
+        return ProjectToY(screen, 0.0f);
+    }
+    
+    public Vector3 ProjectToY(Vector2 screen, float y)
+    {
+        return ProjectPosition(screen, GlobalTransform.origin.y - y);
     }
     
     public override void _Ready()
@@ -122,6 +129,8 @@ public class GameCamera : Camera
         {
             _initialTrans = new Transform(_initialTrans.basis, _initialTrans.origin + Vector3.Up * 5.0f);
         }
+        
+        OnPostCameraTransformed?.Invoke();
     }
 
     private Transform GetTransform(StateMachine_Game.States state, float delta)

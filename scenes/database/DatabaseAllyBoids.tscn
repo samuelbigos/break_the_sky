@@ -5,7 +5,7 @@
 [ext_resource path="res://scenes/boids/ally/BoidAllyDrone.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBomber.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/mesh/enemies/enemy_drone.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/mesh/allies/ally_drone_2.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/mesh/allies/ally_drone.obj" type="ArrayMesh" id=6]
 
 [node name="DatabaseAllyBoids" type="Node"]
 script = ExtResource( 1 )
@@ -15,7 +15,7 @@ script = ExtResource( 2 )
 DisplayName = "Drone"
 Scene = ExtResource( 3 )
 Mesh = ExtResource( 6 )
-FabricateCost = 10
+FabricateCost = 5
 FabricateTime = 3.0
 
 [node name="bomber" type="Node" parent="."]

@@ -14,8 +14,9 @@ public class SaveManager : Singleton<SaveManager>
 	public override void _Ready()
 	{
 		base._Ready();
-		
-		DoLoad();
+
+		Reset();
+		//DoLoad();
 	}
 
 	public static void DoSave()

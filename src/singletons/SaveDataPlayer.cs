@@ -15,11 +15,11 @@ public class SaveDataPlayer : Saveable
     private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
         { "level", 0 },
-        { "totalExperience", 0 },
+        { "totalExperience", 50 },
         { "skillPoints", 0 },
-        { "materialCount", 10 },
+        { "materialCount", 0 },
         { "maxAllyCount", 500 },
-        { "initialAllyCount", 1 },
+        { "initialAllyCount", 0 },
         { "unlockedAllies", new Array() },
         { "seenEnemies", new Dictionary() },
     };
@@ -174,10 +174,14 @@ public class SaveDataPlayer : Saveable
             }
         }
 
+        // TODO: _activeSkills isn't saved.
         foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
         {
-            _activeSkills.Add(boid.Name, new List<SkillNodeResource>());
+            if (!_activeSkills.ContainsKey(boid.Name))
+                _activeSkills.Add(boid.Name, new List<SkillNodeResource>());
         }
+        if (!_activeSkills.ContainsKey("player"))
+            _activeSkills.Add("player", new List<SkillNodeResource>());
     }
 
     public override void InitialiseSaveData()
@@ -186,22 +190,30 @@ public class SaveDataPlayer : Saveable
 
         List<DataEnemyBoid> enemyBoids = Database.EnemyBoids.GetAllEntries<DataEnemyBoid>();
         SetSeenEnemy(enemyBoids[0].Name); // so we always have something to spawn
-
-        List<DataAllyBoid> allyBoids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
-        Debug.Assert(allyBoids.Count > 0, "Error creating save file, no ally boid data!");
-        UnlockedAllies.Add(allyBoids[0].Name);
     }
     
     public override void _EnterTree()
     {
         base._EnterTree();
         DebugImGui.Instance.RegisterWindow("savedata_player", "Player Data", _OnImGuiLayout);
+        OnLevelUp += _OnLevelUp;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
         DebugImGui.Instance.UnRegisterWindow("savedata_player", _OnImGuiLayout);
+    }
+
+    private void _OnLevelUp(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                string unlocked = Database.AllyBoids.GetAllEntries<DataAllyBoid>()[0].Name;
+                UnlockedAllies.Add(unlocked);
+                break;
+        }
     }
 
     private void _OnImGuiLayout()

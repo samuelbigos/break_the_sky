@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public class BoidPlayer : BoidBase
+public class BoidPlayer : BoidAllyBase
 {
+    [Export] private PackedScene _bulletScene;
     [Export] private NodePath _sfxPickupPath;
 
     private AudioStreamPlayer2D _sfxPickup;
     private Vector2 _velocity;
+    
+    private float _shootCooldown;
+    private bool _cachedShoot;
 
     public override void _Ready()
     {
@@ -106,7 +110,60 @@ public class BoidPlayer : BoidBase
             boid.Heading = lookAt.ToNumerics();
         }
         
+        // shooting
+        Vector2 shootDir = (GameCamera.Instance.MousePosition - GlobalPosition).Normalized();
+        
+        _shootCooldown -= delta;
+        if (_cachedShoot)
+        {
+            if (_CanShoot(shootDir))
+            {
+                _Shoot(shootDir);
+            }
+        }
+
+        if (_shootCooldown > 0.0f)
+        {
+            float t = _shootCooldown / _stats.AttackCooldown;
+            t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
+            Vector3 from = _baseScale * 2.0f;
+            _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
+        }
+        
         base.ProcessAlive(delta);
+    }
+
+    protected override bool _CanShoot(Vector2 dir)
+    {
+        return _shootCooldown <= 0.0f;
+    }
+    
+    protected override void _Shoot(Vector2 dir)
+    {
+        base._Shoot(dir);
+
+        _shootCooldown = _stats.AttackCooldown;
+        Bullet bullet = _bulletScene.Instance() as Bullet;
+        Game.Instance.AddChild(bullet);
+        bullet.Init(GlobalPosition, dir * _stats.AttackVelocity, Alignment, _stats.AttackDamage);
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        if (!_acceptInput)
+            return;
+
+        if (@event.IsActionPressed("shoot"))
+        {
+            _cachedShoot = true;
+        }
+
+        if (@event.IsActionReleased("shoot"))
+        {
+            _cachedShoot = false;
+        }
     }
 
     private int DroneSort(BoidAllyDrone x, BoidAllyDrone y)

@@ -13,7 +13,8 @@ public partial class HUD : Singleton<HUD>
     [OnReadyGet] private Button _openSkillTreeButton;
     [OnReadyGet] private ProgressBar _levelBar;
     [OnReadyGet] private Label _progressLabel;
-
+    [OnReadyGet] private Label _levelLabel;
+    
     // resources
     [Export] private NodePath _materialsValuePath;
     
@@ -55,11 +56,22 @@ public partial class HUD : Singleton<HUD>
         }
 
         _openSkillTreeButton.Connect("pressed", this, nameof(_OnOpenSkillTreeButtonPressed));
+
+        SaveDataPlayer.OnLevelUp += _OnPlayedLevelUp;
+    }
+
+    private void _OnPlayedLevelUp(int level)
+    {
+        Refresh();
     }
 
     private void Refresh()
     {
         // setup fabrication buttons
+        for (int i = 0; i < _fabricateMenu.GetChildCount(); i++)
+        {
+            _fabricateMenu.GetChild(i).QueueFree();
+        }
         List<DataAllyBoid> boids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
         foreach (DataAllyBoid boid in boids)
         {
@@ -121,8 +133,9 @@ public partial class HUD : Singleton<HUD>
         float expInLevel = SaveDataPlayer.Experience - SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level);
         float expRequiredForLevel = SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level + 1) -
                                     SaveDataPlayer.TotalExpRequiredForLevel(SaveDataPlayer.Level);
-        _levelBar.Value = expInLevel / expRequiredForLevel;
+        _levelBar.Value = expInLevel / expRequiredForLevel; 
         _progressLabel.Text = $"{(int)expInLevel} / {(int)expRequiredForLevel}";
+        _levelLabel.Text = $"Level: {SaveDataPlayer.Level + 1}";
 
         // queue progress
         for (int i = 0; i < _queueIcons.Count; i++)

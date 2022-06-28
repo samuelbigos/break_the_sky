@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b77cc901-0f95-4a1b-9629-c87628ecfe92" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/sand.shader" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../scenes/boids/ally/BoidPlayer.tscn" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../src/boids/ally/BoidPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_ally_bomber.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_ally_bomber.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_ally_drone.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_ally_drone.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_ally_player.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_ally_player.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_enemy_beacon.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_enemy_beacon.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_enemy_carrier.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_enemy_carrier.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_enemy_carrierrotorgun.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_enemy_carrierrotorgun.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_enemy_driller.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_enemy_driller.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/stats/stats_enemy_laser.tres" beforeDir="false" afterPath="$PROJECT_DIR$/../data/stats/stats_enemy_laser.tres" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mesh/allies/ally_drone.obj" beforeDir="false" afterPath="$PROJECT_DIR$/../mesh/allies/ally_drone.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mesh/allies/ally_drone_2.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mesh/allies/ally_drone_2.obj.import" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../../imgui.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/boids/BoidPlayer.tscn" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/boids/ally/BoidAllyDrone.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/boids/ally/BoidAllyDrone.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/boids/enemy/BoidEnemyLaser.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/boids/enemy/BoidEnemyLaser.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/database/DatabaseAllyBoids.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/database/DatabaseAllyBoids.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/database/DatabaseEnemyBoids.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/database/DatabaseEnemyBoids.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/gui/hud/HUD.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/gui/hud/HUD.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/metagame/CommandCentre.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/metagame/CommandCentre.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../scenes/metagame/Game.tscn" beforeDir="false" afterPath="$PROJECT_DIR$/../../scenes/metagame/Game.tscn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/ai/AISpawningDirector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/ai/AISpawningDirector.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/boids/BoidPlayer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/boids/enemy/BoidEnemyLaser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/boids/enemy/BoidEnemyLaser.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/data/StatsResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/data/StatsResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/gui/hud/HUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/gui/hud/HUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/metagame/Game.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/metagame/Game.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/singletons/SaveDataPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/singletons/SaveDataPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/singletons/SaveManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/singletons/SaveManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/utils/Saveable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/utils/Saveable.cs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="2BDq6KQqK8KJEKaLPtxFZ6rPtIu" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b77cc901-0f95-4a1b-9629-c87628ecfe92" name="Changes" comment="" />
+      <created>1656450826909</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1656450826909</updated>
+      <workItem from="1656450830656" duration="5000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

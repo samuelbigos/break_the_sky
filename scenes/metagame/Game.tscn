@@ -1,8 +1,8 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
-[ext_resource path="res://scenes/boids/BoidPlayer.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/boids/ally/BoidPlayer.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/rendering/GameCamera.cs" type="Script" id=4]
 [ext_resource path="res://src/ai/AISpawningDirector.cs" type="Script" id=5]
 [ext_resource path="res://scenes/rendering/Cloud.tscn" type="PackedScene" id=6]
@@ -11,6 +11,7 @@
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 [ext_resource path="res://src/rendering/TrailRenderer.cs" type="Script" id=11]
+[ext_resource path="res://assets/shader/sand.shader" type="Shader" id=12]
 
 [sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
@@ -20,11 +21,13 @@ vertex_color_use_as_albedo = true
 [sub_resource type="SphereMesh" id=4]
 
 [sub_resource type="PlaneMesh" id=8]
-size = Vector2( 1000, 1000 )
+size = Vector2( 1, 1 )
+subdivide_width = 500
+subdivide_depth = 500
 
-[sub_resource type="SpatialMaterial" id=9]
-flags_unshaded = true
-albedo_color = Color( 1, 0.831373, 0.639216, 1 )
+[sub_resource type="ShaderMaterial" id=11]
+shader = ExtResource( 12 )
+shader_param/u_sand_col = Color( 0.898039, 0.65098, 0.384314, 1 )
 
 [sub_resource type="QuadMesh" id=7]
 
@@ -42,10 +45,11 @@ shader_param/distance_fade_blend = 1000.0
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
 StateMachinePath = NodePath("StateMachine_Game")
-PlayerPath = NodePath("BoidPlayer")
 AiSpawningDirectorPath = NodePath("AISpawningDirector")
 HudPath = NodePath("HUD")
-AreaRect = Rect2( -300, -300, 600, 600 )
+SandPath = NodePath("Sand")
+_areaRect = Rect2( -300, -300, 600, 600 )
+_playerScene = ExtResource( 3 )
 
 [node name="AISpawningDirector" type="Node" parent="."]
 script = ExtResource( 5 )
@@ -63,8 +67,6 @@ script = ExtResource( 9 )
 [node name="TrailRenderer" type="MeshInstance" parent="."]
 material_override = SubResource( 10 )
 script = ExtResource( 11 )
-
-[node name="BoidPlayer" parent="." instance=ExtResource( 3 )]
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 250, 0 )
@@ -87,10 +89,10 @@ mesh = SubResource( 4 )
 
 [node name="HUD" parent="." instance=ExtResource( 1 )]
 
-[node name="Ground" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -50, 0 )
+[node name="Sand" type="MeshInstance" parent="."]
+transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -50, 0 )
 mesh = SubResource( 8 )
-material/0 = SubResource( 9 )
+material/0 = SubResource( 11 )
 
 [node name="PostProcess" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140.015, 0 )

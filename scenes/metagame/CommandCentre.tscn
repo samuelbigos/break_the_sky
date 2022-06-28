@@ -116,7 +116,6 @@ shape = SubResource( 10 )
 [node name="Africa" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 12 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Africa"]
 
@@ -126,7 +125,6 @@ shape = SubResource( 1 )
 [node name="Antarctica" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 13 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Antarctica"]
 
@@ -136,7 +134,6 @@ shape = SubResource( 2 )
 [node name="Arctic" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 6 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Arctic"]
 
@@ -146,7 +143,6 @@ shape = SubResource( 3 )
 [node name="Asia" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 10 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Asia"]
 
@@ -156,7 +152,6 @@ shape = SubResource( 4 )
 [node name="Australia" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 11 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Australia"]
 
@@ -166,7 +161,6 @@ shape = SubResource( 5 )
 [node name="Europe" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 9 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/Europe"]
 
@@ -176,7 +170,6 @@ shape = SubResource( 6 )
 [node name="NorthAmerica" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 5 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/NorthAmerica"]
 
@@ -186,7 +179,6 @@ shape = SubResource( 7 )
 [node name="SouthAmerica" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 7 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/SouthAmerica"]
 
@@ -196,7 +188,6 @@ shape = SubResource( 8 )
 [node name="UK" type="MeshInstance" parent="Map"]
 mesh = ExtResource( 8 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="StaticBody" type="StaticBody" parent="Map/UK"]
 

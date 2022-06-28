@@ -40,9 +40,12 @@ _steeringRadius = 15.0
 MaxVelocity = 25.0
 MaxForce = 25.0
 _baseStats = ExtResource( 10 )
+DestroyTrauma = 0.1
+HitTrauma = 0.05
 EngageRange = 250.0
 LaserMeshPath = NodePath("LaserMesh")
 LaserWarningMeshPath = NodePath("LaserWarningMesh")
+_targetLaserDist = 250.0
 _sfxLaserChargeNode = NodePath("SFXLaserCharge")
 _sfxLaserFireNode = NodePath("SFXLaserFire")
 _rotorNode = NodePath("RotorMesh")
@@ -54,7 +57,6 @@ transform = Transform( 1.97819, 0, 0, 0, 2.35269, 0, 0, 0, 3.81871, 0, 0, -2.769
 [node name="Mesh" parent="." index="1"]
 material_override = SubResource( 5 )
 mesh = ExtResource( 5 )
-material/0 = null
 
 [node name="RotorMesh" type="MeshInstance" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
@@ -79,7 +81,6 @@ transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, -12.3501 )
 visible = false
 material_override = ExtResource( 8 )
 mesh = ExtResource( 9 )
-material/0 = null
 
 [node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="9"]
 stream = ExtResource( 3 )

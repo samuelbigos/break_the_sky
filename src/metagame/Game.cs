@@ -8,34 +8,43 @@ using ImGuiNET;
 public partial class Game : Singleton<Game>
 {
     [OnReadyGet] private StateMachine_Game _stateMachine;
-    [OnReadyGet] private BoidPlayer _player;
     [OnReadyGet] private AISpawningDirector _aiSpawningDirector;
     [OnReadyGet] private HUD _hud;
+    [OnReadyGet] private MeshInstance _sand;
 
-    [Export] public Rect2 AreaRect;
+    [Export] private Rect2 _areaRect;
+    [Export] private PackedScene _playerScene;
     
     private bool _initialSpawn;
     private bool _fullScreen = false;
+    private BoidPlayer _player;
     
     public static BoidPlayer Player => Instance._player;
-    public Rect2 SpawningRect => new(Player.GlobalPosition - AreaRect.Size * 0.5f, AreaRect.Size);
-    
-    [OnReady] private void Ready()
+    public Rect2 SpawningRect => new(Player.GlobalPosition - _areaRect.Size * 0.5f, _areaRect.Size);
+
+    [OnReady]
+    private void Ready()
     {
         base._Ready();
-        
-        SteeringManager.EdgeBounds = AreaRect;
-        
+
+        SteeringManager.EdgeBounds = _areaRect;
+
+        _player = _playerScene.Instance<BoidPlayer>();
+        AddChild(_player);
         _player.Init("player", _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
-        
+        BoidFactory.Instance.AllyBoids.Add(_player);
+        BoidFactory.Instance.AllBoids.Add(_player);
+
         _aiSpawningDirector.Init(this, _player);
 
         GD.Randomize();
 
         GameCamera.Instance.Init(_player);
         MusicPlayer.Instance.PlayGame();
-        
+
         StateMachine_Game.Instance.SendInitialStateChange();
+
+        GameCamera.OnPostCameraTransformed += OnPostCameraTransformed;
     }
 
     public override void _EnterTree()
@@ -63,6 +72,16 @@ public partial class Game : Singleton<Game>
             
             _initialSpawn = true;
         }
+    }
+    
+    private void OnPostCameraTransformed()
+    {
+        Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), -50.0f);
+        Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, -50.0f);
+        _sand.Scale = new Vector3(bottomRight.x - topLeft.x,1.0f, bottomRight.z - topLeft.z);
+        Vector3 pos = GameCamera.Instance.GlobalTransform.origin;
+        pos.y = _sand.GlobalTransform.origin.y;
+        _sand.GlobalPosition(pos);
     }
 
     public void RegisterPickup(PickupMaterial pickup)

@@ -304,7 +304,7 @@ public class AISpawningDirector : Node
     private float CalcBudget(float intensity)
     {
         // budget is a factor of intensity and player level
-        return _baseBudget * (SaveDataPlayer.Level * _levelScale) * intensity;
+        return _baseBudget * Mathf.Max((float) Math.Log(SaveDataPlayer.Level + 1, 2), 1.0f) * intensity;
     }
 
     private SpawningState CalcExitState(float intensity, List<SpawningState> exitStates, List<float> exitStateWeights)

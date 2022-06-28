@@ -15,9 +15,10 @@ public abstract class Saveable : Node
     
     public abstract void InitialiseSaveData();
 
-    public void Reset()
+    public virtual void Reset()
     {
         _data = new Dictionary();
+        InitialiseSaveData();
     }
 
     protected abstract void Validate();
