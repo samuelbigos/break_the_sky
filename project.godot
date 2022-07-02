@@ -57,7 +57,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg", "res://addons/cloud_texture_generator/plugin.cfg" )
 
 [gd2cs]
 

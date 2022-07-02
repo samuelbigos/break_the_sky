@@ -108,9 +108,9 @@ public class CloudTextureGenerator : EditorPlugin
     
     private void _OnButtonPressed()
     {
-        const int sizeX = 256;
-        const int sizeY = 8;
-        const int sizeZ = 256;
+        const int sizeX = 32;
+        const int sizeY = 32;
+        const int sizeZ = 32;
         const float freq = 4.0f;
 
         Stopwatch stopwatch = new Stopwatch();
@@ -125,7 +125,7 @@ public class CloudTextureGenerator : EditorPlugin
         Node anl = anlScript.New() as Node;
         Debug.Assert(anl != null, "anl != null");
         
-        anl.Call("Generate3DGradientNoiseImage", sizeX, freq, freq * ((float)sizeY / sizeX), freq, DateTime.Now.Millisecond);
+        anl.Call("Generate3DGradientNoiseImage", sizeX, freq, freq, freq, DateTime.Now.Millisecond);
         
         GD.Print($"Generate3DGradientNoiseImage {stopwatch.ElapsedTicks * tick:F2} seconds.");
         stopwatch.Restart();
@@ -163,6 +163,9 @@ public class CloudTextureGenerator : EditorPlugin
         ResourceSaver.Save("res://assets/textures/noise/cloud_noise.tex3d", texture3D);
         
         GD.Print($"Save - {stopwatch.ElapsedTicks * tick:F2} seconds.");
+        
+        anlScript.Free();
+        anl.Free();
     }
 }
 #endif
