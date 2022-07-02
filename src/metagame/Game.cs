@@ -76,8 +76,8 @@ public partial class Game : Singleton<Game>
     
     private void OnPostCameraTransformed()
     {
-        Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), -50.0f);
-        Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, -50.0f);
+        Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), _sand.GlobalTransform.origin.y);
+        Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, _sand.GlobalTransform.origin.y);
         _sand.Scale = new Vector3(bottomRight.x - topLeft.x,1.0f, bottomRight.z - topLeft.z);
         Vector3 pos = GameCamera.Instance.GlobalTransform.origin;
         pos.y = _sand.GlobalTransform.origin.y;

@@ -1,0 +1,35 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path="res://.import/LargeDunes_Alb.tga-2458f77f214c2f90f1f5930f4bdcfa94.stex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/textures/dunes/LargeDunes_Alb.tga"
+dest_files=[ "res://.import/LargeDunes_Alb.tga-2458f77f214c2f90f1f5930f4bdcfa94.stex" ]
+
+[params]
+
+compress/mode=0
+compress/lossy_quality=0.99
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=0
+flags/repeat=true
+flags/filter=true
+flags/mipmaps=true
+flags/anisotropic=true
+flags/srgb=1
+process/fix_alpha_border=false
+process/premult_alpha=false
+process/HDR_as_SRGB=true
+process/invert_color=false
+process/normal_map_invert_y=false
+stream=false
+size_limit=0
+detect_3d=false
+svg/scale=1.0
