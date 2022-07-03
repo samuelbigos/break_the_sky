@@ -108,10 +108,10 @@ public class CloudTextureGenerator : EditorPlugin
     
     private void _OnButtonPressed()
     {
-        const int sizeX = 32;
-        const int sizeY = 32;
-        const int sizeZ = 32;
-        const float freq = 4.0f;
+        const int sizeX = 128;
+        const int sizeY = 128;
+        const int sizeZ = 128;
+        const float freq = 8.0f;
 
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();

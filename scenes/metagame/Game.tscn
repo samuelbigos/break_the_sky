@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
@@ -20,6 +20,9 @@
 [ext_resource path="res://assets/textures/dunes/SmallDunes_Normal.tga" type="Texture" id=18]
 [ext_resource path="res://assets/textures/dunes/SmallDunes_Height.tga" type="Texture" id=19]
 [ext_resource path="res://assets/textures/dunes/SmallDunes_Alb.tga" type="Texture" id=20]
+[ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=21]
+[ext_resource path="res://assets/textures/noise/cloud_noise.tex3d" type="Texture3D" id=22]
+[ext_resource path="res://assets/textures/clouds/height_cumulus.png" type="Texture" id=23]
 
 [sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
@@ -70,6 +73,43 @@ shader_param/threshold_depth = 0.0
 shader_param/blend_depth = 0.01
 shader_param/distance_fade_length = 1000.0
 shader_param/distance_fade_blend = 1000.0
+
+[sub_resource type="CubeMesh" id=12]
+size = Vector3( 500, 200, 500 )
+
+[sub_resource type="ShaderMaterial" id=13]
+shader = ExtResource( 21 )
+shader_param/u_colour_a = null
+shader_param/u_colour_b = null
+shader_param/u_flip = null
+shader_param/u_scroll_speed = 1.0
+shader_param/u_turbulence = 1.0
+shader_param/u_scale = 512.0
+shader_param/u_pos_y = null
+shader_param/u_density = 0.5
+shader_param/u_transparent = null
+shader_param/u_transparent_col = null
+shader_param/u_transparent_tex = null
+shader_param/u_edge_strength = 0.5
+shader_param/u_height_world_top = 300.0
+shader_param/u_height_world_bot = 100.0
+shader_param/u_do_dither = false
+shader_param/u_bit_depth = 32
+shader_param/u_contrast = 0.0
+shader_param/u_offset = 0.0
+shader_param/u_dither_size = 1
+shader_param/u_plane_size = null
+shader_param/u_receive_shadow = null
+shader_param/u_shadow_offset = null
+shader_param/u_num_boids = null
+shader_param/u_displace_radius = null
+shader_param/u_boid_pos_1 = null
+shader_param/u_boid_pos_2 = null
+shader_param/u_boid_pos_3 = null
+shader_param/u_boid_pos_4 = null
+shader_param/u_boid_pos_5 = null
+shader_param/u_noise = ExtResource( 22 )
+shader_param/u_cloud_heightmap = ExtResource( 23 )
 
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
@@ -130,3 +170,8 @@ extra_cull_margin = 16384.0
 mesh = SubResource( 7 )
 skeleton = NodePath("../Camera")
 material/0 = SubResource( 6 )
+
+[node name="CloudBox" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 200, 0 )
+mesh = SubResource( 12 )
+material/0 = SubResource( 13 )
