@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://assets/shader/cloud.shader" type="Shader" id=1]
 [ext_resource path="res://src/rendering/Clouds.cs" type="Script" id=2]
@@ -10,73 +10,19 @@
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 1024, 640 )
 
-[sub_resource type="ShaderMaterial" id=8]
-shader = ExtResource( 5 )
-shader_param/u_colour_a = null
-shader_param/u_colour_b = null
-shader_param/u_flip = null
-shader_param/u_scroll_speed = 1.0
-shader_param/u_turbulence = 1.0
-shader_param/u_scale = 256.0
-shader_param/u_pos_y = null
-shader_param/u_density = 0.5
-shader_param/u_transparent = null
-shader_param/u_transparent_col = null
-shader_param/u_transparent_tex = null
-shader_param/u_edge_strength = 0.5
-shader_param/u_height_world_top = 300.0
-shader_param/u_height_world_bot = 100.0
-shader_param/u_do_dither = false
-shader_param/u_bit_depth = 32
-shader_param/u_contrast = 0.0
-shader_param/u_offset = 0.0
-shader_param/u_dither_size = 1
-shader_param/u_plane_size = null
-shader_param/u_receive_shadow = null
-shader_param/u_shadow_offset = null
-shader_param/u_num_boids = null
-shader_param/u_displace_radius = null
-shader_param/u_boid_pos_1 = null
-shader_param/u_boid_pos_2 = null
-shader_param/u_boid_pos_3 = null
-shader_param/u_boid_pos_4 = null
-shader_param/u_boid_pos_5 = null
-
 [sub_resource type="ShaderMaterial" id=2]
 resource_local_to_scene = true
 shader = ExtResource( 5 )
-shader_param/u_colour_a = Color( 1, 1, 1, 1 )
-shader_param/u_colour_b = Color( 0, 0, 0, 1 )
-shader_param/u_flip = 1
 shader_param/u_scroll_speed = 5.0
-shader_param/u_turbulence = 10.0
 shader_param/u_scale = 512.0
-shader_param/u_pos_y = null
 shader_param/u_density = 0.306
-shader_param/u_transparent = true
-shader_param/u_transparent_col = null
-shader_param/u_transparent_tex = null
-shader_param/u_edge_strength = 0.5
+shader_param/u_fluffiness = 5.0
+shader_param/u_absorbtion = 0.025
+shader_param/u_colour_lit = Color( 1, 1, 1, 1 )
+shader_param/u_colour_shadow = Color( 0, 0, 0, 0 )
 shader_param/u_height_world_top = 300.0
 shader_param/u_height_world_bot = 100.0
-shader_param/u_do_dither = false
-shader_param/u_bit_depth = 32
-shader_param/u_contrast = 0.0
-shader_param/u_offset = 0.0
-shader_param/u_dither_size = 4
-shader_param/u_plane_size = Vector2( 640, 512 )
-shader_param/u_receive_shadow = null
-shader_param/u_shadow_offset = null
-shader_param/u_num_boids = null
-shader_param/u_displace_radius = null
-shader_param/u_boid_pos_1 = null
-shader_param/u_boid_pos_2 = null
-shader_param/u_boid_pos_3 = null
-shader_param/u_boid_pos_4 = null
-shader_param/u_boid_pos_5 = null
 shader_param/u_noise = ExtResource( 7 )
-shader_param/u_dither_tex = ExtResource( 4 )
-shader_param/u_boid_vel_tex = SubResource( 8 )
 
 [sub_resource type="ViewportTexture" id=7]
 viewport_path = NodePath("BoidVelMapViewport")

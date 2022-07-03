@@ -79,38 +79,15 @@ size = Vector3( 500, 200, 500 )
 
 [sub_resource type="ShaderMaterial" id=13]
 shader = ExtResource( 21 )
-shader_param/u_colour_a = null
-shader_param/u_colour_b = null
-shader_param/u_flip = null
 shader_param/u_scroll_speed = 1.0
-shader_param/u_turbulence = 1.0
 shader_param/u_scale = 512.0
-shader_param/u_pos_y = null
-shader_param/u_density = -0.816
-shader_param/u_transparent = null
-shader_param/u_transparent_col = null
-shader_param/u_transparent_tex = null
-shader_param/u_fluffiness = 10.0
-shader_param/u_absorbtion = 0.01
-shader_param/u_colour_lit = Color( 1, 1, 1, 1 )
-shader_param/u_colour_shadow = Color( 0, 0, 0, 0 )
+shader_param/u_density = -0.48
+shader_param/u_fluffiness = 5.0
+shader_param/u_absorbtion = 0.025
+shader_param/u_colour_lit = Color( 0.858824, 0.603922, 0.329412, 1 )
+shader_param/u_colour_shadow = Color( 0.0313726, 0.0431373, 0.180392, 1 )
 shader_param/u_height_world_top = 300.0
 shader_param/u_height_world_bot = 100.0
-shader_param/u_do_dither = false
-shader_param/u_bit_depth = 32
-shader_param/u_contrast = 0.0
-shader_param/u_offset = 0.0
-shader_param/u_dither_size = 1
-shader_param/u_plane_size = null
-shader_param/u_receive_shadow = null
-shader_param/u_shadow_offset = null
-shader_param/u_num_boids = null
-shader_param/u_displace_radius = null
-shader_param/u_boid_pos_1 = null
-shader_param/u_boid_pos_2 = null
-shader_param/u_boid_pos_3 = null
-shader_param/u_boid_pos_4 = null
-shader_param/u_boid_pos_5 = null
 shader_param/u_noise = ExtResource( 22 )
 shader_param/u_cloud_heightmap = ExtResource( 23 )
 
@@ -151,7 +128,7 @@ script = ExtResource( 4 )
 [node name="Clouds" parent="." instance=ExtResource( 6 )]
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 100, 0 )
+transform = Transform( -0.847525, 0.528347, -0.0505013, -0.424907, -0.618409, 0.661078, 0.318048, 0.581739, 0.748616, 0, 276.325, 0 )
 light_cull_mask = 4294966273
 directional_shadow_max_distance = 1000.0
 
