@@ -90,7 +90,7 @@ public class DebugImGui : Saveable
         delta = TimeSystem.UnscaledDelta;
         if (delta != 0.0f)
         {
-            float fps = 1.0f / delta;
+            float fps = 1.0f / Performance.GetMonitor(Performance.Monitor.TimeProcess);
             _fps = 0.033f * fps + 0.966f * _fps;
         }
     }

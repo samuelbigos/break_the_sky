@@ -1,7 +1,9 @@
 shader_type spatial;
-render_mode world_vertex_coords;
+render_mode world_vertex_coords, cull_front;
 
 // implementation of Horizon Zero Dawn cloud rendering
+// https://www.youtube.com/watch?v=-d8qT5-1LOI
+// https://www.shadertoy.com/view/3sffzj
 // http://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
 // comments referencing page numbers refer to pages in that PDF
 
@@ -10,6 +12,11 @@ uniform sampler3D u_noise;
 uniform float u_scroll_speed = 1.0;
 uniform float u_scale = 256.0;
 uniform float u_density = 0.5;
+
+uniform int u_num_cloud_steps = 32;
+
+uniform vec3 u_cloud_box_min = vec3(-250.0, 0.0, -250.0);
+uniform vec3 u_cloud_box_max = vec3(250.0, 100.0, 250.0);
 
 // determines how far we penetrate into clouds before stopping the raymarch, manifests
 // as more transparent cloud edges
@@ -20,12 +27,22 @@ uniform float u_absorbtion = 0.025;
 uniform vec4 u_colour_lit : hint_color = vec4(1.0);
 uniform vec4 u_colour_shadow : hint_color = vec4(0.0);
 
+// lighting
+uniform int u_num_light_steps = 16;
+uniform vec4 u_sun_colour : hint_color = vec4(1.0);
+uniform float u_sun_power = 1.0;
+
+uniform sampler2D u_blue_noise;
+
 // height
 uniform sampler2D u_cloud_heightmap;
-uniform float u_height_world_top = 300.0;
-uniform float u_height_world_bot = 100.0;
 
 varying vec3 v_vertex;
+varying float v_blue_noise;
+
+const float GOLDEN_RATIO = 1.6180339;
+
+const vec3 sigma = vec3(1.0, 1.0, 1.0);
 
 void vertex()
 {
@@ -66,15 +83,15 @@ vec4 cloud_noise(vec3 pos)
 	return col;
 }
 
-float height_gradient(vec3 pos)
+float height_gradient(float height)
 {
 	vec2 uv = vec2(0.5, 0.0);
-	uv.y = 1.0 - clamp((pos.y - u_height_world_bot) / (u_height_world_top - u_height_world_bot), 0.0, 1.0);
+	uv.y = height;
 	return texture(u_cloud_heightmap, uv).r;
 }
 
 /* returns the density of cloud at given world position in 0-1 range. */
-float cloud(vec3 pos)
+float cloud(vec3 pos, out float cloud_height, bool sample_detail)
 {
 	vec4 cloud_noise = cloud_noise(pos);
 	
@@ -88,119 +105,169 @@ float cloud(vec3 pos)
     // cloud shape modeled after the GPU Pro 7 chapter
     float cloud = remap(perlinWorley, 0.0, 1.0, worley.x, 1.0);
     cloud = remap(cloud, mix(0.9, 0.95, 1.0 - u_density), 1.0, 0.0, 1.0); // fake cloud coverage
-	cloud *= height_gradient(pos);
+	cloud_height = 1.0 - clamp((pos.y - u_cloud_box_min.y) / (u_cloud_box_max.y - u_cloud_box_min.y), 0.0, 1.0);
+	float density = height_gradient(cloud_height);
+	cloud *= density;
 	
 	return clamp(cloud, 0.0, 1.0);
 }
 
-void cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, out float dist, out float alpha, out float lighting)
+float henyey_greenstein(float g, float costh)
 {
+	return (1.0 / (4.0 * 3.1415))  * ((1.0 - g * g) / pow(1.0 + g*g - 2.0*g*costh, 1.5));
+}
+
+// https://twitter.com/FewesW/status/1364629939568451587/photo/1
+vec3 multiple_octaves(float extinction, float mu, float step_size)
+{
+    vec3 luminance = vec3(0);
+    const float octaves = 4.0;
+    
+    // Attenuation
+    float a = 1.0;
+    // Contribution
+    float b = 1.0;
+    // Phase attenuation
+    float c = 1.0;
+    
+    float phase;
+	
+    for(float i = 0.0; i < octaves; i++)
+	{
+        // Two-lobed HG
+        phase = mix(henyey_greenstein(-0.1 * c, mu), henyey_greenstein(0.3 * c, mu), 0.7);
+        luminance += b * phase * exp(-step_size * extinction * sigma * a);
+        // Lower is brighter
+        a *= 0.2;
+        // Higher is brighter
+        b *= 0.5;
+        c *= 0.5;
+    }
+    return luminance;
+}
+
+float light_march(vec3 ro, vec3 rd)
+{
+	vec2 intersect = intersect_aabb(ro, rd, u_cloud_box_min, u_cloud_box_max);
+	
+	// sum up the total density of clouds along the path to the light source
+	float cloud_height;
+	float step_size = intersect.y / float(u_num_light_steps);
+	float density = 0.0;
+	for (int i = 0; i < u_num_light_steps; i++)
+	{
+		vec3 p = ro + rd * step_size * float(i);
+		density += cloud(p, cloud_height, true) * step_size;
+		
+	}
+	return density;
+}
+
+float beers_law(float density)
+{
+	return exp(-density);
+}
+
+vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, out float alpha)
+{	
 	// p.80 - define low and high level-of-detail step size
 	// we'll march with large steps through the cloud volume until we hit a cloud, then step back and march
 	// forward again with smaller step size and more detailed samples to save GPU time
-	int max_steps = 512;
-	float small_step_size = float(max_dist) / float(max_steps);
-	float large_step_size = small_step_size * 10.0;
-	float step_size = large_step_size;
-	bool quickmarch = true;
+	float step_size = float(max_dist) / float(u_num_cloud_steps);
+	
+	// blue noise to reduce banding from low step count
+	// https://blog.demofox.org/2020/05/10/ray-marching-fog-with-blue-noise/
+	float blue_noise = texture(u_blue_noise, fragcoord * 1024.0f).r;
+	float dist_to_start = step_size * blue_noise;
+	
+	ro += rd * dist_to_start;
 	
 	int steps = 0;
-	bool hit = false;
-	dist = 0.0;
-	alpha = 0.0;
+	float dist = 0.0;
 	
 	// start by assuming all the light from the source reaches the camera
 	// we'll then begin to attenuate (reduce) this value as we march through the clouds,
 	// with more dense clouds (as determined by our cloud function) causing more attenuation
-	lighting = 1.0;
+	vec3 cloud_color = vec3(1.0);
+	vec3 sun_light = u_sun_colour.rgb * u_sun_power;
 	
-	for (int i = 0; i < max_steps; i++)
+	// Variable to track transmittance along view ray. 
+    // Assume clear sky and attenuate light when encountering clouds.
+	float cloud_height;
+	
+	float transmittance = 1.0;
+	float light_energy = 0.0;
+	
+	for (int i = 0; i < u_num_cloud_steps; i++)
 	{
-		vec3 sample = ro + rd * dist;
-		float density = cloud(sample);
+		vec3 p = ro + rd * dist;
+		
+		float density = cloud(p, cloud_height, true);
 		
 		steps++;
 		dist += step_size;
 		
-		// if we've just entered a cloud, disable quickmarch and backstep so we can repeat with detailed sampling
-		if (quickmarch)
-		{
-			if (density > 0.0)
-			{
-				quickmarch = false;
-				dist = max(0.0, dist - step_size * 2.0);
-				step_size = small_step_size;
-			}
-			continue;
-		}
-		
-		alpha += density * step_size * (1.0 / u_fluffiness);
-		
 		// calculate lighting for this sample if we're in the clouds
 		if (density > 0.0)
 		{
-			vec3 l_ro = sample;
-			vec3 l_dir = light;
-			int l_steps = 16;
-			float l_dist = 50.0;
-			float l_step_dist = l_dist / float(l_steps);
+			float l_density = light_march(p, light);
+			float l_transmittance = beers_law(l_density);
 			
-			// sum up the total density of clouds along the path to the light source
-			float l_density = 0.0;
-			for (int l = 0; l < 16; l++)
-			{
-				vec3 l_sample = l_ro + l_dir * l_step_dist * (float(l) + 1.0);
-				l_density += cloud(l_sample) * l_step_dist;
-			}
+			light_energy += (l_transmittance * transmittance * density) * step_size;
 			
-			// use this density to determine how much light has reached this point using beer's law
-			// multiplying by step size here means attenuation is constant with respect to depth
-			// regardless of how much we're stepping through the cloud
-			float transmittance = exp(-l_density * u_absorbtion * step_size);
+			transmittance *= beers_law(density * step_size);
 			
-			// lighting is reduced by the transmittance at this sample point
-			lighting *= transmittance;
+			alpha += density * step_size;
 		}
 		
-		if (steps >= max_steps || dist >= max_dist)
-			break;
-			
-		// p.81 - once the alpha of the image reaches 1 we don’t need to keep sampling so we stop
-		// the march early 
-		if (alpha >= 1.0)
+		if (transmittance < 0.01)
 			break;
 	}
+	
+	cloud_color = vec3(light_energy);
+	alpha = clamp(alpha, 0.0, 1.0);
+	return cloud_color;
+	//return vec3(cloud(vec3(ro.x, 0.0, ro.z), cloud_height, true));
 }
 
-void volume_cloud(vec3 cam_pos, vec3 light, out float dist, out float alpha, out float lighting)
+vec3 volume_cloud(vec3 cam, vec3 pixel, vec3 light, vec2 fragcoord, out float alpha)
 {
-	vec3 dir = normalize(v_vertex - cam_pos);
-	vec3 cloud_min = vec3(-250.0, u_height_world_bot, -250.0);
-	vec3 cloud_max = vec3(250.0, u_height_world_top, 250.0);
-	vec2 intersect = intersect_aabb(cam_pos, dir, cloud_min, cloud_max);
-	if (intersect.x < intersect.y) // there is an intersection
+	bool inside = cam.x > u_cloud_box_min.x && cam.x < u_cloud_box_max.x &&
+				  cam.y > u_cloud_box_min.y && cam.y < u_cloud_box_max.y &&
+				  cam.z > u_cloud_box_min.z && cam.z < u_cloud_box_max.z;
+				
+	vec3 ro;
+	vec3 rd = normalize(v_vertex - cam);
+	float dist;
+	if (inside)
 	{
-		vec3 ro = cam_pos + dir * intersect.x;
-		float max_dist = intersect.y - intersect.x;
-		cloud_march(ro, dir, light, max_dist, dist, alpha, lighting);
+		ro = cam;
+		dist = length(ro - pixel);
 	}
+	else
+	{
+		vec2 intersect = intersect_aabb(cam, rd, u_cloud_box_min, u_cloud_box_max);
+		if (intersect.x < intersect.y) // there is an intersection
+		{
+			ro = cam + rd * intersect.x;
+			dist = intersect.y - intersect.x;
+		}
+	}
+	
+	return cloud_march(ro, rd, light, dist, fragcoord, alpha);
 }
 
 void light()
 {
-	vec3 world_camera = (CAMERA_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	vec3 cam = (CAMERA_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	vec3 light = (vec4(LIGHT, 1.0) * INV_CAMERA_MATRIX).rgb;
 	
-	float dist = 0.0;
-	float alpha = 0.0;
-	float depth = 0.0;
-	float lighting = 0.0;
-	volume_cloud(world_camera, light, dist, alpha, lighting);
+	float alpha;
+	vec3 col = volume_cloud(cam, v_vertex, light, UV, alpha);
 	
 	// set cloud colour based on the lighting value returned
-	vec3 col = mix(u_colour_shadow, u_colour_lit, lighting).rgb;
+	//vec3 col = mix(u_colour_shadow, u_colour_lit, lighting).rgb;
 	
 	DIFFUSE_LIGHT = col;
-	ALPHA = clamp(alpha, 0.0, 1.0);
-	//ALPHA = step(0.001, c);
+	ALPHA = alpha;
 }
