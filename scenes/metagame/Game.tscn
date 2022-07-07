@@ -83,7 +83,7 @@ shader = ExtResource( 21 )
 shader_param/u_scroll_speed = 1.0
 shader_param/u_scale = 1024.0
 shader_param/u_density = 0.5
-shader_param/u_num_cloud_steps = 64
+shader_param/u_num_cloud_steps = 32
 shader_param/u_cloud_box_min = Vector3( -250, 0, -250 )
 shader_param/u_cloud_box_max = Vector3( 250, 100, 250 )
 shader_param/u_fluffiness = 5.0
@@ -134,7 +134,7 @@ script = ExtResource( 4 )
 [node name="Clouds" parent="." instance=ExtResource( 6 )]
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 0.450336, -0.737901, -0.502692, 0.241241, -0.441515, 0.864215, -0.859651, -0.510457, -0.0208184, 0, 186.63, 0 )
+transform = Transform( 0.450336, -0.737901, -0.502692, -0.235699, -0.641291, 0.7302, -0.861187, -0.210352, -0.462719, 0, 186.63, 0 )
 light_cull_mask = 4294966273
 directional_shadow_max_distance = 1000.0
 

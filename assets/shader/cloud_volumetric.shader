@@ -220,6 +220,9 @@ vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, o
 			alpha += density * step_size;
 		}
 		
+//		if (alpha > 1.0)
+//			break;
+		
 		if (transmittance < 0.01)
 			break;
 	}

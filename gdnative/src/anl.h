@@ -3,6 +3,7 @@
 
 #include <Godot.hpp>
 #include <Node.hpp>
+#include <vector>
 
 namespace godot {
 
@@ -14,6 +15,9 @@ private:
 
     void* m_img;
 
+    std::vector<void*> m_img_handles_2d;
+    std::vector<void*> m_img_handles_3d;
+
 public:
     static void _register_methods();
 
@@ -22,8 +26,13 @@ public:
 
     void _init();
     
-    void Generate3DGradientNoiseImage(int, float, float, float, int);
-    double SampleGradientImage(int, int, int);
+    int Generate2DGradientNoiseImage(int, float, float, int, int);
+    void ReleaseNoiseImage2D(int);
+    double SampleGradientImage2D(int, int, int);
+
+    int Generate3DGradientNoiseImage(int, float, float, float, int, int);
+    void ReleaseNoiseImage3D(int);
+    double SampleGradientImage3D(int, int, int, int);
 };
 
 }

@@ -1,0 +1,115 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/cloud_texture_generator/ChannelOptions.cs" type="Script" id=1]
+
+[sub_resource type="ButtonGroup" id=1]
+
+[node name="ChannelOptions" type="VBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 1 )
+GradientPath = NodePath("Gradient")
+WorleyPath = NodePath("Worley")
+GradientWorleyPath = NodePath("GradientWorley")
+FreqPath = NodePath("Frequency/Frequency")
+LacunarityPath = NodePath("Lacunarity/Lacunarity")
+AmplitudePath = NodePath("Aplitude/Aplitude")
+OctavesLabelPath = NodePath("Octaves/OctavesLabel")
+OctavesPath = NodePath("Octaves/Octaves")
+
+[node name="Gradient" type="CheckBox" parent="."]
+margin_right = 1272.0
+margin_bottom = 24.0
+pressed = true
+group = SubResource( 1 )
+text = "Gradient"
+
+[node name="Worley" type="CheckBox" parent="."]
+margin_top = 28.0
+margin_right = 1272.0
+margin_bottom = 52.0
+group = SubResource( 1 )
+text = "Worley"
+
+[node name="GradientWorley" type="CheckBox" parent="."]
+margin_top = 56.0
+margin_right = 1272.0
+margin_bottom = 80.0
+group = SubResource( 1 )
+text = "GradientWorley"
+
+[node name="Octaves" type="HBoxContainer" parent="."]
+margin_top = 84.0
+margin_right = 1272.0
+margin_bottom = 100.0
+
+[node name="OctavesLabel" type="Label" parent="Octaves"]
+margin_top = 1.0
+margin_right = 68.0
+margin_bottom = 15.0
+text = "Octaves: 1"
+
+[node name="Octaves" type="HSlider" parent="Octaves"]
+margin_left = 72.0
+margin_right = 1272.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+ticks_on_borders = true
+
+[node name="Frequency" type="HBoxContainer" parent="."]
+margin_top = 104.0
+margin_right = 1272.0
+margin_bottom = 128.0
+
+[node name="FrequencyLabel" type="Label" parent="Frequency"]
+margin_top = 5.0
+margin_right = 66.0
+margin_bottom = 19.0
+text = "Frequency"
+
+[node name="Frequency" type="LineEdit" parent="Frequency"]
+margin_left = 70.0
+margin_right = 128.0
+margin_bottom = 24.0
+text = "2"
+
+[node name="Lacunarity" type="HBoxContainer" parent="."]
+margin_top = 132.0
+margin_right = 1272.0
+margin_bottom = 156.0
+
+[node name="LacunarityLabel" type="Label" parent="Lacunarity"]
+margin_top = 5.0
+margin_right = 65.0
+margin_bottom = 19.0
+text = "Lacunarity"
+
+[node name="Lacunarity" type="LineEdit" parent="Lacunarity"]
+margin_left = 69.0
+margin_right = 127.0
+margin_bottom = 24.0
+text = "2"
+
+[node name="Aplitude" type="HBoxContainer" parent="."]
+margin_top = 160.0
+margin_right = 1272.0
+margin_bottom = 184.0
+
+[node name="AplitudeLabel" type="Label" parent="Aplitude"]
+margin_top = 5.0
+margin_right = 54.0
+margin_bottom = 19.0
+text = "Aplitude"
+
+[node name="Aplitude" type="LineEdit" parent="Aplitude"]
+margin_left = 58.0
+margin_right = 116.0
+margin_bottom = 24.0
+text = "0.5"
