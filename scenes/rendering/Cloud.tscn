@@ -1,11 +1,10 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://assets/shader/cloud.shader" type="Shader" id=1]
 [ext_resource path="res://src/rendering/Clouds.cs" type="Script" id=2]
 [ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture" id=4]
 [ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=5]
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
-[ext_resource path="res://assets/textures/clouds/cloud_noise.tex3d" type="Texture3D" id=7]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 1024, 640 )
@@ -13,16 +12,26 @@ size = Vector2( 1024, 640 )
 [sub_resource type="ShaderMaterial" id=2]
 resource_local_to_scene = true
 shader = ExtResource( 5 )
+shader_param/u_coverage_scale = 256.0
+shader_param/u_coverage_density = 1.0
+shader_param/u_subtract_shape = true
+shader_param/u_subtract_detail = true
+shader_param/u_detail_scale = 256.0
+shader_param/u_detail_strength = 1.0
 shader_param/u_scroll_speed = 5.0
-shader_param/u_scale = 512.0
 shader_param/u_density = 0.306
-shader_param/u_fluffiness = 5.0
-shader_param/u_absorbtion = 0.025
+shader_param/u_num_cloud_steps = 32
+shader_param/u_cloud_box_min = Vector3( -250, 0, -250 )
+shader_param/u_cloud_box_max = Vector3( 250, 100, 250 )
 shader_param/u_colour_lit = Color( 1, 1, 1, 1 )
 shader_param/u_colour_shadow = Color( 0, 0, 0, 0 )
-shader_param/u_height_world_top = 300.0
-shader_param/u_height_world_bot = 100.0
-shader_param/u_noise = ExtResource( 7 )
+shader_param/u_do_dither = true
+shader_param/u_dither_scale = 1024.0
+shader_param/u_num_light_steps = 16
+shader_param/u_light_ray_dist = 50.0
+shader_param/u_light_absorbtion = 1.0
+shader_param/u_sun_colour = Color( 1, 1, 1, 1 )
+shader_param/u_sun_power = 1.0
 
 [sub_resource type="ViewportTexture" id=7]
 viewport_path = NodePath("BoidVelMapViewport")
@@ -158,5 +167,3 @@ margin_bottom = 720.0
 texture = SubResource( 4 )
 expand = true
 stretch_mode = 7
-
-[node name="DirectionalLight" type="DirectionalLight" parent="."]
