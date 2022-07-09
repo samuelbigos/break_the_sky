@@ -3,7 +3,7 @@
 [ext_resource path="res://addons/cloud_texture_generator/NoiseViewer.cs" type="Script" id=1]
 [ext_resource path="res://assets/gui/1px.png" type="Texture" id=2]
 [ext_resource path="res://addons/cloud_texture_generator/noise_preview.shader" type="Shader" id=3]
-[ext_resource path="res://test.tex3d" type="Texture3D" id=4]
+[ext_resource path="res://assets/textures/clouds/detail.tex3d" type="Texture3D" id=4]
 
 [sub_resource type="ButtonGroup" id=2]
 

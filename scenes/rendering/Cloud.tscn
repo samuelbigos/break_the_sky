@@ -5,7 +5,7 @@
 [ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture" id=4]
 [ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=5]
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
-[ext_resource path="res://assets/textures/noise/cloud_noise.tex3d" type="Texture3D" id=7]
+[ext_resource path="res://assets/textures/clouds/cloud_noise.tex3d" type="Texture3D" id=7]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 1024, 640 )
