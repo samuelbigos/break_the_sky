@@ -49,7 +49,6 @@ int ANL::Generate2DGradient(int size, float freq, int octaves, int seed)
     _gradient(&k, octaves, seed);
     anl::map2DNoZ(anl::SEAMLESS_XY, *((anl::CArray2Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq), k.lastIndex());
 
-    image->scaleToRange(0.0, 1.0);
     m_img_handles_2d.push_back(image);
     return (int)m_img_handles_2d.size() - 1;
 }
@@ -59,10 +58,14 @@ int ANL::Generate2DCellularFBM(int size, float freq, int octaves, int seed)
     anl::CKernel k;
     anl::CArray2Dd* image = new anl::CArray2Dd(size, size);
 
-    _cellularFbm(&k, seed);
-    anl::map2DNoZ(anl::SEAMLESS_XY, *((anl::CArray2Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq), k.lastIndex());
+    //_cellularFbm(&k, seed);
+    anl::CInstructionIndex c1 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed)), k.constant(.625)), k.constant(1.0));
+    anl::CInstructionIndex c2 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed+10+1*1000)), k.constant(.25)), k.constant(2.0));
+    anl::CInstructionIndex c3 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed+10+2*1000)), k.constant(.125)), k.constant(4.0));
+    anl::CInstructionIndex a = k.add(c1, k.add(c2, c3));
+    
+    anl::map2DNoZ(anl::SEAMLESS_XY, *((anl::CArray2Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq), a);
 
-    image->scaleToRange(0.0, 1.0);
     m_img_handles_2d.push_back(image);
     return (int)m_img_handles_2d.size() - 1;
 }
@@ -82,13 +85,13 @@ int ANL::Generate3DGradient(int size, float freq, int octaves, int seed)
 int ANL::Generate3DCellularFBM(int size, float freq, int octaves, int seed)
 {
     anl::CKernel k;
-    anl::CArray3Dd* image = new anl::CArray3Dd(size, size, size);
+    anl::CArray2Dd* image = new anl::CArray2Dd(size, size);
 
     _cellularFbm(&k, seed);
-    anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq, 0.0f, freq), k.lastIndex());
+    anl::map2DNoZ(anl::SEAMLESS_XY, *((anl::CArray2Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq), k.lastIndex());
 
-    m_img_handles_3d.push_back(image);
-    return (int)m_img_handles_3d.size() - 1;
+    m_img_handles_2d.push_back(image);
+    return (int)m_img_handles_2d.size() - 1;
 }
 
 double ANL::Sample2D(int handle, int x, int y)
@@ -137,16 +140,31 @@ void ANL::Release3D(int handle)
         delete image;
 }
 
+void ANL::_cellularFractalLayer(void* kernel, double layerscale, double layerfreq, unsigned int s, double angle, double ax, double ay, double az)
+{
+    anl::CKernel k = *(anl::CKernel*)kernel;
+    anl::CInstructionIndex base = k.nextIndex();
+
+    k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(),
+            k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(s));
+
+    k.constant(layerscale);
+    k.multiply(base, base + 1);
+    k.constant(layerfreq);
+    anl::CInstructionIndex sd = k.scaleDomain(base + 2, k.lastIndex());
+}
+
 void ANL::_gradient(anl::CKernel* k, int octaves, int seed)
 {
     k->simplefBm(anl::BASIS_GRADIENT, anl::INTERP_QUINTIC, octaves, 1.0, seed); 
 }
 
-void ANL::_cellularFbm(anl::CKernel* k, int seed)
+void ANL::_cellularFbm(anl::CKernel* kernel, int seed)
 {
-    anl::CInstructionIndex c1 = k->scaleDomain(k->multiply(k->cellularBasis(k->constant(1), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->constant(0), k->seed(seed)), k->constant(.625)), k->constant(1.0));
-    anl::CInstructionIndex c2 = k->scaleDomain(k->multiply(k->cellularBasis(k->constant(1), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->constant(0), k->seed(seed+10+1*1000)), k->constant(.25)), k->constant(2.0));
-    anl::CInstructionIndex c3 = k->scaleDomain(k->multiply(k->cellularBasis(k->constant(1), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->constant(0), k->seed(seed+10+2*1000)), k->constant(.125)), k->constant(4.0));
-    anl::CInstructionIndex a = k->add(c2, c3);
-    k->add(c1, a);
+    anl::CKernel k = *kernel;
+    anl::CInstructionIndex c1 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed)), k.constant(.625)), k.constant(1.0));
+    anl::CInstructionIndex c2 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed+10+1*1000)), k.constant(.25)), k.constant(2.0));
+    anl::CInstructionIndex c3 = k.scaleDomain(k.multiply(k.cellularBasis(k.constant(1), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.zero(), k.constant(0), k.seed(seed+10+2*1000)), k.constant(.125)), k.constant(4.0));
+    anl::CInstructionIndex a = k.add(c2, c3);
+    k.add(c1, a);
 }

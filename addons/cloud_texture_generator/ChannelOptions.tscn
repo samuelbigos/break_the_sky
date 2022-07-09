@@ -17,7 +17,7 @@ WorleyPath = NodePath("Worley")
 GradientWorleyPath = NodePath("GradientWorley")
 FreqPath = NodePath("Frequency/Frequency")
 LacunarityPath = NodePath("Lacunarity/Lacunarity")
-AmplitudePath = NodePath("Aplitude/Aplitude")
+AmplitudePath = NodePath("Amplitude/Amplitude")
 OctavesLabelPath = NodePath("Octaves/OctavesLabel")
 OctavesPath = NodePath("Octaves/Octaves")
 
@@ -97,19 +97,19 @@ margin_right = 127.0
 margin_bottom = 24.0
 text = "2"
 
-[node name="Aplitude" type="HBoxContainer" parent="."]
+[node name="Amplitude" type="HBoxContainer" parent="."]
 margin_top = 160.0
 margin_right = 1272.0
 margin_bottom = 184.0
 
-[node name="AplitudeLabel" type="Label" parent="Aplitude"]
+[node name="AmplitudeLabel" type="Label" parent="Amplitude"]
 margin_top = 5.0
-margin_right = 54.0
+margin_right = 67.0
 margin_bottom = 19.0
-text = "Aplitude"
+text = "Amplitude"
 
-[node name="Aplitude" type="LineEdit" parent="Aplitude"]
-margin_left = 58.0
-margin_right = 116.0
+[node name="Amplitude" type="LineEdit" parent="Amplitude"]
+margin_left = 71.0
+margin_right = 129.0
 margin_bottom = 24.0
 text = "0.5"

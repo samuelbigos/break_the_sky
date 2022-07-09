@@ -20,7 +20,9 @@ private:
 
     std::vector<void*> m_img_handles_2d;
     std::vector<void*> m_img_handles_3d;
-    
+
+    void _cellularFractalLayer(void*, double layerscale, double layerfreq, unsigned int s, double angle, double ax, double ay, double az);
+
     void _gradient(anl::CKernel*, int, int);
     void _cellularFbm(anl::CKernel*, int);
 

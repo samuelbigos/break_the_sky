@@ -11,8 +11,8 @@ public class GeneratorToolbox : Control
     private enum NoiseType
     {
         Gradient,
-        Worley,
-        GradientWorley,
+        InvCellular,
+        GradientCellular,
     }
     
     [Export] private PackedScene _channelOptionsScene;
@@ -43,7 +43,6 @@ public class GeneratorToolbox : Control
 
     private List<ChannelOptions> _channelOptions = new List<ChannelOptions>();
     private Node _anl;
-    private NativeScript _anlScript;
 
     public override void _Ready()
     {
@@ -66,10 +65,7 @@ public class GeneratorToolbox : Control
         _generateButton.Connect("pressed", this, nameof(_OnGenerate));
         _browseButton.Connect("pressed", this, nameof(_OnBrowse));
         
-        _anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
-        Debug.Assert(_anlScript != null, "anlScript != null");
-
-        _OnAddChannel();
+         _OnAddChannel();
     }
 
     private void _OnAddChannel()
@@ -114,8 +110,11 @@ public class GeneratorToolbox : Control
         DoGenerate(_browseBox.Text);
     }
     
-    private void DoGenerate(string filepath)    
+    private void DoGenerate(string filepath)
     {
+        NativeScript anlScript = GD.Load("res://gdnative/bin/anl.gdns") as NativeScript;
+        Debug.Assert(anlScript != null, "anlScript != null");
+        
         uint size = (uint)_size.Text.ToInt();
         int dims = _dim2D.Pressed ? 2 : 3;
         int channels = _channelOptions.Count;
@@ -124,7 +123,7 @@ public class GeneratorToolbox : Control
         stopwatch.Start();
         float tick = 1.0f / Stopwatch.Frequency;
         
-        _anl = _anlScript.New() as Node;
+        _anl = anlScript.New() as Node;
         Debug.Assert(_anl != null, "anl != null");
         if (_anl == null)
             return;
@@ -152,10 +151,10 @@ public class GeneratorToolbox : Control
                 switch (dims)
                 {
                     case 2:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate2DGradientNoiseImage", size, frequencies[i], frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate2DGradient", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
                         break;
                     case 3:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate3DGradientNoiseImage", size, frequencies[i], frequencies[i], frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate3DGradient", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(dims), dims, null);
@@ -163,11 +162,22 @@ public class GeneratorToolbox : Control
             }
             if (options.Worley.Pressed)
             {
-                types[i] = NoiseType.Worley;
+                types[i] = NoiseType.InvCellular;
+                switch (dims)
+                {
+                    case 2:
+                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate2DCellularFBM", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                        break;
+                    case 3:
+                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate3DCellularFBM", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(dims), dims, null);
+                }
             }
             if (options.GradientWorley.Pressed)
             {
-                types[i] = NoiseType.GradientWorley;
+                types[i] = NoiseType.GradientCellular;
             }
         }
         
@@ -277,6 +287,7 @@ public class GeneratorToolbox : Control
         ResourceSaver.Save($"{filepath}", noiseTex);
         
         _anl.QueueFree();
+        GC.Collect();
         
         _viewer.SetResource(noiseTex);
     }
@@ -287,30 +298,27 @@ public class GeneratorToolbox : Control
         {
             case NoiseType.Gradient:
                 Debug.Assert(anlHandle != -1);
-                return (float)Convert.ToDouble(_anl.Call("SampleGradientImage2D", anlHandle, pos.x, pos.y)) * 0.5f + 0.5f;
-            case NoiseType.Worley:
-                return -NoiseGenerators.WorleyFbm(new Vector3(pos.x, pos.y, 0.0f) / size, octaves, frequency, lacunarity, amplitude);
+                return (float)Convert.ToDouble(_anl.Call("Sample2D", anlHandle, pos.x, pos.y));
+            case NoiseType.InvCellular:
+                Debug.Assert(anlHandle != -1);
+                return 1.0f - (float)Convert.ToDouble(_anl.Call("Sample2D", anlHandle, pos.x, pos.y));
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
-
+    
     private float Noise3D(Vector3 pos, uint size, NoiseType type, float frequency, int octaves, float lacunarity, float amplitude, int anlHandle)
     {
-        float noise;
         switch (type)
         {
             case NoiseType.Gradient:
                 Debug.Assert(anlHandle != -1);
-                noise = (float)Convert.ToDouble(_anl.Call("SampleGradientImage3D", anlHandle, pos.x, pos.y, pos.z));
-                break;
-            case NoiseType.Worley:
-                noise = -NoiseGenerators.WorleyFbm(pos / size, octaves, frequency, lacunarity, amplitude);
-                break;
+                return (float)Convert.ToDouble(_anl.Call("Sample3D", anlHandle, pos.x, pos.y, pos.z)) * 0.5f + 0.5f;
+            case NoiseType.InvCellular:
+                Debug.Assert(anlHandle != -1);
+                return 1.0f - (float)Convert.ToDouble(_anl.Call("Sample3D", anlHandle, pos.x, pos.y, pos.z));
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
-
-        return noise * 0.5f + 0.5f;
     }
 }

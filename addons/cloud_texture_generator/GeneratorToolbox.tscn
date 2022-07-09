@@ -106,6 +106,7 @@ text = "Browse"
 margin_left = 63.0
 margin_right = 121.0
 margin_bottom = 24.0
+text = "res://test"
 
 [node name="Generate" type="Button" parent="VBox"]
 margin_top = 350.0

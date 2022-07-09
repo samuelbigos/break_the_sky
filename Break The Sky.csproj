@@ -10,4 +10,9 @@
     <PackageReference Include="ImGui.NET" Version="1.87.3" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="GodotSharpEditor">
+      <HintPath>.mono\assemblies\Debug\GodotSharpEditor.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

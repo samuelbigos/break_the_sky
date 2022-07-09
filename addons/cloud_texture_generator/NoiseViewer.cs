@@ -67,7 +67,7 @@ public class NoiseViewer : VBoxContainer
     private void SetTexture(ImageTexture texture)
     {
         _noisePreviewMaterial.SetShaderParam("u_noise2d", texture);
-        SetTextureInternal(3, texture.GetFormat(), (int)texture.GetSize().x);
+        SetTextureInternal(2, texture.GetFormat(), (int)texture.GetSize().x);
     }
 
     private void SetTexture(Texture3D texture)
