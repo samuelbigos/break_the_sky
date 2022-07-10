@@ -12,14 +12,16 @@ margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
 script = ExtResource( 1 )
-GradientPath = NodePath("Gradient")
-WorleyPath = NodePath("Worley")
-GradientWorleyPath = NodePath("GradientWorley")
-FreqPath = NodePath("Frequency/Frequency")
-LacunarityPath = NodePath("Lacunarity/Lacunarity")
-AmplitudePath = NodePath("Amplitude/Amplitude")
-OctavesLabelPath = NodePath("Octaves/OctavesLabel")
-OctavesPath = NodePath("Octaves/Octaves")
+_fbmOptionsPath = NodePath("FBMOptions")
+_gradientPath = NodePath("Gradient")
+_cellularPath = NodePath("Cellular")
+_cellularFBMPath = NodePath("CellularFBM")
+_freqPath = NodePath("Frequency/Frequency")
+_lacunarityPath = NodePath("FBMOptions/Lacunarity/Lacunarity")
+_amplitudePath = NodePath("FBMOptions/Amplitude/Amplitude")
+_octavesLabelPath = NodePath("FBMOptions/Octaves/OctavesLabel")
+_octavesPath = NodePath("FBMOptions/Octaves/Octaves")
+_invertPath = NodePath("Invert")
 
 [node name="Gradient" type="CheckBox" parent="."]
 margin_right = 1272.0
@@ -28,45 +30,24 @@ pressed = true
 group = SubResource( 1 )
 text = "Gradient"
 
-[node name="Worley" type="CheckBox" parent="."]
+[node name="Cellular" type="CheckBox" parent="."]
 margin_top = 28.0
 margin_right = 1272.0
 margin_bottom = 52.0
 group = SubResource( 1 )
-text = "Worley"
+text = "Cellular"
 
-[node name="GradientWorley" type="CheckBox" parent="."]
+[node name="CellularFBM" type="CheckBox" parent="."]
 margin_top = 56.0
 margin_right = 1272.0
 margin_bottom = 80.0
 group = SubResource( 1 )
-text = "GradientWorley"
-
-[node name="Octaves" type="HBoxContainer" parent="."]
-margin_top = 84.0
-margin_right = 1272.0
-margin_bottom = 100.0
-
-[node name="OctavesLabel" type="Label" parent="Octaves"]
-margin_top = 1.0
-margin_right = 68.0
-margin_bottom = 15.0
-text = "Octaves: 1"
-
-[node name="Octaves" type="HSlider" parent="Octaves"]
-margin_left = 72.0
-margin_right = 1272.0
-margin_bottom = 16.0
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 10.0
-value = 1.0
-ticks_on_borders = true
+text = "CellularFBM"
 
 [node name="Frequency" type="HBoxContainer" parent="."]
-margin_top = 104.0
+margin_top = 84.0
 margin_right = 1272.0
-margin_bottom = 128.0
+margin_bottom = 108.0
 
 [node name="FrequencyLabel" type="Label" parent="Frequency"]
 margin_top = 5.0
@@ -80,36 +61,68 @@ margin_right = 128.0
 margin_bottom = 24.0
 text = "2"
 
-[node name="Lacunarity" type="HBoxContainer" parent="."]
-margin_top = 132.0
+[node name="FBMOptions" type="VBoxContainer" parent="."]
+margin_top = 112.0
 margin_right = 1272.0
-margin_bottom = 156.0
+margin_bottom = 184.0
 
-[node name="LacunarityLabel" type="Label" parent="Lacunarity"]
+[node name="Octaves" type="HBoxContainer" parent="FBMOptions"]
+margin_right = 1272.0
+margin_bottom = 16.0
+
+[node name="OctavesLabel" type="Label" parent="FBMOptions/Octaves"]
+margin_top = 1.0
+margin_right = 68.0
+margin_bottom = 15.0
+text = "Octaves: 1"
+
+[node name="Octaves" type="HSlider" parent="FBMOptions/Octaves"]
+margin_left = 72.0
+margin_right = 1272.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+ticks_on_borders = true
+
+[node name="Lacunarity" type="HBoxContainer" parent="FBMOptions"]
+margin_top = 20.0
+margin_right = 1272.0
+margin_bottom = 44.0
+
+[node name="LacunarityLabel" type="Label" parent="FBMOptions/Lacunarity"]
 margin_top = 5.0
 margin_right = 65.0
 margin_bottom = 19.0
 text = "Lacunarity"
 
-[node name="Lacunarity" type="LineEdit" parent="Lacunarity"]
+[node name="Lacunarity" type="LineEdit" parent="FBMOptions/Lacunarity"]
 margin_left = 69.0
 margin_right = 127.0
 margin_bottom = 24.0
 text = "2"
 
-[node name="Amplitude" type="HBoxContainer" parent="."]
-margin_top = 160.0
+[node name="Amplitude" type="HBoxContainer" parent="FBMOptions"]
+margin_top = 48.0
 margin_right = 1272.0
-margin_bottom = 184.0
+margin_bottom = 72.0
 
-[node name="AmplitudeLabel" type="Label" parent="Amplitude"]
+[node name="AmplitudeLabel" type="Label" parent="FBMOptions/Amplitude"]
 margin_top = 5.0
 margin_right = 67.0
 margin_bottom = 19.0
 text = "Amplitude"
 
-[node name="Amplitude" type="LineEdit" parent="Amplitude"]
+[node name="Amplitude" type="LineEdit" parent="FBMOptions/Amplitude"]
 margin_left = 71.0
 margin_right = 129.0
 margin_bottom = 24.0
 text = "0.5"
+
+[node name="Invert" type="CheckButton" parent="."]
+margin_top = 188.0
+margin_right = 118.0
+margin_bottom = 228.0
+size_flags_horizontal = 0
+text = "Invert"

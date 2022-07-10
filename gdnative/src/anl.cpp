@@ -8,9 +8,11 @@ using namespace godot;
 
 void ANL::_register_methods() {
     register_method("Generate2DGradient", &ANL::Generate2DGradient);
+    register_method("Generate2DCellular", &ANL::Generate2DCellular);
     register_method("Generate2DCellularFBM", &ANL::Generate2DCellularFBM);
 
     register_method("Generate3DGradient", &ANL::Generate3DGradient);
+    register_method("Generate3DCellular", &ANL::Generate3DCellular);
     register_method("Generate3DCellularFBM", &ANL::Generate3DCellularFBM);
 
     register_method("Sample2D", &ANL::Sample2D);
@@ -54,6 +56,19 @@ int ANL::Generate2DGradient(int size, float freq, int octaves, int seed)
     return (int)m_img_handles_2d.size() - 1;
 }
 
+int ANL::Generate2DCellular(int size, float freq, int seed)
+{
+    anl::CKernel k;
+    anl::CArray2Dd* image = new anl::CArray2Dd(size, size);
+
+    _cellular(&k, seed);
+    anl::map2DNoZ(anl::SEAMLESS_XY, *((anl::CArray2Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq), k.lastIndex());
+
+    image->scaleToRange(0.0, 1.0);
+    m_img_handles_2d.push_back(image);
+    return (int)m_img_handles_2d.size() - 1;
+}
+
 int ANL::Generate2DCellularFBM(int size, float freq, int octaves, int seed)
 {
     anl::CKernel k;
@@ -75,6 +90,20 @@ int ANL::Generate3DGradient(int size, float freq, int octaves, int seed)
     _gradient(&k, octaves, seed);
     anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq, 0.0f, freq), k.lastIndex());
 
+    image->scaleToRange(0.0, 1.0);
+    m_img_handles_3d.push_back(image);
+    return (int)m_img_handles_3d.size() - 1;
+}
+
+int ANL::Generate3DCellular(int size, float freq, int seed)
+{
+    anl::CKernel k;
+    anl::CArray3Dd* image = new anl::CArray3Dd(size, size, size);
+
+    _cellular(&k, seed);
+    anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq, 0.0f, freq), k.lastIndex());
+
+    image->scaleToRange(0.0, 1.0);
     m_img_handles_3d.push_back(image);
     return (int)m_img_handles_3d.size() - 1;
 }
@@ -87,6 +116,7 @@ int ANL::Generate3DCellularFBM(int size, float freq, int octaves, int seed)
     _cellularFbm(&k, seed);
     anl::map3D(anl::SEAMLESS_XYZ, *((anl::CArray3Dd*)image), k, anl::SMappingRanges(0.0f, freq, 0.0f, freq, 0.0f, freq), k.lastIndex());
 
+    image->scaleToRange(0.0, 1.0);
     m_img_handles_3d.push_back(image);
     return (int)m_img_handles_3d.size() - 1;
 }
@@ -140,6 +170,11 @@ void ANL::Release3D(int handle)
 void ANL::_gradient(anl::CKernel* k, int octaves, int seed)
 {
     k->simplefBm(anl::BASIS_GRADIENT, anl::INTERP_QUINTIC, octaves, 1.0, seed); 
+}
+
+void ANL::_cellular(anl::CKernel* k, int seed)
+{
+    k->cellularBasis(k->constant(1), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->zero(), k->constant(0), k->seed(seed));
 }
 
 void ANL::_cellularFbm(anl::CKernel* k, int seed)

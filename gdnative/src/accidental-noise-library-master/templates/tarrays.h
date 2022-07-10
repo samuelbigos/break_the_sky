@@ -822,6 +822,66 @@ public:
         return m_depth;
     }
 
+    T getMax()
+    {
+        T m = m_array[0];
+        for(int x=0; x<m_width; ++x)
+        {
+            for(int y=0; y<m_height; ++y)
+            {
+                for(int z=0; z<m_depth; ++z)
+                {
+                    T v=get(x,y,z);
+                    if(v > m) m=v;
+                }
+            }
+        }
+
+        return m;
+    }
+
+    T getMin()
+    {
+        T m = m_array[0];
+        for(int x=0; x<m_width; ++x)
+        {
+            for(int y=0; y<m_height; ++y)
+            {
+                for(int z=0; z<m_depth; ++z)
+                {
+                    T v=get(x,y,z);
+                    if(v < m) m=v;
+                }
+            }
+        }
+
+        return m;
+    }
+
+    void scaleToRange(T low, T high)
+    {
+        T max=getMax();
+        T min=getMin();
+
+        for(int x=0; x<m_width; ++x)
+        {
+            for(int y=0; y<m_height; ++y)
+            {
+                for(int z=0; z<m_depth; ++z)
+                {
+                    T temp = get(x,y,z);
+                    temp = temp - min;
+                    //float ftemp = (float)temp / ( (float)max - (float)min);
+                    T ftemp = temp / (max-min);
+                    T val = ftemp * (high-low);
+                    //T val = (T)(ftemp * ((float)high-(float)low));
+                    val = val + low;
+                    set(x,y,z,val);
+                }
+            }
+        }
+    }
+
     void resize(int width, int height, int depth)
     {
         m_array.resize(width*height*depth);

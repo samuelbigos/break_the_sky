@@ -22,6 +22,7 @@ private:
     std::vector<void*> m_img_handles_3d;
     
     void _gradient(anl::CKernel*, int, int);
+    void _cellular(anl::CKernel*, int);
     void _cellularFbm(anl::CKernel*, int);
 
 public:
@@ -33,9 +34,11 @@ public:
     void _init();
     
     int Generate2DGradient(int, float, int, int);
+    int Generate2DCellular(int, float, int);
     int Generate2DCellularFBM(int, float, int, int);
     
     int Generate3DGradient(int, float, int, int);
+    int Generate3DCellular(int, float, int);
     int Generate3DCellularFBM(int, float, int, int);
     
     double Sample2D(int, int, int);

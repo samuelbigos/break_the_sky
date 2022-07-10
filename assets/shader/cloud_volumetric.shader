@@ -1,13 +1,14 @@
 shader_type spatial;
 render_mode world_vertex_coords, cull_front;
 
-// implementation of Horizon Zero Dawn cloud rendering
-// https://www.youtube.com/watch?v=-d8qT5-1LOI
-// https://www.shadertoy.com/view/3sffzj
-// http://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
-// comments referencing page numbers refer to pages in that PDF
+// mashed together from various sources:
+// * Geurilla talk - https://www.youtube.com/watch?v=-d8qT5-1LOI
+// * Geurilla paper - http://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
+// * Shadertoy by alro - https://www.shadertoy.com/view/3sffzj
+// * Clouds by Sebastian Lague - https://www.youtube.com/watch?v=4QOcCGI6xOU
 
 // coverage
+uniform bool u_do_coverage = true;
 uniform float u_coverage_scale = 256.0;
 uniform float u_coverage_density = 1.0;
 uniform sampler2D u_coverage_tex;
@@ -20,20 +21,14 @@ uniform sampler2D u_shape_tex;
 uniform bool u_subtract_detail = true;
 uniform float u_detail_scale = 256.0;
 uniform float u_detail_strength = 1.0;
+uniform vec3 u_detail_weights = vec3(1.0, 1.0, 1.0);
 uniform sampler3D u_detail_noise;
 
 // clouds
-uniform float u_scroll_speed = 1.0;
-uniform float u_density = 0.5;
-
 uniform int u_num_cloud_steps = 32;
 
 uniform vec3 u_cloud_box_min = vec3(-250.0, 0.0, -250.0);
 uniform vec3 u_cloud_box_max = vec3(250.0, 100.0, 250.0);
-
-// lit and shadowed cloud colour, we mix between these depending on lighting
-uniform vec4 u_colour_lit : hint_color = vec4(1.0);
-uniform vec4 u_colour_shadow : hint_color = vec4(0.0);
 
 // dither
 uniform bool u_do_dither = true;
@@ -41,14 +36,15 @@ uniform float u_dither_scale = 1024.0;
 uniform sampler2D u_blue_noise;
 
 // lighting
+uniform vec4 u_colour_lit : hint_color = vec4(1.0);
+uniform vec4 u_colour_shadow : hint_color = vec4(0.0);
 uniform int u_num_light_steps = 16;
 uniform float u_light_ray_dist = 50.0;
 uniform float u_light_absorbtion = 1.0;
-uniform vec4 u_sun_colour : hint_color = vec4(1.0);
 uniform float u_sun_power = 1.0;
+uniform bool u_do_scattering = true;
 
-
-// verying
+// varying
 varying vec3 v_vertex;
 varying float v_blue_noise;
 
@@ -90,23 +86,34 @@ float cloud_coverage(vec3 pos)
 	return clamp(remap(coverage.r, 0.0, 1.0, -(1.0 / u_coverage_density), 1.0), 0.0, 1.0);
 }
 
-float cloud_detail(vec3 pos)
+float cloud_detail(vec3 pos, float cloud_density)
 {	
 	vec3 uv = pos.xzy / u_detail_scale;
-	vec4 detail = texture(u_detail_noise, uv);
+	vec3 detail = texture(u_detail_noise, uv).rgb;
 
-	float d = remap(detail.r, 0.0, 1.0, detail.g * 1.5, 1.0);
-	return 1.0 - d;
+	// sebastian lague
+	vec3 detail_weights = u_detail_weights / dot(u_detail_weights, vec3(1.0));
+	float detailFbm = dot(detail, detail_weights);
+	float erodeWeight = pow(1.0 - cloud_density, 3.0);	
+	//float d = detailFbm * erodeWeight * u_detail_strength;
+
+	// horizon
+	//float d = remap(detail.r, 0.0, 1.0, detail.g * 1.5, 1.0);
+	float d = remap(detail.r, 0.0, 1.0, detailFbm * erodeWeight, 1.0);
+	return d * u_detail_strength;
 }
 
 /* returns the density of cloud at given world position in 0-1 range. */
 float cloud(vec3 pos, out float cloud_height, bool sample_detail)
 {
-	float cloud = 0.0;
+	float cloud = 1.0;
 	
 	// start with cloud coverage, this gives the basic 2D coverage of clouds in the sky
-	float coverage = cloud_coverage(pos);
-	cloud = coverage;
+	if (u_do_coverage)
+	{
+		float coverage = cloud_coverage(pos);
+		cloud = coverage;
+	}
 	
 	// subtract the shape of the cloud, this is defined by the cloud type (i.e. cumulus) and is a density heightmap
 	if (u_subtract_shape)
@@ -117,10 +124,10 @@ float cloud(vec3 pos, out float cloud_height, bool sample_detail)
 	}
 	
 	// subtract detail from cloud
-	if (u_subtract_detail)
+	if (u_subtract_detail && sample_detail)
 	{
-		float detail = cloud_detail(pos);
-		cloud -= detail * u_detail_strength;
+		float detail = cloud_detail(pos, cloud);
+		cloud -= detail;
 	}
 	
 	return clamp(cloud, 0.0, 1.0);
@@ -162,9 +169,6 @@ vec3 multiple_octaves(float extinction, float mu, float step_size)
 
 float light_march(vec3 ro, vec3 rd)
 {
-	//vec2 intersect = intersect_aabb(ro, rd, u_cloud_box_min, u_cloud_box_max);
-	//float step_size = intersect.y / float(u_num_light_steps);
-	
 	// sum up the total density of clouds along the path to the light source
 	float step_size = u_light_ray_dist / float(u_num_light_steps);
 	float density = 0.0;
@@ -184,6 +188,12 @@ float beers_law(float density)
 
 vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, out float alpha)
 {	
+	int steps = 0;
+	float dist = 0.0;
+	float cloud_height;
+	float transmittance = 1.0;
+	float light_energy = 0.0;
+	
 	// p.80 - define low and high level-of-detail step size
 	// we'll march with large steps through the cloud volume until we hit a cloud, then step back and march
 	// forward again with smaller step size and more detailed samples to save GPU time
@@ -191,32 +201,23 @@ vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, o
 	
 	// blue noise to reduce banding from low step count
 	// https://blog.demofox.org/2020/05/10/ray-marching-fog-with-blue-noise/
-	float blue_noise = texture(u_blue_noise, fragcoord * u_dither_scale).r;
-	
-	int steps = 0;
-	float dist = 0.0;
 	if (u_do_dither)
 	{
+		float blue_noise = texture(u_blue_noise, fragcoord * u_dither_scale).r;
 		dist += step_size * blue_noise;
 	}
 	
-	// start by assuming all the light from the source reaches the camera
-	// we'll then begin to attenuate (reduce) this value as we march through the clouds,
-	// with more dense clouds (as determined by our cloud function) causing more attenuation
-	vec3 cloud_color = vec3(1.0);
-	vec3 sun_light = u_sun_colour.rgb * u_sun_power;
-	
-	// Variable to track transmittance along view ray. 
-    // Assume clear sky and attenuate light when encountering clouds.
-	float cloud_height;
-	
-	float transmittance = 1.0;
-	float light_energy = 0.0;
+	// light scattering - from https://www.shadertoy.com/view/3sffzj
+	float phase_function = 1.0;
+	if (u_do_scattering)
+	{
+		float mu = dot(rd, light);
+		phase_function = mix(henyey_greenstein(-0.3, mu), henyey_greenstein(0.3, mu), 0.7);
+	}
 	
 	for (int i = 0; i < u_num_cloud_steps; i++)
 	{
 		vec3 p = ro + rd * dist;
-		
 		float density = cloud(p, cloud_height, true);
 		
 		steps++;
@@ -227,28 +228,23 @@ vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, o
 		{
 			float l_density = light_march(p, light);
 			float l_transmittance = beers_law(l_density);
-
-			light_energy += (l_transmittance * transmittance * density) * step_size;
-
-			transmittance *= beers_law(density * step_size);
 			
+			float attenuation_component = (l_transmittance * transmittance * density);
+			float phase_component = phase_function;
+			float in_scattering_component = 1.0 - beers_law(density);
+			
+			light_energy += attenuation_component * phase_component * in_scattering_component * step_size * u_sun_power;
+			transmittance *= beers_law(density * step_size);
 			alpha += density * step_size;
 		}
 		
-		if (alpha >= 1.0)
+		if (alpha >= 1.0 || transmittance < 0.01)
 			break;
-		
-		if (transmittance < 0.01)
-		{
-			alpha = 1.0;
-			break;
-		}
 	}
 	
-	cloud_color = vec3(light_energy);
+	vec3 cloud_color = mix(u_colour_shadow, u_colour_lit, light_energy).rgb;
 	alpha = clamp(alpha, 0.0, 1.0);
 	return cloud_color;
-	//return vec3(cloud(vec3(ro.x, 0.0, ro.z), cloud_height, true));
 }
 
 vec3 volume_cloud(vec3 cam, vec3 pixel, vec3 light, vec2 fragcoord, out float alpha)
@@ -286,9 +282,6 @@ void light()
 	float alpha;
 	vec3 col = volume_cloud(cam, v_vertex, light, UV, alpha);
 	
-	// set cloud colour based on the lighting value returned
-	//vec3 col = mix(u_colour_shadow, u_colour_lit, lighting).rgb;
-	
 	DIFFUSE_LIGHT = col;
-	ALPHA = alpha;
+	ALPHA = pow(alpha, 1.0);
 }

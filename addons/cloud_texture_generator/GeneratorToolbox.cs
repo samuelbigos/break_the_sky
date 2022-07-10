@@ -8,11 +8,12 @@ using Array = Godot.Collections.Array;
 [Tool]
 public class GeneratorToolbox : Control
 {
-    private enum NoiseType
+    public enum NoiseType
     {
         Gradient,
-        InvCellular,
-        GradientCellular,
+        Cellular,
+        CellularFBM,
+        None,
     }
     
     [Export] private PackedScene _channelOptionsScene;
@@ -136,48 +137,32 @@ public class GeneratorToolbox : Control
         float[] lacunarities = new float[channels];
         float[] amplitudes = new float[channels];
         int[] anlHandles = new int[channels];
+        bool[] inverts = new bool[channels];
         for (int i = 0; i < channels; i++)
         {
             ChannelOptions options = _channelOptions[i];
 
-            frequencies[i] = options.Freq.Text.ToFloat();
-            octaves[i] = (int) options.Octaves.Value;
-            lacunarities[i] = options.Lacunarity.Text.ToFloat();
-            amplitudes[i] = options.Amplitude.Text.ToFloat();
+            options.GetParams(out frequencies[i], out octaves[i], out lacunarities[i], out amplitudes[i], out inverts[i]);
             anlHandles[i] = -1;
-            if (options.Gradient.Pressed)
+
+            string anlMethod = $"Generate{dims}D";
+            switch (options.GetNoiseType())
             {
-                types[i] = NoiseType.Gradient;
-                switch (dims)
-                {
-                    case 2:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate2DGradient", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
-                        break;
-                    case 3:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate3DGradient", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(dims), dims, null);
-                }
-            }
-            if (options.Worley.Pressed)
-            {
-                types[i] = NoiseType.InvCellular;
-                switch (dims)
-                {
-                    case 2:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate2DCellularFBM", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
-                        break;
-                    case 3:
-                        anlHandles[i] = Convert.ToInt32(_anl.Call("Generate3DCellularFBM", size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(dims), dims, null);
-                }
-            }
-            if (options.GradientWorley.Pressed)
-            {
-                types[i] = NoiseType.GradientCellular;
+                case NoiseType.Gradient:
+                    anlMethod += "Gradient";
+                    anlHandles[i] = Convert.ToInt32(_anl.Call(anlMethod, size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                    break;
+                case NoiseType.Cellular:
+                    anlMethod += "Cellular";
+                    anlHandles[i] = Convert.ToInt32(_anl.Call(anlMethod, size, frequencies[i], DateTime.Now.Millisecond));
+                    break;
+                case NoiseType.CellularFBM:
+                    anlMethod += "CellularFBM";
+                    anlHandles[i] = Convert.ToInt32(_anl.Call(anlMethod, size, frequencies[i], octaves[i], DateTime.Now.Millisecond));
+                    break;
+                case NoiseType.None:
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
         
@@ -194,29 +179,10 @@ public class GeneratorToolbox : Control
         {
             case 2:
             {
-                Image layer = new Image();
-                layer.Create((int) size, (int) size, true, format);
-                layer.Lock();
-                for (int x = 0; x < size; x++)
-                {
-                    for (int y = 0; y < size; y++)
-                    {
-                        Color col = new Color();
-                        Vector2 pos = new Vector2(x, y);
-
-                        for (int c = 0; c < channels; c++)
-                        {
-                            col[c] = Noise2D(pos, size, types[c], frequencies[c], octaves[c], lacunarities[c], amplitudes[c], anlHandles[c]);
-                        }
-                    
-                        layer.SetPixel(x, y, col);
-                    }
-                }
-                layer.Unlock();
-                
-                ImageTexture texture = new ImageTexture();
+                Image layer = NoiseLayer(size, format, channels, anlHandles, inverts, -1);
+                ImageTexture texture = new();
                 noiseTex = texture;
-                texture.CreateFromImage(layer);
+                texture.CreateFromImage(layer, (uint) (Texture.FlagsEnum.Repeat | Texture.FlagsEnum.Filter | Texture.FlagsEnum.ConvertToLinear));
                 break;
             }
             case 3:
@@ -224,34 +190,12 @@ public class GeneratorToolbox : Control
                 Texture3D texture3D = new Texture3D();
                 noiseTex = texture3D;
                 texture3D.Create(size, size, size, format, (uint) (TextureLayered.FlagsEnum.FlagFilter | TextureLayered.FlagsEnum.FlagRepeat));
-
-                for (int y = 0; y < size; y++)
+                for (int z = 0; z < size; z++)
                 {
-                    Image layer = new Image();
-                    layer.Create((int) size, (int) size, true, format);
-                    layer.Lock();
-                    for (int x = 0; x < size; x++)
-                    {
-                        for (int z = 0; z < size; z++)
-                        {
-                            Color col = new Color();
-                            Vector3 pos = new Vector3(x, z, y);
-                    
-                            for (int c = 0; c < channels; c++)
-                            {
-                                col[c] = Noise3D(pos, size, types[c], frequencies[c], octaves[c], lacunarities[c], amplitudes[c], anlHandles[c]);
-                            }
-                    
-                            layer.SetPixel(x, z, col);
-                        }
-                    }
-                    layer.Unlock();
-                    texture3D.SetLayerData(layer, y);
-            
-                    GD.Print($"Y {y} - {stopwatch.ElapsedTicks * tick:F2} seconds.");
+                    Image layer = NoiseLayer(size, format, channels, anlHandles, inverts, z);
+                    texture3D.SetLayerData(layer, z);
                     stopwatch.Restart();
                 }
-                
                 break;
             }
         }
@@ -259,7 +203,7 @@ public class GeneratorToolbox : Control
         GD.Print($"Generate3DGradientNoiseImage {stopwatch.ElapsedTicks * tick:F2} seconds.");
         stopwatch.Restart();
 
-        Directory dir = new Directory();
+        Directory dir = new();
         
         switch (dims)
         {
@@ -291,34 +235,46 @@ public class GeneratorToolbox : Control
         
         _viewer.SetResource(noiseTex);
     }
-    
-    private float Noise2D(Vector2 pos, uint size, NoiseType type, float frequency, int octaves, float lacunarity, float amplitude, int anlHandle)
+
+    private Image NoiseLayer(uint size, Image.Format format, int channels, int[] anlHandles, bool[] inverts, int z)
     {
-        switch (type)
+        Image layer = new();
+        layer.Create((int) size, (int) size, true, format);
+        layer.Lock();
+        for (int x = 0; x < size; x++)
         {
-            case NoiseType.Gradient:
-                Debug.Assert(anlHandle != -1);
-                return (float)Convert.ToDouble(_anl.Call("Sample2D", anlHandle, pos.x, pos.y));
-            case NoiseType.InvCellular:
-                Debug.Assert(anlHandle != -1);
-                return 1.0f - (float)Convert.ToDouble(_anl.Call("Sample2D", anlHandle, pos.x, pos.y));
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            for (int y = 0; y < size; y++)
+            {
+                Color col = new();
+                for (int c = 0; c < channels; c++)
+                {
+                    if (z == -1)
+                    {
+                        col[c] = Noise2D(new Vector2(x, y), anlHandles[c], inverts[c]);
+                    }
+                    else
+                    {
+                        col[c] = Noise3D(new Vector3(x, y, z), anlHandles[c], inverts[c]);
+                    }
+                }
+                layer.SetPixel(x, y, col);
+            }
         }
+        layer.Unlock();
+        return layer;
     }
     
-    private float Noise3D(Vector3 pos, uint size, NoiseType type, float frequency, int octaves, float lacunarity, float amplitude, int anlHandle)
+    private float Noise2D(Vector2 pos, int anlHandle, bool invert)
     {
-        switch (type)
-        {
-            case NoiseType.Gradient:
-                Debug.Assert(anlHandle != -1);
-                return (float)Convert.ToDouble(_anl.Call("Sample3D", anlHandle, pos.x, pos.y, pos.z)) * 0.5f + 0.5f;
-            case NoiseType.InvCellular:
-                Debug.Assert(anlHandle != -1);
-                return 1.0f - (float)Convert.ToDouble(_anl.Call("Sample3D", anlHandle, pos.x, pos.y, pos.z));
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+        Debug.Assert(anlHandle != -1);
+        float noise = (float) Convert.ToDouble(_anl.Call("Sample2D", anlHandle, pos.x, pos.y));
+        return invert ? 1.0f - noise : noise;
+    }
+    
+    private float Noise3D(Vector3 pos, int anlHandle, bool invert)
+    {
+        Debug.Assert(anlHandle != -1);
+        float noise = (float)Convert.ToDouble(_anl.Call("Sample3D", anlHandle, pos.x, pos.y, pos.z));
+        return invert ? 1.0f - noise : noise;
     }
 }

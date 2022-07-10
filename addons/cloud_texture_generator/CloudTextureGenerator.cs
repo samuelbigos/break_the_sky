@@ -1,16 +1,11 @@
 using Godot;
-using System;
-using System.Diagnostics;
-using Color = Godot.Color;
-using Image = Godot.Image;
-using Vector3 = Godot.Vector3;
 
 [Tool]
 public class CloudTextureGenerator : EditorPlugin
 {
     private Control _dock;
 
-    public override void _EnterTree()
+    public override void _EnterTree()   
     {
         base._EnterTree();
 
