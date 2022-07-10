@@ -21,7 +21,7 @@
 [ext_resource path="res://assets/textures/dunes/SmallDunes_Height.tga" type="Texture" id=19]
 [ext_resource path="res://assets/textures/dunes/SmallDunes_Alb.tga" type="Texture" id=20]
 [ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=21]
-[ext_resource path="res://assets/textures/clouds/billow_cloud_noise.tex3d" type="Texture3D" id=22]
+[ext_resource path="res://assets/textures/clouds/billow_cloud_noise_128.tex3d" type="Texture3D" id=22]
 [ext_resource path="res://assets/textures/clouds/coverage.tex" type="Texture" id=23]
 [ext_resource path="res://assets/textures/noise/blue_noise.png" type="Texture" id=24]
 [ext_resource path="res://assets/textures/clouds/shape_cumulus.png" type="Texture" id=25]
@@ -81,24 +81,25 @@ size = Vector3( 1000, 25, 1000 )
 
 [sub_resource type="ShaderMaterial" id=13]
 shader = ExtResource( 21 )
+shader_param/u_cloud_box_min = Vector3( -500, -25, -500 )
+shader_param/u_cloud_box_max = Vector3( 500, 25, 500 )
 shader_param/u_do_coverage = true
-shader_param/u_coverage_scale = 1024.0
-shader_param/u_coverage_density = 2.086
+shader_param/u_coverage_scale = 1000.0
+shader_param/u_coverage_density = 2.0
 shader_param/u_subtract_shape = true
 shader_param/u_subtract_detail = true
 shader_param/u_detail_scale = 256.0
-shader_param/u_detail_strength = 0.797
-shader_param/u_detail_weights = Vector3( 1, 1, 1 )
+shader_param/u_detail_strength = 1.0
+shader_param/u_detail_weights = Vector3( 1, 0.159, 0.136 )
 shader_param/u_num_cloud_steps = 32
-shader_param/u_cloud_box_min = Vector3( -500, -25, -500 )
-shader_param/u_cloud_box_max = Vector3( 500, 25, 500 )
+shader_param/u_alpha_exponent = 1.0
 shader_param/u_do_dither = true
 shader_param/u_dither_scale = 1024.0
 shader_param/u_colour_lit = Color( 0.980392, 0.964706, 0.921569, 1 )
 shader_param/u_colour_shadow = Color( 0.0823529, 0.0235294, 0.239216, 1 )
 shader_param/u_num_light_steps = 8
 shader_param/u_light_ray_dist = 25.0
-shader_param/u_light_absorbtion = 1.363
+shader_param/u_light_absorbtion = 1.0
 shader_param/u_sun_power = 200.0
 shader_param/u_do_scattering = true
 shader_param/u_coverage_tex = ExtResource( 23 )
@@ -171,5 +172,3 @@ material/0 = SubResource( 6 )
 cast_shadow = 0
 mesh = SubResource( 12 )
 material/0 = SubResource( 13 )
-
-[node name="MeshInstance" type="MeshInstance" parent="."]

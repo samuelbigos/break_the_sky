@@ -1,11 +1,14 @@
 shader_type spatial;
-render_mode world_vertex_coords, cull_front;
+render_mode world_vertex_coords;//, cull_front;
 
 // mashed together from various sources:
 // * Geurilla talk - https://www.youtube.com/watch?v=-d8qT5-1LOI
 // * Geurilla paper - http://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
 // * Shadertoy by alro - https://www.shadertoy.com/view/3sffzj
 // * Clouds by Sebastian Lague - https://www.youtube.com/watch?v=4QOcCGI6xOU
+
+uniform vec3 u_cloud_box_min = vec3(-250.0, 0.0, -250.0);
+uniform vec3 u_cloud_box_max = vec3(250.0, 100.0, 250.0);
 
 // coverage
 uniform bool u_do_coverage = true;
@@ -21,14 +24,12 @@ uniform sampler2D u_shape_tex;
 uniform bool u_subtract_detail = true;
 uniform float u_detail_scale = 256.0;
 uniform float u_detail_strength = 1.0;
-uniform vec3 u_detail_weights = vec3(1.0, 1.0, 1.0);
+uniform vec3 u_detail_weights = vec3(1.0, 0.5, 0.5);
 uniform sampler3D u_detail_noise;
 
 // clouds
 uniform int u_num_cloud_steps = 32;
-
-uniform vec3 u_cloud_box_min = vec3(-250.0, 0.0, -250.0);
-uniform vec3 u_cloud_box_max = vec3(250.0, 100.0, 250.0);
+uniform float u_alpha_exponent = 1.0;
 
 // dither
 uniform bool u_do_dither = true;
@@ -46,7 +47,10 @@ uniform bool u_do_scattering = true;
 
 // varying
 varying vec3 v_vertex;
+varying vec3 v_cam;
 varying float v_blue_noise;
+varying float v_depth;
+varying vec3 v_depth_pos;
 
 const float GOLDEN_RATIO = 1.6180339;
 const vec3 SIGMA = vec3(1.0, 1.0, 1.0);
@@ -54,6 +58,7 @@ const vec3 SIGMA = vec3(1.0, 1.0, 1.0);
 void vertex()
 {
 	v_vertex = VERTEX;
+	v_cam = (CAMERA_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 }
 
 // https://gist.github.com/DomNomNom/46bb1ce47f68d255fd5d
@@ -92,14 +97,12 @@ float cloud_detail(vec3 pos, float cloud_density)
 	vec3 detail = texture(u_detail_noise, uv).rgb;
 
 	// sebastian lague
-	vec3 detail_weights = u_detail_weights / dot(u_detail_weights, vec3(1.0));
-	float detailFbm = dot(detail, detail_weights);
-	float erodeWeight = pow(1.0 - cloud_density, 3.0);	
-	//float d = detailFbm * erodeWeight * u_detail_strength;
 
 	// horizon
 	//float d = remap(detail.r, 0.0, 1.0, detail.g * 1.5, 1.0);
-	float d = remap(detail.r, 0.0, 1.0, detailFbm * erodeWeight, 1.0);
+	float d = remap(detail.r * u_detail_weights.r, 0.0, 1.0, 0.0, 1.0);
+	d += (detail.g * 2.0 - 1.0) * u_detail_weights.g;
+	d += (detail.b * 2.0 - 1.0) * u_detail_weights.b;
 	return d * u_detail_strength;
 }
 
@@ -136,35 +139,6 @@ float cloud(vec3 pos, out float cloud_height, bool sample_detail)
 float henyey_greenstein(float g, float costh)
 {
 	return (1.0 / (4.0 * 3.1415))  * ((1.0 - g * g) / pow(1.0 + g*g - 2.0*g*costh, 1.5));
-}
-
-// https://twitter.com/FewesW/status/1364629939568451587/photo/1
-vec3 multiple_octaves(float extinction, float mu, float step_size)
-{
-    vec3 luminance = vec3(0);
-    const float octaves = 4.0;
-    
-    // Attenuation
-    float a = 1.0;
-    // Contribution
-    float b = 1.0;
-    // Phase attenuation
-    float c = 1.0;
-    
-    float phase;
-	
-    for(float i = 0.0; i < octaves; i++)
-	{
-        // Two-lobed HG
-        phase = mix(henyey_greenstein(-0.1 * c, mu), henyey_greenstein(0.3 * c, mu), 0.7);
-        luminance += b * phase * exp(-step_size * extinction * SIGMA * a);
-        // Lower is brighter
-        a *= 0.2;
-        // Higher is brighter
-        b *= 0.5;
-        c *= 0.5;
-    }
-    return luminance;
 }
 
 float light_march(vec3 ro, vec3 rd)
@@ -247,41 +221,53 @@ vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, o
 	return cloud_color;
 }
 
-vec3 volume_cloud(vec3 cam, vec3 pixel, vec3 light, vec2 fragcoord, out float alpha)
+vec3 volume_cloud(vec3 cam, vec3 pixel, vec3 light, vec2 fragcoord, out float alpha, float depth)
 {
-	bool inside = cam.x > u_cloud_box_min.x && cam.x < u_cloud_box_max.x &&
-				  cam.y > u_cloud_box_min.y && cam.y < u_cloud_box_max.y &&
-				  cam.z > u_cloud_box_min.z && cam.z < u_cloud_box_max.z;
+//	bool inside = cam.x > u_cloud_box_min.x && cam.x < u_cloud_box_max.x &&
+//				  cam.y > u_cloud_box_min.y && cam.y < u_cloud_box_max.y &&
+//				  cam.z > u_cloud_box_min.z && cam.z < u_cloud_box_max.z;
 				
 	vec3 ro;
 	vec3 rd = normalize(v_vertex - cam);
 	float dist;
-	if (inside)
-	{
-		ro = cam;
-		dist = length(ro - pixel);
-	}
-	else
+	float cam_to_ro;
+//	if (inside)
+//	{
+//		ro = cam;
+//		dist = length(ro - pixel);
+//		cam_to_ro = 0.0;
+//	}
+//	else
 	{
 		vec2 intersect = intersect_aabb(cam, rd, u_cloud_box_min, u_cloud_box_max);
 		if (intersect.x < intersect.y) // there is an intersection
 		{
 			ro = cam + rd * intersect.x;
+			cam_to_ro = intersect.x;
 			dist = intersect.y - intersect.x;
 		}
 	}
 	
+	dist = min(dist, depth - cam_to_ro);
 	return cloud_march(ro, rd, light, dist, fragcoord, alpha);
+}
+
+void fragment()
+{
+	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).x;
+	vec3 ndc = vec3(SCREEN_UV, depth) * 2.0 - 1.0;
+	vec4 world = CAMERA_MATRIX * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+  	vec3 world_position = world.xyz / world.w;
+	v_depth = length(world_position - v_cam);
 }
 
 void light()
 {
-	vec3 cam = (CAMERA_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	vec3 light = (vec4(LIGHT, 1.0) * INV_CAMERA_MATRIX).rgb;
-	
+
 	float alpha;
-	vec3 col = volume_cloud(cam, v_vertex, light, UV, alpha);
-	
+	vec3 col = volume_cloud(v_cam, v_vertex, light, UV, alpha, v_depth);
+
 	DIFFUSE_LIGHT = col;
-	ALPHA = pow(alpha, 1.0);
+	ALPHA = pow(alpha, u_alpha_exponent);
 }
