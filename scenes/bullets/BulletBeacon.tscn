@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=2]
+[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=2]
 
 [sub_resource type="ShaderMaterial" id=1]
 resource_local_to_scene = true

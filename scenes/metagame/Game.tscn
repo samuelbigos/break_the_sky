@@ -5,7 +5,6 @@
 [ext_resource path="res://scenes/boids/ally/BoidPlayer.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/rendering/GameCamera.cs" type="Script" id=4]
 [ext_resource path="res://src/ai/AISpawningDirector.cs" type="Script" id=5]
-[ext_resource path="res://scenes/rendering/Cloud.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/singletons/FabricateManager.cs" type="Script" id=7]
 [ext_resource path="res://assets/shader/post_process.shader" type="Shader" id=8]
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
@@ -25,6 +24,7 @@
 [ext_resource path="res://assets/textures/clouds/coverage.tex" type="Texture" id=23]
 [ext_resource path="res://assets/textures/noise/blue_noise.png" type="Texture" id=24]
 [ext_resource path="res://assets/textures/clouds/shape_cumulus.png" type="Texture" id=25]
+[ext_resource path="res://scenes/rendering/CloudBox.cs" type="Script" id=26]
 
 [sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
@@ -63,26 +63,13 @@ shader_param/u_ripple_normal_tex = ExtResource( 18 )
 shader_param/u_grain_texture = ExtResource( 13 )
 shader_param/u_glitter_texture = ExtResource( 14 )
 
-[sub_resource type="QuadMesh" id=7]
-
-[sub_resource type="ShaderMaterial" id=6]
-shader = ExtResource( 8 )
-shader_param/edge_color = Color( 0, 0, 0, 1 )
-shader_param/threshold = 0.0
-shader_param/blend = 0.01
-shader_param/enable_depth_pass = true
-shader_param/threshold_depth = 0.0
-shader_param/blend_depth = 0.01
-shader_param/distance_fade_length = 1000.0
-shader_param/distance_fade_blend = 1000.0
-
 [sub_resource type="CubeMesh" id=12]
 size = Vector3( 1000, 25, 1000 )
 
 [sub_resource type="ShaderMaterial" id=13]
 shader = ExtResource( 21 )
-shader_param/u_cloud_box_min = Vector3( -500, -25, -500 )
-shader_param/u_cloud_box_max = Vector3( 500, 25, 500 )
+shader_param/u_cloud_box_min = Vector3( -500, -12.5, -500 )
+shader_param/u_cloud_box_max = Vector3( 500, 12.5, 500 )
 shader_param/u_do_coverage = true
 shader_param/u_coverage_scale = 1000.0
 shader_param/u_coverage_density = 2.0
@@ -107,12 +94,26 @@ shader_param/u_shape_tex = ExtResource( 25 )
 shader_param/u_detail_noise = ExtResource( 22 )
 shader_param/u_blue_noise = ExtResource( 24 )
 
+[sub_resource type="QuadMesh" id=7]
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 8 )
+shader_param/edge_color = Color( 0, 0, 0, 1 )
+shader_param/threshold = 0.0
+shader_param/blend = 0.01
+shader_param/enable_depth_pass = true
+shader_param/threshold_depth = 0.0
+shader_param/blend_depth = 0.01
+shader_param/distance_fade_length = 1000.0
+shader_param/distance_fade_blend = 1000.0
+
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
 StateMachinePath = NodePath("StateMachine_Game")
 AiSpawningDirectorPath = NodePath("AISpawningDirector")
 HudPath = NodePath("HUD")
 SandPath = NodePath("Sand")
+CloudsPath = NodePath("CloudBox")
 _areaRect = Rect2( -300, -300, 600, 600 )
 _playerScene = ExtResource( 3 )
 
@@ -141,12 +142,10 @@ near = 1.0
 far = 1000.0
 script = ExtResource( 4 )
 
-[node name="Clouds" parent="." instance=ExtResource( 6 )]
-visible = false
-
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 0.958098, 1.25207e-08, -0.286441, 0.173651, -0.795283, 0.580836, -0.227802, -0.606238, -0.761959, 0, 186.63, 0 )
 light_cull_mask = 4294966273
+shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 
 [node name="MouseCursor" type="MeshInstance" parent="."]
@@ -157,8 +156,15 @@ mesh = SubResource( 4 )
 
 [node name="Sand" type="MeshInstance" parent="."]
 transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -100, 0 )
+cast_shadow = 0
 mesh = SubResource( 8 )
 material/0 = SubResource( 11 )
+
+[node name="CloudBox" type="MeshInstance" parent="."]
+cast_shadow = 0
+mesh = SubResource( 12 )
+material/0 = SubResource( 13 )
+script = ExtResource( 26 )
 
 [node name="PostProcess" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140.015, 0 )
@@ -167,8 +173,3 @@ extra_cull_margin = 16384.0
 mesh = SubResource( 7 )
 skeleton = NodePath("../Camera")
 material/0 = SubResource( 6 )
-
-[node name="CloudBox" type="MeshInstance" parent="."]
-cast_shadow = 0
-mesh = SubResource( 12 )
-material/0 = SubResource( 13 )

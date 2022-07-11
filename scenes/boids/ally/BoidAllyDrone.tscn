@@ -4,7 +4,7 @@
 [ext_resource path="res://assets/mesh/allies/ally_drone.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/bullets/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
-[ext_resource path="res://assets/shader/boid_shader.shader" type="Shader" id=5]
+[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=5]
 [ext_resource path="res://assets/data/stats/stats_ally_drone.tres" type="Resource" id=6]
 
 [sub_resource type="BoxShape" id=1]

@@ -11,6 +11,7 @@ public partial class Game : Singleton<Game>
     [OnReadyGet] private AISpawningDirector _aiSpawningDirector;
     [OnReadyGet] private HUD _hud;
     [OnReadyGet] private MeshInstance _sand;
+    [OnReadyGet] private CloudBox _clouds;
 
     [Export] private Rect2 _areaRect;
     [Export] private PackedScene _playerScene;
@@ -76,12 +77,19 @@ public partial class Game : Singleton<Game>
     
     private void OnPostCameraTransformed()
     {
-        Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), _sand.GlobalTransform.origin.y);
-        Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, _sand.GlobalTransform.origin.y);
-        _sand.Scale = new Vector3(bottomRight.x - topLeft.x,1.0f, bottomRight.z - topLeft.z);
-        Vector3 pos = GameCamera.Instance.GlobalTransform.origin;
-        pos.y = _sand.GlobalTransform.origin.y;
-        _sand.GlobalPosition(pos);
+        // scale and position sand
+        {
+            Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), _sand.GlobalTransform.origin.y);
+            Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, _sand.GlobalTransform.origin.y);
+            _sand.Scale = new Vector3(bottomRight.x - topLeft.x,1.0f, bottomRight.z - topLeft.z);
+            Vector3 pos = GameCamera.Instance.GlobalTransform.origin;
+            pos.y = _sand.GlobalTransform.origin.y;
+            _sand.GlobalPosition(pos);  
+        }
+        
+        // position clouds
+        Vector3 cloudPos = GameCamera.Instance.GlobalTransform.origin;
+        _clouds.GlobalPosition(new Vector3(cloudPos.x, _clouds.GlobalTransform.origin.y, cloudPos.z));
     }
 
     public void RegisterPickup(PickupMaterial pickup)

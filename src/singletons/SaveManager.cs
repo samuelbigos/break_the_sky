@@ -15,8 +15,8 @@ public class SaveManager : Singleton<SaveManager>
 	{
 		base._Ready();
 
-		Reset();
-		//DoLoad();
+		//Reset();
+		DoLoad();
 	}
 
 	public static void DoSave()

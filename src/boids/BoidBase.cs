@@ -224,10 +224,30 @@ public partial class BoidBase : Area
 
     protected virtual void ProcessAlive(float delta)
     {
-        // update position and cache velocity from steering boid
         Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-        GlobalTransform = new Transform(new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f), steeringBoid.Position.ToGodot().To3D());
+
+        Basis basis = new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f);
+
+        // banking
+        if (delta > 0.0f)
+        {
+            System.Numerics.Vector2 right = new(steeringBoid.Heading.Y, -steeringBoid.Heading.X);
+            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
+            localSteering /= delta;
+            localSteering /= 100.0f;
+            _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
+            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
+            float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
+            // _mesh.Rotation = Bank360 ? 
+            //     new Vector3(bankX, _mesh.Rotation.y, bankZ) : 
+            //     new Vector3(0.0f, _mesh.Rotation.y, bankZ);
+
+            basis = basis.Rotated(basis.z, bankZ);
+        }
+        
+        // update position and cache velocity from steering boid
+        GlobalTransform = new Transform(basis, steeringBoid.Position.ToGodot().To3D());
         _cachedVelocity = steeringBoid.Velocity;
         _cachedHeading = steeringBoid.Heading;
 
@@ -245,21 +265,6 @@ public partial class BoidBase : Area
         }
         _cachedLastHitDir = Vector3.Zero;
         _cachedLastHitDamage = 0.0f;
-        
-        // banking
-        if (delta > 0.0f)
-        {
-            System.Numerics.Vector2 right = new(steeringBoid.Heading.Y, -steeringBoid.Heading.X);
-            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
-            localSteering /= delta;
-            localSteering /= 100.0f;
-            _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
-            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
-            float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
-            _mesh.Rotation = Bank360 ? 
-                new Vector3(bankX, 0.0f, bankZ) : 
-                new Vector3(0.0f, 0.0f, bankZ);
-        }
     }
     
     protected virtual void ProcessDestroyed(float delta)

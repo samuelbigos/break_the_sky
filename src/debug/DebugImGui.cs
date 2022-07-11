@@ -153,14 +153,17 @@ public class DebugImGui : Saveable
                 if (ImGui.MenuItem("Performance", "CTRL+P", ShowPerformance))
                 {
                     ShowPerformance = !ShowPerformance;
+                    DoSave();
                 }
                 if (ImGui.MenuItem("Debug", "CTRL+D", ShowDebug))
                 {
                     ShowDebug = !ShowDebug;
+                    DoSave();
                 }
                 if (ImGui.MenuItem("GameSettings", "CTRL+G", ShowGameSettings))
                 {
                     ShowGameSettings = !ShowGameSettings;
+                    DoSave();
                 }
 
                 foreach ((string, string, Action) window in _registeredWindows)
