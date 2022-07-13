@@ -6,9 +6,6 @@ using System.Linq;
 
 public abstract class Database : Node
 {
-    public static Database Cities;
-    public static Database AllyBoids;
-    public static Database EnemyBoids;
     public static Database Waves;
     
     private readonly List<DataEntry> _entries = new List<DataEntry>();
@@ -33,15 +30,6 @@ public abstract class Database : Node
 
         switch (Name)
         {
-            case "DatabaseCities":
-                Cities = this;
-                break;
-            case "DatabaseAllyBoids":
-                AllyBoids = this;
-                break;
-            case "DatabaseEnemyBoids":
-                EnemyBoids = this;
-                break;
             case "DatabaseWaves":
                 Waves = this;
                 break;
@@ -64,16 +52,5 @@ public abstract class Database : Node
                 AddEntriesInChildren(node, $"{name}{node.Name}_");
             }
         }
-    }
-    
-    // quick-helpers
-    public static DataAllyBoid AllyBoid(string id)
-    {
-        return AllyBoids.FindEntry<DataAllyBoid>(id);
-    }
-    
-    public static DataEnemyBoid EnemyBoid(string id)
-    {
-        return EnemyBoids.FindEntry<DataEnemyBoid>(id);
     }
 }

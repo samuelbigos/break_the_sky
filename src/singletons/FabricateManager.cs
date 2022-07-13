@@ -2,22 +2,26 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ImGuiNET;
 
 public class FabricateManager : Singleton<FabricateManager>
 {
+    [Export] private List<ResourceBoidAlly> _fabricantPool = new();
+    
     public class Fabricant
     {
-        public string BoidId;
+        public ResourceBoidAlly FabricantData;
         public float TotalTime;
         public float TimeLeft;
     }
 
+    public IReadOnlyList<ResourceBoidAlly> Fabricants => _fabricantPool;
     public IReadOnlyList<Fabricant> Queue => _queue;
     
-    public Action<string> OnPushQueue;
+    public Action<ResourceBoidAlly> OnPushQueue;
     public Action<int> OnPopQueue;
 
-    private List<Fabricant> _queue = new List<Fabricant>();
+    private List<Fabricant> _queue = new();
 
     public override void _Ready()
     {
@@ -25,6 +29,14 @@ public class FabricateManager : Singleton<FabricateManager>
         
         HUD.Instance.OnFabricateButtonPressed += _OnFabricateButtonPressed;
         HUD.Instance.OnQueueButtonPressed += _OnQueueButtonPressed;
+        
+        SaveDataPlayer.OnLevelUp += OnLevelUp;
+    }
+
+    private void OnLevelUp(int level)
+    {
+        if (level == 1)
+            SaveDataPlayer.UnlockFabricant(_fabricantPool[0]);
     }
 
     public override void _Process(float delta)
@@ -34,18 +46,18 @@ public class FabricateManager : Singleton<FabricateManager>
         if (_queue.Count > 0)
         {
             _queue[0].TimeLeft -= delta;
-            if (_queue[0].TimeLeft <= 0.0f && BoidFactory.Instance.CreateAllyBoid(Database.AllyBoid(_queue[0].BoidId)) != null)
+            if (_queue[0].TimeLeft <= 0.0f && BoidFactory.Instance.CreateAllyBoid(_queue[0].FabricantData) != null)
             {
                 RemoveFromQueue(0);
             }
         }
     }
 
-    private void AddToQueue(DataAllyBoid boid)
+    private void AddToQueue(ResourceBoidAlly fabricant)
     {
-        Debug.Assert(boid != null, $"ID {boid.Name} unknown.");
-        _queue.Add(new Fabricant() { BoidId = boid.Name, TotalTime = boid.FabricateTime, TimeLeft = boid.FabricateTime });
-        OnPushQueue?.Invoke(boid.Name);
+        Debug.Assert(fabricant != null, $"ID {fabricant} unknown.");
+        _queue.Add(new Fabricant() { FabricantData = fabricant, TotalTime = fabricant.FabricateTime, TimeLeft = fabricant.FabricateTime });
+        OnPushQueue?.Invoke(fabricant);
     }
 
     private void RemoveFromQueue(int idx)
@@ -53,26 +65,55 @@ public class FabricateManager : Singleton<FabricateManager>
         Debug.Assert(_queue.Count > idx, "Invalid index when trying to remove from queue.");
         
         // refund
-        DataAllyBoid boid = Database.AllyBoid(_queue[idx].BoidId);
-        SaveDataPlayer.MaterialCount += boid.FabricateCost;
+        SaveDataPlayer.MaterialCount += _queue[idx].FabricantData.FabricateCost;
         
         _queue.RemoveAt(idx);
         OnPopQueue?.Invoke(idx);
     }
     
-    private void _OnFabricateButtonPressed(string boidId)
+    private void _OnFabricateButtonPressed(ResourceBoidAlly fabricant)
     {
-        DataAllyBoid boid = Database.AllyBoids.FindEntry<DataAllyBoid>(boidId);
         int mats = SaveDataPlayer.MaterialCount;
-        if (mats >= boid.FabricateCost)
+        if (mats >= fabricant.FabricateCost)
         {
-            SaveDataPlayer.MaterialCount -= boid.FabricateCost;
-            AddToQueue(boid);
+            SaveDataPlayer.MaterialCount -= fabricant.FabricateCost;
+            AddToQueue(fabricant);
         }
     }
     
     private void _OnQueueButtonPressed(int idx)
     {
         RemoveFromQueue(idx);
+    }
+    
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        DebugImGui.Instance.RegisterWindow("fabricate", "Fabricate", _OnImGuiLayoutWindow);
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        DebugImGui.Instance.UnRegisterWindow("fabricate", _OnImGuiLayoutWindow);
+    }
+    
+    private void _OnImGuiLayoutWindow()
+    {
+        ImGui.Text($"Boids: {BoidFactory.Instance.AllBoids.Count}");
+        ImGui.Text(" ### Spawn");
+        foreach (ResourceBoidAlly fabricant in _fabricantPool)
+        {
+            if (ImGui.Button($"{fabricant.DisplayName}"))
+            {
+                BoidFactory.Instance.CreateAllyBoid(fabricant);
+            }
+
+            if (ImGui.Button($"{fabricant.DisplayName} x10"))
+            {
+                for (int i = 0; i < 10; i++)
+                    BoidFactory.Instance.CreateAllyBoid(fabricant);
+            }
+        }
     }
 }

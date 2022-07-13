@@ -144,5 +144,5 @@ void light()
 	vec3 view = (vec4(VIEW, 1.0) * INV_CAMERA_MATRIX).rgb;
 
 	DIFFUSE_LIGHT = toLinear(vec4(colour(light, view), 1.0)).rgb;
-	DIFFUSE_LIGHT = vec3(colour(light, view));
+	DIFFUSE_LIGHT = vec3(colour(light, view)) * ATTENUATION;
 }

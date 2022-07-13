@@ -6,13 +6,14 @@ public class BoidEnemyCarrier : BoidEnemyBase
     [Export] private List<NodePath> _rotorgunsPaths;
     [Export] private List<NodePath> _lockPaths;
 
-    [Export] private string _droneId;
-
     [Export] private float _targetDist = 400.0f;
     [Export] private float _dronePulseCooldown = 2.0f;
     [Export] private float _droneSpawnInterval = 0.33f;
     [Export] private int _dronePulseCount = 10;
     [Export] private float _droneSpawnRange = 750.0f;
+
+    [Export] private ResourceBoidEnemy _rotorgunData;
+    [Export] private ResourceBoidEnemy _minionData;
 
     private AudioStreamPlayer2D _sfxBeaconFire;
     private AudioStream _rocochetSfx;
@@ -39,7 +40,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
         for (int i = 0; i < _rotorgunsPaths.Count; i++)
         {
             _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
-            _rotorguns[i].Init("rotorgun", _OnRotorgunDestroyed, _rotorguns[i].GlobalPosition, Vector2.Zero);
+            _rotorguns[i].Init(_rotorgunData, _OnRotorgunDestroyed, _rotorguns[i].GlobalPosition, Vector2.Zero);
             _rotorguns[i].SetTarget(TargetType.Enemy, Game.Player);
             _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
         }
@@ -87,15 +88,18 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
     private void _SpawnDrone()
     {
-        DataEnemyBoid enemyData = Database.EnemyBoids.FindEntry<DataEnemyBoid>(_droneId);
         _droneSpawnSide = (_droneSpawnSide + 1) % 2;
         Vector2 pos;
         if (_droneSpawnSide == 0)
+        {
             pos = (GetNode("SpawnLeft") as Spatial).GlobalTransform.origin.To2D();
+        }
         else
+        {
             pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
+        }
         Vector2 vel = 100.0f * (pos - GlobalPosition).Normalized();
-        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(enemyData, pos, vel);
+        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_rotorgunData, pos, vel);
         enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
         enemy.SetTarget(TargetType.Enemy, Game.Player);
     }

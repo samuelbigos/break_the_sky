@@ -43,9 +43,9 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
 
-        _laserCooldown = _stats.AttackCooldown;
-        _laserCharge = _stats.AttackCharge;
-        _laserDuration = _stats.AttackDuration;
+        _laserCooldown = _resourceStats.AttackCooldown;
+        _laserCharge = _resourceStats.AttackCharge;
+        _laserDuration = _resourceStats.AttackDuration;
             
         _laserCooldownTimer = _laserCooldown * 0.5f;
 

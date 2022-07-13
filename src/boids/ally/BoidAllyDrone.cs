@@ -10,9 +10,9 @@ public class BoidAllyDrone : BoidAllyBase
     private float _shootCooldown;
     private bool _cachedShoot;
 
-    public override void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
-        base.Init(id, onDestroy, position, velocity);
+        base.Init(data, onDestroy, position, velocity);
         
         SetTarget(TargetType.Ally, Game.Player);
     }
@@ -35,7 +35,7 @@ public class BoidAllyDrone : BoidAllyBase
 
         if (_shootCooldown > 0.0f)
         {
-            float t = _shootCooldown / _stats.AttackCooldown;
+            float t = _shootCooldown / _resourceStats.AttackCooldown;
             t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
             Vector3 from = _baseScale * 2.0f;
             _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
@@ -66,9 +66,9 @@ public class BoidAllyDrone : BoidAllyBase
     {
         base._Shoot(dir);
 
-        _shootCooldown = _stats.AttackCooldown;
+        _shootCooldown = _resourceStats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * _stats.AttackVelocity, Alignment, _stats.AttackDamage);
+        bullet.Init(GlobalPosition, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
     }
 }

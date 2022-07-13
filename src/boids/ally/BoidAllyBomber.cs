@@ -119,7 +119,7 @@ public class BoidAllyBomber : BoidAllyBase
         Vector2 pos = _bomb.GlobalPosition;
         RemoveChild(_bomb);
         Game.Instance.AddChild(_bomb);
-        _bomb.Init(pos, dir * _stats.AttackVelocity, Alignment, _stats.AttackDamage);
+        _bomb.Init(pos, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
         _bomb.Target = _targetBoid;
         _bomb = null;
         

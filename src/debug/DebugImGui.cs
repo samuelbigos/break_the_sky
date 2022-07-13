@@ -238,7 +238,7 @@ public class DebugImGui : Saveable
             ImGui.SetNextWindowBgAlpha(windowAlpha);
             if (ImGui.Begin("GameSettings", flags))
             {
-                Resources.Instance.GameSettings._OnImGuiLayout();
+                Resources.Instance.ResourceGameSettings._OnImGuiLayout();
             }
         }
 

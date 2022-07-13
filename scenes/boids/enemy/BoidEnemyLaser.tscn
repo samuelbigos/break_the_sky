@@ -9,7 +9,7 @@
 [ext_resource path="res://assets/shader/boid.shader" type="Shader" id=7]
 [ext_resource path="res://assets/material/spatial_red.material" type="Material" id=8]
 [ext_resource path="res://assets/mesh/ui/warning_zone_line.obj" type="ArrayMesh" id=9]
-[ext_resource path="res://assets/data/stats/stats_enemy_laser.tres" type="Resource" id=10]
+[ext_resource path="res://assets/data/stats/enemies/stats_enemy_laser.tres" type="Resource" id=10]
 
 [sub_resource type="ShaderMaterial" id=5]
 resource_local_to_scene = true

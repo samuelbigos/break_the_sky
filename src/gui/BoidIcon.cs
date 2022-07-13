@@ -10,14 +10,12 @@ public class BoidIcon : Control
     [Export] private float _rotSpeed = 5.0f;
     [Export] private bool _showProgress = true;
 
-    public Action<BoidIcon> OnPressed;
-
-    public string BoidID => _id;
+    public Action<BoidIcon, ResourceBoid> OnPressed;
 
     private MeshInstance _mesh;
     private Button _button;
     private ProgressBar _progress;
-    private string _id;
+    private ResourceBoid _boidData;
 
     public override void _Ready()
     {
@@ -32,11 +30,10 @@ public class BoidIcon : Control
         _progress.Visible = _showProgress;
     }
     
-    public void Init(string boidId, bool showProgress)
+    public void Init(ResourceBoid data, bool showProgress)
     {
-        DataAllyBoid data = Database.AllyBoids.FindEntry<DataAllyBoid>(boidId);
         _mesh.Mesh = data.Mesh;
-        _id = data.Name;
+        _boidData = data;
         _progress.Visible = showProgress && _showProgress;
     }
 
@@ -56,6 +53,6 @@ public class BoidIcon : Control
 
     private void _OnPressed()
     {
-        OnPressed?.Invoke(this);
+        OnPressed?.Invoke(this, _boidData);
     }
 }

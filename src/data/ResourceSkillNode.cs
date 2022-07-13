@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 [Tool]
-public class SkillNodeResource : Resource
+public class ResourceSkillNode : Resource
 {
     [Export] public Texture Icon;
     [Export] public bool Major;

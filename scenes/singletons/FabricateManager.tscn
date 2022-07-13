@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/singletons/FabricateManager.cs" type="Script" id=1]
+[ext_resource path="res://assets/data/boids/allies/boid_ally_drone.tres" type="Resource" id=2]
+
+[node name="FabricateManager" type="Node"]
+script = ExtResource( 1 )
+_fabricantPool = [ ExtResource( 2 ) ]

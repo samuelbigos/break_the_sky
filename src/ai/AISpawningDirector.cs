@@ -18,6 +18,9 @@ public class AISpawningDirector : Node
     [Export] private float _levelScale = 1.1f;
 
     [Export] private float _swarmRampUpTime = 15.0f; // time it takes to fill the budget when swarming
+    
+    [Export] private ResourceBoidEnemy _firstEnemy;
+    [Export] private List<ResourceBoidEnemy> _enemyBoidPool = new();
 
     private enum SpawningState
     {
@@ -50,6 +53,9 @@ public class AISpawningDirector : Node
     
     public override void _Ready()
     {
+        Debug.Assert(_firstEnemy != null, "_firstEnemy != null");
+        SaveDataPlayer.SetSeenEnemy(_firstEnemy);
+        
         ChangeState(SpawningState.Idle);
     }
     
@@ -145,13 +151,13 @@ public class AISpawningDirector : Node
                 continue;
             }
 
-            activeBudget += Database.EnemyBoids.FindEntry<DataEnemyBoid>(_swarmingEnemies[i].Id).SpawningCost;
+            activeBudget += _swarmingEnemies[i].Data.SpawningCost;
         }
         
         while (activeBudget < budgetGoal)
         {
-            List<DataEnemyBoid> list = ListPossibleEnemies();
-            DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
+            List<ResourceBoidEnemy> list = ListPossibleEnemies();
+            ResourceBoidEnemy enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             activeBudget += enemy.SpawningCost;
             _swarmingEnemies.Add(SpawnEnemyRandom(enemy));
         }
@@ -177,11 +183,11 @@ public class AISpawningDirector : Node
         _waveEnemies = new List<BoidEnemyBase>();
         
         // get a list of enemies to make a wave from
-        List<DataEnemyBoid> list = ListPossibleEnemies();
+        List<ResourceBoidEnemy> list = ListPossibleEnemies();
         float budget = CalcBudget(CalcIntensity(_totalTime));
         while (budget >= 0.0f)
         {
-            DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
+            ResourceBoidEnemy enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             budget -= enemy.SpawningCost;
             _waveEnemies.Add(SpawnEnemyRandom(enemy));
         }
@@ -216,11 +222,11 @@ public class AISpawningDirector : Node
     private void EnterStatePatrol()
     {
         // get a list of enemies to patrol
-        List<DataEnemyBoid> list = ListPossibleEnemies();
+        List<ResourceBoidEnemy> list = ListPossibleEnemies();
         float budget = CalcBudget(CalcIntensity(_totalTime));
         while (budget >= 0.0f)
         {
-            DataEnemyBoid enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
+            ResourceBoidEnemy enemy = list[(int) (Utils.Rng.Randi() % list.Count)];
             budget -= enemy.SpawningCost;
             SpawnEnemyRandom(enemy);
         }
@@ -339,46 +345,47 @@ public class AISpawningDirector : Node
         return SpawningState.Idle;
     }
 
-    private List<DataEnemyBoid> ListPossibleEnemies()
+    private List<ResourceBoidEnemy> ListPossibleEnemies()
     {
-        List<DataEnemyBoid> possibleTypes = new List<DataEnemyBoid>();
-        foreach (DataEnemyBoid enemy in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
+        List<ResourceBoidEnemy> possibleTypes = new();
+        foreach (ResourceBoidEnemy data in _enemyBoidPool)
         {
-            if (SaveDataPlayer.HasSeenEnemy(enemy.Name))
-                possibleTypes.Add(enemy);
+            if (SaveDataPlayer.HasSeenEnemy(data))
+                possibleTypes.Add(data);
         }
 
         return possibleTypes;
     }
 
-    public BoidEnemyBase SpawnEnemyRandom(DataEnemyBoid id)
+    public BoidEnemyBase SpawnEnemyRandom(ResourceBoidEnemy enemyData)
     {
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = _game.SpawningRect.RandPointOnEdge();
         Vector2 spawnVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * 100.0f;
-        return SpawnEnemy(id, spawnPos, spawnVel);
+        return SpawnEnemy(enemyData, spawnPos, spawnVel);
     }
 
-    public BoidEnemyBase SpawnEnemy(DataEnemyBoid id, Vector2 pos, Vector2 vel)
+    public BoidEnemyBase SpawnEnemy(ResourceBoidEnemy enemyData, Vector2 pos, Vector2 vel)
     {
-        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(id, pos, vel);
+        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(enemyData, pos, vel);
         _activeEnemies.Add(enemy);
         enemy.OnBoidDestroyed += _OnEnemyDestroyed;
         return enemy;
     }
 
-    private void SpawnEnemyEscort(DataEnemyBoid leaderId, List<DataEnemyBoid> escortIds, out BoidEnemyBase leaderBoid, out List<BoidEnemyBase> escortBoids)
+    private void SpawnEnemyEscort(ResourceBoidEnemy leaderData, List<ResourceBoidEnemy> escortDatas, out BoidEnemyBase leaderBoid, out List<BoidEnemyBase> escortBoids)
     {
         escortBoids = new List<BoidEnemyBase>();
-        BoidEnemyBase leader = SpawnEnemyRandom(leaderId);
-        foreach (DataEnemyBoid id in escortIds)
+        BoidEnemyBase leader = SpawnEnemyRandom(leaderData);
+        foreach (ResourceBoidEnemy escortData in escortDatas)
         {
             float f = (float) GD.RandRange(0.0f, Mathf.Pi * 2.0f);
             float escortRadius = 50.0f;
             Vector2 spawnPos = leader.GlobalPosition + new Vector2(Mathf.Sin(f), -Mathf.Cos(f)).Normalized() * escortRadius;
-            BoidEnemyBase escort = SpawnEnemy(id, spawnPos, Vector2.Zero);
+            BoidEnemyBase escort = SpawnEnemy(escortData, spawnPos, Vector2.Zero);
             escortBoids.Add(escort);
-            escort.SetupEscort(leader);
+            //escort.SetupEscort(leader);
+            Debug.Assert(false, "Escort currently not supported.");
         }
 
         leaderBoid = leader;
@@ -391,29 +398,18 @@ public class AISpawningDirector : Node
             case DataWave.Type.Standard:
             {
                 // spawn
-                foreach (string enemy in wave.PrimarySpawns)
+                foreach (ResourceBoidEnemy enemy in wave.PrimarySpawns)
                 {
-                    DataEnemyBoid data = Database.EnemyBoid(enemy);
-                    primaryList.Add(SpawnEnemyRandom(data));
+                    primaryList.Add(SpawnEnemyRandom(enemy));
                 }
                 break;
             }
             case DataWave.Type.Escort:
             {
-                // get leader
                 Debug.Assert(wave.PrimarySpawns.Count > 0, "Invalid wave setup");
-                DataEnemyBoid leaderData = Database.EnemyBoid(wave.PrimarySpawns[0]);
-
-                // get escort
-                List<DataEnemyBoid> escort = new List<DataEnemyBoid>();
-                foreach (string id in wave.SecondarySpawns)
-                {
-                    Debug.Assert(Database.EnemyBoid(id) != null, "Invalid wave setup");
-                    escort.Add(Database.EnemyBoid(id));
-                }
 
                 // spawn
-                SpawnEnemyEscort(leaderData, escort,
+                SpawnEnemyEscort(wave.PrimarySpawns[0], wave.SecondarySpawns,
                     out BoidEnemyBase spawnedLeader,
                     out secondaryList);
                 primaryList.Add(spawnedLeader);
@@ -426,9 +422,11 @@ public class AISpawningDirector : Node
         }
     }
     
-    private void _OnEnemyDestroyed(BoidBase enemy)
+    private void _OnEnemyDestroyed(BoidBase boid)
     {
-        _totalBudgetDestoyed += Database.EnemyBoid(enemy.Id).SpawningCost;
+        BoidEnemyBase enemy = boid as BoidEnemyBase;
+        Debug.Assert(enemy != null, "enemy != null");
+        _totalBudgetDestoyed += enemy.Data.SpawningCost;
     }
 
     private void _OnImGuiLayout()
@@ -472,5 +470,20 @@ public class AISpawningDirector : Node
     
         ImGui.SliderFloat("Offset", ref _intensityOffset, -1.0f, 1.0f);
         ImGui.SliderFloat("OffsetScale", ref _intensityOffsetScale, 0.0f, 0.01f);
+        
+        ImGui.Text(" ### Spawn");
+        foreach (ResourceBoidEnemy enemy in _enemyBoidPool)
+        {
+            if (ImGui.Button($"{enemy.DisplayName}"))
+            {
+                BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
+            }
+
+            if (ImGui.Button($"{enemy.DisplayName} x10"))
+            {
+                for (int i = 0; i < 10; i++)
+                    BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
+            }
+        }
     }
 }

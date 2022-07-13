@@ -6,7 +6,7 @@
 [ext_resource path="res://assets/mesh/enemies/enemy_carrier_rotorgun.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=5]
 [ext_resource path="res://assets/shader/boid.shader" type="Shader" id=6]
-[ext_resource path="res://assets/data/stats/stats_enemy_carrierrotorgun.tres" type="Resource" id=7]
+[ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrierrotorgun.tres" type="Resource" id=7]
 
 [sub_resource type="CylinderShape" id=2]
 

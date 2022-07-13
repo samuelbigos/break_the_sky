@@ -4,73 +4,55 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Godot.Collections;
+using ImGuiNET;
 
 public class SaveDataWorld : Saveable
 {
-    public static SaveDataWorld Instance;
+    private static SaveDataWorld _instance;
 
-    public enum CityState
+    private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
-        Cold,
-        Warm,
-        Hot,
-        Destroyed
-    }
-
-    public CityState GetCityState(string city)
-    {
-        Dictionary cityStates = _data["cityStates"] as Dictionary;
-        
-        Debug.Assert(cityStates != null);
-        Debug.Assert(cityStates.Contains(city));
-
-        return (CityState) Convert.ToInt32(cityStates[city]);
-    }
+    };
     
     public SaveDataWorld()
     {
-        Debug.Assert(Instance == null, "Attempting to create multiple SaveDataWorld instances!");
-        Instance = this;
+        Debug.Assert(_instance == null, "Attempting to create multiple SaveDataWorld instances!");
+        _instance = this;
     }
-
-    public override void _Ready()
-    {
-        base._Ready();
-
-        Utils.Rng.Seed = (ulong)DateTime.Now.Millisecond;
-    }
-
-    public override void InitialiseSaveData()
-    {
-        Dictionary cityStates = new Dictionary();
-        _data["cityStates"] = cityStates;
-        
-        // populate city states
-        List<DataCity> cities = Database.Cities.GetAllEntries<DataCity>();
-        foreach (DataCity city in cities)
-        {
-            cityStates[city.Name] = CityState.Cold;
-        }
-        
-        // pick two cities to be under attack
-        int numCitiesUnderAttack = Metagame.Instance.InitialCitiesUnderAttack;
-        Debug.Assert(cities.Count > numCitiesUnderAttack);
-        List<string> citiesUnderAttack = new List<string>();
-        while (citiesUnderAttack.Count < numCitiesUnderAttack)
-        {
-            int randCity = (int) (Utils.Rng.Randi() % cities.Count);
-            if (!citiesUnderAttack.Contains(cities[randCity].Name))
-            {
-                citiesUnderAttack.Add(cities[randCity].Name);
-            }
-        }
-        foreach (string city in citiesUnderAttack)
-        {
-            cityStates[city] = CityState.Warm;
-        }
-    }
-
+    
     protected override void Validate()
     {
+        foreach (string key in _defaults.Keys)
+        {
+            if (!_data.Contains(key))
+            {
+                _data[key] = _defaults[key];
+            }
+        }
+    }
+    
+    public override void InitialiseSaveData()
+    {
+        base.InitialiseSaveData();
+    }
+    
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        DebugImGui.Instance.RegisterWindow("savedata_world", "World Data", _OnImGuiLayout);
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        DebugImGui.Instance.UnRegisterWindow("savedata_world", _OnImGuiLayout);
+    }
+
+    private void _OnImGuiLayout()
+    {
+        foreach (string key in _defaults.Keys)
+        {
+            ImGui.Text($"{key}: {_data[key]}");
+        }
     }
 }

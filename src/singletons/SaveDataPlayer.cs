@@ -8,7 +8,7 @@ using Array = Godot.Collections.Array;
 
 public class SaveDataPlayer : Saveable
 {
-    public static SaveDataPlayer Instance;
+    private static SaveDataPlayer _instance;
 
     public static Action<int> OnLevelUp;
 
@@ -19,78 +19,89 @@ public class SaveDataPlayer : Saveable
         { "skillPoints", 0 },
         { "materialCount", 0 },
         { "maxAllyCount", 500 },
-        { "initialAllyCount", 0 },
         { "unlockedAllies", new Array() },
         { "seenEnemies", new Dictionary() },
     };
 
-    private System.Collections.Generic.Dictionary<string, List<SkillNodeResource>> _activeSkills = new();
+    private System.Collections.Generic.Dictionary<string, List<ResourceSkillNode>> _activeSkills = new();
 
     public static int MaxAllyCount
     {
-        get => Convert.ToInt32(Instance._data["maxAllyCount"]);
-        set => Instance._data["maxAllyCount"] = value;
-    }
-
-    public static int InitialAllyCount
-    {
-        get => Convert.ToInt32(Instance._data["initialAllyCount"]);
-        set => Instance._data["initialAllyCount"] = value;
+        get => Convert.ToInt32(_instance._data["maxAllyCount"]);
+        set => _instance._data["maxAllyCount"] = value;
     }
     
     public static int SkillPoints
     {
-        get => Convert.ToInt32(Instance._data["skillPoints"]);
-        set => Instance._data["skillPoints"] = value;
+        get => Convert.ToInt32(_instance._data["skillPoints"]);
+        set => _instance._data["skillPoints"] = value;
     }
     
     public static int Experience
     {
-        get => Convert.ToInt32(Instance._data["totalExperience"]);
+        get => Convert.ToInt32(_instance._data["totalExperience"]);
         set
         {
-            Instance._data["totalExperience"] = value;
-            Instance.DetermineLevelup();
+            _instance._data["totalExperience"] = value;
+            _instance.DetermineLevelup();
         }
     }
 
-    public static int Level => Convert.ToInt32(Instance._data["level"]);
-    public static Array UnlockedAllies => Instance._data["unlockedAllies"] as Array;
+    public static int Level => Convert.ToInt32(_instance._data["level"]);
 
     public static int MaterialCount
     {
-        get => Convert.ToInt32(Instance._data["materialCount"]);
-        set => Instance._data["materialCount"] = value;
+        get => Convert.ToInt32(_instance._data["materialCount"]);
+        set => _instance._data["materialCount"] = value;
     }
 
-    public static bool HasSeenEnemy(string id)
+    public static bool HasSeenEnemy(ResourceBoidEnemy enemyData)
     {
-        Dictionary seenEnemies = Instance._data["seenEnemies"] as Dictionary;
-        if (!seenEnemies.Contains(id))
+        Dictionary seenEnemies = _instance._data["seenEnemies"] as Dictionary;
+        Debug.Assert(seenEnemies != null, nameof(seenEnemies) + " != null");
+        if (!seenEnemies.Contains(enemyData.UniqueID))
             return false;
-        return (bool) seenEnemies[id];
+        return (bool) seenEnemies[enemyData.UniqueID];
     }
 
-    public static void SetSeenEnemy(string id)
+    public static void SetSeenEnemy(ResourceBoidEnemy enemyData)
     {
-        Dictionary seenEnemies = Instance._data["seenEnemies"] as Dictionary;
-        seenEnemies[id] = true;
+        Dictionary seenEnemies = _instance._data["seenEnemies"] as Dictionary;
+        Debug.Assert(seenEnemies != null, nameof(seenEnemies) + " != null");
+        seenEnemies[enemyData.UniqueID] = true;
+    }
+    
+    public static bool IsFabricantUnlocked(ResourceBoidAlly allyData)
+    {
+        Array unlockedFabricants = _instance._data["unlockedAllies"] as Array;
+        Debug.Assert(unlockedFabricants != null, nameof(unlockedFabricants) + " != null");
+        return unlockedFabricants.Contains(allyData.UniqueID);
+    }
+    
+    public static void UnlockFabricant(ResourceBoidAlly allyData)
+    {
+        Array unlockedFabricants = _instance._data["unlockedAllies"] as Array;
+        if (!IsFabricantUnlocked(allyData))
+        {
+            Debug.Assert(unlockedFabricants != null, nameof(unlockedFabricants) + " != null");
+            unlockedFabricants.Add(allyData.UniqueID);
+        }
     }
     
     public static bool ConsumeSkillPoint()
     {
         if (SkillPoints > 0)
         {
-            Instance._data["skillPoints"] = SkillPoints - 1;
+            _instance._data["skillPoints"] = SkillPoints - 1;
             return true;
         }
 
         return false;
     }
 
-    public static List<SkillNodeResource> GetActiveSkills(string allyType)
+    public static List<ResourceSkillNode> GetActiveSkills(ResourceBoidAlly allyType)
     {
-        return Instance._activeSkills[allyType];
+        return _instance._activeSkills[allyType.UniqueID];
         
         // Dictionary dict = Instance._data["skills"] as Dictionary;
         // List<SkillNodeResource> skills = new();
@@ -102,9 +113,9 @@ public class SaveDataPlayer : Saveable
         // return skills;
     }
     
-    public static void UpdateActiveSkills(string allyType, List<SkillNodeResource> nodes)
+    public static void UpdateActiveSkills(ResourceBoidAlly allyType, List<ResourceSkillNode> nodes)
     {
-        Instance._activeSkills[allyType] = nodes;
+        _instance._activeSkills[allyType.UniqueID] = nodes;
 
         // Dictionary dict = Instance._data["skills"] as Dictionary;
         // Array array = new();
@@ -122,7 +133,7 @@ public class SaveDataPlayer : Saveable
         {
             if (TotalExpRequiredForLevel(Level + 1) <= Experience)
             {
-                Instance._data["level"] = Convert.ToInt32(Instance._data["level"]) + 1;
+                _instance._data["level"] = Convert.ToInt32(_instance._data["level"]) + 1;
                 SkillPoints += 1;
                 OnLevelUp?.Invoke(Level);
             }
@@ -135,7 +146,7 @@ public class SaveDataPlayer : Saveable
 
     public static float TotalExpRequiredForLevel(int level)
     {
-        GameSettingsResource settings = Resources.Instance.GameSettings;
+        ResourceGameSettings settings = Resources.Instance.ResourceGameSettings;
         float b = settings.ExperiencePerLevelBase;
         float e = settings.ExperiencePerLevelExponent;
         float sum = 0.0f;
@@ -148,8 +159,8 @@ public class SaveDataPlayer : Saveable
 
     public SaveDataPlayer()
     {
-        Debug.Assert(Instance == null, "Attempting to create multiple SaveDataPlayer instances!");
-        Instance = this;
+        Debug.Assert(_instance == null, "Attempting to create multiple SaveDataPlayer instances!");
+        _instance = this;
     }
 
     protected override void Validate()
@@ -175,21 +186,18 @@ public class SaveDataPlayer : Saveable
         }
 
         // TODO: _activeSkills isn't saved.
-        foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
+        foreach (ResourceBoidAlly allyData in FabricateManager.Instance.Fabricants)
         {
-            if (!_activeSkills.ContainsKey(boid.Name))
-                _activeSkills.Add(boid.Name, new List<SkillNodeResource>());
+            if (!_activeSkills.ContainsKey(allyData.UniqueID))
+                _activeSkills.Add(allyData.UniqueID, new List<ResourceSkillNode>());
         }
         if (!_activeSkills.ContainsKey("player"))
-            _activeSkills.Add("player", new List<SkillNodeResource>());
+            _activeSkills.Add("player", new List<ResourceSkillNode>());
     }
 
     public override void InitialiseSaveData()
     {
-        Validate();
-
-        List<DataEnemyBoid> enemyBoids = Database.EnemyBoids.GetAllEntries<DataEnemyBoid>();
-        SetSeenEnemy(enemyBoids[0].Name); // so we always have something to spawn
+        base.InitialiseSaveData();
     }
     
     public override void _EnterTree()
@@ -210,8 +218,6 @@ public class SaveDataPlayer : Saveable
         switch (level)
         {
             case 1:
-                string unlocked = Database.AllyBoids.GetAllEntries<DataAllyBoid>()[0].Name;
-                UnlockedAllies.Add(unlocked);
                 break;
         }
     }

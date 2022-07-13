@@ -16,6 +16,8 @@ public class BoidAllyBase : BoidBase
     [Export] private NodePath _sfxHitMicroPlayerNode;
     [Export] private NodePath _sfxShootPlayerPath;
     private AudioStreamPlayer2D _sfxShootPlayer;
+    
+    public ResourceBoidEnemy Data => _data as ResourceBoidEnemy;
 
     protected override BoidAlignment Alignment => BoidAlignment.Ally;
 
@@ -43,13 +45,13 @@ public class BoidAllyBase : BoidBase
         }
         
         // microturrets
-        if (_stats.MicroTurrets)
+        if (_resourceStats.MicroTurrets)
         {
             _microTurretSearchTimer -= delta;
             if (_microTurretTarget == null && _microTurretSearchTimer < 0.0f)
             {
                 // TODO: use quadtree
-                float closest = _stats.MicroTurretRange * _stats.MicroTurretRange;
+                float closest = _resourceStats.MicroTurretRange * _resourceStats.MicroTurretRange;
                 foreach (BoidEnemyBase enemy in BoidFactory.Instance.EnemyBoids)
                 {
                     float dist = (enemy.GlobalPosition - GlobalPosition).LengthSquared();
@@ -70,10 +72,10 @@ public class BoidAllyBase : BoidBase
             _microTurretCooldown -= delta;
             if (_microTurretTarget != null && _microTurretCooldown < 0.0f)
             {
-                _microTurretCooldown = _stats.MicroTurretCooldown;
+                _microTurretCooldown = _resourceStats.MicroTurretCooldown;
                 Vector2 toTarget = _microTurretTarget.GlobalPosition - GlobalPosition;
                 Vector2 dir = toTarget.Normalized();
-                if (toTarget.LengthSquared() > _stats.MicroTurretRange * _stats.MicroTurretRange)
+                if (toTarget.LengthSquared() > _resourceStats.MicroTurretRange * _resourceStats.MicroTurretRange)
                 {
                     _microTurretTarget.OnBoidDestroyed -= _OnMicroTurretTargetDestroyed;
                     _microTurretTarget = null;
@@ -82,7 +84,7 @@ public class BoidAllyBase : BoidBase
                 {
                     Bullet bullet = _microBulletScene.Instance() as Bullet;
                     Game.Instance.AddChild(bullet);
-                    bullet.Init(GlobalPosition, dir * _stats.AttackVelocity, Alignment, _stats.MicroTurretDamage);
+                    bullet.Init(GlobalPosition, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.MicroTurretDamage);
                 }
             }
         }
@@ -130,21 +132,21 @@ public class BoidAllyBase : BoidBase
     {
         base._OnGameStateChanged(state, prevState);
 
-        if (state == StateMachine_Game.States.Play)
-        {
-            _OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
-        }
+        // if (state == StateMachine_Game.States.Play)
+        // {
+        //     _OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
+        // }
     }
 
-    protected override void _OnSkillsChanged(List<SkillNodeResource> skillNodes)
+    protected override void _OnSkillsChanged(List<ResourceSkillNode> skillNodes)
     {
-        bool microTurretsEnabled = _stats.MicroTurrets;
+        bool microTurretsEnabled = _resourceStats.MicroTurrets;
         
         base._OnSkillsChanged(skillNodes);
 
-        if (!microTurretsEnabled && _stats.MicroTurrets)
+        if (!microTurretsEnabled && _resourceStats.MicroTurrets)
         {
-            _microTurretCooldown = Utils.Rng.Randf() * _stats.MicroTurretCooldown;
+            _microTurretCooldown = Utils.Rng.Randf() * _resourceStats.MicroTurretCooldown;
         }
     }
 }

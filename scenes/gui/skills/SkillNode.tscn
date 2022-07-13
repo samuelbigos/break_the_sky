@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://src/gui/skills/SkillNode.cs" type="Script" id=1]
 [ext_resource path="res://assets/gui/skills/skill_power.png" type="Texture" id=2]
-[ext_resource path="res://assets/data/skills/skill_minor_power.tres" type="Resource" id=3]
 [ext_resource path="res://assets/gui/9-patch.png" type="Texture" id=4]
 
 [node name="SkillNode" type="Button"]
@@ -17,7 +16,6 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": true
 }
-Skill = ExtResource( 3 )
 SizeMinor = Vector2( 28, 28 )
 SizeMajor = Vector2( 34, 34 )
 _activeIndicatorPath = NodePath("ActiveIndicator")

@@ -38,10 +38,8 @@ ColourManager="*res://scenes/singletons/ColourManager.tscn"
 Resources="*res://scenes/singletons/Resources.tscn"
 FlockingManager="*res://src/steering/SteeringManager.cs"
 Metagame="*res://scenes/metagame/Metagame.tscn"
-DatabaseCities="*res://scenes/database/DatabaseCities.tscn"
-DatabaseAllyBoids="*res://scenes/database/DatabaseAllyBoids.tscn"
-DatabaseEnemyBoids="*res://scenes/database/DatabaseEnemyBoids.tscn"
 DatabaseWaves="*res://scenes/database/DatabaseWaves.tscn"
+FabricateManager="*res://scenes/singletons/FabricateManager.tscn"
 SaveDataSettings="*res://src/singletons/SaveDataSettings.cs"
 SaveDataPlayer="*res://src/singletons/SaveDataPlayer.cs"
 SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
@@ -57,7 +55,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg", "res://addons/cloud_texture_generator/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/better-texture-array/plugin.cfg" )
 
 [gd2cs]
 

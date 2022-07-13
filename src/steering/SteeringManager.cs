@@ -29,6 +29,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 Target;
         public short TargetIndex;
         public Vector2 TargetOffset;
+        public float DesiredDistFromTarget;
+        public Vector2 DesiredOffsetFromTarget;
         public int Behaviours;
         public float DesiredSpeed;
         public float MaxSpeed;
@@ -75,12 +77,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 return false;
             if (point.Y < tl.Y)
                 return false;
-
             if (point.X >= tl.X + Size.X)
                 return false;
             if (point.Y >= tl.Y + Size.Y)
                 return false;
-
             return true;
         }
     }
@@ -252,7 +252,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_Separate(boid, boids, boidPositions, obstacles, delta);
                 break;
             case Arrive:
-                force += Steering_Arrive(boid);
+                force += Steering_Arrive(boid, boid.Target);
                 break;
             case Pursuit:
                 force += Steering_Pursuit(boid);
@@ -277,6 +277,12 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case FlowFieldFollow:
                 force += Steering_FlowFieldFollow(boid, flowFields);
+                break;
+            case MaintainDistance:
+                force += Steering_MaintainDistance(boid);
+                break;
+            case MaintainOffset:
+                force += Steering_MaintainOffset(boid);
                 break;
             case COUNT:
                 break;

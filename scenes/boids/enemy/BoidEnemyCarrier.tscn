@@ -5,7 +5,7 @@
 [ext_resource path="res://src/boids/enemy/BoidEnemyCarrier.cs" type="Script" id=3]
 [ext_resource path="res://assets/mesh/enemies/enemy_carrier_body.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/shader/boid.shader" type="Shader" id=5]
-[ext_resource path="res://assets/data/stats/stats_enemy_carrier.tres" type="Resource" id=6]
+[ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" type="Resource" id=6]
 
 [sub_resource type="ShaderMaterial" id=1]
 resource_local_to_scene = true

@@ -15,6 +15,8 @@ public partial class Game : Singleton<Game>
 
     [Export] private Rect2 _areaRect;
     [Export] private PackedScene _playerScene;
+
+    [Export] private ResourceBoidAlly _playerData;
     
     private bool _initialSpawn;
     private bool _fullScreen = false;
@@ -32,7 +34,7 @@ public partial class Game : Singleton<Game>
 
         _player = _playerScene.Instance<BoidPlayer>();
         AddChild(_player);
-        _player.Init("player", _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
+        _player.Init(_playerData, _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
         BoidFactory.Instance.AllyBoids.Add(_player);
         BoidFactory.Instance.AllBoids.Add(_player);
 
@@ -46,18 +48,6 @@ public partial class Game : Singleton<Game>
         StateMachine_Game.Instance.SendInitialStateChange();
 
         GameCamera.OnPostCameraTransformed += OnPostCameraTransformed;
-    }
-
-    public override void _EnterTree()
-    {
-        base._EnterTree();
-        DebugImGui.Instance.RegisterWindow("spawning", "Spawning", _OnImGuiLayoutWindow);
-    }
-
-    public override void _ExitTree()
-    {
-        base._ExitTree();
-        DebugImGui.Instance.UnRegisterWindow("spawning", _OnImGuiLayoutWindow);
     }
 
     public override void _Process(float delta)
@@ -101,48 +91,5 @@ public partial class Game : Singleton<Game>
     private void _OnPlayerDestroyed(BoidBase player)
     {
         // TODO: game over
-    }
-
-    private void _OnImGuiLayoutWindow()
-    {
-        ImGui.Text($"Boids: {BoidFactory.Instance.AllBoids.Count}");
-        ImGui.Text(" ### Fabricants");
-        foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
-        {
-            if (ImGui.Button($"{boid.DisplayName}"))
-            {
-                BoidFactory.Instance.CreateAllyBoid(boid);
-            }
-
-            if (ImGui.Button($"{boid.DisplayName} x10"))
-            {
-                for (int i = 0; i < 10; i++)
-                    BoidFactory.Instance.CreateAllyBoid(boid);
-            }
-        }
-
-        ImGui.Text(" ### Enemies");
-        foreach (DataEnemyBoid boid in Database.EnemyBoids.GetAllEntries<DataEnemyBoid>())
-        {
-            if (ImGui.Button($"{boid.DisplayName}"))
-            {
-                _aiSpawningDirector.SpawnEnemyRandom(boid);
-            }
-
-            if (ImGui.Button($"{boid.DisplayName} x10"))
-            {
-                for (int i = 0; i < 10; i++)
-                    _aiSpawningDirector.SpawnEnemyRandom(boid);
-            }
-        }
-
-        ImGui.Text(" ### Waves");
-        foreach (DataWave wave in Database.Waves.GetAllEntries<DataWave>())
-        {
-            if (ImGui.Button($"{wave.Name}"))
-            {
-                _aiSpawningDirector.SpawnWave(wave, new List<BoidEnemyBase>(), new List<BoidEnemyBase>());
-            }
-        }
     }
 }

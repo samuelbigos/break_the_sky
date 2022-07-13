@@ -1,17 +1,17 @@
 [gd_resource type="Resource" load_steps=2 format=2]
 
-[ext_resource path="res://src/data/StatsResource.cs" type="Script" id=1]
+[ext_resource path="res://src/data/ResourceStats.cs" type="Script" id=1]
 
 [resource]
 script = ExtResource( 1 )
-AttackDamage = 10.0
+AttackDamage = 25.0
 AttackCooldown = 5.0
 AttackSpread = 0.0
 AttackVelocity = 0.0
 AttackCharge = 1.0
 AttackDuration = 1.0
 MoveSpeed = 1.0
-MaxHealth = 100.0
+MaxHealth = 250.0
 Regeneration = 0.0
 CollisionDamage = 100.0
 MicroTurrets = false

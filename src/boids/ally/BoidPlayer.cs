@@ -124,7 +124,7 @@ public class BoidPlayer : BoidAllyBase
 
         if (_shootCooldown > 0.0f)
         {
-            float t = _shootCooldown / _stats.AttackCooldown;
+            float t = _shootCooldown / _resourceStats.AttackCooldown;
             t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
             Vector3 from = _baseScale * 2.0f;
             _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
@@ -142,10 +142,10 @@ public class BoidPlayer : BoidAllyBase
     {
         base._Shoot(dir);
 
-        _shootCooldown = _stats.AttackCooldown;
+        _shootCooldown = _resourceStats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * _stats.AttackVelocity, Alignment, _stats.AttackDamage);
+        bullet.Init(GlobalPosition, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
     }
 
     public override void _Input(InputEvent @event)

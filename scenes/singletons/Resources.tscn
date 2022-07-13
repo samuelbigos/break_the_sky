@@ -7,4 +7,4 @@
 [node name="Node" type="Node"]
 script = ExtResource( 1 )
 Tooltip = ExtResource( 2 )
-GameSettings = ExtResource( 3 )
+ResourceGameSettings = ExtResource( 3 )

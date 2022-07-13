@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/enemy_blockout_a.obj-f8ee9df3cbf9688e9b5793bc0f66c2ce.mesh"
+
+[deps]
+
+files=[ "res://.import/enemy_blockout_a.obj-f8ee9df3cbf9688e9b5793bc0f66c2ce.mesh" ]
+
+source_file="res://assets/mesh/enemies/enemy_blockout_a.obj"
+dest_files=[ "res://.import/enemy_blockout_a.obj-f8ee9df3cbf9688e9b5793bc0f66c2ce.mesh", "res://.import/enemy_blockout_a.obj-f8ee9df3cbf9688e9b5793bc0f66c2ce.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

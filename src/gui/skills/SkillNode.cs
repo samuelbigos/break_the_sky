@@ -6,9 +6,9 @@ using GodotOnReady.Attributes;
 [Tool]
 public class SkillNode : Button
 {
-    [Export] public bool IsRoot = false;
-    [Export] public string AllyType; // TODO: this should reference an ally boid Resource not be a string.
-    [Export] public SkillNodeResource Skill;
+    [Export] public bool IsRoot;
+    [Export] public ResourceBoidAlly AllyType;
+    [Export] public ResourceSkillNode ResourceSkill;
     [Export] public List<NodePath> Connections = new();
     [Export] public Vector2 SizeMinor;
     [Export] public Vector2 SizeMajor;
@@ -38,17 +38,20 @@ public class SkillNode : Button
 
     private void Refresh()
     {
-        Icon = Skill.Icon;
-        RectMinSize = Skill.Major ? SizeMajor : SizeMinor;
+        if (!IsRoot)
+        {
+            Icon = ResourceSkill.Icon;
+            RectMinSize = ResourceSkill.Major ? SizeMajor : SizeMinor; 
+        }
     }
     
     public override void _Process(float delta)
     {
         base._Process(delta);
     
-        if (Engine.EditorHint && Skill != null)
+        if (Engine.EditorHint && ResourceSkill != null)
         {
-            Icon = Skill.Icon;
+            Icon = ResourceSkill.Icon;
             Refresh();
         }
     }
@@ -143,14 +146,14 @@ public class SkillNode : Button
     {
         Debug.Assert(IsRoot, "Only call this from root node.");
 
-        List<SkillNodeResource> skills = new();
+        List<ResourceSkillNode> skills = new();
         int children = GetParent().GetChildCount();
         for (int i = 0; i < children; i++)
         {
             Node child = GetParent().GetChild(i);
             if (child is SkillNode skillNode && skillNode.Active)
             {
-                skills.Add(skillNode.Skill);
+                skills.Add(skillNode.ResourceSkill);
             }
         }
 

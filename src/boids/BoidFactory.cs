@@ -2,6 +2,8 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Xml;
+using ImGuiNET;
 
 public class BoidFactory : Singleton<BoidFactory>
 {
@@ -10,7 +12,7 @@ public class BoidFactory : Singleton<BoidFactory>
     public List<BoidAllyBase> AllyBoids => _allyBoids;
     public List<BoidEnemyBase> EnemyBoids => _enemyBoids;
     public int NumBoids => _allyBoids.Count;
-    
+
     private List<BoidBase> _allBoids = new();
     private List<BoidBase> _destroyedBoids = new();
     private List<BoidEnemyBase> _enemyBoids = new();
@@ -44,29 +46,29 @@ public class BoidFactory : Singleton<BoidFactory>
         Debug.Assert(_allyBoids.Count + _enemyBoids.Count == _allBoids.Count, "Error in boid references.");
     }
 
-    public BoidEnemyBase CreateEnemyBoid(DataEnemyBoid boid, Vector2 pos, Vector2 vel)
+    public BoidEnemyBase CreateEnemyBoid(ResourceBoidEnemy boid, Vector2 pos, Vector2 vel)
     {
         BoidEnemyBase enemy = boid.Scene.Instance<BoidEnemyBase>();
         Game.Instance.AddChild(enemy);
-        enemy.Init(boid.Name, _OnBoidDestroyed, pos, vel);
+        enemy.Init(boid, _OnBoidDestroyed, pos, vel);
         
-        SaveDataPlayer.SetSeenEnemy(boid.Name);
+        SaveDataPlayer.SetSeenEnemy(boid);
         _enemyBoids.Add(enemy);
         _allBoids.Add(enemy);
         
         return enemy;
     }
 
-    public BoidAllyBase CreateAllyBoid(DataAllyBoid boid)
+    public BoidAllyBase CreateAllyBoid(ResourceBoid resourceBoid)
     {
         if (_allyBoids.Count >= SaveDataPlayer.MaxAllyCount)
             return null;
             
-        BoidAllyBase ally = boid.Scene.Instance<BoidAllyBase>();
+        BoidAllyBase ally = resourceBoid.Scene.Instance<BoidAllyBase>();
         Game.Instance.AddChild(ally);
 
         Vector2 pos = Game.Player.GlobalPosition + Utils.RandV2() * 1.0f;
-        ally.Init(boid.Name, _OnBoidDestroyed, pos, Vector2.Zero);
+        ally.Init(resourceBoid, _OnBoidDestroyed, pos, Vector2.Zero);
         
         _allyBoids.Add(ally);
         _allBoids.Add(ally);

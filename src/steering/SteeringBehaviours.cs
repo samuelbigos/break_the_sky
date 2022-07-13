@@ -23,6 +23,8 @@ public partial class SteeringManager
         Pursuit,
         Wander,
         FlowFieldFollow,
+        MaintainDistance,
+        MaintainOffset,
         COUNT,
     }
     
@@ -35,9 +37,8 @@ public partial class SteeringManager
         return force;
     }
     
-    private static Vector2 Steering_Arrive(in Boid boid)
+    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position)
     {
-        Vector2 position = boid.Target;
         float radius = 25.0f;//Mathf.Max(1.0f, boid.Speed * boid.LookAhead);
         float dist = (boid.Position - position).Length();
         return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f));
@@ -312,5 +313,18 @@ public partial class SteeringManager
         desired /= count;
         desired.SetMag(boid.MaxSpeed);
         return desired - boid.Velocity;
+    }
+
+    private static Vector2 Steering_MaintainDistance(in Boid boid)
+    {
+        Vector2 targetToSelf = (boid.Position - boid.Target).NormalizeSafe();
+        Vector2 targetPos = boid.Target + targetToSelf * boid.DesiredDistFromTarget;
+        return Steering_Arrive(boid, targetPos);
+    }
+    
+    private static Vector2 Steering_MaintainOffset(in Boid boid)
+    {
+        Vector2 targetPos = boid.Target + boid.DesiredOffsetFromTarget;
+        return Steering_Arrive(boid, targetPos);
     }
 }

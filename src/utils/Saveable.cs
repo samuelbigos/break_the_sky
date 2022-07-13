@@ -12,8 +12,11 @@ public abstract class Saveable : Node
         
         AddToGroup("persistent");
     }
-    
-    public abstract void InitialiseSaveData();
+
+    public virtual void InitialiseSaveData()
+    {
+        Validate();
+    }
 
     public virtual void Reset()
     {

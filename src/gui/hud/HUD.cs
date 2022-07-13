@@ -26,7 +26,7 @@ public partial class HUD : Singleton<HUD>
     // skill trees
     [OnReadyGet] private Label _skillPointsValue;
 
-    public Action<string> OnFabricateButtonPressed;
+    public Action<ResourceBoidAlly> OnFabricateButtonPressed;
     public Action<int> OnQueueButtonPressed;
 
     public bool RequestShowConstructMenu;
@@ -72,16 +72,16 @@ public partial class HUD : Singleton<HUD>
         {
             _fabricateMenu.GetChild(i).QueueFree();
         }
-        List<DataAllyBoid> boids = Database.AllyBoids.GetAllEntries<DataAllyBoid>();
-        foreach (DataAllyBoid boid in boids)
+        
+        foreach (ResourceBoidAlly fabricant in FabricateManager.Instance.Fabricants)
         {
-            if (!SaveDataPlayer.UnlockedAllies.Contains(boid.Name))
+            if (!SaveDataPlayer.IsFabricantUnlocked(fabricant))
                 continue;
             
             BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
             _fabricateMenu.AddChild(icon);
             icon.OnPressed += _OnFabricateButtonPressed;
-            icon.Init(boid.Name, false);
+            icon.Init(fabricant, false);
         }
     }
 
@@ -170,12 +170,12 @@ public partial class HUD : Singleton<HUD>
         _queueIcons.RemoveAt(idx);
     }
 
-    private void _OnPushQueue(string boidId)
+    private void _OnPushQueue(ResourceBoidAlly data)
     {
         BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
         _fabricateQueue.AddChild(icon);
         icon.OnPressed += _OnQueueButtonPressed;
-        icon.Init(boidId, true);
+        icon.Init(data, true);
         _queueIcons.Add(icon);
     }
     
@@ -202,12 +202,12 @@ public partial class HUD : Singleton<HUD>
         }
     }
 
-    private void _OnFabricateButtonPressed(BoidIcon icon)
+    private void _OnFabricateButtonPressed(BoidIcon icon, ResourceBoid data)
     {
-        OnFabricateButtonPressed?.Invoke(icon.BoidID);
+        OnFabricateButtonPressed?.Invoke(data as ResourceBoidAlly);
     }
     
-    private void _OnQueueButtonPressed(BoidIcon icon)
+    private void _OnQueueButtonPressed(BoidIcon icon, ResourceBoid boidData)
     {
         Debug.Assert(_queueIcons.Contains(icon), "Clicking icon that doesn't exist in queue list.");
         OnQueueButtonPressed?.Invoke(_queueIcons.IndexOf(icon));

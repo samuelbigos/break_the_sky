@@ -45,7 +45,7 @@ public partial class BoidBase : Area
     [Export] public float DestroyTime = 3.0f;
     [Export] public float HitFlashTime = 1.0f / 30.0f;
 
-    [Export] private StatsResource _baseStats;
+    [Export] private ResourceStats _baseResourceStats;
     
     [Export] private int _damageVfxCount = 2;
     
@@ -75,8 +75,7 @@ public partial class BoidBase : Area
     #region Public
 
     protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
-    public bool Destroyed => _state == State.Destroyed;    
-    public string Id = "";
+    public bool Destroyed => _state == State.Destroyed;
     public short SteeringId => _steeringId;
     
     public Vector2 GlobalPosition
@@ -123,7 +122,8 @@ public partial class BoidBase : Area
 
     #region Protected
 
-    protected StatsResource _stats;
+    protected ResourceStats _resourceStats;
+    protected ResourceBoid _data;
     protected short _steeringId;
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
@@ -165,10 +165,10 @@ public partial class BoidBase : Area
 
     #endregion
 
-    public virtual void Init(string id, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    public virtual void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
+        _data = data;
         _state = State.Alive;
-        Id = id;
         OnBoidDestroyed += onDestroy;
         RegisterSteeringBoid(velocity);
         GlobalPosition = position;
@@ -176,11 +176,11 @@ public partial class BoidBase : Area
 
     [OnReady] private void Ready()
     {
-        Debug.Assert(_baseStats != null, "_baseStats != null");
-        _stats = _baseStats.Duplicate() as StatsResource;
+        Debug.Assert(_baseResourceStats != null, "_baseStats != null");
+        _resourceStats = _baseResourceStats.Duplicate() as ResourceStats;
         //_OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
         
-        _health = _stats.MaxHealth;
+        _health = _resourceStats.MaxHealth;
 
         //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
         _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
@@ -227,13 +227,13 @@ public partial class BoidBase : Area
         Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
 
-        Basis basis = new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f);
+        Basis basis = new Basis(Vector3.Down, _cachedHeading.Angle() + Mathf.Pi * 0.5f);
 
         // banking
         if (delta > 0.0f)
         {
-            System.Numerics.Vector2 right = new(steeringBoid.Heading.Y, -steeringBoid.Heading.X);
-            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, steeringBoid.Heading, right);
+            System.Numerics.Vector2 right = new(_cachedHeading.Y, -_cachedHeading.X);
+            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, _cachedHeading, right);
             localSteering /= delta;
             localSteering /= 100.0f;
             _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
@@ -241,9 +241,10 @@ public partial class BoidBase : Area
             float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
             // _mesh.Rotation = Bank360 ? 
             //     new Vector3(bankX, _mesh.Rotation.y, bankZ) : 
-            //     new Vector3(0.0f, _mesh.Rotation.y, bankZ);
+            //     new Vector3(0.0f, _mesh.Rotation.y, bankZ);  
 
             basis = basis.Rotated(basis.z, bankZ);
+            basis = basis.Rotated(basis.x, bankX);
         }
         
         // update position and cache velocity from steering boid
@@ -278,8 +279,8 @@ public partial class BoidBase : Area
             BoidFactory.Instance.FreeBoid(this);
         }
     }
-    
-    protected void RegisterSteeringBoid(Vector2 velocity)
+
+    private void RegisterSteeringBoid(Vector2 velocity)
     {
         _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
@@ -293,7 +294,9 @@ public partial class BoidBase : Area
         _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
         _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
         _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
-
+        _steeringWeights[(int) SteeringManager.Behaviours.MaintainDistance] = 1.0f;
+        _steeringWeights[(int) SteeringManager.Behaviours.MaintainOffset] = 1.0f;
+        
         SteeringManager.Boid boid = new()
         {
             Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
@@ -304,9 +307,9 @@ public partial class BoidBase : Area
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = -1,
             Behaviours = _behaviours,
-            MaxSpeed = MaxVelocity * _stats.MoveSpeed,
+            MaxSpeed = MaxVelocity * _resourceStats.MoveSpeed,
             MinSpeed = MinVelocity,
-            MaxForce = MaxForce * _stats.MoveSpeed,
+            MaxForce = MaxForce * _resourceStats.MoveSpeed,
             DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
             Weights = _steeringWeights,
@@ -347,7 +350,7 @@ public partial class BoidBase : Area
         {
             float damageVfxThresholds = 1.0f / (_damageVfxCount + 1.0f);
             float nextThreshold = 1.0f - (_damagedParticles.Count + 1.0f) * damageVfxThresholds;
-            if (_health / _stats.MaxHealth < nextThreshold)
+            if (_health / _resourceStats.MaxHealth < nextThreshold)
             {
                 Particles particles = _damagedParticlesScene.Instance<Particles>();
                 _damagedParticles.Add(particles);
@@ -475,7 +478,7 @@ public partial class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(_stats.CollisionDamage, false, _cachedVelocity.ToGodot(), GlobalTransform.origin);
+            boid._OnHit(_resourceStats.CollisionDamage, false, _cachedVelocity.ToGodot(), GlobalTransform.origin);
             return;
         }
         
@@ -517,24 +520,24 @@ public partial class BoidBase : Area
         }
     }
 
-    protected virtual void _OnSkillsChanged(List<SkillNodeResource> skillNodes)
+    protected virtual void _OnSkillsChanged(List<ResourceSkillNode> skillNodes)
     {
-        _stats = _baseStats.Duplicate() as StatsResource;
-        Debug.Assert(_stats != null, "_stats != null");
-        foreach (SkillNodeResource skill in skillNodes)
+        _resourceStats = _baseResourceStats.Duplicate() as ResourceStats;
+        Debug.Assert(_resourceStats != null, "_stats != null");
+        foreach (ResourceSkillNode skill in skillNodes)
         {
-            _stats.AttackDamage *= skill.AttackDamage;
-            _stats.AttackCooldown *= skill.AttackCooldown;
-            _stats.AttackSpread *= skill.AttackSpread;
-            _stats.AttackVelocity *= skill.AttackVelocity;
-            _stats.MoveSpeed *= skill.MoveSpeed;
-            _stats.MaxHealth *= skill.MaxHealth;
-            _stats.Regeneration += skill.Regeneration;
-            _stats.MicroTurrets |= skill.MicroTurrets;
-            _stats.MicroTurretRange *= skill.MicroTurretRange;
-            _stats.MicroTurretBallistics |= skill.MicroTurretBallistics;
-            _stats.MicroTurretDamage *= skill.MicroTurretDamage;
-            _stats.MicroTurretVelocity *= skill.MicroTurretVelocity;
+            _resourceStats.AttackDamage *= skill.AttackDamage;
+            _resourceStats.AttackCooldown *= skill.AttackCooldown;
+            _resourceStats.AttackSpread *= skill.AttackSpread;
+            _resourceStats.AttackVelocity *= skill.AttackVelocity;
+            _resourceStats.MoveSpeed *= skill.MoveSpeed;
+            _resourceStats.MaxHealth *= skill.MaxHealth;
+            _resourceStats.Regeneration += skill.Regeneration;
+            _resourceStats.MicroTurrets |= skill.MicroTurrets;
+            _resourceStats.MicroTurretRange *= skill.MicroTurretRange;
+            _resourceStats.MicroTurretBallistics |= skill.MicroTurretBallistics;
+            _resourceStats.MicroTurretDamage *= skill.MicroTurretDamage;
+            _resourceStats.MicroTurretVelocity *= skill.MicroTurretVelocity;
         }
     }
 }
