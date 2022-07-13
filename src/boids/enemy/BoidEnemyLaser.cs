@@ -109,7 +109,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         if (_targetType != TargetType.Enemy)
             return false;
 
-        return (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Dot(_cachedHeading.ToGodot()) > 0.99f;
+        return (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Dot(_cachedHeading) > 0.99f;
     }
 
     private void LaserCharging()
@@ -135,9 +135,9 @@ public partial class BoidEnemyLaser : BoidEnemyBase
             SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
     }
 
-    protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    protected override void _Destroy(Vector2 hitDir, float hitStrength)
     {
-        base._Destroy(score, hitDir, hitStrength);
+        base._Destroy(hitDir, hitStrength);
         
         _laserWarningMesh.Visible = false;
     }

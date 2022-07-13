@@ -30,6 +30,8 @@ public class Bullet : Area
 		_spawnPos = position;
 
 		Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.y), 0.0f);
+		
+		Connect("area_entered", this, nameof(_OnAreaEntered));
 	}
 	
 	public override void _Process(float delta)
@@ -38,6 +40,14 @@ public class Bullet : Area
 		if((_spawnPos - GlobalPosition).LengthSquared() > Mathf.Pow(_range, 2.0f))
 		{
 			QueueFree();
+		}
+	}
+	
+	public virtual void _OnAreaEntered(Area area)
+	{
+		if (area is BoidBase boid && boid.Alignment != _alignment)
+		{
+			boid.SendHitMessage(_damage, _velocity, GlobalPosition, _alignment);
 		}
 	}
 

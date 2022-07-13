@@ -10,6 +10,7 @@ AttackSpread = 0.0
 AttackVelocity = 100.0
 AttackCharge = 1.0
 AttackDuration = 1.0
+AttackCount = 1
 MoveSpeed = 1.0
 MaxHealth = 100.0
 Regeneration = 0.0

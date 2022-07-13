@@ -2,10 +2,10 @@
 #define EXPORT
 #endif
 
-using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot;
 using static SteeringManager.Behaviours;
 using Vector2 = System.Numerics.Vector2;
 
@@ -37,13 +37,13 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float MinSpeed;
         public float MaxForce;
         public float LookAhead;
-        public float[] Weights;
         public float ViewRange;
         public float ViewAngle;
         public float WanderAngle;
         public float WanderCircleDist;
         public float WanderCircleRadius;
         public float WanderVariance;
+        public bool Ignore;
 #if !EXPORT
         public Intersection Intersection;
 #endif
@@ -52,6 +52,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
         {
             return (Behaviours & (1 << (int) behaviour)) > 0;
         }
+
+        public Godot.Vector2 PositionG => Position.ToGodot();
+        public Godot.Vector2 VelocityG => Velocity.ToGodot();
     }
 
     public struct Obstacle
@@ -112,6 +115,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private int _boidIdGen = 1;
     private int _obstacleIdGen = 1;
     private int _flowFieldIdGen = 1;
+    private static float[] _behaviourWeights;
 
     public MeshInstance _debugMesh;
 
@@ -126,6 +130,22 @@ public partial class SteeringManager : Singleton<SteeringManager>
         mat.VertexColorIsSrgb = true;
         _debugMesh.MaterialOverride = mat;
         AddChild(_debugMesh);
+
+        _behaviourWeights = new float[(int) COUNT];
+        _behaviourWeights[(int) Separation] = 2.0f;
+        _behaviourWeights[(int) AvoidObstacles] = 2.0f;
+        _behaviourWeights[(int) AvoidAllies] = 2.0f;
+        _behaviourWeights[(int) AvoidEnemies] = 2.0f;
+        _behaviourWeights[(int) MaintainSpeed] = 0.1f;
+        _behaviourWeights[(int) Cohesion] = 0.1f;
+        _behaviourWeights[(int) Alignment] = 0.1f;
+        _behaviourWeights[(int) Arrive] = 2.0f;
+        _behaviourWeights[(int) Pursuit] = 1.0f;
+        _behaviourWeights[(int) Flee] = 1.0f;
+        _behaviourWeights[(int) Wander] = 0.1f;
+        _behaviourWeights[(int) FlowFieldFollow] = 1.0f;
+        _behaviourWeights[(int) MaintainDistance] = 1.0f;
+        _behaviourWeights[(int) MaintainOffset] = 1.0f;
     }
 
     public override void _Process(float delta)
@@ -290,7 +310,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 throw new ArgumentOutOfRangeException();
         }
 
-        return force.Limit(boid.MaxForce * delta) * boid.Weights[(int)behaviour];
+        return force.Limit(boid.MaxForce * delta) * _behaviourWeights[(int)behaviour];
     }
 
     public short RegisterBoid(Boid boid)
@@ -338,7 +358,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public ref Boid GetBoid(int id)
     {
-        Debug.Assert(_boidIdToIndex.ContainsKey(id), $"Boid doesn't exist.");
+        Debug.Assert(_boidIdToIndex.ContainsKey(id), "Boid doesn't exist.");
         return ref _boidPool.AsSpan()[_boidIdToIndex[id]];
     }
 

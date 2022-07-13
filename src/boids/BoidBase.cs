@@ -28,6 +28,14 @@ public partial class BoidBase : Area
         Destroyed
     }
 
+    private struct HitMessage
+    {
+        public float Damage;
+        public Vector2 Position;
+        public Vector2 Velocity;
+        public BoidAlignment Alignment;
+    }
+
     #region Export
 
     [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
@@ -74,7 +82,7 @@ public partial class BoidBase : Area
 
     #region Public
 
-    protected virtual BoidAlignment Alignment => BoidAlignment.Ally;
+    public virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _state == State.Destroyed;
     public short SteeringId => _steeringId;
     
@@ -87,7 +95,7 @@ public partial class BoidBase : Area
             {
                 ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
                 boid.Position = value.ToNumerics();
-                GlobalTransform = new Transform(new Basis(Vector3.Down, boid.Heading.Angle() + Mathf.Pi * 0.5f), value.To3D());
+                GlobalTransform = new Transform(new Basis(Godot.Vector3.Down, boid.Heading.Angle() + Mathf.Pi * 0.5f), value.To3D());
             }
         }
     }
@@ -128,12 +136,13 @@ public partial class BoidBase : Area
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
-    protected Vector3 _baseScale;
+    protected Godot.Vector3 _baseScale;
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
-    protected System.Numerics.Vector2 _cachedVelocity;
-    protected System.Numerics.Vector2 _cachedHeading;
+    protected Vector2 _cachedVelocity;
+    protected Vector2 _cachedHeading;
     protected State _state;
+    protected ShaderMaterial _meshMaterial;
 
     #endregion
 
@@ -141,15 +150,15 @@ public partial class BoidBase : Area
 
     private float _health;
     private float _hitFlashTimer;
+    private List<HitMessage> _hitMessages = new();
     private List<Particles> _damagedParticles = new();
-    protected ShaderMaterial _meshMaterial;
     private ShaderMaterial _altMaterial;
     private List<Particles> _hitParticles = new();
     private AudioStreamPlayer2D _sfxOnDestroy;
-    private Vector3 _cachedLastHitDir;
+    private Vector2 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
-    private Vector2 _smoothSteering;
+    private Godot.Vector2 _smoothSteering;
     private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
     private int _sharedPropertiesId;
 
@@ -232,25 +241,31 @@ public partial class BoidBase : Area
         // banking
         if (delta > 0.0f)
         {
-            System.Numerics.Vector2 right = new(_cachedHeading.Y, -_cachedHeading.X);
-            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, _cachedHeading, right);
+            System.Numerics.Vector2 right = new(_cachedHeading.y, -_cachedHeading.x);
+            System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, _cachedHeading.ToNumerics(), right);
             localSteering /= delta;
             localSteering /= 100.0f;
             _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
             float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
             float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
-            // _mesh.Rotation = Bank360 ? 
-            //     new Vector3(bankX, _mesh.Rotation.y, bankZ) : 
-            //     new Vector3(0.0f, _mesh.Rotation.y, bankZ);  
-
             basis = basis.Rotated(basis.z, bankZ);
             basis = basis.Rotated(basis.x, bankX);
         }
         
         // update position and cache velocity from steering boid
-        GlobalTransform = new Transform(basis, steeringBoid.Position.ToGodot().To3D());
-        _cachedVelocity = steeringBoid.Velocity;
-        _cachedHeading = steeringBoid.Heading;
+        GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
+        _cachedVelocity = steeringBoid.Velocity.ToGodot();
+        _cachedHeading = steeringBoid.Heading.ToGodot();
+        
+        // process hits
+        foreach (HitMessage hit in _hitMessages)
+        {
+            if (hit.Alignment != Alignment)
+            {
+                _OnHit(hit.Damage, hit.Velocity, hit.Position);
+            }
+        }
+        _hitMessages.Clear();
 
         // hit flash
         if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
@@ -261,10 +276,10 @@ public partial class BoidBase : Area
 
         if (_health <= 0.0f)
         {
-            _Destroy(false, _cachedLastHitDir, _cachedLastHitDamage);
+            _Destroy(_cachedLastHitDir, _cachedLastHitDamage);
             return;
         }
-        _cachedLastHitDir = Vector3.Zero;
+        _cachedLastHitDir = Vector2.Zero;
         _cachedLastHitDamage = 0.0f;
     }
     
@@ -282,21 +297,6 @@ public partial class BoidBase : Area
 
     private void RegisterSteeringBoid(Vector2 velocity)
     {
-        _steeringWeights[(int) SteeringManager.Behaviours.Separation] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidObstacles] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidAllies] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.AvoidEnemies] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.MaintainSpeed] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Cohesion] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Alignment] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Arrive] = 2.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Pursuit] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Flee] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.Wander] = 0.1f;
-        _steeringWeights[(int) SteeringManager.Behaviours.FlowFieldFollow] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.MaintainDistance] = 1.0f;
-        _steeringWeights[(int) SteeringManager.Behaviours.MaintainOffset] = 1.0f;
-        
         SteeringManager.Boid boid = new()
         {
             Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
@@ -312,7 +312,6 @@ public partial class BoidBase : Area
             MaxForce = MaxForce * _resourceStats.MoveSpeed,
             DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
-            Weights = _steeringWeights,
             ViewRange = 50.0f,
             ViewAngle = 240.0f,
             WanderCircleDist = 25.0f,
@@ -323,7 +322,15 @@ public partial class BoidBase : Area
         _steeringId = SteeringManager.Instance.RegisterBoid(boid);
     }
 
-    protected virtual void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
+    public void SendHitMessage(float damage, Vector2 vel, Vector2 pos, BoidAlignment alignment)
+    {
+        _hitMessages.Add(new HitMessage()
+        {
+            Damage = damage, Alignment = alignment, Position = pos, Velocity = vel
+        });
+    }
+
+    protected virtual void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
         _health -= damage;
 
@@ -338,9 +345,9 @@ public partial class BoidBase : Area
             Game.Instance.AddChild(hitParticles);
             ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
             Debug.Assert(mat != null);
-            Vector3 fromCentre = pos - GlobalTransform.origin;
+            Vector3 fromCentre = pos.To3D() - GlobalTransform.origin;
             mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
-            hitParticles.GlobalPosition(pos + Vector3.Up * 5.0f);
+            hitParticles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
             hitParticles.Emitting = true;
             _hitParticles.Add(hitParticles);
         }
@@ -355,15 +362,15 @@ public partial class BoidBase : Area
                 Particles particles = _damagedParticlesScene.Instance<Particles>();
                 _damagedParticles.Add(particles);
                 AddChild(particles);
-                particles.GlobalPosition(pos + Vector3.Up * 5.0f);
+                particles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
             }
         }
 
-        _cachedLastHitDir = bulletVel.To3D().Normalized();
+        _cachedLastHitDir = bulletVel.Normalized();
         _cachedLastHitDamage = damage;
     }
     
-    protected virtual void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    protected virtual void _Destroy(Vector2 hitDir, float hitStrength)
     {
         Debug.Assert(_state != State.Destroyed, "_state != State.Destroyed");
         if (_state != State.Destroyed)
@@ -394,7 +401,7 @@ public partial class BoidBase : Area
             rb.GlobalTransform = new Transform(Basis.Identity, pos);
             GlobalTransform = new Transform(GlobalTransform.basis, pos);
 
-            if (hitDir == Vector3.Zero) // random impulse
+            if (hitDir.To3D() == Vector3.Zero) // random impulse
             {
                 Vector3 randVec =
                     new Vector3(Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f)
@@ -403,7 +410,7 @@ public partial class BoidBase : Area
             }
             else // impulse from hit direction
             {
-                rb.ApplyCentralImpulse(hitDir * hitStrength);
+                rb.ApplyCentralImpulse(hitDir.To3D() * hitStrength);
                 rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);
             }
             
@@ -478,20 +485,14 @@ public partial class BoidBase : Area
         
         if (boid != null && !boid.Destroyed)
         {
-            boid._OnHit(_resourceStats.CollisionDamage, false, _cachedVelocity.ToGodot(), GlobalTransform.origin);
+            boid.SendHitMessage(_resourceStats.CollisionDamage, _cachedVelocity, GlobalTransform.origin.To2D(), Alignment);
             return;
         }
         
         if (area.IsInGroup("laser") && Alignment != BoidAlignment.Enemy)
         {
-            _OnHit(_health, Alignment == BoidAlignment.Enemy, Vector2.Zero, GlobalPosition.To3D());
+            SendHitMessage(_health,Vector2.Zero, GlobalPosition, BoidAlignment.Enemy);
             return;
-        }
-
-        if (area is Bullet bullet && bullet.Alignment != Alignment)
-        {
-            bullet.OnHit();
-            _OnHit(bullet.Damage, Alignment == BoidAlignment.Enemy, bullet.Velocity, bullet.GlobalTransform.origin);
         }
     }
     

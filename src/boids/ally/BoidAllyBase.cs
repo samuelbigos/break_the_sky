@@ -19,7 +19,7 @@ public class BoidAllyBase : BoidBase
     
     public ResourceBoidEnemy Data => _data as ResourceBoidEnemy;
 
-    protected override BoidAlignment Alignment => BoidAlignment.Ally;
+    public override BoidAlignment Alignment => BoidAlignment.Ally;
 
     private float _microTurretSearchTimer;
     private float _microTurretCooldown;

@@ -1231,6 +1231,7 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 11 )
 
 [node name="CloudBox" type="MeshInstance" parent="."]
+visible = false
 cast_shadow = 0
 mesh = SubResource( 12 )
 material/0 = SubResource( 13 )

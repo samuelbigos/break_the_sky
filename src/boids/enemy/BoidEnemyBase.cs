@@ -16,8 +16,8 @@ public class BoidEnemyBase : BoidBase
 
     public bool IsTargetted = false;
     public ResourceBoidEnemy Data => _data as ResourceBoidEnemy;
-    
-    protected override BoidAlignment Alignment => BoidAlignment.Enemy;
+
+    public override BoidAlignment Alignment => BoidAlignment.Enemy;
     protected AIState _aiState = AIState.Seeking;
     
     private int _cachedBehaviours;
@@ -140,16 +140,16 @@ public class BoidEnemyBase : BoidBase
         steeringBoid.Behaviours = _behaviours;
     }
 
-    protected override void _OnHit(float damage, bool score, Vector2 bulletVel, Vector3 pos)
+    protected override void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
-        base._OnHit(damage, score, bulletVel, pos);
+        base._OnHit(damage, bulletVel, pos);
 
         GameCamera.Instance.AddTrauma(HitTrauma);
     }
     
-    protected override void _Destroy(bool score, Vector3 hitDir, float hitStrength)
+    protected override void _Destroy(Vector2 hitDir, float hitStrength)
     {
-        base._Destroy(score, hitDir, hitStrength);
+        base._Destroy(hitDir, hitStrength);
 
         for (int i = 0; i < Data.MaterialDropCount; i++)
         {

@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://src/bullets/SeekerMissile.cs" type="Script" id=1]
+[ext_resource path="res://scenes/vfx/ParticlesExplode.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=3]
+
+[sub_resource type="CapsuleShape" id=1]
+radius = 0.713931
+
+[sub_resource type="CapsuleMesh" id=2]
+radius = 0.2
+mid_height = 1.5
+radial_segments = 8
+rings = 2
+
+[node name="SeekerMissile" type="Area"]
+script = ExtResource( 1 )
+ExplodeVfxPath = NodePath("ParticlesExplode")
+LaunchSfxPath = NodePath("SFXLaunch")
+_selfDestructTime = 10.0
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+
+[node name="SFXLaunch" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 3 )
+volume_db = -20.0
+
+[node name="ParticlesExplode" parent="." instance=ExtResource( 2 )]

@@ -109,6 +109,7 @@ public partial class SteeringManager
                 continue;
             
             ref readonly Boid other = ref boids[i];
+            if (other.Ignore) continue;
             if (boid.Id == other.Id) continue;
 
             Vector2 desired = pos - otherPos;
@@ -242,6 +243,7 @@ public partial class SteeringManager
             if (distSq > radiusSq || distSq == 0.0f) continue;
             
             ref readonly Boid other = ref boids[i];
+            if (other.Ignore) continue;
             if (!InView(boid, other, boid.ViewAngle)) continue;
 
             bool collision = CollisionDetection(boid.Position, other.Position, boid.Velocity, other.Velocity,

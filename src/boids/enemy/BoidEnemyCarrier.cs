@@ -54,7 +54,7 @@ public class BoidEnemyCarrier : BoidEnemyBase
 
         if (_rotorguns.Count == 0 && !Destroyed)
         {
-            _Destroy(true, Vector3.Zero, 0.0f);
+            _Destroy(Vector2.Zero, 0.0f);
         }
 
         float dist = (TargetPos - GlobalPosition).Length();

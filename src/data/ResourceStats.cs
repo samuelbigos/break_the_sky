@@ -9,6 +9,7 @@ public class ResourceStats : Resource
     [Export] public float AttackVelocity = 1.0f;
     [Export] public float AttackCharge = 1.0f;
     [Export] public float AttackDuration = 1.0f;
+    [Export] public int AttackCount = 1;
     [Export] public float MoveSpeed = 1.0f;
     [Export] public float MaxHealth = 1.0f;
     [Export] public float Regeneration = 0.0f;
