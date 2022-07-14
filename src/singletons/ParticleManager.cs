@@ -1,3 +1,7 @@
+#if GODOT_PC || GODOT_WEB || GODOT_MOBILE
+#define EXPORT
+#endif
+
 using Godot;
 using System;
 using System.Collections.Generic;

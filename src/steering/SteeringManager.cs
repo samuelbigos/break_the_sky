@@ -16,7 +16,12 @@ public partial class SteeringManager : Singleton<SteeringManager>
         Circle,
     }
 
-    public struct Boid
+    public interface IPoolable
+    {
+        public abstract bool Empty();
+    }
+
+    public struct Boid : IPoolable
     {
         public short Id;
         public byte Alignment;
@@ -55,6 +60,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
         public Godot.Vector2 PositionG => Position.ToGodot();
         public Godot.Vector2 VelocityG => Velocity.ToGodot();
+        
+        public bool Empty()
+        {
+            return Id == 0;
+        }
     }
 
     public struct Obstacle
@@ -97,7 +107,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public static Rect2 EdgeBounds;
 
-    private StructPool<Boid> _boidPool = new(1000);
+    private static readonly int MAX_BOIDS = 1000;
+    
+    private StructPool<Boid> _boidPool = new(MAX_BOIDS);
     private int _numObstacles;
     private Obstacle[] _obstaclePool = new Obstacle[100];
     private int _numFlowFields;
@@ -109,10 +121,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private Dictionary<int, int> _flowFieldIdToIndex = new();
     private Dictionary<int, int> _flowFieldIndexToId = new();
 
-    private Vector2[] _boidPositions = new Vector2[500];
-    private byte[] _boidAlignments = new byte[500];
+    private Vector2[] _boidPositions = new Vector2[MAX_BOIDS];
+    private byte[] _boidAlignments = new byte[MAX_BOIDS];
     
-    private int _boidIdGen = 1;
+    private int _boidIdGen = 1; // IDs start at 1 because Boid struct initialises default to 0.
     private int _obstacleIdGen = 1;
     private int _flowFieldIdGen = 1;
     private static float[] _behaviourWeights;
@@ -172,8 +184,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
             }
         }
 
-        Span<Vector2> boidPositions = _boidPositions.AsSpan(0, _boidPool.Count);
-        Span<byte> boidAlignments = _boidAlignments.AsSpan(0, _boidPool.Count);
+        Span<Vector2> boidPositions = _boidPositions.AsSpan(0, _boidPool.Span);
+        Span<byte> boidAlignments = _boidAlignments.AsSpan(0, _boidPool.Span);
         for (int i = 0; i < boidPositions.Length; i++)
         {
             boidPositions[i] = boids[i].Position;
@@ -315,9 +327,13 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public short RegisterBoid(Boid boid)
     {
-        Debug.Assert(!_boidIdToIndex.ContainsKey(boid.Id), $"Boid with this ID ({boid.Id}) already registered.");
-        if (_boidIdToIndex.ContainsKey(boid.Id))
+#if !EXPORT
+        if (_boidPool.Count >= MAX_BOIDS)
+        {
+            Debug.Assert(false, $"MAX_BOIDS ({MAX_BOIDS}) reached, check for leaks or increase pool size.");
             return -1;
+        }
+#endif
 
         boid.Id = Convert.ToInt16(_boidIdGen++);
         int index = _boidPool.Add(boid);
@@ -330,7 +346,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         Debug.Assert(!_obstacleIdToIndex.ContainsKey(obstacle.ID), $"Obstacle with this ID ({obstacle.ID}) already registered.");
         if (_obstacleIdToIndex.ContainsKey(obstacle.ID))
             return -1;
-        
+
         obstacle.ID =  _obstacleIdGen++;
         _obstaclePool[_numObstacles++] = obstacle;
         _obstacleIdToIndex[obstacle.ID] = _numObstacles - 1;
