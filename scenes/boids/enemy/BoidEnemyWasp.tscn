@@ -9,7 +9,6 @@
 [sub_resource type="CapsuleShape" id=1]
 
 [node name="BoidEnemyWasp" instance=ExtResource( 1 )]
-transform = Transform( 0.66, 0, 0, 0, 0.66, 0, 0, 0, 0.66, 0, 0, 0 )
 script = ExtResource( 3 )
 MaxVelocity = 100.0
 MaxForce = 100.0
@@ -18,6 +17,7 @@ _baseResourceStats = ExtResource( 4 )
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 150.0
+WeaponPositionPath = NodePath("WeaponPosition")
 _bulletScene = ExtResource( 5 )
 
 [node name="CollisionShape" parent="." index="0"]
@@ -28,3 +28,6 @@ shape = SubResource( 1 )
 transform = Transform( -8.74228e-08, 0, 2, 0, 2, 0, -2, 0, -8.74228e-08, 0, 0, 0 )
 material_override = null
 mesh = ExtResource( 2 )
+
+[node name="WeaponPosition" type="Spatial" parent="." index="5"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.81574, -0.708372 )

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/singletons/ParticleManager.cs" type="Script" id=1]
+[ext_resource path="res://scenes/vfx/ParticlesExplode.tscn" type="PackedScene" id=2]
+
+[node name="ParticleManager" type="Spatial"]
+script = ExtResource( 1 )
+_poolSize = 50
+_particlesToPool = [ ExtResource( 2 ) ]

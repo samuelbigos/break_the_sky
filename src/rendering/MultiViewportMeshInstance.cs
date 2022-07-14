@@ -30,6 +30,7 @@ public class MultiViewportMeshInstance : MeshInstance
             mesh.Transform = Transform;
             _meshes.Add(mesh);
             mesh.Visible = Visible;
+            mesh.CastShadow = ShadowCastingSetting.Off;
         }
     }
 

@@ -4,23 +4,34 @@ using GodotOnReady.Attributes;
 
 public partial class SeekerMissile : Area
 {
+    protected enum State
+    {
+        Alive,
+        Deactivated
+    }
+    
     [Export] private float _steeringRadius = 5.0f;
     [Export] private float _maxSpeed = 200.0f;
     [Export] private float _maxForce = 50.0f;
-    [Export] private float _selfDestructTime = 5.0f;
-    
-    [OnReadyGet] private Particles _explodeVfx;
-    [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
+    [Export] private float _lifetime = 5.0f;
+    [Export] private PackedScene _explodeVfx;
 
+    [OnReadyGet] private MeshInstance _mesh;
+    [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
+    [OnReadyGet] private BoidTrail _trail;
+    
     private BoidBase.BoidAlignment _alignment;
     private float _damage;
     private int _steeringId;
-    private float _selfDestructTimer;
+    private float _deactivationTimer;
+    private State _state = State.Alive;
     
-    public void Init(Vector2 spawnPos, BoidBase.BoidAlignment alignment, BoidBase target)
+    public void Init(float damage, Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, BoidBase target)
     {
-        _selfDestructTimer = _selfDestructTime;
+        _damage = damage;
+        _deactivationTimer = _lifetime;
         _alignment = alignment;
+        _mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
         
         Connect("area_entered", this, nameof(_OnAreaEntered));
         
@@ -31,9 +42,9 @@ public partial class SeekerMissile : Area
         {
             Alignment = (byte)alignment,
             Radius = _steeringRadius,
-            Position = spawnPos.ToNumerics(),
-            Velocity = System.Numerics.Vector2.Zero,
-            Heading = System.Numerics.Vector2.UnitY,
+            Position = position.To2D().ToNumerics(),
+            Velocity = velocity.ToNumerics(),
+            Heading = velocity.ToNumerics().NormalizeSafe(),
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = target.SteeringId,
             Behaviours = behaviours,
@@ -60,21 +71,58 @@ public partial class SeekerMissile : Area
     public override void _Process(float delta)
     {
         base._Process(delta);
-        
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-        Basis basis = new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f);
-        GlobalTransform = new Transform(basis, steeringBoid.Position.ToGodot().To3D());
 
-        _selfDestructTimer -= delta;
-        if (_selfDestructTimer < 0.0f)
+        if (_state == State.Alive)
         {
-            Destroy();
+            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+            Basis basis = new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f);
+            Vector3 pos = steeringBoid.PositionG.To3D();
+            GlobalTransform = new Transform(basis, pos);
+
+            _deactivationTimer -= delta;
+            if (_deactivationTimer < 0.0f)
+            {
+                Deactivate();
+            }
+        }
+        else if (_state == State.Deactivated)
+        {
+            if (GlobalTransform.origin.y < -100.0f)
+            {
+                QueueFree();
+            }
         }
     }
 
-    private void Destroy()
+    private void Deactivate()
     {
+        // convert to rigid body for 'ragdoll' death physics.
+        Vector3 pos = GlobalTransform.origin;
+        RigidBody rb = new RigidBody();
+        GetParent().AddChild(rb);
+        rb.GlobalTransform = GlobalTransform;
+        GetParent().RemoveChild(this);  
+        rb.AddChild(this);
+        CollisionShape shape = GetNode<CollisionShape>("CollisionShape");
+        rb.AddChild(shape.Duplicate());
+
+        rb.GlobalTransform = new Transform(Basis.Identity, pos);
+        GlobalTransform = new Transform(GlobalTransform.basis, pos);
+        
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        rb.ApplyCentralImpulse(steeringBoid.Velocity.ToGodot().To3D());
+        rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 1.0f);
+        
         SteeringManager.Instance.RemoveBoid(_steeringId);
+        _trail.QueueFree();
+        _state = State.Deactivated;
+    }
+
+    private void Explode()
+    {
+        _state = State.Deactivated;
+        SteeringManager.Instance.RemoveBoid(_steeringId);
+        ParticleManager.Instance.AddOneShotParticles(_explodeVfx, GlobalTransform.origin);
         QueueFree();
     }
 
@@ -85,7 +133,7 @@ public partial class SeekerMissile : Area
             ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
             boid.SendHitMessage(_damage, steeringBoid.VelocityG, steeringBoid.PositionG, _alignment);
 
-            _selfDestructTimer = 0.0f;
+            Explode();
         }
     }
 

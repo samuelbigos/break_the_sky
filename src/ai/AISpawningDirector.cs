@@ -479,11 +479,11 @@ public class AISpawningDirector : Node
                 BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
             }
 
-            if (ImGui.Button($"{enemy.DisplayName} x10"))
-            {
-                for (int i = 0; i < 10; i++)
-                    BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
-            }
+            // if (ImGui.Button($"{enemy.DisplayName} x10"))
+            // {
+            //     for (int i = 0; i < 10; i++)
+            //         BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
+            // }
         }
     }
 }

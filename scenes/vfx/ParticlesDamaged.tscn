@@ -16,8 +16,10 @@ curve = SubResource( 7 )
 [sub_resource type="ParticlesMaterial" id=2]
 lifetime_randomness = 0.5
 emission_shape = 1
-emission_sphere_radius = 1.0
+emission_sphere_radius = 3.0
 gravity = Vector3( 0, 0, 0 )
+scale = 2.0
+scale_random = 1.0
 scale_curve = SubResource( 8 )
 color_ramp = SubResource( 6 )
 

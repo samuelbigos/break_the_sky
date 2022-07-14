@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
+using GodotOnReady.Attributes;
 
-public class BoidEnemyWasp : BoidEnemyBase
+public partial class BoidEnemyWasp : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
+    
+    [OnReadyGet] private Spatial _weaponPosition; 
 
     private float _attackCooldownTimer;
     private float _shotCooldownTimer;
@@ -42,12 +45,13 @@ public class BoidEnemyWasp : BoidEnemyBase
 
     private void Shoot()
     {
-        SeekerMissile bullet = _bulletScene.Instance() as SeekerMissile;
-        Debug.Assert(bullet != null, nameof(bullet) + " != null");
+        SeekerMissile missile = _bulletScene.Instance() as SeekerMissile;
+        Debug.Assert(missile != null, nameof(missile) + " != null");
         
-        Vector2 spawnPos = GlobalPosition;
-        Game.Instance.AddChild(bullet);
-        bullet.Init(spawnPos, Alignment, _targetBoid);
+        Vector3 spawnPos = _weaponPosition.GlobalTransform.origin;
+        Vector2 spawnVel = (_targetBoid.GlobalPosition - GlobalPosition).Normalized();
+        Game.Instance.AddChild(missile);
+        missile.Init(_resourceStats.AttackDamage, spawnPos, spawnVel, Alignment, _targetBoid);
     }
 
     protected override void EnterAIState_Engaged()
@@ -58,7 +62,8 @@ public class BoidEnemyWasp : BoidEnemyBase
         
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
         steeringBoid.DesiredOffsetFromTarget = (GlobalPosition - _targetBoid.GlobalPosition).Normalized().ToNumerics() * EngageRange;
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainOffset, true);
+        //SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainOffset, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);
         
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);

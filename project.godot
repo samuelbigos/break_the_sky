@@ -46,6 +46,7 @@ SaveDataWorld="*res://src/singletons/SaveDataWorld.cs"
 SaveManager="*res://src/singletons/SaveManager.cs"
 TimeSystem="*res://src/singletons/TimeSystem.cs"
 BoidFactory="*res://src/boids/BoidFactory.cs"
+ParticleManager="*res://scenes/singletons/ParticleManager.tscn"
 
 [display]
 
@@ -229,4 +230,4 @@ common/enable_pause_aware_picking=true
 
 threads/thread_model=2
 quality/filters/msaa=3
-environment/default_environment="res://assets/Environment.tres"
+environment/default_environment="res://assets/EditorEnvironment.tres"

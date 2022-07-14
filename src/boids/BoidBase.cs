@@ -246,8 +246,8 @@ public partial class BoidBase : Area
             localSteering /= delta;
             localSteering /= 100.0f;
             _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
-            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
-            float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.33f, Mathf.Pi * 0.33f);
+            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
+            float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
             basis = basis.Rotated(basis.z, bankZ);
             basis = basis.Rotated(basis.x, bankX);
         }
