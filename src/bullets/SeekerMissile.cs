@@ -25,9 +25,11 @@ public partial class SeekerMissile : Area
     private int _steeringId;
     private float _deactivationTimer;
     private State _state = State.Alive;
+    private System.Numerics.Vector2 _smoothHeading;
     
     public void Init(float damage, Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, BoidBase target)
     {
+        this.GlobalPosition(position.To2D());
         _damage = damage;
         _deactivationTimer = _lifetime;
         _alignment = alignment;
@@ -72,24 +74,40 @@ public partial class SeekerMissile : Area
     {
         base._Process(delta);
 
-        if (_state == State.Alive)
+        switch (_state)
         {
-            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-            Basis basis = new Basis(Vector3.Down, steeringBoid.Heading.Angle() + Mathf.Pi * 0.5f);
-            Vector3 pos = steeringBoid.PositionG.To3D();
-            GlobalTransform = new Transform(basis, pos);
+            case State.Alive:
+            {
+                ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+            
+                // head the missile in the steering direction, but as steering strength approaches zero, mix in more heading (velocity) because steering direction is
+                // less accurate at lower strengths.
+                float steeringStrength = Mathf.Clamp(steeringBoid.Steering.Length(), 0.0f, 1.0f);
+                float smoothFactor = 0.9f;
+                _smoothHeading = _smoothHeading * smoothFactor + (1.0f - smoothFactor) * 
+                    System.Numerics.Vector2.Lerp(steeringBoid.Heading, steeringBoid.Steering.NormalizeSafe(), steeringStrength);
 
-            _deactivationTimer -= delta;
-            if (_deactivationTimer < 0.0f)
-            {
-                Deactivate();
+                Basis basis = new(Vector3.Down, _smoothHeading.Angle() + Mathf.Pi * 0.5f);
+                GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
+
+                _trail.Thrust = -_smoothHeading.ToGodot();
+
+                _deactivationTimer -= delta;
+                if (_deactivationTimer < 0.0f)
+                {
+                    Deactivate();
+                }
+
+                break;
             }
-        }
-        else if (_state == State.Deactivated)
-        {
-            if (GlobalTransform.origin.y < -100.0f)
+            case State.Deactivated:
             {
-                QueueFree();
+                if (GlobalTransform.origin.y < -100.0f)
+                {
+                    QueueFree();
+                }
+
+                break;
             }
         }
     }
@@ -116,6 +134,7 @@ public partial class SeekerMissile : Area
         SteeringManager.Instance.RemoveBoid(_steeringId);
         _trail.QueueFree();
         _state = State.Deactivated;
+        Monitoring = false;
     }
 
     private void Explode()

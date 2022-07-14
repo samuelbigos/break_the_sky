@@ -224,16 +224,16 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 totalForce += force;
             }
             
-            //GD.Print($"{totalForce.Length() / (boid.MaxForce * delta * 2.0f)}");
-
-            // adjust raw steering force
             totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
-
-            // TODO: Add smooth steering.
             boid.Steering = totalForce;
 
             boid.Velocity += boid.Steering;
             boid.Velocity.Limit(boid.MaxSpeed);
+
+            // TODO: replace max speed with drag, so max speed is a derived value from drag and thrust.
+            // float dragCoeff = 0.0001f;
+            // Vector2 drag = -boid.Velocity.NormalizeSafe() * boid.Velocity.LengthSquared() * dragCoeff;
+            //boid.Velocity *= boid.Velocity.LengthSquared();
 
             boid.Speed = boid.Velocity.Length();
 

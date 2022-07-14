@@ -1,5 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
+[ext_resource path="res://assets/mesh/circle.obj" type="ArrayMesh" id=1]
+
 [sub_resource type="SpatialMaterial" id=3]
 flags_unshaded = true
 vertex_color_use_as_albedo = true
@@ -19,10 +21,6 @@ initial_velocity = 100.0
 initial_velocity_random = 1.0
 scale_curve = SubResource( 6 )
 
-[sub_resource type="SphereMesh" id=4]
-radial_segments = 4
-rings = 2
-
 [node name="ParticlesHit" type="Particles"]
 material_override = SubResource( 3 )
 emitting = false
@@ -32,4 +30,4 @@ one_shot = true
 explosiveness = 1.0
 local_coords = false
 process_material = SubResource( 2 )
-draw_pass_1 = SubResource( 4 )
+draw_pass_1 = ExtResource( 1 )

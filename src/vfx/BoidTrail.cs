@@ -5,6 +5,8 @@ using Vector3 = Godot.Vector3;
 
 public class BoidTrail : Spatial
 {
+    // TODO: Burst trail should emit in the direction of steering forces if attached to a boid.
+    
     public enum TrailType
     {
         Smooth,
@@ -23,19 +25,23 @@ public class BoidTrail : Spatial
     public int TrailIdx => _trailIdx;
     public Curve LineWidthCurve => _lineWidthCurve;
     public float LineWidth => _lineWidth;
+    public Vector2 Thrust { set => _thrust = value; }
     
     private int _trailIdx;
     private Vector3[] _trailPositions;
     private float _updateTimer;
     private Particles _burstParticles;
+    private ParticlesMaterial _burstMaterial;
     private bool _initialised;
     private bool _registered;
+    private Vector2 _thrust;
 
     public override void _Ready()
     {
         base._Ready();
 
         _burstParticles = GetNode<Particles>(_burstParticlesPath);
+        _burstMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;;
 
         _initialised = false;
     }
@@ -76,6 +82,7 @@ public class BoidTrail : Spatial
                     ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
                     Debug.Assert(processMaterial != null);
                     processMaterial.Color = ColourManager.Instance.White;
+                    _burstParticles.Emitting = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -99,6 +106,8 @@ public class BoidTrail : Spatial
 
     private void ProcessBurst(float delta)
     {
+        // TODO: take parent velocity into account.
+        _burstMaterial.InitialVelocity = _thrust.Length() * 25.0f;
     }
 
     private void ProcessSmooth(float delta)

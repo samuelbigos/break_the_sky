@@ -32,6 +32,12 @@ public static class Utils
         spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
     }
 
+    public static void GlobalPosition(this Spatial spatial, Godot.Vector2 position)
+    {
+        Godot.Vector3 pos = position.To3D();
+        spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, pos);
+    }
+
     public static float RandfUnit()
     {
         return Rng.RandfRange(-1.0f, 1.0f);

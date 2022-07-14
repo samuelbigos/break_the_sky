@@ -1211,14 +1211,14 @@ cull_mask = 1047553
 environment = ExtResource( 7 )
 current = true
 fov = 90.0
-near = 1.0
-far = 1000.0
+near = 10.0
+far = 500.0
 script = ExtResource( 4 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 0.971977, -0.231503, 0.0408202, 0, 0.173648, 0.984808, -0.235074, -0.957211, 0.168782, 0, 186.63, 0 )
 light_cull_mask = 4294966273
-shadow_enabled = true
+directional_shadow_blend_splits = true
 directional_shadow_max_distance = 500.0
 
 [node name="MouseCursor" type="MeshInstance" parent="."]

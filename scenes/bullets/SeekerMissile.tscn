@@ -20,7 +20,7 @@ MeshPath = NodePath("MeshInstance")
 LaunchSfxPath = NodePath("SFXLaunch")
 TrailPath = NodePath("MeshInstance/BoidTrail")
 _maxSpeed = 100.0
-_maxForce = 25.0
+_maxForce = 100.0
 _explodeVfx = ExtResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
@@ -30,6 +30,7 @@ shape = SubResource( 1 )
 mesh = SubResource( 2 )
 
 [node name="BoidTrail" parent="MeshInstance" instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 2.42524 )
 _type = 1
 
 [node name="SFXLaunch" type="AudioStreamPlayer2D" parent="."]

@@ -1,5 +1,11 @@
 [gd_scene load_steps=8 format=2]
 
+[ext_resource path="res://assets/mesh/icosphere.obj" type="ArrayMesh" id=1]
+
+[sub_resource type="SpatialMaterial" id=9]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+
 [sub_resource type="Gradient" id=5]
 offsets = PoolRealArray( 0, 0.394286, 0.725714, 0.994286 )
 colors = PoolColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.963867, 0.140081, 0.0489464, 1, 0, 0, 0, 1 )
@@ -23,19 +29,13 @@ scale_random = 1.0
 scale_curve = SubResource( 8 )
 color_ramp = SubResource( 6 )
 
-[sub_resource type="SpatialMaterial" id=3]
-flags_unshaded = true
-vertex_color_use_as_albedo = true
-
-[sub_resource type="SphereMesh" id=4]
-material = SubResource( 3 )
-
 [node name="ParticlesExplode" type="Particles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
+material_override = SubResource( 9 )
 emitting = false
 amount = 50
 one_shot = true
 explosiveness = 0.79
 local_coords = false
 process_material = SubResource( 2 )
-draw_pass_1 = SubResource( 4 )
+draw_pass_1 = ExtResource( 1 )

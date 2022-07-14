@@ -18,6 +18,7 @@ public class ParticleManager : Spatial
         public Queue<Particles> Queue;
         public Particles Particles;
         public float Lifetime;
+        public bool TriggerEmit;
     }
 
     private List<OneShotParticles> _oneShotParticles = new(100);
@@ -39,6 +40,7 @@ public class ParticleManager : Spatial
             for (int i = 0; i < _poolSize; i++)
             {
                 Particles particles = particleScene.Instance() as Particles;
+                particles.Visible = false;
                 AddChild(particles);
                 list.Enqueue(particles);
             }
@@ -54,12 +56,20 @@ public class ParticleManager : Spatial
         {
             OneShotParticles osp = _oneShotParticles[i];
             osp.Lifetime -= delta;
+            if (osp.TriggerEmit)
+            {
+                // start emitting the frame after we set position, otherwise the first particles will
+                // appear at the previous location.
+                osp.Particles.Emitting = true;
+                osp.TriggerEmit = false;
+            }
             _oneShotParticles[i] = osp;
             
             if (osp.Lifetime < 0.0f)
             {
                 _oneShotParticles.RemoveAt(i);
                 osp.Queue.Enqueue(osp.Particles);
+                osp.Particles.Visible = false;
             }
         }
     }
@@ -83,7 +93,7 @@ public class ParticleManager : Spatial
 #endif
         Particles p = list.Dequeue();
         p.GlobalPosition(position);
-        p.Emitting = true;
-        _oneShotParticles.Add(new OneShotParticles() { Queue = list, Particles = p, Lifetime = p.Lifetime });
+        p.Visible = true;
+        _oneShotParticles.Add(new OneShotParticles() { Queue = list, Particles = p, Lifetime = p.Lifetime, TriggerEmit = true });
     }
 }
