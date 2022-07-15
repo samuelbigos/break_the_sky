@@ -1,11 +1,8 @@
-#if GODOT_PC || GODOT_WEB || GODOT_MOBILE
-#define EXPORT
-#endif
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
+using ImGuiNET;
 using static SteeringManager.Behaviours;
 using Vector2 = System.Numerics.Vector2;
 
@@ -49,7 +46,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float WanderCircleRadius;
         public float WanderVariance;
         public bool Ignore;
-#if !EXPORT
+#if !FINAL
         public Intersection Intersection;
 #endif
         
@@ -102,6 +99,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         public bool Intersect;
         public float IntersectTime;
+        public Vector2 SurfacePoint;
         public Vector2 SurfaceNormal;
     }
 
@@ -327,7 +325,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
     public short RegisterBoid(Boid boid)
     {
-#if !EXPORT
+#if !FINAL
         if (_boidPool.Count >= MAX_BOIDS)
         {
             Debug.Assert(false, $"MAX_BOIDS ({MAX_BOIDS}) reached, check for leaks or increase pool size.");
@@ -384,5 +382,33 @@ public partial class SteeringManager : Singleton<SteeringManager>
         int i = _boidIdToIndex[id];
         _boidPool.Remove(i);
         _boidIdToIndex.Remove(id);
+    }
+    
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        DebugImGui.Instance.RegisterWindow("steering", "Steering Behaviours", _OnImGuiLayout);
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        DebugImGui.Instance.UnRegisterWindow("steering", _OnImGuiLayout);
+    }
+
+    private void _OnImGuiLayout()
+    {
+        ImGui.Text($"Boids: {_boidPool.Count} / {MAX_BOIDS}");
+        ImGui.Text($"Span: {_boidPool.Span}");
+        ImGui.Spacing();
+        ImGui.Checkbox("Draw", ref _draw);
+        ImGui.Checkbox("Draw Separation", ref _drawSeparation);
+        ImGui.Checkbox("Draw Steering", ref _drawSteering);
+        ImGui.Checkbox("Draw Velocity", ref _drawVelocity);
+        ImGui.Checkbox("Draw Vision", ref _drawVision);
+        ImGui.Checkbox("Draw Avoidance", ref _drawAvoidance);
+        ImGui.Checkbox("Draw Wander", ref _drawWander);
+        ImGui.Checkbox("Draw FlowFields", ref _drawFlowFields);
+        ImGui.EndTabItem();
     }
 }

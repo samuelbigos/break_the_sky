@@ -1,9 +1,4 @@
-#if GODOT_PC || GODOT_WEB || GODOT_MOBILE
-#define EXPORT
-#endif
-
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -80,7 +75,7 @@ public class ParticleManager : Spatial
 
     public void AddOneShotParticles(PackedScene particleScene, Vector3 position)
     {
-#if !EXPORT
+#if !FINAL
         if (!_pools.ContainsKey(particleScene))
         {
             Debug.Assert(false, $"ParticleManager does not pool {particleScene}!");
@@ -88,13 +83,11 @@ public class ParticleManager : Spatial
         }
 #endif
         Queue<Particles> list = _pools[particleScene];
-#if !EXPORT
         if (list.Count == 0)
         {
             Debug.Assert(false, $"Increase pool size for {particleScene}!");
             return;
         }
-#endif
         Particles p = list.Dequeue();
         p.GlobalPosition(position);
         p.Visible = true;

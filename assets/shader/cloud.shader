@@ -39,11 +39,11 @@ uniform vec3 u_boid_pos_3;
 uniform vec3 u_boid_pos_4;
 uniform vec3 u_boid_pos_5;
 
-varying vec3 v_vertPos;
+varying vec3 v_vert_pos;
 
 void vertex()
 {
-	v_vertPos = VERTEX;
+	v_vert_pos = VERTEX;
 }
 
 float remap(float x, float a, float b, float c, float d)
@@ -122,7 +122,7 @@ float cloud(vec3 pos)
 
 void fragment()
 {
-	vec3 vertPos = v_vertPos;
+	vec3 vertPos = v_vert_pos;
 //	vertPos.x += TIME * u_scroll_speed;
 //	vertPos.z += TIME * u_scroll_speed;
 	

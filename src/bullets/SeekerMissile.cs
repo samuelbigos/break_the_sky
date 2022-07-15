@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using GodotOnReady.Attributes;
 
 public partial class SeekerMissile : Area
@@ -19,6 +18,7 @@ public partial class SeekerMissile : Area
     [OnReadyGet] private MeshInstance _mesh;
     [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
     [OnReadyGet] private BoidTrail _trail;
+    [OnReadyGet] private CollisionShape _collisionShape;
     
     private BoidBase.BoidAlignment _alignment;
     private float _damage;
@@ -82,8 +82,8 @@ public partial class SeekerMissile : Area
             
                 // head the missile in the steering direction, but as steering strength approaches zero, mix in more heading (velocity) because steering direction is
                 // less accurate at lower strengths.
-                float steeringStrength = Mathf.Clamp(steeringBoid.Steering.Length(), 0.0f, 1.0f);
-                float smoothFactor = 0.9f;
+                float steeringStrength = Mathf.Clamp(steeringBoid.Steering.Length() * 2.5f, 0.0f, 1.0f);
+                float smoothFactor = 0.95f;
                 _smoothHeading = _smoothHeading * smoothFactor + (1.0f - smoothFactor) * 
                     System.Numerics.Vector2.Lerp(steeringBoid.Heading, steeringBoid.Steering.NormalizeSafe(), steeringStrength);
 
@@ -116,12 +116,14 @@ public partial class SeekerMissile : Area
     {
         // convert to rigid body for 'ragdoll' death physics.
         Vector3 pos = GlobalTransform.origin;
+        
+        // TODO: pool RigidBodies.
         RigidBody rb = new RigidBody();
         GetParent().AddChild(rb);
         rb.GlobalTransform = GlobalTransform;
         GetParent().RemoveChild(this);  
         rb.AddChild(this);
-        CollisionShape shape = GetNode<CollisionShape>("CollisionShape");
+        CollisionShape shape = _collisionShape;
         rb.AddChild(shape.Duplicate());
 
         rb.GlobalTransform = new Transform(Basis.Identity, pos);

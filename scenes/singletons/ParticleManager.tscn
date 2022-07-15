@@ -5,5 +5,4 @@
 
 [node name="ParticleManager" type="Spatial"]
 script = ExtResource( 1 )
-_poolSize = 50
 _particlesToPool = [ ExtResource( 2 ) ]

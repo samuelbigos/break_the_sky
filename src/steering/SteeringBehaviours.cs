@@ -1,10 +1,5 @@
-#if GODOT_PC || GODOT_WEB || GODOT_MOBILE
-#define EXPORT
-#endif
-
 using Godot;
 using System;
-using System.Diagnostics;
 using Vector2 = System.Numerics.Vector2;
 
 public partial class SteeringManager
@@ -191,7 +186,7 @@ public partial class SteeringManager
         }
 
         // if nearby intersection found, steer away from it, otherwise no steering
-#if !EXPORT
+#if !FINAL
         boid.Intersection = intersection;
 #endif
         if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)
@@ -258,13 +253,14 @@ public partial class SteeringManager
             {
                 nearestDistance = dist;
                 intersection.SurfaceNormal = collisionNormal;
+                intersection.SurfacePoint = collisionPos;
                 intersection.IntersectTime = collisionTime;
                 intersection.Intersect = true;
             }
         }
 
         // if nearby intersection found, steer away from it, otherwise no steering
-#if !EXPORT
+#if !FINAL
         boid.Intersection = intersection;
 #endif
         if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)

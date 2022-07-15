@@ -19,8 +19,9 @@ script = ExtResource( 1 )
 MeshPath = NodePath("MeshInstance")
 LaunchSfxPath = NodePath("SFXLaunch")
 TrailPath = NodePath("MeshInstance/BoidTrail")
+CollisionShapePath = NodePath("CollisionShape")
 _maxSpeed = 100.0
-_maxForce = 100.0
+_maxForce = 75.0
 _explodeVfx = ExtResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]

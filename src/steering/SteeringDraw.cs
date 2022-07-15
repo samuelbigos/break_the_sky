@@ -1,11 +1,6 @@
-#if GODOT_PC || GODOT_WEB || GODOT_MOBILE
-#define EXPORT
-#endif
-
 using Godot;
 using System;
 using System.Diagnostics;
-using ImGuiNET;
 using Array = Godot.Collections.Array;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
@@ -39,7 +34,7 @@ public partial class SteeringManager
 
         // boids
         Span<Boid> boids = _boidPool.AsSpan();
-        
+
         foreach (ref readonly Boid boid in boids)
         {
             // body
@@ -55,7 +50,7 @@ public partial class SteeringManager
             Utils.Line(p0, p1, col, ref v, ref i, _vertList, _colList, _indexList);
             Utils.Line(p1, p2, col, ref v, ref i, _vertList, _colList, _indexList);
             Utils.Line(p2, p0, col, ref v, ref i, _vertList, _colList, _indexList);
-            
+
             // separation radius
             if (_drawSeparation)
             {
@@ -65,7 +60,8 @@ public partial class SteeringManager
             // boid velocity/force
             if (_drawVelocity)
             {
-                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i,
+                    _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)
@@ -75,7 +71,7 @@ public partial class SteeringManager
             }
 
             // boid avoidance
-#if !EXPORT
+#if !FINAL
             if (boid.Intersection.Intersect && _drawAvoidance)
             {
                 //Line(_st, boid.Position, boid.Position + forward * boid.LookAhead * boid.Speed, Colors.Black, ref v);
@@ -89,7 +85,8 @@ public partial class SteeringManager
             if (_drawVision)
             {
                 Color visCol = Color.Color8(30, 30, 30);
-                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, visCol, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.CircleArc(boidPos, 32, boid.ViewRange, boid.ViewAngle, boid.Heading, visCol, ref v, ref i,
+                    _vertList, _colList, _indexList);
             }
 
             // wander
@@ -98,10 +95,13 @@ public partial class SteeringManager
                 Vector3 circlePos = boidPos + boid.Heading.To3D() * boid.WanderCircleDist;
 
                 float angle = -boid.Heading.AngleTo(System.Numerics.Vector2.UnitX) + boid.WanderAngle;
-                Vector3 displacement = Vector3.Normalize(new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle))) *  boid.WanderCircleRadius;
+                Vector3 displacement = Vector3.Normalize(new Vector3(Mathf.Cos(angle), 0.0f, Mathf.Sin(angle))) *
+                                       boid.WanderCircleRadius;
 
-                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.SlateGray, ref v, ref i, _vertList, _colList, _indexList);
-                Utils.Line(circlePos, circlePos + displacement, Colors.DarkGray, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(circlePos, 32, boid.WanderCircleRadius, Colors.SlateGray, ref v, ref i, _vertList,
+                    _colList, _indexList);
+                Utils.Line(circlePos, circlePos + displacement, Colors.DarkGray, ref v, ref i, _vertList, _colList,
+                    _indexList);
             }
 
             if (_drawFlowFields)
@@ -110,28 +110,29 @@ public partial class SteeringManager
                 //Utils.Circle(boidPos + forward * boid.FlowFieldDist, 8, 2.0f, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
             }
         }
-        
+
         // flow fields
         if (_drawFlowFields)
         {
             float flowFieldVisCellSize = 10.0f;
             Vector2 topLeft = BoidTestbedCamera.Instance.ScreenPosition(Godot.Vector2.Zero).ToNumerics();
             Vector2 botRight = BoidTestbedCamera.Instance.ScreenPosition(GetViewport().Size).ToNumerics();
-            
+
             for (float x = topLeft.X; x < botRight.X; x += flowFieldVisCellSize)
             {
                 for (float y = topLeft.Y; y < botRight.Y; y += flowFieldVisCellSize)
                 {
-                    Vector3 pos = new(x, -1.0f, y);// / flowFieldVisCellSize;
+                    Vector3 pos = new(x, -1.0f, y); // / flowFieldVisCellSize;
                     // pos = pos.Floor();
                     // pos *= flowFieldVisCellSize;
-                    
+
                     Vector3 dir = Vector3.Zero;
                     int count = 0;
                     for (int ff = 0; ff < _numFlowFields; ff++)
                     {
                         FlowField flowField = _flowFieldPool[ff];
-                        if (TryGetFieldAtPosition(flowField, new System.Numerics.Vector2(pos.X, pos.Z), out Vector2 vector))
+                        if (TryGetFieldAtPosition(flowField, new System.Numerics.Vector2(pos.X, pos.Z),
+                                out Vector2 vector))
                         {
                             dir.X += vector.X;
                             dir.Z += vector.Y;
@@ -147,8 +148,9 @@ public partial class SteeringManager
                         Mathf.Lerp(0.0f, 1.0f, dir.Z * 0.5f + 0.5f),
                         Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.Z * 0.5f + 0.5f)));
                     col.a = 0.5f;
-                    
-                    Utils.Line(pos, pos + dir * flowFieldVisCellSize, col, ref v, ref i, _vertList, _colList, _indexList);
+
+                    Utils.Line(pos, pos + dir * flowFieldVisCellSize, col, ref v, ref i, _vertList, _colList,
+                        _indexList);
                 }
             }
         }
@@ -182,7 +184,7 @@ public partial class SteeringManager
                 }
             }
         }
-        
+
         Debug.Assert(v < _vertList.Length, "v < _vertList.Length");
         Debug.Assert(v < _colList.Length, "v < _colList.Length");
         Debug.Assert(i < _indexList.Length, "i < _indexList.Length");
@@ -190,7 +192,7 @@ public partial class SteeringManager
         Span<Godot.Vector3> verts = _vertList.AsSpan(0, v);
         Span<Color> colours = _colList.AsSpan(0, v);
         Span<int> indices = _indexList.AsSpan(0, i);
-        
+
         Array arrays = new();
         arrays.Resize((int) ArrayMesh.ArrayType.Max);
         arrays[(int) ArrayMesh.ArrayType.Vertex] = verts.ToArray();
@@ -200,30 +202,5 @@ public partial class SteeringManager
         outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
 
         mesh = outMesh;
-    }
-    
-    public override void _EnterTree()
-    {
-        base._EnterTree();
-        DebugImGui.Instance.RegisterWindow("steering", "Steering Behaviours", _OnImGuiLayout);
-    }
-
-    public override void _ExitTree()
-    {
-        base._ExitTree();
-        DebugImGui.Instance.UnRegisterWindow("steering", _OnImGuiLayout);
-    }
-
-    private void _OnImGuiLayout()
-    {
-        ImGui.Checkbox("Draw", ref _draw);
-        ImGui.Checkbox("Draw Separation", ref _drawSeparation);
-        ImGui.Checkbox("Draw Steering", ref _drawSteering);
-        ImGui.Checkbox("Draw Velocity", ref _drawVelocity);
-        ImGui.Checkbox("Draw Vision", ref _drawVision);
-        ImGui.Checkbox("Draw Avoidance", ref _drawAvoidance);
-        ImGui.Checkbox("Draw Wander", ref _drawWander);
-        ImGui.Checkbox("Draw FlowFields", ref _drawFlowFields);
-        ImGui.EndTabItem();
     }
 }
