@@ -11,7 +11,7 @@ public class SaveDataSettings : Saveable
     private Dictionary<string, object> _defaults = new()
     {
         { "fullscreen", false },
-        { "windowed_resolution", new Vector2(1280, 720) },
+        { "windowed_resolution", new Vector2(1440, 810) },
     };
 
     private static bool Fullscreen

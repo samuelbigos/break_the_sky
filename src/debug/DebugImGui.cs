@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using ImGuiNET;
 
@@ -13,11 +14,23 @@ public class DebugImGui : Saveable
     public static Action DrawImGuiMenuBar = null;
     
     public static bool ManualInputHandling = false;
+
+    private struct RegisteredWindow
+    {
+        public string Id;
+        public string Name;
+        public Action Callback;
+        public string Shortcut;
+        public string ShortcutDisplay;
+    }
     
     private float _fps;
     private float _timescale;
-    private List<(string, string, Action)> _registeredWindows = new();
+    private List<RegisteredWindow> _registeredWindows = new();
     private bool _hasMovedParent;
+    
+    private const float _windowAlpha = 0.75f;
+    private ImGuiWindowFlags _windowFlags = ImGuiWindowFlags.AlwaysAutoResize;
     
     private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
@@ -49,7 +62,11 @@ public class DebugImGui : Saveable
         base._Ready();
         
         GetNode<ImGuiNode>("ImGuiNode").Connect("IGLayout", this, nameof(_OnImGuiLayout));
-
+        
+        RegisterWindow("performance", "Performance", _OnImGuiLayoutPerformance);
+        RegisterWindow("debug", "Debug", _OnImGuiLayoutDebug);
+        RegisterWindow("gamesettings", "Game Settings", _OnImGuiLayoutGameSettings);
+        
         _timescale = Engine.TimeScale;
     }
 
@@ -75,11 +92,11 @@ public class DebugImGui : Saveable
             }
         }
 
-        foreach ((string, string, Action) window in _registeredWindows)
+        foreach (RegisteredWindow window in _registeredWindows)
         {
-            if (!_data.Contains(window.Item1))
+            if (!_data.Contains(window.Id))
             {
-                _data[window.Item1] = false;
+                _data[window.Id] = false;
             }
         }
     }
@@ -111,19 +128,37 @@ public class DebugImGui : Saveable
         {
             GetTree().SetInputAsHandled();
         }
+        
+        foreach (RegisteredWindow window in _registeredWindows)
+        {
+            if (evt.IsActionPressed(window.Shortcut))
+                SetCustomWindowEnabled(window.Id, !Convert.ToBoolean(_data[window.Id]));
+        }
+    }
 
-        if (evt.IsActionPressed("debug_show_performance"))
-            ShowPerformance = !ShowPerformance;
-        if (evt.IsActionPressed("debug_show_debug"))
-            ShowDebug = !ShowDebug;
-        if (evt.IsActionPressed("debug_show_gamesettings"))
-            ShowGameSettings = !ShowGameSettings;
+    private void SetCustomWindowEnabled(string Id, bool enabled)
+    {
+        _data[Id] = enabled;
+        SaveManager.DoSave();
     }
 
     public void RegisterWindow(string id, string name, Action callback)
     {
-        _registeredWindows.Add((id, name, callback));
+        RegisteredWindow window = new() {Id = id, Name = name, Callback = callback, Shortcut = $"debug_show_{id}"};
+        if (!DebugUtils.Assert(InputMap.HasAction(window.Shortcut), $"RegisterWindow: {window.Id} does not have shortcut action."))
+        {
+            return;
+        }
+
+        foreach (object action in InputMap.GetActionList(window.Shortcut))
+        {
+            InputEventKey key = action as InputEventKey;
+            DebugUtils.Assert(key.Control, $"RegisterWindow: {window.Id} action does not have Control modifier.");
+            window.ShortcutDisplay += "CTRL+" + (char)key.Scancode;
+        }
         
+        _registeredWindows.Add(window);
+
         if (!_data.Contains(id))
             _data[id] = false;
     }
@@ -133,8 +168,8 @@ public class DebugImGui : Saveable
         int index = -1;
         for (int i = 0; i < _registeredWindows.Count; i++)
         {
-            (string, string, Action) window = _registeredWindows[i];
-            if (window.Item1 == id)
+            RegisteredWindow window = _registeredWindows[i];
+            if (window.Id == id)
             {
                 index = i;
                 break;
@@ -142,6 +177,62 @@ public class DebugImGui : Saveable
         }
         if (index != -1)
             _registeredWindows.RemoveAt(index);
+    }
+
+    private void _OnImGuiLayoutPerformance()
+    {
+        ImGui.SetNextWindowBgAlpha(_windowAlpha);
+        if (ImGui.Begin("Performance", _windowFlags))
+        {
+            ImGui.Text($"FPS: {_fps:F0}");
+            
+            ImGui.Text(" ### Processing");
+            ImGui.Text($"TimeProcess: {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000.0f:F0}ms");
+            ImGui.Text($"ObjectCount: {Performance.GetMonitor(Performance.Monitor.ObjectCount):F0}");
+            ImGui.Text($"ObjectNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):F0}");
+            ImGui.Text($"ObjectResourceCount: {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):F0}");
+            ImGui.Text($"ObjectOrphanNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount):F0}");
+
+            ImGui.Text(" ### Rendering");
+            ImGui.Text($"RenderVerticesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame):F0}");
+            ImGui.Text($"RenderDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame):F0}");
+            ImGui.Text($"Render2dDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame):F0}");
+
+            ImGui.Text(" ### Memory");
+            ImGui.Text($"MemoryDynamic: {Performance.GetMonitor(Performance.Monitor.MemoryDynamic) / 1024.0f:F0}KiB");
+            ImGui.Text($"MemoryStatic: {Performance.GetMonitor(Performance.Monitor.MemoryStatic) / 1024.0f:F0}KiB");
+            ImGui.Text($"MemoryMessageBufferMax: {Performance.GetMonitor(Performance.Monitor.MemoryMessageBufferMax) / 1024.0f:F0}KiB");
+
+            ImGui.Text(" ### Physics");
+            ImGui.Text($"Physics3dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3dActiveObjects):F0}");
+            ImGui.Text($"Physics2dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2dActiveObjects):F0}");
+            ImGui.Text($"Physics3dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3dIslandCount):F0}KiB");
+            ImGui.Text($"Physics2dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2dIslandCount):F0}KiB");
+
+            ImGui.End();
+        }
+    }
+    
+    private void _OnImGuiLayoutDebug()
+    {
+        ImGui.SetNextWindowBgAlpha(_windowAlpha);
+        if (ImGui.Begin("Debug", _windowFlags))
+        {
+            if (ImGui.SliderFloat("Timescale", ref _timescale, 0.0f, 1.0f))
+            {
+                Engine.TimeScale = _timescale;
+            }
+            ImGui.End();
+        }
+    }
+    
+    private void _OnImGuiLayoutGameSettings()
+    {
+        ImGui.SetNextWindowBgAlpha(_windowAlpha);
+        if (ImGui.Begin("GameSettings", _windowFlags))
+        {
+            Resources.Instance.ResourceGameSettings._OnImGuiLayout();
+        }
     }
 
     private void _OnImGuiLayout()
@@ -155,34 +246,22 @@ public class DebugImGui : Saveable
                     SaveManager.Instance.Reset();
                     GetTree().ChangeSceneTo(_initialScene);
                 }
+                if (ImGui.MenuItem("Save and Quit"))
+                {
+                    SaveManager.DoSave();
+                    GetTree().Quit();
+                }
                 ImGui.EndMenu();
             }
             
             if (ImGui.BeginMenu("Windows"))
             {
-                if (ImGui.MenuItem("Performance", "CTRL+P", ShowPerformance))
+                foreach (RegisteredWindow window in _registeredWindows)
                 {
-                    ShowPerformance = !ShowPerformance;
-                    DoSave();
-                }
-                if (ImGui.MenuItem("Debug", "CTRL+D", ShowDebug))
-                {
-                    ShowDebug = !ShowDebug;
-                    DoSave();
-                }
-                if (ImGui.MenuItem("GameSettings", "CTRL+G", ShowGameSettings))
-                {
-                    ShowGameSettings = !ShowGameSettings;
-                    DoSave();
-                }
-
-                foreach ((string, string, Action) window in _registeredWindows)
-                {
-                    bool selected = Convert.ToBoolean(_data[window.Item1]);
-                    if (ImGui.MenuItem($"{window.Item2}", "", selected))
+                    bool selected = Convert.ToBoolean(_data[window.Id]);
+                    if (ImGui.MenuItem($"{window.Name}", window.ShortcutDisplay, selected))
                     {
-                        _data[window.Item1] = !selected;
-                        SaveManager.DoSave();
+                        SetCustomWindowEnabled(window.Id, !selected);
                     }
                 }
                 ImGui.EndMenu();
@@ -193,73 +272,14 @@ public class DebugImGui : Saveable
             ImGui.EndMainMenuBar();
         }
 
-        const float windowAlpha = 0.75f;
-        ImGuiWindowFlags flags = ImGuiWindowFlags.AlwaysAutoResize;
-
-        if (ShowPerformance)
+        foreach (RegisteredWindow window in _registeredWindows)
         {
-            ImGui.SetNextWindowBgAlpha(windowAlpha);
-            if (ImGui.Begin("Performance", flags))
+            if (Convert.ToBoolean(_data[window.Id]))
             {
-                ImGui.Text($"FPS: {_fps:F0}");
-                
-                ImGui.Text(" ### Processing");
-                ImGui.Text($"TimeProcess: {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000.0f:F0}ms");
-                ImGui.Text($"ObjectCount: {Performance.GetMonitor(Performance.Monitor.ObjectCount):F0}");
-                ImGui.Text($"ObjectNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):F0}");
-                ImGui.Text($"ObjectResourceCount: {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):F0}");
-                ImGui.Text($"ObjectOrphanNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount):F0}");
-
-                ImGui.Text(" ### Rendering");
-                ImGui.Text($"RenderVerticesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame):F0}");
-                ImGui.Text($"RenderDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame):F0}");
-                ImGui.Text($"Render2dDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame):F0}");
-
-                ImGui.Text(" ### Memory");
-                ImGui.Text($"MemoryDynamic: {Performance.GetMonitor(Performance.Monitor.MemoryDynamic) / 1024.0f:F0}KiB");
-                ImGui.Text($"MemoryStatic: {Performance.GetMonitor(Performance.Monitor.MemoryStatic) / 1024.0f:F0}KiB");
-                ImGui.Text($"MemoryMessageBufferMax: {Performance.GetMonitor(Performance.Monitor.MemoryMessageBufferMax) / 1024.0f:F0}KiB");
-
-                ImGui.Text(" ### Physics");
-                ImGui.Text($"Physics3dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3dActiveObjects):F0}");
-                ImGui.Text($"Physics2dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2dActiveObjects):F0}");
-                ImGui.Text($"Physics3dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3dIslandCount):F0}KiB");
-                ImGui.Text($"Physics2dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2dIslandCount):F0}KiB");
-
-                ImGui.End();
-            }
-        }
-
-        if (ShowDebug)
-        {
-            ImGui.SetNextWindowBgAlpha(windowAlpha);
-            if (ImGui.Begin("Debug", flags))
-            {
-                if (ImGui.SliderFloat("Timescale", ref _timescale, 0.0f, 1.0f))
+                ImGui.SetNextWindowBgAlpha(_windowAlpha);
+                if (ImGui.Begin(window.Name, _windowFlags))
                 {
-                    Engine.TimeScale = _timescale;
-                }
-                ImGui.End();
-            }
-        }
-
-        if (ShowGameSettings)
-        {
-            ImGui.SetNextWindowBgAlpha(windowAlpha);
-            if (ImGui.Begin("GameSettings", flags))
-            {
-                Resources.Instance.ResourceGameSettings._OnImGuiLayout();
-            }
-        }
-
-        foreach ((string, string, Action) window in _registeredWindows)
-        {
-            if (Convert.ToBoolean(_data[window.Item1]))
-            {
-                ImGui.SetNextWindowBgAlpha(windowAlpha);
-                if (ImGui.Begin(window.Item2, flags))
-                {
-                    window.Item3?.Invoke();
+                    window.Callback?.Invoke();
                 }
             }
         }
