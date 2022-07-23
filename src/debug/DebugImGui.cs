@@ -17,6 +17,7 @@ public class DebugImGui : Saveable
     private float _fps;
     private float _timescale;
     private List<(string, string, Action)> _registeredWindows = new();
+    private bool _hasMovedParent;
     
     private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
@@ -86,6 +87,15 @@ public class DebugImGui : Saveable
     public override void _Process(float delta)
     {
         base._Process(delta);
+
+        if (!_hasMovedParent)
+        {
+            // move to the bottom of the scene hierarchy so we can consume input events.
+            Viewport root = GetTree().Root;
+            GetParent().RemoveChild(this);
+            root.AddChild(this);
+            _hasMovedParent = true;
+        }
 
         delta = TimeSystem.UnscaledDelta;
         if (delta != 0.0f)
