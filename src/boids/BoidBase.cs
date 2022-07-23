@@ -95,7 +95,7 @@ public partial class BoidBase : Area
             {
                 ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
                 boid.Position = value.ToNumerics();
-                GlobalTransform = new Transform(new Basis(Godot.Vector3.Down, boid.Heading.Angle() + Mathf.Pi * 0.5f), value.To3D());
+                GlobalTransform = new Transform(new Basis(Vector3.Down, boid.Heading.AngleToY()), value.To3D());
             }
         }
     }
@@ -136,7 +136,7 @@ public partial class BoidBase : Area
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
-    protected Godot.Vector3 _baseScale;
+    protected Vector3 _baseScale;
     protected bool _acceptInput = true;
     protected AudioStreamPlayer2D _sfxOnHit;
     protected Vector2 _cachedVelocity;
@@ -158,7 +158,7 @@ public partial class BoidBase : Area
     private Vector2 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
-    private Godot.Vector2 _smoothSteering;
+    private Vector2 _smoothSteering;
     private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
     private int _sharedPropertiesId;
 
@@ -236,20 +236,21 @@ public partial class BoidBase : Area
         Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
 
-        Basis basis = new Basis(Vector3.Down, _cachedHeading.Angle() + Mathf.Pi * 0.5f);
+        Basis basis = new Basis(Vector3.Up, _cachedHeading.AngleToY());
 
         // banking
         if (delta > 0.0f)
         {
-            System.Numerics.Vector2 right = new(_cachedHeading.y, -_cachedHeading.x);
+            System.Numerics.Vector2 right = new(-_cachedHeading.y, _cachedHeading.x);
             System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, _cachedHeading.ToNumerics(), right);
             localSteering /= delta;
             localSteering /= 100.0f;
             _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
-            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Up) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
+            float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Down) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
             float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
             basis = basis.Rotated(basis.z, bankZ);
-            basis = basis.Rotated(basis.x, bankX);
+            if (Bank360)
+                basis = basis.Rotated(basis.x, bankX);
         }
         
         // update position and cache velocity from steering boid
@@ -298,7 +299,7 @@ public partial class BoidBase : Area
     private void RegisterSteeringBoid(Vector2 velocity)
     {
         SteeringManager.Boid boid = new()
-        {
+        {   
             Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
             Radius = _steeringRadius,
             Position = GlobalPosition.ToNumerics(),

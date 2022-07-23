@@ -26,10 +26,13 @@ public class FabricateManager : Singleton<FabricateManager>
     public override void _Ready()
     {
         base._Ready();
-        
-        HUD.Instance.OnFabricateButtonPressed += _OnFabricateButtonPressed;
-        HUD.Instance.OnQueueButtonPressed += _OnQueueButtonPressed;
-        
+
+        if (HUD.Instance != null)
+        {
+            HUD.Instance.OnFabricateButtonPressed += _OnFabricateButtonPressed;
+            HUD.Instance.OnQueueButtonPressed += _OnQueueButtonPressed;
+        }
+
         SaveDataPlayer.OnLevelUp += OnLevelUp;
     }
 

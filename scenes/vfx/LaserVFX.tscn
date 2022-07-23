@@ -1,0 +1,155 @@
+[gd_scene load_steps=21 format=2]
+
+[ext_resource path="res://src/vfx/LaserVFX.cs" type="Script" id=2]
+[ext_resource path="res://assets/material/particle.material" type="Material" id=3]
+
+[sub_resource type="ParticlesMaterial" id=4]
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 2.0
+color = Color( 2, 2, 2, 1 )
+
+[sub_resource type="QuadMesh" id=5]
+
+[sub_resource type="Curve" id=7]
+min_value = -25.0
+max_value = 25.0
+_data = [ Vector2( 0, 0 ), 0.0, -61.736, 0, 0, Vector2( 0.501196, -18.4049 ), -17.0961, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=8]
+curve = SubResource( 7 )
+
+[sub_resource type="ParticlesMaterial" id=6]
+emission_shape = 1
+emission_sphere_radius = 1.0
+gravity = Vector3( 0, 0, 0 )
+radial_accel = 1.0
+radial_accel_curve = SubResource( 8 )
+scale = 0.1
+
+[sub_resource type="Curve" id=10]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.955742, 0.168712 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=11]
+curve = SubResource( 10 )
+
+[sub_resource type="ParticlesMaterial" id=12]
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 2.0
+scale = 10.0
+scale_random = 0.62
+scale_curve = SubResource( 11 )
+color = Color( 2, 2, 2, 1 )
+
+[sub_resource type="QuadMesh" id=13]
+
+[sub_resource type="Curve" id=19]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=20]
+curve = SubResource( 19 )
+
+[sub_resource type="ParticlesMaterial" id=16]
+emission_shape = 1
+emission_sphere_radius = 1.0
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 25.0
+radial_accel = -36.84
+scale = 0.3
+scale_random = 0.18
+scale_curve = SubResource( 20 )
+
+[sub_resource type="Curve" id=21]
+_data = [ Vector2( 0, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.52512, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=22]
+curve = SubResource( 21 )
+
+[sub_resource type="ParticlesMaterial" id=23]
+emission_shape = 2
+emission_box_extents = Vector3( 0.1, 0.1, 100 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 10.0
+scale_curve = SubResource( 22 )
+
+[sub_resource type="QuadMesh" id=24]
+
+[sub_resource type="SpatialMaterial" id=18]
+flags_unshaded = true
+albedo_color = Color( 1.5, 1.5, 1.5, 1 )
+
+[sub_resource type="CylinderMesh" id=17]
+height = 500.0
+radial_segments = 16
+
+[node name="LaserVFX" type="Spatial"]
+script = ExtResource( 2 )
+CentrePath = NodePath("Centre")
+ParticlesPath = NodePath("Particles")
+Shoot1Path = NodePath("Shoot1")
+Shoot2Path = NodePath("Shoot2")
+Shoot3Path = NodePath("Shoot3")
+LaserMeshPath = NodePath("LaserMesh")
+
+[node name="Centre" type="Particles" parent="."]
+visible = false
+material_override = ExtResource( 3 )
+amount = 16
+lifetime = 0.1
+visibility_aabb = AABB( -1.09799, -1.09968, -1.0988, 2.19752, 2.19916, 2.19462 )
+process_material = SubResource( 4 )
+draw_pass_1 = SubResource( 5 )
+
+[node name="Particles" type="Particles" parent="."]
+visible = false
+material_override = ExtResource( 3 )
+amount = 32
+lifetime = 0.2
+visibility_aabb = AABB( -2.48684, -2.46805, -2.47931, 4.98666, 4.95491, 4.96855 )
+process_material = SubResource( 6 )
+draw_pass_1 = SubResource( 5 )
+
+[node name="Shoot1" type="Particles" parent="."]
+visible = false
+material_override = ExtResource( 3 )
+emitting = false
+amount = 16
+one_shot = true
+explosiveness = 1.0
+visibility_aabb = AABB( -1.09799, -1.09968, -1.0988, 2.19752, 2.19916, 2.19462 )
+process_material = SubResource( 12 )
+draw_pass_1 = SubResource( 13 )
+
+[node name="Shoot2" type="Particles" parent="."]
+visible = false
+material_override = ExtResource( 3 )
+emitting = false
+amount = 64
+one_shot = true
+explosiveness = 1.0
+visibility_aabb = AABB( -2.48684, -2.46805, -2.47931, 4.98666, 4.95491, 4.96855 )
+process_material = SubResource( 16 )
+draw_pass_1 = SubResource( 13 )
+
+[node name="Shoot3" type="Particles" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 108.764 )
+visible = false
+material_override = ExtResource( 3 )
+emitting = false
+amount = 64
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.55
+visibility_aabb = AABB( -5.78063, -5.98476, -99.433, 11.5241, 12.0345, 194.45 )
+process_material = SubResource( 23 )
+draw_pass_1 = SubResource( 24 )
+
+[node name="LaserMesh" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 250 )
+visible = false
+material_override = SubResource( 18 )
+mesh = SubResource( 17 )
+material/0 = null

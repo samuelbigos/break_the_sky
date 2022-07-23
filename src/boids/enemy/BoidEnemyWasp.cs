@@ -54,9 +54,9 @@ public partial class BoidEnemyWasp : BoidEnemyBase
         missile.Init(_resourceStats.AttackDamage, spawnPos, spawnVel, Alignment, _targetBoid);
     }
 
-    protected override void EnterAIState_Engaged()
+    protected override void OnEnterAIState_Engaged()
     {
-        base.EnterAIState_Engaged();
+        base.OnEnterAIState_Engaged();
         
         ResetSteeringBehaviours();
         

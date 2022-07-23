@@ -246,6 +246,11 @@ public class DebugImGui : Saveable
                     SaveManager.Instance.Reset();
                     GetTree().ChangeSceneTo(_initialScene);
                 }
+                if (ImGui.MenuItem("Reload"))
+                {
+                    SaveManager.DoSave();
+                    GetTree().ReloadCurrentScene();
+                }
                 if (ImGui.MenuItem("Save and Quit"))
                 {
                     SaveManager.DoSave();

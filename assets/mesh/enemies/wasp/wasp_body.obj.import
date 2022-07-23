@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wasp_body.obj-445798b1c4d107374770c0f77b810eb7.mesh"
+
+[deps]
+
+files=[ "res://.import/wasp_body.obj-445798b1c4d107374770c0f77b810eb7.mesh" ]
+
+source_file="res://assets/mesh/enemies/wasp/wasp_body.obj"
+dest_files=[ "res://.import/wasp_body.obj-445798b1c4d107374770c0f77b810eb7.mesh", "res://.import/wasp_body.obj-445798b1c4d107374770c0f77b810eb7.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

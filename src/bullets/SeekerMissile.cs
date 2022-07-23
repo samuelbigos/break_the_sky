@@ -87,7 +87,7 @@ public partial class SeekerMissile : Area
                 _smoothHeading = _smoothHeading * smoothFactor + (1.0f - smoothFactor) * 
                     System.Numerics.Vector2.Lerp(steeringBoid.Heading, steeringBoid.Steering.NormalizeSafe(), steeringStrength);
 
-                Basis basis = new(Vector3.Down, _smoothHeading.Angle() + Mathf.Pi * 0.5f);
+                Basis basis = new(Vector3.Up, _smoothHeading.AngleToY());
                 GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
 
                 _trail.Thrust = -_smoothHeading.ToGodot();

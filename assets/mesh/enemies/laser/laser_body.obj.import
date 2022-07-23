@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/laser_body.obj-1907967a16c2306bc8376b446339bf37.mesh"
+
+[deps]
+
+files=[ "res://.import/laser_body.obj-1907967a16c2306bc8376b446339bf37.mesh" ]
+
+source_file="res://assets/mesh/enemies/laser/laser_body.obj"
+dest_files=[ "res://.import/laser_body.obj-1907967a16c2306bc8376b446339bf37.mesh", "res://.import/laser_body.obj-1907967a16c2306bc8376b446339bf37.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

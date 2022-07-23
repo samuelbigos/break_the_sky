@@ -1,9 +1,9 @@
 [gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/bullets/SeekerMissile.cs" type="Script" id=1]
-[ext_resource path="res://scenes/vfx/ParticlesExplode.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/vfx/ExplodeVFX.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=3]
-[ext_resource path="res://scenes/vfx/BoidTrail.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=4]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.713931
@@ -29,9 +29,10 @@ shape = SubResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 mesh = SubResource( 2 )
+material/0 = null
 
 [node name="BoidTrail" parent="MeshInstance" instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 2.42524 )
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.00265479, -0.0101357, -2.2351 )
 _type = 1
 
 [node name="SFXLaunch" type="AudioStreamPlayer2D" parent="."]

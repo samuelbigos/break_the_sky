@@ -20,6 +20,7 @@ public partial class SteeringManager
         FlowFieldFollow,
         MaintainDistance,
         MaintainOffset,
+        Stop,
         COUNT,
     }
     
@@ -324,5 +325,11 @@ public partial class SteeringManager
     {
         Vector2 targetPos = boid.Target + boid.DesiredOffsetFromTarget;
         return Steering_Arrive(boid, targetPos);
+    }
+
+    private static Vector2 Steering_Stop(in Boid boid)
+    {
+        Vector2 desired = Vector2.Zero;
+        return desired - boid.Velocity;
     }
 }

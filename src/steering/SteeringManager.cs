@@ -156,6 +156,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _behaviourWeights[(int) FlowFieldFollow] = 1.0f;
         _behaviourWeights[(int) MaintainDistance] = 1.0f;
         _behaviourWeights[(int) MaintainOffset] = 1.0f;
+        _behaviourWeights[(int) Stop] = 1.0f;
     }
 
     public override void _Process(float delta)
@@ -313,6 +314,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case MaintainOffset:
                 force += Steering_MaintainOffset(boid);
+                break;
+            case Stop:
+                force += Steering_Stop(boid);
                 break;
             case COUNT:
                 break;

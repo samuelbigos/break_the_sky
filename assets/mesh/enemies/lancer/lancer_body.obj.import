@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/lancer_body.obj-59e25764e31b1634aed4020ec2315d4a.mesh"
+
+[deps]
+
+files=[ "res://.import/lancer_body.obj-59e25764e31b1634aed4020ec2315d4a.mesh" ]
+
+source_file="res://assets/mesh/enemies/lancer/lancer_body.obj"
+dest_files=[ "res://.import/lancer_body.obj-59e25764e31b1634aed4020ec2315d4a.mesh", "res://.import/lancer_body.obj-59e25764e31b1634aed4020ec2315d4a.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

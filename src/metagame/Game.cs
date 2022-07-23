@@ -50,6 +50,13 @@ public partial class Game : Singleton<Game>
         GameCamera.OnPostCameraTransformed += OnPostCameraTransformed;
     }
 
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        
+        GameCamera.OnPostCameraTransformed -= OnPostCameraTransformed;
+    }
+
     public override void _Process(float delta)
     {
         base._Process(delta);

@@ -107,10 +107,10 @@ public class BoidEnemyBase : BoidBase
         switch (state)
         {
             case AIState.Seeking:
-                EnterAIState_Seeking();
+                OnEnterAIState_Seeking();
                 break;
             case AIState.Engaged:
-                EnterAIState_Engaged();
+                OnEnterAIState_Engaged();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -118,18 +118,15 @@ public class BoidEnemyBase : BoidBase
         _aiState = state;
     }
 
-    protected virtual void EnterAIState_Seeking()
+    protected virtual void OnEnterAIState_Seeking()
     {
         // set target as player
         SetTarget(TargetType.Enemy, Game.Player);
+        ResetSteeringBehaviours();
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, false);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, false);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.FlowFieldFollow, false);
     }
     
-    protected virtual void EnterAIState_Engaged()
+    protected virtual void OnEnterAIState_Engaged()
     {
     }
 

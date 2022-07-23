@@ -107,7 +107,7 @@ public class BoidTrail : Spatial
     private void ProcessBurst(float delta)
     {
         // TODO: take parent velocity into account.
-        _burstMaterial.InitialVelocity = _thrust.Length() * 25.0f;
+        _burstMaterial.InitialVelocity = _thrust.Length() * 50.0f;
     }
 
     private void ProcessSmooth(float delta)

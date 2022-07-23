@@ -54,6 +54,11 @@ public static class Utils
             ? 4.0f * t * t * t
             : 0.5f * Mathf.Pow(2.0f * t - 2.0f, 3.0f) + 1.0f;
     }
+    
+    public static float Ease_CubicOut(float t)
+    {
+        return 1 - Mathf.Pow(1 - t, 3);
+    }
 
     public static Godot.Vector2 RandPointOnEdge(this Rect2 rect)
     {
@@ -103,10 +108,15 @@ public static class Utils
     {
         return new Vector3(vec.x, vec.y, vec.z);
     }
-
-    public static float Angle(this Vector2 vec)
+    
+    public static float AngleToY(this Vector2 vec)
     {
-        return (float) Math.Atan2(vec.Y, vec.X);
+        return (float) Math.Atan2(vec.X, vec.Y);
+    }
+    
+    public static float AngleToY(this Godot.Vector2 vec)
+    {
+        return (float) Math.Atan2(vec.x, vec.y);
     }
     
     public static float AngleTo(this Vector2 v1, Vector2 v2)
@@ -117,6 +127,11 @@ public static class Utils
     public static float Cross(this Vector2 v1, Vector2 v2)
     {
         return (v1.X * v2.Y) - (v1.Y * v2.X);
+    }
+
+    public static Vector2 Rot90(this Vector2 v)
+    {
+        return new Vector2(v.Y, v.X);
     }
 
     public static Vector2 NormalizeSafe(this Vector2 vec)

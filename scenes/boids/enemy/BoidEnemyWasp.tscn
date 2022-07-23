@@ -1,44 +1,46 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/enemies/enemy_wasp.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/enemies/wasp/wasp_antigrav.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyWasp.cs" type="Script" id=3]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" type="Resource" id=4]
 [ext_resource path="res://scenes/bullets/SeekerMissile.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/mesh/anti_gravity.obj" type="ArrayMesh" id=6]
-[ext_resource path="res://assets/shader/anti_gravity.shader" type="Shader" id=7]
+[ext_resource path="res://assets/mesh/enemies/wasp/wasp_body.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
 
 [sub_resource type="CapsuleShape" id=1]
-
-[sub_resource type="ShaderMaterial" id=2]
-shader = ExtResource( 7 )
-shader_param/u_colour = Color( 0.340538, 0.882813, 0.781136, 1 )
+radius = 1.18034
 
 [node name="BoidEnemyWasp" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
+_behaviours = 15
 MaxVelocity = 100.0
 MaxForce = 100.0
 Bank360 = true
 _baseResourceStats = ExtResource( 4 )
 DestroyTrauma = 0.1
 HitTrauma = 0.05
-EngageRange = 50.0
+EngageRange = 120.0
 WeaponPositionPath = NodePath("WeaponPosition")
 _bulletScene = ExtResource( 5 )
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, -1.41208 )
+transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-transform = Transform( -8.74228e-08, 0, 2, 0, 2, 0, -2, 0, -8.74228e-08, 0, 0, 0 )
 material_override = null
-mesh = ExtResource( 2 )
+mesh = ExtResource( 6 )
+material/0 = null
+
+[node name="BoidTrail" parent="Mesh" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.063448, 0, -0.0634489 )
 
 [node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
-material_override = SubResource( 2 )
-mesh = ExtResource( 6 )
+material_override = ExtResource( 7 )
+mesh = ExtResource( 2 )
 skeleton = NodePath("../..")
+material/0 = null
 
 [node name="WeaponPosition" type="Spatial" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.81574, -0.708372 )

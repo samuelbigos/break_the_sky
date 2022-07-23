@@ -3,17 +3,15 @@ using GodotOnReady.Attributes;
 
 public partial class BoidEnemyLaser : BoidEnemyBase
 {
-    [Export] private float _targetLaserDist = 250.0f;
-    
     [Export] private NodePath _sfxLaserChargeNode;
     [Export] private NodePath _sfxLaserFireNode;
-    [Export] private NodePath _rotorNode;
     [Export] private NodePath _laserAreaPath;
+    [Export] private float GunTrackSpeed = 2.0f;
 
-    [OnReadyGet] private MeshInstance _laserMesh;
     [OnReadyGet] private MeshInstance _laserWarningMesh;
+    [OnReadyGet] private MeshInstance _gunMesh;
+    [OnReadyGet] private LaserVFX _vfx;
 
-    private MeshInstance _rotor;
     private Area _laserArea;
     private AudioStreamPlayer2D _sfxLaserCharge;
     private AudioStreamPlayer2D _sfxLaserFire;
@@ -31,75 +29,88 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     private float _laserDurationTimer;
     private float _flashingTimer;
     private int _flashState;
-    
-    private float _laserCooldown;
-    private float _laserCharge;
-    private float _laserDuration;
+    private Vector2 _desiredGunHeading;
+    private Vector2 _gunHeading = Vector2.Up;
 
     [OnReady] private void Ready()
     {
-        _rotor = GetNode<MeshInstance>(_rotorNode);
         _laserArea = GetNode<Area>(_laserAreaPath);
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
-
-        _laserCooldown = _resourceStats.AttackCooldown;
-        _laserCharge = _resourceStats.AttackCharge;
-        _laserDuration = _resourceStats.AttackDuration;
-            
-        _laserCooldownTimer = _laserCooldown * 0.5f;
-
-        LaserInactive();
-
-        SpatialMaterial mat = _laserMesh.GetActiveMaterial(0) as SpatialMaterial;
-        mat.AlbedoColor = ColourManager.Instance.White;
     }
     
     protected override void ProcessAlive(float delta)
     {
-        if (_laserState == LaserState.Inactive)
+        _laserCooldownTimer -= delta;
+
+        Basis basis = new(Vector3.Up, _gunHeading.AngleToY());
+        _gunMesh.GlobalTransform = new Transform(basis, _gunMesh.GlobalTransform.origin);
+        
+        if (_aiState == AIState.Engaged)
         {
-            _laserCooldownTimer -= delta;
-            if (_laserCooldownTimer < 0.0f && CanFire())
+            switch (_laserState)
             {
-                _laserState = LaserState.Charging;
-                _laserChargeTimer = _laserCharge;
-                LaserCharging();
+                case LaserState.Inactive:
+                {
+                    _desiredGunHeading = (_targetBoid.GlobalPosition - _gunMesh.GlobalTransform.origin.To2D()).Normalized();
+
+                    if (_laserCooldownTimer < 0.0f && CanFire())
+                    {
+                        _laserState = LaserState.Charging;
+                        _laserChargeTimer = _resourceStats.AttackCharge;
+                        LaserCharging();
+                    }
+
+                    if ((_targetBoid.GlobalPosition - GlobalPosition).Length() > EngageRange + 50.0f)
+                    {
+                        EnterAIState(AIState.Seeking);
+                    }
+
+                    break;
+                }
+                case LaserState.Charging:
+                {
+                    _laserChargeTimer -= delta;
+                    _flashingTimer -= delta;
+                    if (_flashingTimer < 0.0f)
+                    {
+                        _flashingTimer = 0.1f;
+                        _laserWarningMesh.Visible = _flashState == 1;
+                        _flashState = (_flashState + 1) % 2;
+                    }
+                    if (_laserChargeTimer < 0.0f)
+                    {
+                        _laserState = LaserState.Firing;
+                        _laserDurationTimer = _resourceStats.AttackDuration;
+                        LaserFiring();
+                    }
+
+                    break;
+                }
+                case LaserState.Firing:
+                {
+                    _laserDurationTimer -= delta;
+                    if (_laserDurationTimer < 0.0f)
+                    {
+                        _laserState = LaserState.Inactive;
+                        _laserCooldownTimer = _resourceStats.AttackCooldown;
+                        LaserInactive();
+                    }
+
+                    break;
+                }
             }
         }
-
-        if (_laserState == LaserState.Charging)
+        else
         {
-            _laserChargeTimer -= delta;
-            _flashingTimer -= delta;
-            if (_flashingTimer < 0.0f)
-            {
-                _flashingTimer = 0.1f;
-                _laserWarningMesh.Visible = _flashState == 1;
-                _flashState = (_flashState + 1) % 2;
-            }
-            if (_laserChargeTimer < 0.0f)
-            {
-                _laserState = LaserState.Firing;
-                _laserDurationTimer = _laserDuration;
-                LaserFiring();
-            }
+            _desiredGunHeading = _cachedHeading;
         }
 
-        if (_laserState == LaserState.Firing)
+        if (!_desiredGunHeading.IsNormalized())
         {
-            _laserDurationTimer -= delta;
-            if (_laserDurationTimer < 0.0f)
-            {
-                _laserState = LaserState.Inactive;
-                _laserCooldownTimer = _laserCooldown;
-                LaserInactive();
-            }
+            _desiredGunHeading = Vector2.Up;
         }
-
-        Vector3 rot = _rotor.Rotation;
-        rot.y = Mathf.PosMod(_rotor.Rotation.y + 50.0f * delta, Mathf.Pi * 2.0f);
-        _rotor.Rotation = rot;
+        _gunHeading = _gunHeading.Slerp(_desiredGunHeading, delta * GunTrackSpeed).Normalized();
         
         base.ProcessAlive(delta);
     }
@@ -109,30 +120,30 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         if (_targetType != TargetType.Enemy)
             return false;
 
-        return (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Dot(_cachedHeading) > 0.99f;
+        return (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Dot(_gunHeading) > 0.99f;
     }
 
     private void LaserCharging()
     {
+        _vfx.Reset();
+        _vfx.ChargeTime = _resourceStats.AttackCharge;
+        _vfx.FireTime = _resourceStats.AttackDuration;
+        _vfx.Start();
         _sfxLaserCharge.Play();
         _laserWarningMesh.Visible = true;
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
     }
 
     private void LaserFiring()
     {
         _sfxLaserFire.Play();
-        _laserMesh.Visible = true;
         _laserArea.Monitorable = true;
         _laserWarningMesh.Visible = false;
     }
 
     private void LaserInactive()
     {
-        _laserMesh.Visible = false;
         _laserArea.Monitorable = false;
-        if (_targetType == TargetType.Enemy)
-            SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        EnterAIState(AIState.Seeking);
     }
 
     protected override void _Destroy(Vector2 hitDir, float hitStrength)
@@ -140,5 +151,23 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         base._Destroy(hitDir, hitStrength);
         
         _laserWarningMesh.Visible = false;
+    }
+    
+    protected override void OnEnterAIState_Seeking()
+    {
+        base.OnEnterAIState_Seeking();
+        
+        _laserCooldownTimer = _resourceStats.AttackCooldown;
+        
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, false);
+    }
+
+    protected override void OnEnterAIState_Engaged()
+    {
+        base.OnEnterAIState_Engaged();
+        
+        ResetSteeringBehaviours();
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, true);
     }
 }
