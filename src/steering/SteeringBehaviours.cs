@@ -317,7 +317,8 @@ public partial class SteeringManager
     private static Vector2 Steering_MaintainDistance(in Boid boid)
     {
         Vector2 targetToSelf = (boid.Position - boid.Target).NormalizeSafe();
-        Vector2 targetPos = boid.Target + targetToSelf * boid.DesiredDistFromTarget;
+        float currentDist = (boid.Position - boid.Target).Length();
+        Vector2 targetPos = boid.Target + targetToSelf * Mathf.Clamp(currentDist, boid.DesiredDistFromTargetMin, boid.DesiredDistFromTargetMax);
         return Steering_Arrive(boid, targetPos);
     }
     

@@ -31,7 +31,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 Target;
         public short TargetIndex;
         public Vector2 TargetOffset;
-        public float DesiredDistFromTarget;
+        public float DesiredDistFromTargetMin;
+        public float DesiredDistFromTargetMax;
         public Vector2 DesiredOffsetFromTarget;
         public int Behaviours;
         public float DesiredSpeed;
@@ -138,6 +139,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         mat.FlagsUnshaded = true;
         mat.VertexColorUseAsAlbedo = true;
         mat.VertexColorIsSrgb = true;
+        mat.FlagsNoDepthTest = true;
         _debugMesh.MaterialOverride = mat;
         AddChild(_debugMesh);
 

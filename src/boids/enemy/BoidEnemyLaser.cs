@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using GodotOnReady.Attributes;
 
@@ -38,7 +39,15 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
     }
-    
+
+    public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    {
+        base.Init(data, onDestroy, position, velocity);
+        
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.5f;
+    }
+
     protected override void ProcessAlive(float delta)
     {
         _laserCooldownTimer -= delta;
@@ -159,7 +168,8 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         
         _laserCooldownTimer = _resourceStats.AttackCooldown;
         
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, false);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, false);
     }
 
     protected override void OnEnterAIState_Engaged()
@@ -168,6 +178,6 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         
         ResetSteeringBehaviours();
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);
     }
 }

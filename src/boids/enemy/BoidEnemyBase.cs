@@ -40,7 +40,8 @@ public class BoidEnemyBase : BoidBase
         base.Init(data, onDestroy, position, velocity);
         
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
-        steeringBoid.DesiredDistFromTarget = EngageRange;
+        steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.05f;
+        steeringBoid.DesiredDistFromTargetMax = EngageRange + EngageRange * 0.05f;
         
         EnterAIState(AIState.Seeking);
     }

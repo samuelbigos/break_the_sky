@@ -13,7 +13,7 @@ public partial class SteeringManager
 
         float range = boid.Speed / minSpeed;
         float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 5));
-        return VecLimitDeviationAngleUtility(true, force, cosine, boid.Velocity.NormalizeSafe());
+        return VecLimitDeviationAngleUtility(true, force, cosine, boid.Heading);
     }
 
     private static Vector2 VecLimitDeviationAngleUtility(bool insideOrOutside, Vector2 source, float cosineOfConeAngle, Vector2 basis)

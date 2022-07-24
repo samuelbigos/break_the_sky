@@ -1,58 +1,87 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/boids/enemy/BoidEnemyCarrierRotorgun.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/mesh/enemies/carrier/carrier_antigrav.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyCarrier.cs" type="Script" id=3]
-[ext_resource path="res://assets/mesh/enemies/enemy_carrier_body.obj" type="ArrayMesh" id=4]
-[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=5]
+[ext_resource path="res://assets/mesh/enemies/carrier/carrier_body.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" type="Resource" id=6]
+[ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
+[ext_resource path="res://scenes/bullets/Turret.tscn" type="PackedScene" id=8]
 
-[sub_resource type="ShaderMaterial" id=1]
-resource_local_to_scene = true
-shader = ExtResource( 5 )
-shader_param/u_primary_colour = null
-shader_param/u_secondary_colour = null
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 2.56472, 1, 4.19469 )
 
 [node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-_behaviours = 12
-_baseStats = ExtResource( 6 )
-_rotorgunsPaths = [ NodePath("Rotorgun1"), NodePath("Rotorgun2"), NodePath("Rotorgun3"), NodePath("Rotorgun4") ]
-_lockPaths = [ NodePath("Lock1"), NodePath("Lock2"), NodePath("Lock3"), NodePath("Lock4") ]
-_droneId = "driller"
+_behaviours = 1
+_steeringRadius = 25.0
+MaxVelocity = 20.0
+MinVelocity = 10.0
+MaxForce = 10.0
+Bank360 = true
+BankingRate = 1.0
+BankingAmount = 1.0
+_baseResourceStats = ExtResource( 6 )
+_damageVfxCount = 10
+DestroyTrauma = 0.1
+HitTrauma = 0.05
+EngageRange = 150.0
+_turretPaths = [ NodePath("Mesh/Turret1"), NodePath("Mesh/Turret2"), NodePath("Mesh/Turret3"), NodePath("Mesh/Turret4"), NodePath("Mesh/Turret5"), NodePath("Mesh/Turret6") ]
 _droneSpawnInterval = 0.1
 _dronePulseCount = 15
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 2.46802, 0, 0, 0, 2.8404, 0, 0, 0, 4.49237, 0, 0, 0 )
+transform = Transform( 2.46802, 0, 0, 0, 2.8404, 0, 0, 0, 4.49237, 0, 0, 0.24768 )
+shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = SubResource( 1 )
+material_override = null
 mesh = ExtResource( 4 )
 material/0 = null
 
-[node name="Lock1" type="Spatial" parent="." index="5"]
+[node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
+material_override = ExtResource( 7 )
+mesh = ExtResource( 2 )
+material/0 = null
 
-[node name="Rotorgun1" parent="." index="6" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.85766, 0, -10.0319 )
+[node name="Turret1" parent="Mesh" index="2" instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499 )
+material/0 = null
+ClampRangeDeg = 150.0
 
-[node name="Lock2" type="Spatial" parent="." index="7"]
+[node name="Turret2" parent="Mesh" index="3" instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499 )
+material/0 = null
+ClampRangeDeg = 150.0
 
-[node name="Rotorgun2" parent="." index="8" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.91924, 0, -10.0109 )
+[node name="Turret3" parent="Mesh" index="4" instance=ExtResource( 8 )]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3.68905, 1.02147, -2.97812 )
+material/0 = null
+ClampOffsetDeg = 90.0
+ClampRangeDeg = 150.0
 
-[node name="Lock3" type="Spatial" parent="." index="9"]
+[node name="Turret4" parent="Mesh" index="5" instance=ExtResource( 8 )]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -3.51253, 1.01012, -2.97917 )
+material/0 = null
+ClampOffsetDeg = -90.0
+ClampRangeDeg = 150.0
 
-[node name="Rotorgun3" parent="." index="10" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.87438, 0, 9.94929 )
+[node name="Turret5" parent="Mesh" index="6" instance=ExtResource( 8 )]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -8.73603, -0.578, -7.43053 )
+skeleton = NodePath("../Turret4")
+material/0 = null
+ClampOffsetDeg = -90.0
+ClampRangeDeg = 150.0
 
-[node name="Lock4" type="Spatial" parent="." index="11"]
+[node name="Turret6" parent="Mesh" index="7" instance=ExtResource( 8 )]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 7.95714, -0.577606, -7.64544 )
+skeleton = NodePath("../Turret4")
+material/0 = null
+ClampOffsetDeg = 90.0
+ClampRangeDeg = 150.0
 
-[node name="Rotorgun4" parent="." index="12" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.91924, 0, 9.9913 )
-
-[node name="SpawnLeft" type="Spatial" parent="." index="13"]
+[node name="SpawnLeft" type="Spatial" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0 )
 
-[node name="SpawnRight" type="Spatial" parent="." index="14"]
+[node name="SpawnRight" type="Spatial" parent="." index="6"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0 )

@@ -1,0 +1,7 @@
+[gd_resource type="CapsuleMesh" format=2]
+
+[resource]
+flip_faces = true
+radius = 0.5
+radial_segments = 8
+rings = 3

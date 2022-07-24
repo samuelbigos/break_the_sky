@@ -1,3 +1,8 @@
 [gd_resource type="Environment" format=2]
 
 [resource]
+glow_enabled = true
+glow_strength = 0.8
+glow_blend_mode = 1
+glow_bicubic_upscale = true
+glow_high_quality = true

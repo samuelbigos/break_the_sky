@@ -6,6 +6,7 @@ public class BoidPlayer : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
     [Export] private NodePath _sfxPickupPath;
+    [Export] private float _damping = 0.05f;
 
     private AudioStreamPlayer2D _sfxPickup;
     private Vector2 _velocity;
@@ -103,7 +104,7 @@ public class BoidPlayer : BoidAllyBase
                 dir *= MaxVelocity * delta;
                 _velocity += dir;
             }
-            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(Damping, 0.0f, 1.0f), delta * 60.0f);
+            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
 
             ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
             boid.Position += (_velocity * delta).ToNumerics();

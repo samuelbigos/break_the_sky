@@ -1,24 +1,20 @@
+using System;
 using System.Collections.Generic;
 using Godot;
+using GodotOnReady.Attributes;
 
-public class BoidEnemyCarrier : BoidEnemyBase
+public partial class BoidEnemyCarrier : BoidEnemyBase
 {
-    [Export] private List<NodePath> _rotorgunsPaths;
-    [Export] private List<NodePath> _lockPaths;
+    [Export] private List<NodePath> _turretPaths;
 
-    [Export] private float _targetDist = 400.0f;
     [Export] private float _dronePulseCooldown = 2.0f;
     [Export] private float _droneSpawnInterval = 0.33f;
     [Export] private int _dronePulseCount = 10;
     [Export] private float _droneSpawnRange = 750.0f;
+    [Export] private float GunTrackSpeed = 2.0f;
 
-    [Export] private ResourceBoidEnemy _rotorgunData;
-    [Export] private ResourceBoidEnemy _minionData;
-
-    private AudioStreamPlayer2D _sfxBeaconFire;
-    private AudioStream _rocochetSfx;
-
-    private List<BoidEnemyCarrierRotorgun> _rotorguns = new List<BoidEnemyCarrierRotorgun>();
+    private List<Turret> _turrets = new List<Turret>();
+    private List<Spatial> _turretBarrels = new List<Spatial>();
     private float _beaconCooldown;
     private float _beaconCharge;
     private float _beaconDuration;
@@ -30,32 +26,33 @@ public class BoidEnemyCarrier : BoidEnemyBase
     private int _dronePulseSpawned;
     private int _droneSpawnSide;
 
-    public override void _Ready()
+    [OnReady] private void Ready()
     {
         base._Ready();
-        
-        _sfxBeaconFire = GetNode("SFXBeaconFire") as AudioStreamPlayer2D;
-        _rocochetSfx = GD.Load("res://assets/sfx/ricochet.wav") as AudioStream;
 
-        for (int i = 0; i < _rotorgunsPaths.Count; i++)
+        for (int i = 0; i < _turretPaths.Count; i++)
         {
-            _rotorguns.Add(GetNode<BoidEnemyCarrierRotorgun>(_rotorgunsPaths[i]));
-            _rotorguns[i].Init(_rotorgunData, _OnRotorgunDestroyed, _rotorguns[i].GlobalPosition, Vector2.Zero);
-            _rotorguns[i].SetTarget(TargetType.Enemy, Game.Player);
-            _rotorguns[i].InitRotorgun(GetNode<Spatial>(_lockPaths[i]), this);
+            _turrets.Add(GetNode<Turret>(_turretPaths[i]));
+            _turretBarrels.Add(_turrets[i].GetChild<Spatial>(0));
+            _turrets[i].Owner = this;
+            _turrets[i].ShootCooldown = _resourceStats.AttackCooldown;
+            _turrets[i].ShootVelocity = _resourceStats.AttackVelocity;
+            _turrets[i].ShootDamage = _resourceStats.AttackDamage;
+            _turrets[i].Alignment = Alignment;
         }
+    }
+    
+    public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
+    {
+        base.Init(data, onDestroy, position, velocity);
         
-        _sfxOnHit.Stream = _rocochetSfx;
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.5f;
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
-
-        if (_rotorguns.Count == 0 && !Destroyed)
-        {
-            _Destroy(Vector2.Zero, 0.0f);
-        }
 
         float dist = (TargetPos - GlobalPosition).Length();
         if (!Destroyed)
@@ -99,13 +96,30 @@ public class BoidEnemyCarrier : BoidEnemyBase
             pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
         }
         Vector2 vel = 100.0f * (pos - GlobalPosition).Normalized();
-        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_rotorgunData, pos, vel);
-        enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
-        enemy.SetTarget(TargetType.Enemy, Game.Player);
+        // BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_rotorgunData, pos, vel);
+        // enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
+        // enemy.SetTarget(TargetType.Enemy, Game.Player);
+    }
+    
+    protected override void OnEnterAIState_Seeking()
+    {
+        base.OnEnterAIState_Seeking();
+        
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, false);
     }
 
-    private void _OnRotorgunDestroyed(BoidBase boid)
+    protected override void OnEnterAIState_Engaged()
     {
-        _rotorguns.Remove(boid as BoidEnemyCarrierRotorgun);
+        base.OnEnterAIState_Engaged();
+        
+        ResetSteeringBehaviours();
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);
+
+        for (int i = 0; i < _turretPaths.Count; i++)
+        {
+            _turrets[i].Target = _targetBoid;
+        }
     }
 }

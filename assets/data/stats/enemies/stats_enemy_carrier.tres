@@ -4,12 +4,13 @@
 
 [resource]
 script = ExtResource( 1 )
-AttackDamage = 25.0
-AttackCooldown = 5.0
+AttackDamage = 1.0
+AttackCooldown = 0.1
 AttackSpread = 0.0
-AttackVelocity = 0.0
+AttackVelocity = 100.0
 AttackCharge = 1.0
 AttackDuration = 1.0
+AttackCount = 1
 MoveSpeed = 1.0
 MaxHealth = 250.0
 Regeneration = 0.0

@@ -49,7 +49,6 @@ public partial class BoidBase : Area
     [Export] public float BankingRate = 2.5f;
     [Export] public float BankingAmount = 2.5f;
     
-    [Export] public float Damping = 0.05f;
     [Export] public float DestroyTime = 3.0f;
     [Export] public float HitFlashTime = 1.0f / 30.0f;
 
@@ -85,6 +84,7 @@ public partial class BoidBase : Area
     public virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _state == State.Destroyed;
     public short SteeringId => _steeringId;
+    public Vector2 Heading => _cachedHeading;
     
     public Vector2 GlobalPosition
     {

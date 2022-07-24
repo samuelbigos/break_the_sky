@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
@@ -28,6 +28,7 @@
 [ext_resource path="res://src/rendering/CloudBox.cs" type="Script" id=26]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_lancer.tres" type="Resource" id=27]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_laser.tres" type="Resource" id=28]
+[ext_resource path="res://assets/data/boids/enemies/boid_enemy_carrier.tres" type="Resource" id=29]
 
 [sub_resource type="ArrayMesh" id=14]
 surfaces/0 = {
@@ -1195,7 +1196,7 @@ _playerData = SubResource( 14 )
 script = ExtResource( 5 )
 _enabled = false
 _firstEnemy = ExtResource( 6 )
-_enemyBoidPool = [ ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ) ]
+_enemyBoidPool = [ ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ) ]
 
 [node name="TacticalPauseManager" type="Node" parent="."]
 script = ExtResource( 10 )

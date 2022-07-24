@@ -3,7 +3,7 @@ using Godot;
 public class Bullet : Area
 {
 	[Export] private float _baseSpeed = 150.0f;
-	[Export] private float _range = 2000.0f;
+	[Export] private float _range = 500.0f;
 
 	protected Vector2 _velocity;
 	private BoidBase.BoidAlignment _alignment;
@@ -48,6 +48,7 @@ public class Bullet : Area
 		if (area is BoidBase boid && boid.Alignment != _alignment)
 		{
 			boid.SendHitMessage(_damage, _velocity, GlobalPosition, _alignment);
+			OnHit();
 		}
 	}
 
