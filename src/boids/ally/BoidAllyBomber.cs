@@ -85,7 +85,7 @@ public class BoidAllyBomber : BoidAllyBase
         _canShoot = true;
         _bomb = _bulletScene.Instance() as BulletBomber;
         AddChild(_bomb);
-        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D(), Vector2.Zero, BoidAlignment.Ally, 0.0f);
+        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D().To3D(), Vector2.Zero, BoidAlignment.Ally, 0.0f);
     }
 
     private void AcquireTarget()
@@ -119,7 +119,7 @@ public class BoidAllyBomber : BoidAllyBase
         Vector2 pos = _bomb.GlobalPosition;
         RemoveChild(_bomb);
         Game.Instance.AddChild(_bomb);
-        _bomb.Init(pos, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
+        _bomb.Init(pos.To3D(), dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
         _bomb.Target = _targetBoid;
         _bomb = null;
         

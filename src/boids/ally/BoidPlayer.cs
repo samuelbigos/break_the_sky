@@ -146,7 +146,7 @@ public class BoidPlayer : BoidAllyBase
         _shootCooldown = _resourceStats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
+        bullet.Init(GlobalPosition.To3D(), dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
     }
 
     public override void _Input(InputEvent @event)

@@ -39,7 +39,7 @@ public partial class BoidEnemyLancer : BoidEnemyBase
         
         Vector2 spawnVel = (_targetBoid.GlobalPosition - GlobalPosition).Normalized() * _resourceStats.AttackVelocity;
         Game.Instance.AddChild(bullet);
-        bullet.Init(spawnPos.To2D(), spawnVel, Alignment, _resourceStats.AttackDamage);
+        bullet.Init(spawnPos, spawnVel, Alignment, _resourceStats.AttackDamage);
     }
 
     protected override void OnEnterAIState_Seeking()

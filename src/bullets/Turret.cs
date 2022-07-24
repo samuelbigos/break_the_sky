@@ -70,14 +70,14 @@ public partial class Turret : MeshInstance
     {
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);
-        Vector2 spawnPos;
+        Vector3 spawnPos;
         if (_shootCount % 2 == 0)
         {
-            spawnPos = _barrel1.GlobalTransform.origin.To2D();
+            spawnPos = _barrel1.GlobalTransform.origin;
         }
         else
         {
-            spawnPos = _barrel1.GlobalTransform.origin.To2D();
+            spawnPos = _barrel1.GlobalTransform.origin;
         }
         bullet.Init(spawnPos, GlobalTransform.basis.z.To2D() * ShootVelocity, Alignment, ShootDamage);
         

@@ -84,7 +84,7 @@ public class BoidAllyBase : BoidBase
                 {
                     Bullet bullet = _microBulletScene.Instance() as Bullet;
                     Game.Instance.AddChild(bullet);
-                    bullet.Init(GlobalPosition, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.MicroTurretDamage);
+                    bullet.Init(GlobalTransform.origin, dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.MicroTurretDamage);
                 }
             }
         }

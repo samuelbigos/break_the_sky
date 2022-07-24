@@ -13,6 +13,7 @@ radial_segments = 16
 
 [node name="Bullet" type="Area"]
 script = ExtResource( 2 )
+MeshPath = NodePath("Mesh")
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 shape = SubResource( 1 )
@@ -20,6 +21,7 @@ shape = SubResource( 1 )
 [node name="Mesh" type="MeshInstance" parent="."]
 material_override = ExtResource( 3 )
 mesh = SubResource( 2 )
+material/0 = null
 script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]

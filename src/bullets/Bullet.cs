@@ -1,9 +1,12 @@
 using Godot;
+using GodotOnReady.Attributes;
 
-public class Bullet : Area
+public partial class Bullet : Area
 {
 	[Export] private float _baseSpeed = 150.0f;
 	[Export] private float _range = 500.0f;
+
+	[OnReadyGet] private MeshInstance _mesh;
 
 	protected Vector2 _velocity;
 	private BoidBase.BoidAlignment _alignment;
@@ -21,13 +24,15 @@ public class Bullet : Area
 		set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
 	}
 	
-	public void Init(Vector2 position, Vector2 velocity, BoidBase.BoidAlignment alignment, float damage)
+	public void Init(Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, float damage)
 	{
 		_damage = damage;
 		_velocity = velocity;
 		_alignment = alignment;
-		GlobalPosition = position;
-		_spawnPos = position;
+		GlobalPosition = position.To2D();
+		_spawnPos = position.To2D();
+		
+		_mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
 
 		Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.y), 0.0f);
 		
