@@ -12,7 +12,7 @@ public partial class SteeringManager
         }
 
         float range = boid.Speed / minSpeed;
-        float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 5));
+        float cosine = Mathf.Lerp(1.0f, -1.0f, Mathf.Pow(range, 20));
         return VecLimitDeviationAngleUtility(true, force, cosine, boid.Heading);
     }
 
@@ -148,7 +148,7 @@ public partial class SteeringManager
 
         uv.X = Mathf.Clamp(uv.X, 0, flowField.Resource.X - 1);
         uv.Y = Mathf.Clamp(uv.Y, 0, flowField.Resource.Y - 1);
-        field = flowField.Resource.VectorAt((int) uv.X, (int) uv.Y);
+        field = flowField.Resource.VectorAt((int) uv.X, (int) uv.Y).ToNumerics();
         return true;
     }
 }

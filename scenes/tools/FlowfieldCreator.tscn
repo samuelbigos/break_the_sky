@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/tools/FlowFieldCreator.cs" type="Script" id=1]
+[ext_resource path="res://src/steering/FlowFieldResource.cs" type="Script" id=2]
 
 [sub_resource type="SpatialMaterial" id=5]
 flags_unshaded = true
@@ -22,6 +23,7 @@ MeshPath = NodePath("FlowFieldMesh")
 CameraPath = NodePath("Camera")
 DialogSavePath = NodePath("CanvasLayer/FileDialogSave")
 DialogLoadPath = NodePath("CanvasLayer/FileDialogLoad")
+_resourceScript = ExtResource( 2 )
 
 [node name="FlowFieldMesh" type="MeshInstance" parent="."]
 material_override = SubResource( 5 )

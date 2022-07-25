@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Godot;
-using Vector2 = System.Numerics.Vector2;
 
 public class FlowFieldResource : Resource
 {

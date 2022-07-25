@@ -14,11 +14,15 @@ public partial class Turret : MeshInstance
     public BoidBase Owner;
     public BoidBase Target;
 
+    public float BurstCooldown;
+    public float BurstDuration;
     public float ShootVelocity;
     public float ShootCooldown;
     public float ShootDamage;
     public BoidBase.BoidAlignment Alignment;
 
+    private float _burstCooldownTimer;
+    private float _burstDurationTimer;
     private float _shootTimer;
     private int _shootCount;
     
@@ -32,9 +36,10 @@ public partial class Turret : MeshInstance
             Vector2 toPlayer = (player.GlobalTransform.origin - GlobalTransform.origin).Normalized().To2D();
             Vector2 desiredDir = toPlayer;
             
-            float angle = desiredDir.AngleToY() + Mathf.Pi * 2.0f;
+            float angle = desiredDir.AngleToY();
             
-            float clampAngle = Owner.Heading.AngleToY() + Mathf.Pi * 2.0f + Mathf.Deg2Rad(ClampOffsetDeg);
+            // TODO: fix
+            float clampAngle = Owner.Heading.AngleToY() + Mathf.Deg2Rad(ClampOffsetDeg);
             float minAngle = clampAngle - Mathf.Deg2Rad(ClampRangeDeg) * 0.5f;
             float maxAngle = clampAngle + Mathf.Deg2Rad(ClampRangeDeg) * 0.5f;
             angle = Mathf.Clamp(angle, minAngle, maxAngle);
@@ -55,12 +60,23 @@ public partial class Turret : MeshInstance
         _shootTimer -= delta;
         if (Target != null)
         {
-            if (_shootTimer < 0.0f)
+            _burstCooldownTimer -= delta;
+            if (_burstCooldownTimer < 0.0f)
             {
-                Vector2 toTarget = (player.GlobalTransform.origin - GlobalTransform.origin).Normalized().To2D();
-                if (toTarget.Dot(GlobalTransform.basis.z.To2D()) > 0.99f)
+                _burstDurationTimer = BurstDuration;
+                _burstCooldownTimer = BurstCooldown + BurstDuration;
+            }
+
+            if (_burstDurationTimer > 0.0f)
+            {
+                _burstDurationTimer -= delta;
+                if (_shootTimer < 0.0f)
                 {
-                    Shoot();
+                    Vector2 toTarget = (player.GlobalTransform.origin - GlobalTransform.origin).Normalized().To2D();
+                    if (toTarget.Dot(GlobalTransform.basis.z.To2D()) > 0.99f)
+                    {
+                        Shoot();
+                    }
                 }
             }
         }

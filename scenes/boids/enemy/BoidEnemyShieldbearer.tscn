@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/mesh/enemies/a/a.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://src/boids/enemy/BoidEnemyShieldbearer.cs" type="Script" id=3]
+[ext_resource path="res://assets/data/stats/enemies/stats_enemy_shieldbearer.tres" type="Resource" id=4]
+
+[sub_resource type="CapsuleShape" id=1]
+
+[node name="BoidEnemyShieldbearer" instance=ExtResource( 1 )]
+script = ExtResource( 3 )
+_behaviours = 2063
+_steeringRadius = 10.0
+MaxVelocity = 50.0
+MaxForce = 50.0
+_baseResourceStats = ExtResource( 4 )
+
+[node name="CollisionShape" parent="." index="0"]
+transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="Mesh" parent="." index="1"]
+material_override = null
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="BoidTrail" parent="Mesh" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0395321, -0.852419, -6.29935 )

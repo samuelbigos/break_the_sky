@@ -21,6 +21,7 @@ public partial class SteeringManager
         MaintainDistance,
         MaintainOffset,
         Stop,
+        MaintainBroadside,
         COUNT,
     }
     
@@ -318,6 +319,8 @@ public partial class SteeringManager
     {
         Vector2 targetToSelf = (boid.Position - boid.Target).NormalizeSafe();
         float currentDist = (boid.Position - boid.Target).Length();
+        if (currentDist > boid.DesiredDistFromTargetMin && currentDist < boid.DesiredDistFromTargetMax)
+            return Vector2.Zero;
         Vector2 targetPos = boid.Target + targetToSelf * Mathf.Clamp(currentDist, boid.DesiredDistFromTargetMin, boid.DesiredDistFromTargetMax);
         return Steering_Arrive(boid, targetPos);
     }
@@ -332,5 +335,15 @@ public partial class SteeringManager
     {
         Vector2 desired = Vector2.Zero;
         return desired - boid.Velocity;
+    }
+    
+    private static Vector2 Steering_MaintainBroadside(in Boid boid)
+    {
+        Vector2 targetToSelf = (boid.Position - boid.Target).NormalizeSafe();
+        Vector2 perp = boid.Velocity.PerpendicularComponent(targetToSelf).NormalizeSafe();
+        if (perp == Vector2.Zero)
+            perp = targetToSelf.Rot90();
+        Vector2 force = perp - boid.Velocity;
+        return force.Limit(boid.MaxForce);
     }
 }

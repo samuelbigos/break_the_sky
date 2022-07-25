@@ -11,7 +11,9 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     [Export] private float _droneSpawnInterval = 0.33f;
     [Export] private int _dronePulseCount = 10;
     [Export] private float _droneSpawnRange = 750.0f;
-    [Export] private float GunTrackSpeed = 2.0f;
+    [Export] private float _gunTrackSpeed = 2.0f;
+    [Export] private ResourceBoidEnemy _minion;
+    [Export] private FlowFieldResource _minionFlowField;
 
     private List<Turret> _turrets = new List<Turret>();
     private List<Spatial> _turretBarrels = new List<Spatial>();
@@ -26,6 +28,8 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     private int _dronePulseSpawned;
     private int _droneSpawnSide;
 
+    private List<BoidEnemyBase> _minions = new List<BoidEnemyBase>();
+
     [OnReady] private void Ready()
     {
         base._Ready();
@@ -38,6 +42,8 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
             _turrets[i].ShootCooldown = _resourceStats.AttackCooldown;
             _turrets[i].ShootVelocity = _resourceStats.AttackVelocity;
             _turrets[i].ShootDamage = _resourceStats.AttackDamage;
+            _turrets[i].BurstCooldown = _resourceStats.AttackCharge;
+            _turrets[i].BurstDuration = _resourceStats.AttackDuration;
             _turrets[i].Alignment = Alignment;
         }
     }
@@ -48,6 +54,15 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.33f;
+        
+        // minion flowfield
+        SteeringManager.FlowField flowField = new()
+        {
+            Resource = _minionFlowField,
+            TrackID = steeringBoid.Id,
+            Size = new System.Numerics.Vector2(500, 500),
+        };
+        SteeringManager.Instance.RegisterFlowField(flowField);
     }
 
     public override void _Process(float delta)
@@ -55,7 +70,7 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         base._Process(delta);
 
         float dist = (TargetPos - GlobalPosition).Length();
-        if (!Destroyed)
+        if (!Destroyed && _minions.Count < 5)
         {
             _dronePulseTimer -= delta;
             if (_dronePulseTimer < 0.0 && dist < _droneSpawnRange && !_spawningDrones)
@@ -95,18 +110,10 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         {
             pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
         }
-        Vector2 vel = 100.0f * (pos - GlobalPosition).Normalized();
-        // BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_rotorgunData, pos, vel);
-        // enemy.OnBoidDestroyed += _OnRotorgunDestroyed;
-        // enemy.SetTarget(TargetType.Enemy, Game.Player);
-    }
-    
-    protected override void OnEnterAIState_Seeking()
-    {
-        base.OnEnterAIState_Seeking();
-        
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, false);
+        Vector2 vel = 25.0f * (pos - GlobalPosition).Normalized();
+        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_minion, pos, vel);
+        enemy.SetTarget(TargetType.Enemy, _targetBoid);
+        _minions.Add(enemy);
     }
 
     protected override void OnEnterAIState_Engaged()
@@ -116,7 +123,8 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         ResetSteeringBehaviours();
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, false);
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);
-
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainBroadside, true);
+        
         for (int i = 0; i < _turretPaths.Count; i++)
         {
             _turrets[i].Target = _targetBoid;

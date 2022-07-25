@@ -131,7 +131,7 @@ public static class Utils
 
     public static Vector2 Rot90(this Vector2 v)
     {
-        return new Vector2(v.Y, v.X);
+        return new Vector2(-v.Y, v.X);
     }
 
     public static Vector2 NormalizeSafe(this Vector2 vec)

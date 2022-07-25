@@ -159,6 +159,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _behaviourWeights[(int) MaintainDistance] = 1.0f;
         _behaviourWeights[(int) MaintainOffset] = 1.0f;
         _behaviourWeights[(int) Stop] = 1.0f;
+        // this is low so it provides a subtle nudge and doesn't override other behaviours.
+        _behaviourWeights[(int) MaintainBroadside] = 0.1f; 
     }
 
     public override void _Process(float delta)
@@ -319,6 +321,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case Stop:
                 force += Steering_Stop(boid);
+                break;
+            case MaintainBroadside:
+                force += Steering_MaintainBroadside(boid);
                 break;
             case COUNT:
                 break;

@@ -56,6 +56,14 @@ public class GameCamera : Camera
         return ProjectPosition(screen, GlobalTransform.origin.y - y);
     }
     
+    public Vector2 ScreenPosition(Vector2 screen)
+    {
+        Vector3 origin = ProjectRayOrigin(screen);
+        Vector3 normal = ProjectRayNormal(screen);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
+        return new Vector2(hit.x, hit.z);
+    }
+    
     public override void _Ready()
     {
         base._Ready();

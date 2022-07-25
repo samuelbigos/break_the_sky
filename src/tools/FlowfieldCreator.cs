@@ -16,6 +16,8 @@ public partial class FlowFieldCreator : Spatial
     [OnReadyGet] private Camera _camera;
     [OnReadyGet] private FileDialog _dialogSave;
     [OnReadyGet] private FileDialog _dialogLoad;
+
+    [Export] private CSharpScript _resourceScript;
     
     private Vector2 _fieldSize = new(64, 64);
     private float _cellSize = 14.0f;
@@ -231,16 +233,17 @@ public partial class FlowFieldCreator : Spatial
 
     public void _on_FileDialogSave_file_selected(string path)
     {
-        CSharpScript script = ResourceLoader.Load<CSharpScript>("res://src/tools/FlowFieldResource.cs");
+        //CSharpScript script = ResourceLoader.Load<CSharpScript>("res://src/tools/FlowFieldResource.cs");
+        CSharpScript script = _resourceScript;
         FlowFieldResource res = script.New() as FlowFieldResource;
         res.X = (int) _fieldSize.X;
         res.Y = (int) _fieldSize.Y;
-        res.Vectors = new Vector2[res.X * res.Y];
+        res.Vectors = new Godot.Vector2[res.X * res.Y];
         for (int x = 0; x < res.X; x++)
         {
             for (int y = 0; y < res.Y; y++)
             {
-                res.Vectors[y * res.X + x] = _vectors[x,y];
+                res.Vectors[y * res.X + x] = _vectors[x,y].ToGodot();
             }
         }
         string ext = path.Contains(".res") ? "" : ".res";
@@ -258,7 +261,7 @@ public partial class FlowFieldCreator : Spatial
         {
             for (int y = 0; y < res.Y; y++)
             {
-                _vectors[x, y] = res.VectorAt(x, y);
+                _vectors[x, y] = res.VectorAt(x, y).ToNumerics();
             }
         }
         
