@@ -65,7 +65,7 @@ public partial class SeekerMissile : Area
         
         target.OnBoidDestroyed += _OnTargetBoidDestroyed;
         
-        _steeringId = SteeringManager.Instance.RegisterBoid(boid);
+        _steeringId = SteeringManager.Instance.Register(boid);
         
         _launchSfx.Play();
     }
@@ -78,7 +78,7 @@ public partial class SeekerMissile : Area
         {
             case State.Alive:
             {
-                ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+                ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
             
                 // head the missile in the steering direction, but as steering strength approaches zero, mix in more heading (velocity) because steering direction is
                 // less accurate at lower strengths.
@@ -129,11 +129,11 @@ public partial class SeekerMissile : Area
         rb.GlobalTransform = new Transform(Basis.Identity, pos);
         GlobalTransform = new Transform(GlobalTransform.basis, pos);
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         rb.ApplyCentralImpulse(steeringBoid.Velocity.ToGodot().To3D());
         rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 1.0f);
         
-        SteeringManager.Instance.RemoveBoid(_steeringId);
+        SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
         _trail.QueueFree();
         _state = State.Deactivated;
         Monitoring = false;
@@ -142,16 +142,22 @@ public partial class SeekerMissile : Area
     private void Explode()
     {
         _state = State.Deactivated;
-        SteeringManager.Instance.RemoveBoid(_steeringId);
+        SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
         ParticleManager.Instance.AddOneShotParticles(_explodeVfx, GlobalTransform.origin);
         QueueFree();
+
+        Monitorable = false;
+        Monitoring = false;
     }
 
     public virtual void _OnAreaEntered(Area area)
     {
+        if (_state == State.Deactivated)
+            return;
+        
         if (area is BoidBase boid && boid.Alignment != _alignment)
         {
-            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
             boid.SendHitMessage(_damage, steeringBoid.VelocityG, steeringBoid.PositionG, _alignment);
 
             Explode();
@@ -160,7 +166,10 @@ public partial class SeekerMissile : Area
 
     private void _OnTargetBoidDestroyed(BoidBase target)
     {
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        if (_state == State.Deactivated)
+            return;
+        
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.TargetIndex = -1;
     }
 }

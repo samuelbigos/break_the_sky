@@ -5,7 +5,7 @@ render_mode unshaded, world_vertex_coords, cull_disabled;
 uniform vec4 u_colour : hint_color;
 uniform vec4 u_hit_colour : hint_color;
 uniform vec3 u_centre;
-uniform float u_shield_radius = 1.0;
+uniform float u_radius = 1.0;
 uniform float u_glow = 5.0;
 uniform float u_fill = 0.01;
 uniform sampler2D u_texture;
@@ -79,7 +79,7 @@ void sum_hit(inout float o_dent, inout float o_ripple, vec4 hit)
 	
 	float dent_t = 1.0 - easeOutElastic(clamp(time * 0.5, 0.0, 1.0), 1.0);
 	float dent = pow(clamp(hit_dot, 0.0, 1.0), 3.0) * dent_t;
-	dent *= u_shield_radius * 0.75;
+	dent *= u_radius * 0.75;
 	
 	o_ripple = max(ripple, o_ripple);
 	o_dent += dent;
@@ -106,7 +106,7 @@ void vertex()
 	if (u_hits > 9) sum_hit(dent, ripple, u_hit_10);
 	
 	v_ripple = ripple;
-	vec3 offset_ripple = v_normal * v_ripple * u_shield_radius * 0.1;
+	vec3 offset_ripple = v_normal * v_ripple * u_radius * 0.1;
 	vec3 offset_dent = v_normal * dent;
 	
 	// generate
@@ -122,7 +122,7 @@ void vertex()
 	
 	VERTEX += offset_ripple - offset_dent;
 	VERTEX = mix(u_centre, VERTEX, gen_offset);
-	VERTEX += destroy_offset * v_normal * u_shield_radius;
+	VERTEX += destroy_offset * v_normal * u_radius;
 	v_vert_pos = VERTEX;
 }
 

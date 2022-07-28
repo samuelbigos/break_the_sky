@@ -60,6 +60,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479 )
 transform = Transform( -2, 0, -1.74846e-07, 0, 2, 0, 1.74846e-07, 0, -2, 0, 0, 13.5693 )
 visible = false
 material_override = ExtResource( 8 )
+cast_shadow = 0
 mesh = ExtResource( 9 )
 skeleton = NodePath("../../..")
 material/0 = null

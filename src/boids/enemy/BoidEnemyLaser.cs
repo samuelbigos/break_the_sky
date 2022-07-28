@@ -44,7 +44,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     {
         base.Init(data, onDestroy, position, velocity);
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.5f;
     }
 

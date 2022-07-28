@@ -12,6 +12,8 @@ public class GameCamera : Camera
     [Export] public int TraumaPower = 2; // Trauma exponent. Use [2, 3].
     [Export] public float MaxTrauma = 0.75f;
     [Export] private float _stateTransitionTime = 0.5f;
+    [Export] private float _maxZoom = 500.0f;
+    [Export] private float _minZoom = 100.0f;
 
     public static Action OnPostCameraTransformed;
     
@@ -128,15 +130,18 @@ public class GameCamera : Camera
             GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta);
         }
 
+        Vector3 zoom = _initialTrans.origin;
         if (Input.IsActionJustReleased("zoom_in"))
         {
-            _initialTrans = new Transform(_initialTrans.basis, _initialTrans.origin + Vector3.Down * 5.0f);
+            zoom += Vector3.Down * 5.0f;
         }
-        
         if (Input.IsActionJustReleased("zoom_out"))
         {
-            _initialTrans = new Transform(_initialTrans.basis, _initialTrans.origin + Vector3.Up * 5.0f);
+            zoom += Vector3.Up * 5.0f;
         }
+
+        zoom.y = Mathf.Clamp(zoom.y, _minZoom, _maxZoom);
+        _initialTrans = new Transform(_initialTrans.basis, zoom);
         
         OnPostCameraTransformed?.Invoke();
     }

@@ -27,13 +27,12 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     private float _dronePulseTimer;
     private int _dronePulseSpawned;
     private int _droneSpawnSide;
+    private int _flowFieldId;
 
     private List<BoidEnemyBase> _minions = new List<BoidEnemyBase>();
 
     [OnReady] private void Ready()
     {
-        base._Ready();
-
         for (int i = 0; i < _turretPaths.Count; i++)
         {
             _turrets.Add(GetNode<Turret>(_turretPaths[i]));
@@ -52,7 +51,7 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     {
         base.Init(data, onDestroy, position, velocity);
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.33f;
         
         // minion flowfield
@@ -62,7 +61,7 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
             TrackID = steeringBoid.Id,
             Size = new System.Numerics.Vector2(500, 500),
         };
-        SteeringManager.Instance.RegisterFlowField(flowField);
+        _flowFieldId = SteeringManager.Instance.Register(flowField);
     }
 
     public override void _Process(float delta)
@@ -96,6 +95,13 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
                 }
             }
         }
+    }
+
+    protected override void _Destroy(Vector2 hitDir, float hitStrength)
+    {
+        base._Destroy(hitDir, hitStrength);
+
+        SteeringManager.Instance.Unregister<SteeringManager.FlowField>(_flowFieldId);
     }
 
     private void _SpawnDrone()

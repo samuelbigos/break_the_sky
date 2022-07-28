@@ -62,7 +62,7 @@ public class BoidPlayer : BoidAllyBase
                 for (int y = 0; y < boidCols[x].Count; y++)
                 {
                     BoidBase ally = boidCols[x][y];
-                    ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(ally.SteeringId);
+                    ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
                     boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f).ToNumerics();
                 }
             }
@@ -106,7 +106,7 @@ public class BoidPlayer : BoidAllyBase
             }
             _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
 
-            ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
+            ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
             boid.Position += (_velocity * delta).ToNumerics();
             boid.Heading = lookAt.ToNumerics();
         }

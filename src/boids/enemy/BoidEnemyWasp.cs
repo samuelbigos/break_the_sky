@@ -60,7 +60,7 @@ public partial class BoidEnemyWasp : BoidEnemyBase
         
         ResetSteeringBehaviours();
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.DesiredOffsetFromTarget = (GlobalPosition - _targetBoid.GlobalPosition).Normalized().ToNumerics() * EngageRange;
         //SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainOffset, true);
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);

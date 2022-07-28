@@ -72,7 +72,7 @@ vec3 diffuseCol(vec3 n, vec3 l)
 	vec3 sandLit = mix(albedoDune, albedoRipple, v_ripple_strength);
 	vec3 sandShadow = sandLit * u_sand_shadow.rgb;
 	
-	sandLit = u_sand_lit.rgb;
+	sandLit = u_sand_lit.rgb * sandLit;
 	sandShadow = u_sand_shadow.rgb;
 	
 	return mix(sandShadow, sandLit, lum).rgb;
@@ -138,11 +138,16 @@ vec4 toLinear(vec4 sRGB)
     return mix(higher, lower, cutoff);
 }
 
+void fragment()
+{
+	ALBEDO = vec3(0.0);
+}
+
 void light()
 { 
 	vec3 light = (vec4(LIGHT, 1.0) * INV_CAMERA_MATRIX).rgb;
 	vec3 view = (vec4(VIEW, 1.0) * INV_CAMERA_MATRIX).rgb;
 
-	DIFFUSE_LIGHT = toLinear(vec4(colour(light, view), 1.0)).rgb;
+	//DIFFUSE_LIGHT = toLinear(vec4(colour(light, view), 1.0)).rgb;
 	DIFFUSE_LIGHT = vec3(colour(light, view)) * ATTENUATION;
 }

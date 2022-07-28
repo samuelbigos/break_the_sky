@@ -1,9 +1,13 @@
 using Godot;
 using System;
+using GodotOnReady.Attributes;
 
-public class BoidAllyDrone : BoidAllyBase
+public partial class BoidAllyDrone : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
+    [Export] private float _rotorSpinSpeed = 25.0f;
+
+    [OnReadyGet] private MeshInstance _rotorMesh;
 
     public float ShootCooldown => _shootCooldown;
     
@@ -40,6 +44,8 @@ public class BoidAllyDrone : BoidAllyBase
             Vector3 from = _baseScale * 2.0f;
             _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
         }
+        
+        _rotorMesh.RotateY(_rotorSpinSpeed * delta);
     }
 
     public override void _Input(InputEvent @event)

@@ -83,7 +83,7 @@ public partial class BoidBase : Area
 
     public virtual BoidAlignment Alignment => BoidAlignment.Ally;
     public bool Destroyed => _state == State.Destroyed;
-    public short SteeringId => _steeringId;
+    public int SteeringId => _steeringId;
     public Vector2 Heading => _cachedHeading;
     
     public Vector2 GlobalPosition
@@ -91,9 +91,9 @@ public partial class BoidBase : Area
         get => new(GlobalTransform.origin.x, GlobalTransform.origin.z);
         protected set
         {
-            if (SteeringManager.Instance.HasBoid(_steeringId))
+            if (SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId))
             {
-                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetBoid(_steeringId);
+                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
                 boid.Position = value.ToNumerics();
                 GlobalTransform = new Transform(new Basis(Vector3.Down, boid.Heading.AngleToY()), value.To3D());
             }
@@ -132,7 +132,7 @@ public partial class BoidBase : Area
 
     protected ResourceStats _resourceStats;
     protected ResourceBoid _data;
-    protected short _steeringId;
+    protected int _steeringId;
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
@@ -143,6 +143,7 @@ public partial class BoidBase : Area
     protected Vector2 _cachedHeading;
     protected State _state;
     protected ShaderMaterial _meshMaterial;
+    protected int _cachedBehaviours;
 
     #endregion
 
@@ -185,11 +186,12 @@ public partial class BoidBase : Area
 
     [OnReady] private void Ready()
     {
-        Debug.Assert(_baseResourceStats != null, "_baseStats != null");
+        DebugUtils.Assert(_baseResourceStats != null, "_baseStats != null");
         _resourceStats = _baseResourceStats.Duplicate() as ResourceStats;
         //_OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
         
         _health = _resourceStats.MaxHealth;
+        _cachedBehaviours = _behaviours;
 
         //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
         _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
@@ -233,8 +235,8 @@ public partial class BoidBase : Area
 
     protected virtual void ProcessAlive(float delta)
     {
-        Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
 
         Basis basis = new Basis(Vector3.Up, _cachedHeading.AngleToY());
 
@@ -320,7 +322,7 @@ public partial class BoidBase : Area
             WanderVariance = 50.0f,
         };
         
-        _steeringId = SteeringManager.Instance.RegisterBoid(boid);
+        _steeringId = SteeringManager.Instance.Register(boid);
     }
 
     public void SendHitMessage(float damage, Vector2 vel, Vector2 pos, BoidAlignment alignment)
@@ -387,7 +389,7 @@ public partial class BoidBase : Area
             SetTarget(TargetType.None);
             
             // unregister steering boid
-            SteeringManager.Instance.RemoveBoid(_steeringId);
+            SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
 
             // convert to rigid body for 'ragdoll' death physics.
             Vector3 pos = GlobalTransform.origin;
@@ -430,13 +432,13 @@ public partial class BoidBase : Area
             _behaviours &= ~ (1 << (int) behaviour);
         }
 
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.Behaviours = _behaviours;
     }
 
     public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2(), Vector2 offset = new Vector2())
     {
-        Debug.Assert(SteeringManager.Instance.HasBoid(_steeringId));
+        Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
 
         if (_targetBoid != null)
         {
@@ -447,7 +449,7 @@ public partial class BoidBase : Area
         _targetBoid = boid;
         _targetPos = pos;
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         switch (type)
         {
             case TargetType.Ally:

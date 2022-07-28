@@ -16,11 +16,12 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public interface IPoolable
     {
         public abstract bool Empty();
+        public abstract int GenerateId();
     }
 
     public struct Boid : IPoolable
     {
-        public short Id;
+        public int Id;
         public byte Alignment;
         public Vector2 Position; // TODO: Separate position.
         public Vector2 Velocity;
@@ -29,7 +30,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float Radius;
         public float Speed;
         public Vector2 Target;
-        public short TargetIndex;
+        public int TargetIndex;
         public Vector2 TargetOffset;
         public float DesiredDistFromTargetMin;
         public float DesiredDistFromTargetMax;
@@ -59,23 +60,34 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Godot.Vector2 PositionG => Position.ToGodot();
         public Godot.Vector2 VelocityG => Velocity.ToGodot();
         
-        public bool Empty()
+        public bool Empty() => Id == 0;
+        private static int _idGen;
+        public int GenerateId()
         {
-            return Id == 0;
+            Id = _idGen++;
+            return Id;
         }
     }
 
-    public struct Obstacle
+    public struct Obstacle : IPoolable
     {
-        public int ID;
+        public int Id;
         public Vector2 Position;
         public ObstacleShape Shape;
         public float Size;
+        
+        public bool Empty() => Id == 0;
+        private static int _idGen;
+        public int GenerateId()
+        {
+            Id = _idGen++;
+            return Id;
+        }
     }
 
-    public struct FlowField
+    public struct FlowField : IPoolable
     {
-        public int ID;
+        public int Id;
         public FlowFieldResource Resource;
         public int TrackID;
         public Vector2 Position;
@@ -94,6 +106,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 return false;
             return true;
         }
+
+        public bool Empty() => Id == 0;
+        private static int _idGen;
+        public int GenerateId()
+        {
+            Id = _idGen++;
+            return Id;
+        }
     }
 
     public struct Intersection
@@ -107,25 +127,23 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public static Rect2 EdgeBounds;
 
     private static readonly int MAX_BOIDS = 1000;
+    private static readonly int MAX_OBSTACLES = 100;
+    private static readonly int MAX_FLOWFIELDS = 100;
     
     private StructPool<Boid> _boidPool = new(MAX_BOIDS);
-    private int _numObstacles;
-    private Obstacle[] _obstaclePool = new Obstacle[100];
-    private int _numFlowFields;
-    private FlowField[] _flowFieldPool = new FlowField[100];
+    private StructPool<Obstacle> _obstaclePool = new(MAX_OBSTACLES);
+    private StructPool<FlowField> _flowFieldPool = new(MAX_FLOWFIELDS);
 
     private Dictionary<int, int> _boidIdToIndex = new();
     private Dictionary<int, int> _obstacleIdToIndex = new();
-    private Dictionary<int, int> _obstacleIndexToId = new();
     private Dictionary<int, int> _flowFieldIdToIndex = new();
-    private Dictionary<int, int> _flowFieldIndexToId = new();
 
     private Vector2[] _boidPositions = new Vector2[MAX_BOIDS];
     private byte[] _boidAlignments = new byte[MAX_BOIDS];
     
-    private int _boidIdGen = 1; // IDs start at 1 because Boid struct initialises default to 0.
-    private int _obstacleIdGen = 1;
-    private int _flowFieldIdGen = 1;
+    private static int _boidIdGen = 1; // IDs start at 1 because Boid struct initialises default to 0.
+    private static int _obstacleIdGen = 1;
+    private static int _flowFieldIdGen = 1;
     private static float[] _behaviourWeights;
 
     public MeshInstance _debugMesh;
@@ -176,8 +194,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
         EdgeBounds.Position = Game.Player.GlobalPosition - EdgeBounds.Size * 0.5f;
 
         Span<Boid> boids = _boidPool.AsSpan();
-        ReadOnlySpan<Obstacle> obstacles = _obstaclePool.AsSpan(0, _numObstacles);
-        Span<FlowField> flowFields = _flowFieldPool.AsSpan(0, _numFlowFields);
+        ReadOnlySpan<Obstacle> obstacles = _obstaclePool.AsSpan();
+        Span<FlowField> flowFields = _flowFieldPool.AsSpan();
         
         foreach (ref FlowField flowField in flowFields)
         {
@@ -334,65 +352,71 @@ public partial class SteeringManager : Singleton<SteeringManager>
         return force.Limit(boid.MaxForce * delta) * _behaviourWeights[(int)behaviour];
     }
 
-    public short RegisterBoid(Boid boid)
+    private void GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int max) where T : IPoolable
     {
-#if !FINAL
-        if (_boidPool.Count >= MAX_BOIDS)
+        pool = null;
+        toIndex = null;
+        max = 0;
+        if (typeof(T) == typeof(Boid))
         {
-            Debug.Assert(false, $"MAX_BOIDS ({MAX_BOIDS}) reached, check for leaks or increase pool size.");
+            pool = _boidPool as StructPool<T>;
+            toIndex = _boidIdToIndex;
+            max = MAX_BOIDS;
+        }
+        else if (typeof(T) == typeof(Obstacle))
+        {
+            pool = _obstaclePool as StructPool<T>;
+            toIndex = _obstacleIdToIndex;
+            max = MAX_OBSTACLES;
+        }
+        else if (typeof(T) == typeof(FlowField))
+        {
+            pool = _flowFieldPool as StructPool<T>;
+            toIndex = _flowFieldIdToIndex;
+            max = MAX_FLOWFIELDS;
+        }
+        else
+            DebugUtils.Assert(false, "Invalid type in SteeringManager.GetPoolForType()!");
+    }
+    
+    public int Register<T>(T obj) where T : IPoolable
+    {
+        GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int max);
+        
+#if !FINAL
+        if (pool.Count >= max)
+        {
+            Debug.Assert(false, $"Maximum {typeof(T)} ({max}) reached, check for leaks or increase pool size.");
             return -1;
         }
 #endif
 
-        boid.Id = Convert.ToInt16(_boidIdGen++);
-        int index = _boidPool.Add(boid);
-        _boidIdToIndex[boid.Id] = index;
-        return boid.Id;
+        int id = obj.GenerateId();
+        int index = pool.Add(obj);
+        _boidIdToIndex[id] = index;
+        return id;
     }
 
-    public int RegisterObstacle(Obstacle obstacle)
+    public bool HasObject<T>(int id) where T : IPoolable
     {
-        Debug.Assert(!_obstacleIdToIndex.ContainsKey(obstacle.ID), $"Obstacle with this ID ({obstacle.ID}) already registered.");
-        if (_obstacleIdToIndex.ContainsKey(obstacle.ID))
-            return -1;
-
-        obstacle.ID =  _obstacleIdGen++;
-        _obstaclePool[_numObstacles++] = obstacle;
-        _obstacleIdToIndex[obstacle.ID] = _numObstacles - 1;
-        _obstacleIndexToId[_numObstacles - 1] = obstacle.ID;
-        return obstacle.ID;
+        GetPoolForType<T>(out StructPool<T> _, out Dictionary<int, int> toIndex, out int _);
+        return toIndex.ContainsKey(id);
     }
 
-    public int RegisterFlowField(FlowField flowField)
+    public ref T GetObject<T>(int id) where T : IPoolable
     {
-        Debug.Assert(!_flowFieldIdToIndex.ContainsKey(flowField.ID), $"Obstacle with this ID ({flowField.ID}) already registered.");
-        if (_flowFieldIdToIndex.ContainsKey(flowField.ID))
-            return -1;
-
-        flowField.ID = _flowFieldIdGen++;
-        _flowFieldPool[_numFlowFields++] = flowField;
-        _flowFieldIdToIndex[flowField.ID] = _numFlowFields - 1;
-        _flowFieldIndexToId[_numFlowFields - 1] = flowField.ID;
-        return flowField.ID;
+        GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int _);
+        Debug.Assert(toIndex.ContainsKey(id), "Object doesn't exist.");
+        return ref pool.AsSpan()[toIndex[id]];
     }
 
-    public bool HasBoid(int id)
+    public void Unregister<T>(int id) where T : IPoolable
     {
-        return _boidIdToIndex.ContainsKey(id);
-    }
-
-    public ref Boid GetBoid(int id)
-    {
-        Debug.Assert(_boidIdToIndex.ContainsKey(id), "Boid doesn't exist.");
-        return ref _boidPool.AsSpan()[_boidIdToIndex[id]];
-    }
-
-    public void RemoveBoid(int id)
-    {
-        Debug.Assert(HasBoid(id));
-        int i = _boidIdToIndex[id];
-        _boidPool.Remove(i);
-        _boidIdToIndex.Remove(id);
+        GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int _);
+        Debug.Assert(HasObject<T>(id));
+        int i = toIndex[id];
+        pool.Remove(i);
+        toIndex.Remove(id);
     }
     
     public override void _EnterTree()

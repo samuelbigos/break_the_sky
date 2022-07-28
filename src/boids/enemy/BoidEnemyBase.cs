@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public class BoidEnemyBase : BoidBase
+public partial class BoidEnemyBase : BoidBase
 {
     protected enum AIState
     {
@@ -19,8 +19,6 @@ public class BoidEnemyBase : BoidBase
 
     public override BoidAlignment Alignment => BoidAlignment.Enemy;
     protected AIState _aiState = AIState.Seeking;
-    
-    private int _cachedBehaviours;
 
     protected override void SetMeshColour()
     {
@@ -28,18 +26,11 @@ public class BoidEnemyBase : BoidBase
         _meshMaterial?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Red);
     }
 
-    public override void _Ready()
-    {
-        base._Ready();
-
-        _cachedBehaviours = _behaviours;
-    }
-
     public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
         base.Init(data, onDestroy, position, velocity);
         
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.05f;
         steeringBoid.DesiredDistFromTargetMax = EngageRange + EngageRange * 0.05f;
         
@@ -134,7 +125,7 @@ public class BoidEnemyBase : BoidBase
     protected void ResetSteeringBehaviours()
     {
         _behaviours = _cachedBehaviours;
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetBoid(_steeringId);
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.Behaviours = _behaviours;
     }
 

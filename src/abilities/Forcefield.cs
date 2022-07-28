@@ -29,8 +29,7 @@ public partial class Forcefield : Area
     private float _destroyTimer;
     private float _regenTimer;
 
-    [OnReady]
-    private void Ready()
+    [OnReady] private void Ready()
     {
         Connect("area_entered", this, nameof(_OnForceFieldAreaEntered));
         _forcefieldMat = _mesh.MaterialOverride as ShaderMaterial;

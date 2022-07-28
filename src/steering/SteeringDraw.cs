@@ -34,9 +34,10 @@ public partial class SteeringManager
 
         // boids
         Span<Boid> boids = _boidPool.AsSpan();
-
         foreach (ref readonly Boid boid in boids)
         {
+            if (boid.Empty()) continue;
+            
             // body
             Vector3 boidPos = boid.Position.To3D();
             Vector3 forward = boid.Heading.To3D();
@@ -128,10 +129,11 @@ public partial class SteeringManager
 
                     Vector3 dir = Vector3.Zero;
                     int count = 0;
-                    for (int ff = 0; ff < _numFlowFields; ff++)
+                    Span<FlowField> ffs = _flowFieldPool.AsSpan();
+                    foreach (FlowField ff in ffs)
                     {
-                        FlowField flowField = _flowFieldPool[ff];
-                        if (TryGetFieldAtPosition(flowField, new System.Numerics.Vector2(pos.X, pos.Z),
+                        if (ff.Empty()) continue;
+                        if (TryGetFieldAtPosition(ff, new System.Numerics.Vector2(pos.X, pos.Z),
                                 out Vector2 vector))
                         {
                             dir.X += vector.X;
@@ -168,14 +170,15 @@ public partial class SteeringManager
             Utils.Line(p3, p0, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
 
             // obstacles
-            for (int j = 0; j < _numObstacles; j++)
+            Span<Obstacle> obstacles = _obstaclePool.AsSpan();
+            foreach (Obstacle obs in obstacles)
             {
-                Obstacle obstacle = _obstaclePool[j];
-                switch (obstacle.Shape)
+                if (obs.Empty()) continue;
+                switch (obs.Shape)
                 {
                     case ObstacleShape.Circle:
                     {
-                        Utils.Circle(obstacle.Position.To3D(), 32, obstacle.Size, Colors.Brown, ref v, ref i, _vertList,
+                        Utils.Circle(obs.Position.To3D(), 32, obs.Size, Colors.Brown, ref v, ref i, _vertList,
                             _colList, _indexList);
                         break;
                     }

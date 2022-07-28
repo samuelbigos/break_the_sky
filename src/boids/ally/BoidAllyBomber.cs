@@ -115,7 +115,10 @@ public class BoidAllyBomber : BoidAllyBase
     {
         base._Shoot(dir);
         
-        Debug.Assert(_bomb != null);
+        Debug.Assert(IsInstanceValid(_bomb));
+        if (!IsInstanceValid(_bomb))
+            return;
+        
         Vector2 pos = _bomb.GlobalPosition;
         RemoveChild(_bomb);
         Game.Instance.AddChild(_bomb);

@@ -40,8 +40,6 @@ public partial class HUD : Singleton<HUD>
 
     [OnReady] private void Ready()
     {
-        base._Ready();
-        
         _fabricateQueue = GetNode<Control>(_fabricateQueuePath);
         _fabricateMenu = GetNode<Control>(_fabicateMenuPath);
         _materialValue = GetNode<Label>(_materialsValuePath);

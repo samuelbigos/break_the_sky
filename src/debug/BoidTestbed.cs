@@ -237,9 +237,9 @@ public partial class BoidTestbed : Spatial
         {
             foreach (int id in _boidIds)
             {
-                if (SteeringManager.Instance.HasBoid(id))
+                if (SteeringManager.Instance.HasObject<SteeringManager.Boid>(id))
                 {
-                    SteeringManager.Boid boid = SteeringManager.Instance.GetBoid(id);
+                    SteeringManager.Boid boid = SteeringManager.Instance.GetObject<SteeringManager.Boid>(id);
                     Vector2 pos = GetViewport().GetMousePosition();
                     Vector3 origin = _camera.ProjectRayOrigin(pos);
                     Vector3 normal = _camera.ProjectRayNormal(pos);

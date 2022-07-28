@@ -12,8 +12,7 @@ public partial class BoidEnemyShieldbearer : BoidEnemyBase
 
     private Forcefield _forcefield;
 
-    [OnReady]
-    private void Ready()
+    [OnReady] private void Ready()
     {
         _forcefield = _forcefieldScene.Instance<Forcefield>();
         AddChild(_forcefield);

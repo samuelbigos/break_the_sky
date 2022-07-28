@@ -14,5 +14,6 @@ _meshPath = NodePath("MeshInstance")
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 transform = Transform( 1.46379, 0, 0, 0, 1, 0, 0, 0, 1.46379, 0, 10, 0 )
+cast_shadow = 0
 mesh = ExtResource( 2 )
 material/0 = SubResource( 1 )

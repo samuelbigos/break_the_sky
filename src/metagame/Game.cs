@@ -25,11 +25,8 @@ public partial class Game : Singleton<Game>
     public static BoidPlayer Player => Instance._player;
     public Rect2 SpawningRect => new(Player.GlobalPosition - _areaRect.Size * 0.5f, _areaRect.Size);
 
-    [OnReady]
-    private void Ready()
+    [OnReady] private void Ready()
     {
-        base._Ready();
-
         SteeringManager.EdgeBounds = _areaRect;
 
         _player = _playerScene.Instance<BoidPlayer>();

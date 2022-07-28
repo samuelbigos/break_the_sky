@@ -23,4 +23,3 @@ material/0 = null
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 0.323004, -0.334958, 0.885139, 0.114826, 0.942233, 0.314662, -0.939406, 0, 0.342807, 3.07165, 1.52667, 0 )
-visible = false

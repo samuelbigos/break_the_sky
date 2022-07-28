@@ -1,20 +1,14 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
-[ext_resource path="res://assets/mesh/allies/ally_drone.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/allies/alien_drone_b/alien_drone_b_body.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
-[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=5]
+[ext_resource path="res://assets/mesh/allies/alien_drone_b/alien_drone_b_rotor.obj" type="ArrayMesh" id=5]
 [ext_resource path="res://assets/data/stats/allies/stats_ally_drone.tres" type="Resource" id=6]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
-
-[sub_resource type="ShaderMaterial" id=2]
-resource_local_to_scene = true
-shader = ExtResource( 5 )
-shader_param/u_primary_colour = null
-shader_param/u_secondary_colour = null
 
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
@@ -25,18 +19,23 @@ MaxForce = 200.0
 Bank360 = true
 BankingRate = 5.0
 BankingAmount = 1.75
-Damping = 0.0
-_baseStats = ExtResource( 6 )
+_baseResourceStats = ExtResource( 6 )
+RotorMeshPath = NodePath("Mesh/Rotor")
 _bulletScene = ExtResource( 3 )
 
 [node name="CollisionShape" parent="." index="0"]
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = SubResource( 2 )
+material_override = null
 mesh = ExtResource( 2 )
+material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 _lineInterval = 0.016
 _lineWidth = 0.5
+
+[node name="Rotor" type="MeshInstance" parent="Mesh" index="1"]
+mesh = ExtResource( 5 )
+material/0 = null
