@@ -39,6 +39,7 @@ uniform vec3 u_boid_pos_3;
 uniform vec3 u_boid_pos_4;
 uniform vec3 u_boid_pos_5;
 
+// varyings
 varying vec3 v_vert_pos;
 
 void vertex()

@@ -1210,7 +1210,7 @@ material_override = SubResource( 10 )
 script = ExtResource( 11 )
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 250, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0.219631, 250, 0.126312 )
 cull_mask = 1047553
 environment = ExtResource( 7 )
 current = true

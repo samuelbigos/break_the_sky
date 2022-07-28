@@ -269,4 +269,4 @@ common/enable_pause_aware_picking=true
 
 threads/thread_model=2
 quality/filters/msaa=3
-environment/default_environment="res://assets/EditorEnvironment.tres"
+environment/default_environment="res://assets/Environment.tres"

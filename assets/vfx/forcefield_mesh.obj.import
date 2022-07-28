@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/forcefield_mesh.obj-23f84512a38902ad7646fcb98ca8dc00.mesh"
+
+[deps]
+
+files=[ "res://.import/forcefield_mesh.obj-23f84512a38902ad7646fcb98ca8dc00.mesh" ]
+
+source_file="res://assets/vfx/forcefield_mesh.obj"
+dest_files=[ "res://.import/forcefield_mesh.obj-23f84512a38902ad7646fcb98ca8dc00.mesh", "res://.import/forcefield_mesh.obj-23f84512a38902ad7646fcb98ca8dc00.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
