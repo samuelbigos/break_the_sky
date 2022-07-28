@@ -8,7 +8,7 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     [Export] private List<NodePath> _turretPaths;
 
     [Export] private float _dronePulseCooldown = 2.0f;
-    [Export] private float _droneSpawnInterval = 0.33f;
+    [Export] private float _droneSpawnInterval = 1.0f;
     [Export] private int _dronePulseCount = 10;
     [Export] private float _droneSpawnRange = 750.0f;
     [Export] private float _gunTrackSpeed = 2.0f;
@@ -113,7 +113,13 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         Vector2 vel = 25.0f * (pos - GlobalPosition).Normalized();
         BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_minion, pos, vel);
         enemy.SetTarget(TargetType.Enemy, _targetBoid);
+        enemy.OnBoidDestroyed += _OnMinionDestroyed;
         _minions.Add(enemy);
+    }
+
+    private void _OnMinionDestroyed(BoidBase minion)
+    {
+        _minions.Remove(minion as BoidEnemyBase);
     }
 
     protected override void OnEnterAIState_Engaged()

@@ -7,7 +7,7 @@
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" type="Resource" id=5]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" type="Resource" id=6]
 [ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
-[ext_resource path="res://scenes/bullets/Turret.tscn" type="PackedScene" id=8]
+[ext_resource path="res://scenes/abilities/Turret.tscn" type="PackedScene" id=8]
 [ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=9]
 
 [sub_resource type="BoxShape" id=1]
@@ -29,8 +29,6 @@ DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 150.0
 _turretPaths = [ NodePath("Mesh/Turret1"), NodePath("Mesh/Turret2"), NodePath("Mesh/Turret3"), NodePath("Mesh/Turret4"), NodePath("Mesh/Turret5"), NodePath("Mesh/Turret6") ]
-_droneSpawnInterval = 0.1
-_dronePulseCount = 15
 _minion = ExtResource( 5 )
 _minionFlowField = ExtResource( 9 )
 

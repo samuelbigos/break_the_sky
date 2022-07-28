@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/material/forcefield.material" type="Material" id=1]
+[ext_resource path="res://assets/vfx/forcefield_mesh.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://src/abilities/Forcefield.cs" type="Script" id=3]
+
+[sub_resource type="SphereShape" id=2]
+
+[node name="Forcefield" type="Area"]
+script = ExtResource( 3 )
+MeshPath = NodePath("Mesh")
+TestCameraPath = NodePath("Camera")
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 2 )
+
+[node name="Mesh" type="MeshInstance" parent="."]
+material_override = ExtResource( 1 )
+cast_shadow = 0
+mesh = ExtResource( 2 )
+skeleton = NodePath("../../Mesh")
+material/0 = null
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 0.323004, -0.334958, 0.885139, 0.114826, 0.942233, 0.314662, -0.939406, 0, 0.342807, 3.07165, 1.52667, 0 )
+visible = false

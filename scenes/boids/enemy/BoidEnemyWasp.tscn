@@ -4,7 +4,7 @@
 [ext_resource path="res://assets/mesh/enemies/wasp/wasp_antigrav.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyWasp.cs" type="Script" id=3]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" type="Resource" id=4]
-[ext_resource path="res://scenes/bullets/SeekerMissile.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/abilities/SeekerMissile.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/mesh/enemies/wasp/wasp_body.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
 

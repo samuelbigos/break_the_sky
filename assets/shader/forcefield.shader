@@ -4,14 +4,14 @@ render_mode unshaded, world_vertex_coords, cull_disabled;
 // UNIFORMS
 uniform vec4 u_colour : hint_color;
 uniform vec4 u_hit_colour : hint_color;
-uniform float u_shield_radius = 25.0;
+uniform vec3 u_centre;
+uniform float u_shield_radius = 1.0;
 uniform float u_glow = 5.0;
 uniform float u_fill = 0.01;
 uniform sampler2D u_texture;
 
 uniform float u_speed = 1.0;
 uniform float u_ripple_width = 0.2;
-uniform float u_dent_depth = 15.0;
 
 uniform int u_hits = 0;
 uniform vec4 u_hit_1 = vec4(0.0, 0.0, 0.0, 0.0);
@@ -25,30 +25,46 @@ uniform vec4 u_hit_8 = vec4(0.0, 0.0, 0.0, 0.0);
 uniform vec4 u_hit_9 = vec4(0.0, 0.0, 0.0, 0.0);
 uniform vec4 u_hit_10 = vec4(0.0, 0.0, 0.0, 0.0);
 
+uniform vec3 u_heading = vec3(0.0, 0.0, 1.0);
+uniform float u_active_timer;
+uniform float u_activation_speed = 2.0;
+uniform float u_destroy_timer;
+uniform float u_destroy_speed = 1.0;
+
 // VARYINGS
 varying vec3 v_cam;
 varying vec3 v_vert_pos;
 varying float v_depth;
 varying vec3 v_depth_pos;
 varying vec3 v_normal;
-
 varying float v_ripple;
+varying float v_destroy;
 
 // CONSTANTS
 const float PI = 3.141592;
 
-float easeOutElastic(float x) 
+float easeOutElastic(float x, float strength) 
 {
 	float c4 = (2.0 * PI) / 3.0;
 
 	if(x == 0.0) return 0.0;
 	if(x == 1.0) return 1.0;
-	return pow(2.0, -10.0 * x) * sin((x * 10.0 - 0.75) * c4) + 1.0;
+	return pow(2.0, -10.0 * x * (1.0 / strength)) * sin((x * 10.0 - 0.75) * c4) + 1.0;
 }
 
 float easeOutCubic(float x)
 {
-	return 1.0 - pow(1.0 - x, 1.0);
+	return 1.0 - pow(1.0 - x, 3.0);
+}
+
+float easeInOutSine(float x)
+{
+	return -(cos(PI * x) - 1.0) / 2.0;
+}
+
+float easeInOutCubic(float x)
+{
+	return x < 0.5 ? 4.0 * x * x * x : 1.0 - pow(-2.0 * x + 2.0, 3.0) / 2.0;
 }
 
 void sum_hit(inout float o_dent, inout float o_ripple, vec4 hit)
@@ -58,12 +74,12 @@ void sum_hit(inout float o_dent, inout float o_ripple, vec4 hit)
 	
 	vec3 hit_normal = hit.xyz;
 	float hit_dot = dot(hit_normal, v_normal);
-	float ripple_time = (1.0 + u_ripple_width) - easeOutCubic(time / duration) * duration;
+	float ripple_time = (1.0 + u_ripple_width) - (time / duration) * duration;
 	float ripple = min(step(hit_dot, ripple_time), step(ripple_time - u_ripple_width, hit_dot));
 	
-	float dent_t = 1.0 - easeOutElastic(clamp(time * 0.5, 0.0, 1.0));
+	float dent_t = 1.0 - easeOutElastic(clamp(time * 0.5, 0.0, 1.0), 1.0);
 	float dent = pow(clamp(hit_dot, 0.0, 1.0), 3.0) * dent_t;
-	dent *= u_dent_depth;
+	dent *= u_shield_radius * 0.75;
 	
 	o_ripple = max(ripple, o_ripple);
 	o_dent += dent;
@@ -93,7 +109,20 @@ void vertex()
 	vec3 offset_ripple = v_normal * v_ripple * u_shield_radius * 0.1;
 	vec3 offset_dent = v_normal * dent;
 	
+	// generate
+	float gen_time = clamp(u_active_timer * u_activation_speed, 0.0, 2.0);
+	float gen_dot = dot(-u_heading, v_normal) * 0.5 + 0.5;
+	float gen_offset = easeOutElastic(clamp((gen_time - gen_dot), 0.0, 1.0), 0.75);
+	v_ripple = max(v_ripple, gen_offset > 1.1 ? 1.0 : 0.0);
+	
+	// destroy
+	float destroy_time = easeOutCubic(clamp(u_destroy_timer * u_destroy_speed, 0.0, 1.0));
+	float destroy_offset = destroy_time;
+	v_destroy = 1.0 - destroy_time; 
+	
 	VERTEX += offset_ripple - offset_dent;
+	VERTEX = mix(u_centre, VERTEX, gen_offset);
+	VERTEX += destroy_offset * v_normal * u_shield_radius;
 	v_vert_pos = VERTEX;
 }
 
@@ -118,11 +147,11 @@ void fragment()
 	float edge = smoothstep(0.0, 1.0, max(intersectDist, fresnel));
 	
 	// col
-	vec3 base_col = mix(u_colour.rgb, u_hit_colour.rgb, v_ripple);
+	vec3 base_col = mix(u_colour.rgb, u_hit_colour.rgb, v_ripple + (1.0 - v_destroy));
 	vec3 col = mix(base_col, vec3(1.0), edge * 0.25 - 0.075) * u_glow;
 	float grid = texture(u_texture, UV).a;
 	col *= 1.0 - grid;
 	
 	ALBEDO = col;
-	ALPHA = edge + u_fill;
+	ALPHA = (edge + u_fill) * v_destroy;
 }
