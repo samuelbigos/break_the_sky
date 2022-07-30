@@ -124,7 +124,6 @@ public partial class BoidEnemyBase : BoidBase
 
     protected void ResetSteeringBehaviours()
     {
-        _behaviours = _cachedBehaviours;
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.Behaviours = _behaviours;
     }

@@ -37,8 +37,6 @@ public partial class FlowFieldCreator : Spatial
 
     [OnReady] private void Ready()
     {
-        base._Ready();
-
         _vectors = new Vector2[(int)_fieldSize.X, (int)_fieldSize.Y];
         
         Vector2 size = GetViewport().Size.ToNumerics();

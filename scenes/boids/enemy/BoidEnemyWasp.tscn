@@ -13,7 +13,7 @@ radius = 1.18034
 
 [node name="BoidEnemyWasp" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-_behaviours = 15
+_behaviours = 30
 MaxVelocity = 100.0
 MaxForce = 100.0
 Bank360 = true

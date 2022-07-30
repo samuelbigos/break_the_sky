@@ -1233,7 +1233,6 @@ directional_shadow_max_distance = 1000.0
 [node name="MouseCursor" type="MeshInstance" parent="."]
 visible = false
 mesh = SubResource( 4 )
-material/0 = null
 
 [node name="HUD" parent="." instance=ExtResource( 1 )]
 

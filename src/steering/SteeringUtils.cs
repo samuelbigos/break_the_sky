@@ -82,6 +82,18 @@ public partial class SteeringManager
         return x * x;
     }
 
+    private static float ScaleInfluence(float influence)
+    {
+        float t = 1.0f - influence;
+        return 1.0f - Mathf.Clamp(t * t * t, 0.0f, 1.0f);
+    }
+    
+    private static float ScaleInfluenceInv(float influence)
+    {
+        float t = influence;
+        return Mathf.Clamp(t * t, 0.0f, 1.0f);
+    }
+
     private static bool CollisionDetection(Vector2 pA, Vector2 pB, Vector2 vA, Vector2 vB, float rA, float rB, 
         out Vector2 collisionPos, out Vector2 collisionNormal, out float collisionTime)
     {

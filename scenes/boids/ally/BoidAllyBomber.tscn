@@ -16,7 +16,7 @@ shader_param/u_velocity = null
 
 [node name="BoidAllyBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
-_behaviours = 15
+_behaviours = 30
 MaxVelocity = 75.0
 MinVelocity = 75.0
 MaxForce = 100.0

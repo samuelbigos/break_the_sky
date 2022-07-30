@@ -6,6 +6,7 @@ public partial class SteeringManager
 {
     public enum Behaviours // in order of importance
     {
+        DesiredVelocityOverride,
         Separation,
         AvoidObstacles,
         AvoidAllies,
@@ -25,19 +26,43 @@ public partial class SteeringManager
         COUNT,
     }
     
-    private static Vector2 Steering_Seek(in Boid boid, Vector2 position, float limit = 1.0f)
+    private static Vector2 Steering_Seek(in Boid boid, Vector2 position, float limit = -1.0f)
     {
         Vector2 desired = position - boid.Position;
-        desired.SetMag(boid.MaxSpeed * limit);
+        if (limit >= 0.0)
+        {
+            desired.SetMag(limit);
+        }
 
         Vector2 force = desired - boid.Velocity;
         return force;
     }
-    
+
     private static Vector2 Steering_Arrive(in Boid boid, Vector2 position)
     {
-        float radius = 25.0f;//Mathf.Max(1.0f, boid.Speed * boid.LookAhead);
+        return Steering_Arrive(boid, position, out float influence);
+    }
+
+    private static Vector2 Steering_Arrive(in Boid boid, Vector2 position, out float influence)
+    {
+        float radius = Mathf.Max(1.0f, boid.MaxSpeed / (boid.MaxForce * _delta));
         float dist = (boid.Position - position).Length();
+        influence = 1.0f;
+        
+        if (boid.ArriveDeadzone > 0.0f)
+        {
+            if (dist < boid.ArriveDeadzone)
+            {
+                influence = 0.1f;
+                return Steering_Stop(boid);
+            }
+
+            float t = Mathf.Clamp((dist - boid.ArriveDeadzone) / radius, 0.0f, 1.0f);
+            influence = ScaleInfluence(t);
+            return Steering_Seek(boid, position, t * boid.MaxSpeed);
+        }
+
+        influence = Mathf.Clamp(dist / radius, 0.0f, 1.0f);
         return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f));
     }
 
@@ -345,5 +370,10 @@ public partial class SteeringManager
             perp = targetToSelf.Rot90();
         Vector2 force = perp - boid.Velocity;
         return force.Limit(boid.MaxForce);
+    }
+    
+    private static Vector2 Steering_DesiredVelocityOverride(in Boid boid)
+    {
+        return boid.DesiredVelocityOverride - boid.Velocity;
     }
 }

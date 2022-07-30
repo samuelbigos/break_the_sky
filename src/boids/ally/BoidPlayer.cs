@@ -38,33 +38,49 @@ public class BoidPlayer : BoidAllyBase
         // TODO: optimise by caching the column lists
         if (droneCount > 0)
         {
-            int colCount = Mathf.CeilToInt(Mathf.Sqrt(droneCount));
-            int perCol = Mathf.CeilToInt((float)droneCount / colCount);
-            List<List<BoidAllyDrone>> boidCols = new();
-            for (int i = 0; i < colCount; i++)
-            {
-                boidCols.Add(new List<BoidAllyDrone>());
-            }
+            // int colCount = Mathf.CeilToInt(Mathf.Sqrt(droneCount));
+            // int perCol = Mathf.CeilToInt((float)droneCount / colCount);
+            // List<List<BoidAllyDrone>> boidCols = new();
+            // for (int i = 0; i < colCount; i++)
+            // {
+            //     boidCols.Add(new List<BoidAllyDrone>());
+            // }
+            //
+            // for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
+            // {
+            //     BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
+            //     if (ally is not BoidAllyDrone)
+            //         continue;
+            //
+            //     int col = (i / perCol) % colCount;
+            //     boidCols[col].Add(ally as BoidAllyDrone);
+            // }
+            //
+            // float sqrtDroneCount = (float)Math.Sqrt(droneCount);
+            // for (int x = 0; x < boidCols.Count; x++)
+            // {
+            //     boidCols[x].Sort(DroneSort);
+            //     for (int y = 0; y < boidCols[x].Count; y++)
+            //     {
+            //         BoidBase ally = boidCols[x][y];
+            //         ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
+            //         //boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f).ToNumerics();
+            //         
+            //         // set arrive deadzone to some value proportional to the amount of drones we have active
+            //         boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtDroneCount - 1.0f);
+            //         boid.ArriveWeight = 0.5f;
+            //     }
+            // }
 
+            float sqrtDroneCount = (float)Math.Sqrt(droneCount);
             for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
             {
                 BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
-                if (ally is not BoidAllyDrone)
-                    continue;
+                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
 
-                int col = (i / perCol) % colCount;
-                boidCols[col].Add(ally as BoidAllyDrone);
-            }
-            
-            for (int x = 0; x < boidCols.Count; x++)
-            {
-                boidCols[x].Sort(DroneSort);
-                for (int y = 0; y < boidCols[x].Count; y++)
-                {
-                    BoidBase ally = boidCols[x][y];
-                    ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
-                    boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f).ToNumerics();
-                }
+                // set arrive deadzone to some value proportional to the amount of drones we have active
+                boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtDroneCount);
+                boid.ArriveWeight = 0.5f;
             }
         }
 
@@ -97,18 +113,23 @@ public class BoidPlayer : BoidAllyBase
             {
                 dir += -left;
             }
+            
+            ref SteeringManager.Boid boid = ref SteeringBoid;
 
             if (dir != new Vector2(0.0f, 0.0f))
             {
                 dir = dir.Normalized();
-                dir *= MaxVelocity * delta;
-                _velocity += dir;
+                dir *= MaxVelocity;
+                boid.DesiredVelocityOverride = dir.ToNumerics();
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, false);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, true);
             }
-            _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
-
-            ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
-            boid.Position += (_velocity * delta).ToNumerics();
-            boid.Heading = lookAt.ToNumerics();
+            else
+            {
+                boid.DesiredVelocityOverride = System.Numerics.Vector2.Zero;
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, true);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, false);
+            }
         }
         
         // shooting

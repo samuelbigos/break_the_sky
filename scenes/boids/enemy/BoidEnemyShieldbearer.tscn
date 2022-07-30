@@ -10,11 +10,13 @@
 
 [node name="BoidEnemyShieldbearer" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-_behaviours = 2063
+_behaviours = 4126
 _steeringRadius = 10.0
 MaxVelocity = 50.0
 MaxForce = 50.0
 _baseResourceStats = ExtResource( 4 )
+DestroyTrauma = 0.1
+HitTrauma = 0.05
 _forcefieldScene = ExtResource( 5 )
 
 [node name="CollisionShape" parent="." index="0"]

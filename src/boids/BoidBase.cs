@@ -38,8 +38,8 @@ public partial class BoidBase : Area
 
     #region Export
 
-    [Export(PropertyHint.Flags, "Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
-    [Export] private float _steeringRadius = 5.0f;
+    [Export(PropertyHint.Flags, "DesiredVelocityOverride,Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
+    [Export] protected float _steeringRadius = 5.0f;
     
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
@@ -143,7 +143,8 @@ public partial class BoidBase : Area
     protected Vector2 _cachedHeading;
     protected State _state;
     protected ShaderMaterial _meshMaterial;
-    protected int _cachedBehaviours;
+
+    protected ref SteeringManager.Boid SteeringBoid => ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
 
     #endregion
 
@@ -191,7 +192,6 @@ public partial class BoidBase : Area
         //_OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
         
         _health = _resourceStats.MaxHealth;
-        _cachedBehaviours = _behaviours;
 
         //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
         _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
@@ -421,19 +421,17 @@ public partial class BoidBase : Area
         }
     }
 
-    protected void SetSteeringBehaviourEnabled(SteeringManager.Behaviours behaviour, bool enabled, float weight = 1.0f)
+    protected void SetSteeringBehaviourEnabled(SteeringManager.Behaviours behaviour, bool enabled, float weight = -1.0f)
     {
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         if (enabled)
         {
-            _behaviours |= (1 << (int) behaviour);
+            steeringBoid.Behaviours |= (1 << (int) behaviour);
         }
         else
         {
-            _behaviours &= ~ (1 << (int) behaviour);
+            steeringBoid.Behaviours &= ~ (1 << (int) behaviour);
         }
-
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
-        steeringBoid.Behaviours = _behaviours;
     }
 
     public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2(), Vector2 offset = new Vector2())

@@ -153,4 +153,3 @@ visible = false
 material_override = SubResource( 18 )
 cast_shadow = 0
 mesh = SubResource( 17 )
-material/0 = null

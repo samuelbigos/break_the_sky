@@ -15,7 +15,7 @@ extents = Vector3( 2.56472, 1, 4.19469 )
 
 [node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
-_behaviours = 1
+_behaviours = 0
 _steeringRadius = 25.0
 MaxVelocity = 25.0
 MinVelocity = 10.0

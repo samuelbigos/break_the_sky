@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Godot;
 using ImGuiNET;
 using static SteeringManager.Behaviours;
@@ -25,11 +26,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public byte Alignment;
         public Vector2 Position; // TODO: Separate position.
         public Vector2 Velocity;
+        public Vector2 DesiredVelocityOverride;
         public Vector2 Steering;
         public Vector2 Heading;
         public float Radius;
         public float Speed;
         public Vector2 Target;
+        public float ArriveDeadzone;
+        public float ArriveWeight;
         public int TargetIndex;
         public Vector2 TargetOffset;
         public float DesiredDistFromTargetMin;
@@ -51,7 +55,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 #if !FINAL
         public Intersection Intersection;
 #endif
-        
+
         public bool HasBehaviour(Behaviours behaviour)
         {
             return (Behaviours & (1 << (int) behaviour)) > 0;
@@ -61,10 +65,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Godot.Vector2 VelocityG => Velocity.ToGodot();
         
         public bool Empty() => Id == 0;
-        private static int _idGen;
+        public static int IdGen;
         public int GenerateId()
         {
-            Id = _idGen++;
+            Id = IdGen++;
             return Id;
         }
     }
@@ -77,10 +81,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float Size;
         
         public bool Empty() => Id == 0;
-        private static int _idGen;
+        public static int IdGen;
         public int GenerateId()
         {
-            Id = _idGen++;
+            Id = IdGen++;
             return Id;
         }
     }
@@ -108,10 +112,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
         }
 
         public bool Empty() => Id == 0;
-        private static int _idGen;
+        public static int IdGen;
         public int GenerateId()
         {
-            Id = _idGen++;
+            Id = IdGen++;
             return Id;
         }
     }
@@ -145,6 +149,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private static int _obstacleIdGen = 1;
     private static int _flowFieldIdGen = 1;
     private static float[] _behaviourWeights;
+    private static float _delta;
 
     public MeshInstance _debugMesh;
 
@@ -152,6 +157,10 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         base._Ready();
 
+        Boid.IdGen = 1;
+        Obstacle.IdGen = 1;
+        FlowField.IdGen = 1;
+        
         _debugMesh = new MeshInstance();
         SpatialMaterial mat = new();
         mat.FlagsUnshaded = true;
@@ -162,6 +171,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         AddChild(_debugMesh);
 
         _behaviourWeights = new float[(int) COUNT];
+        _behaviourWeights[(int) DesiredVelocityOverride] = 1.0f; 
         _behaviourWeights[(int) Separation] = 2.0f;
         _behaviourWeights[(int) AvoidObstacles] = 2.0f;
         _behaviourWeights[(int) AvoidAllies] = 2.0f;
@@ -169,7 +179,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _behaviourWeights[(int) MaintainSpeed] = 0.1f;
         _behaviourWeights[(int) Cohesion] = 0.1f;
         _behaviourWeights[(int) Alignment] = 0.1f;
-        _behaviourWeights[(int) Arrive] = 2.0f;
+        _behaviourWeights[(int) Arrive] = 1.0f;
         _behaviourWeights[(int) Pursuit] = 1.0f;
         _behaviourWeights[(int) Flee] = 1.0f;
         _behaviourWeights[(int) Wander] = 0.1f;
@@ -178,12 +188,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _behaviourWeights[(int) MaintainOffset] = 1.0f;
         _behaviourWeights[(int) Stop] = 1.0f;
         // this is low so it provides a subtle nudge and doesn't override other behaviours.
-        _behaviourWeights[(int) MaintainBroadside] = 0.1f; 
+        _behaviourWeights[(int) MaintainBroadside] = 0.1f;
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
+
+        _delta = delta;
 
 #if TOOLS
         if (Game.Instance == null)
@@ -256,7 +268,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
                 totalForce += force;
             }
-            
+
             totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
             boid.Steering = totalForce;
 
@@ -293,6 +305,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
         in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<byte> boidAlignments, ReadOnlySpan<Obstacle> obstacles, ReadOnlySpan<FlowField> flowFields, float delta)
     {
         Vector2 force = Vector2.Zero;
+        float influence;
+        
         switch (behaviour)
         {
             case Cohesion:
@@ -305,7 +319,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 force += Steering_Separate(boid, boids, boidPositions, obstacles, delta);
                 break;
             case Arrive:
-                force += Steering_Arrive(boid, boid.Target);
+                force += Steering_Arrive(boid, boid.Target, out influence);
+                force = force.Limit(boid.MaxForce * delta) * influence;
                 break;
             case Pursuit:
                 force += Steering_Pursuit(boid);
@@ -342,6 +357,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case MaintainBroadside:
                 force += Steering_MaintainBroadside(boid);
+                break;
+            case DesiredVelocityOverride:
+                force += Steering_DesiredVelocityOverride(boid);
                 break;
             case COUNT:
                 break;

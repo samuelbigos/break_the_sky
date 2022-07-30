@@ -18,7 +18,7 @@ extents = Vector3( 2.5, 5, 250 )
 
 [node name="BoidEnemyLaser" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
-_behaviours = 7
+_behaviours = 14
 _steeringRadius = 15.0
 MaxVelocity = 25.0
 MaxForce = 25.0
