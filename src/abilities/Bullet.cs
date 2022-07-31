@@ -38,8 +38,11 @@ public partial class Bullet : Area
 		_mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
 
 		Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.y), 0.0f);
-		
-		Connect("area_entered", this, nameof(_OnAreaEntered));
+
+		if (!IsConnected("area_entered", this, nameof(_OnAreaEntered)))
+		{
+			Connect("area_entered", this, nameof(_OnAreaEntered));
+		}
 	}
 	
 	public override void _Process(float delta)

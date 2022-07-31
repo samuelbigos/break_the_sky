@@ -46,7 +46,7 @@ public partial class BoidEnemyWasp : BoidEnemyBase
     private void Shoot()
     {
         SeekerMissile missile = _bulletScene.Instance() as SeekerMissile;
-        Debug.Assert(missile != null, nameof(missile) + " != null");
+        DebugUtils.Assert(missile != null, nameof(missile) + " != null");
         Vector3 spawnPos = _weaponPosition.GlobalTransform.origin;
         float angle = (_shotsFired - _resourceStats.AttackCount * 0.5f + 0.5f) * Mathf.Pi / 10.0f;
         Vector2 spawnVel = _cachedVelocity + (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Rotated(angle) * 20.0f;

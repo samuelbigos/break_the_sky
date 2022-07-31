@@ -101,7 +101,7 @@ public partial class HUD : Singleton<HUD>
             _warningIndicators.TryGetValue(boid, out WarningIndicator indicator);
             if (BoidOffScreen(boid, out Vector2 pos, 0.05f))
             {
-                if (indicator != null)
+                if (!indicator.Null())
                 {
                     indicator.Visible = true;
                     indicator.GlobalPosition(GameCamera.Instance.ProjectToZero(pos));
@@ -116,7 +116,7 @@ public partial class HUD : Singleton<HUD>
                     boid.OnBoidDestroyed += _OnBoidDestroyed;
                 }
             }
-            else if (indicator != null)
+            else if (!indicator.Null())
             {
                 indicator.Visible = false;
             }

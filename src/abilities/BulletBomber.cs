@@ -4,6 +4,8 @@ public class BulletBomber : Bullet
 {
     public BoidBase Parent;
     public BoidBase Target;
+
+    private Vector2 _cachedParentPos;
     
     public override void _Process(float delta)
     {
@@ -22,7 +24,11 @@ public class BulletBomber : Bullet
 
     protected override void ProcessOutOfBounds()
     {
-        if((Parent.GlobalPosition - GlobalPosition).LengthSquared() > Mathf.Pow(_range, 2.0f))
+        if (IsInstanceValid(Parent))
+        {
+            _cachedParentPos = Parent.GlobalPosition;
+        }
+        if((_cachedParentPos - GlobalPosition).LengthSquared() > Mathf.Pow(_range, 2.0f))
         {
             QueueFree();
         }

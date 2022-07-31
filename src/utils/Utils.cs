@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Object = Godot.Object;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
@@ -237,5 +238,10 @@ public static class Utils
     public static float Remap(float x, float a, float b, float c, float d)
     {
         return (((x - a) / (b - a)) * (d - c)) + c;
+    }
+    
+    public static bool Null(this Object instance)
+    {
+        return instance == null || instance.NativeInstance == IntPtr.Zero;
     }
 }

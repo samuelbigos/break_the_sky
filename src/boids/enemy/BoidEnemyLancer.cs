@@ -31,7 +31,7 @@ public partial class BoidEnemyLancer : BoidEnemyBase
     private void Shoot()
     {
         Bullet bullet = _bulletScene.Instance() as Bullet;
-        Debug.Assert(bullet != null, nameof(bullet) + " != null");
+        DebugUtils.Assert(bullet != null, nameof(bullet) + " != null");
         
         Vector3 spawnPos = _weaponPosition1.GlobalTransform.origin;
         if (_shotsFired % 2 == 0)

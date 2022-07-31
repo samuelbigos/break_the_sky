@@ -149,6 +149,7 @@ public partial class BoidEnemyBase : BoidBase
     {
         base._OnTargetBoidDestroyed(boid);
         
+        SetTarget(TargetType.None);
         SwitchAiState(AIState.Seeking);
     }
 }

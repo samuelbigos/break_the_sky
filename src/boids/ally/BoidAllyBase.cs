@@ -80,7 +80,7 @@ public partial class BoidAllyBase : BoidBase
             target = enemy;
         }
         
-        if (target != null)
+        if (!target.Null())
         {
             target.IsTargetted = true;
             SetTarget(TargetType.Enemy, target);
@@ -93,7 +93,7 @@ public partial class BoidAllyBase : BoidBase
         if (_resourceStats.MicroTurrets)
         {
             _microTurretSearchTimer -= delta;
-            if (_microTurretTarget == null && _microTurretSearchTimer < 0.0f)
+            if (_microTurretTarget.Null() && _microTurretSearchTimer < 0.0f)
             {
                 // TODO: use quadtree
                 float closest = _resourceStats.MicroTurretRange * _resourceStats.MicroTurretRange;
@@ -108,14 +108,14 @@ public partial class BoidAllyBase : BoidBase
                 }
 
                 _microTurretSearchTimer = Utils.Rng.Randf() * 0.1f + 0.1f; // random so all allies aren't synced.
-                if (_microTurretTarget != null)
+                if (!_microTurretTarget.Null())
                 {
                     _microTurretTarget.OnBoidDestroyed += _OnMicroTurretTargetDestroyed;
                 }
             }
 
             _microTurretCooldown -= delta;
-            if (_microTurretTarget != null && _microTurretCooldown < 0.0f)
+            if (!_microTurretTarget.Null() && _microTurretCooldown < 0.0f)
             {
                 _microTurretCooldown = _resourceStats.MicroTurretCooldown;
                 Vector2 toTarget = _microTurretTarget.GlobalPosition - GlobalPosition;
@@ -162,7 +162,7 @@ public partial class BoidAllyBase : BoidBase
 
     protected virtual void _OnEnterAIState_Idle()
     {
-        if (_engageTarget != null)
+        if (!_engageTarget.Null())
         {
             _engageTarget.OnBoidDestroyed -= _OnEngageTargetBoidDestroyed;
             _engageTarget = null;

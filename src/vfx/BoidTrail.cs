@@ -80,7 +80,7 @@ public class BoidTrail : Spatial
                 case TrailType.Burst:
                     _burstParticles.Visible = true;
                     ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
-                    Debug.Assert(processMaterial != null);
+                    DebugUtils.Assert(processMaterial != null, "processMaterial != null");
                     processMaterial.Color = ColourManager.Instance.White;
                     _burstParticles.Emitting = true;
                     break;

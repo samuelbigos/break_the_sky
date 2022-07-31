@@ -57,4 +57,3 @@ transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 )
 visible = false
 material_override = SubResource( 4 )
 mesh = ExtResource( 12 )
-material/0 = null

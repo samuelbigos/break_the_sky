@@ -13,6 +13,7 @@ public partial class Cursor : Spatial
 
     [Export] public int TotalPips = 48;
     [Export] public float RotSpeed = 5.0f;
+    [Export] public float YFromCamera = 250.0f;
 
     public int PipCount = 0;
     public float Size = 1.0f;
@@ -42,7 +43,13 @@ public partial class Cursor : Spatial
     {
         base._Process(delta);
         
-        GlobalTransform = new Transform(GlobalTransform.basis, GameCamera.Instance.MousePosition.To3D());
+        Vector2 mouse = GetViewport().GetMousePosition();
+        Vector3 origin = GameCamera.Instance.ProjectRayOrigin(mouse);
+        Vector3 normal = GameCamera.Instance.ProjectRayNormal(mouse);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * YFromCamera;
+        Vector3 pos = new(hit.x, GameCamera.Instance.GlobalTransform.origin.y - YFromCamera, hit.z);
+
+        GlobalTransform = new Transform(GlobalTransform.basis, pos);
         _countMat.SetShaderParam("u_count", PipCount);
 
         if (Activated)

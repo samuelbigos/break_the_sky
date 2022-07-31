@@ -211,7 +211,7 @@ public partial class BoidBase : Area
         
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
-        if (Game.Instance != null)
+        if (!Game.Instance.Null())
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
     }
 
@@ -349,7 +349,7 @@ public partial class BoidBase : Area
             Particles hitParticles = _hitParticlesScene.Instance<Particles>();
             Game.Instance.AddChild(hitParticles);
             ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
-            Debug.Assert(mat != null);
+            DebugUtils.Assert(mat != null, "mat != null");
             Vector3 fromCentre = pos.To3D() - GlobalTransform.origin;
             mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
             hitParticles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
@@ -442,7 +442,7 @@ public partial class BoidBase : Area
     {
         Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
 
-        if (_targetBoid != null)
+        if (!_targetBoid.Null())
         {
             _targetBoid.OnBoidDestroyed -= _OnTargetBoidDestroyed;
         }
@@ -456,7 +456,7 @@ public partial class BoidBase : Area
         {
             case TargetType.Ally:
             case TargetType.Enemy:
-                Debug.Assert(boid != null);
+                DebugUtils.Assert(boid != null, "boid != null");
                 steeringBoid.TargetIndex = boid.SteeringId;
                 steeringBoid.TargetOffset = offset.ToNumerics();
                 _targetBoid.OnBoidDestroyed += _OnTargetBoidDestroyed;
@@ -486,7 +486,7 @@ public partial class BoidBase : Area
             return;
         
         BoidBase boid = area as BoidBase;
-        if (boid != null)
+        if (!boid.Null())
         {
             if (boid.Alignment == Alignment)
             {
@@ -494,7 +494,7 @@ public partial class BoidBase : Area
             }
         }
         
-        if (boid != null && !boid.Destroyed)
+        if (!boid.Null() && !boid.Destroyed)
         {
             boid.SendHitMessage(_resourceStats.CollisionDamage, _cachedVelocity, GlobalTransform.origin.To2D(), Alignment);
             return;
@@ -528,14 +528,13 @@ public partial class BoidBase : Area
         if (_targetType is TargetType.Ally or TargetType.Enemy)
         {
             boid.OnBoidDestroyed -= _OnTargetBoidDestroyed;
-            SetTarget(TargetType.None);
         }
     }
 
     protected virtual void _OnSkillsChanged(List<ResourceSkillNode> skillNodes)
     {
         _resourceStats = _baseResourceStats.Duplicate() as ResourceStats;
-        Debug.Assert(_resourceStats != null, "_stats != null");
+        DebugUtils.Assert(_resourceStats != null, "_stats != null");
         foreach (ResourceSkillNode skill in skillNodes)
         {
             _resourceStats.AttackDamage *= skill.AttackDamage;

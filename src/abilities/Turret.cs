@@ -31,7 +31,7 @@ public partial class Turret : MeshInstance
         base._Process(delta);
 
         BoidPlayer player = Game.Player;
-        if (player != null)
+        if (IsInstanceValid(player))
         {
             Vector2 toPlayer = (player.GlobalTransform.origin - GlobalTransform.origin).Normalized().To2D();
             Vector2 desiredDir = toPlayer;
@@ -58,7 +58,7 @@ public partial class Turret : MeshInstance
         }
 
         _shootTimer -= delta;
-        if (Target != null)
+        if (!Target.Null())
         {
             _burstCooldownTimer -= delta;
             if (_burstCooldownTimer < 0.0f)

@@ -427,7 +427,7 @@ public class AISpawningDirector : Node
     private void _OnEnemyDestroyed(BoidBase boid)
     {
         BoidEnemyBase enemy = boid as BoidEnemyBase;
-        Debug.Assert(enemy != null, "enemy != null");
+        DebugUtils.Assert(enemy != null, "enemy != null");
         _totalBudgetDestoyed += enemy.Data.SpawningCost;
     }
 

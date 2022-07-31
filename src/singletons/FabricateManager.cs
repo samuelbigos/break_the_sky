@@ -27,7 +27,7 @@ public class FabricateManager : Singleton<FabricateManager>
     {
         base._Ready();
 
-        if (HUD.Instance != null)
+        if (!HUD.Instance.Null())
         {
             HUD.Instance.OnFabricateButtonPressed += _OnFabricateButtonPressed;
             HUD.Instance.OnQueueButtonPressed += _OnQueueButtonPressed;

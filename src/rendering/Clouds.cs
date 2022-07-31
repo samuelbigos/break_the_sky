@@ -70,7 +70,7 @@ public class Clouds : Spatial
     {
         base._Process(delta);
 
-        if (GameCamera.Instance != null)
+        if (!GameCamera.Instance.Null())
         {
             _boidVelMapCamera.GlobalTransform = GameCamera.Instance.BaseTransform;
             
@@ -83,7 +83,7 @@ public class Clouds : Spatial
             mat.SetShaderParam("u_parallax_offset", -GameCamera.Instance.GlobalTransform.origin.To2D() * 0.25f);
         }
 
-        if (Game.Instance != null)
+        if (!Game.Instance.Null())
         {
             float displaceRadius = 12.5f;
             List<BoidBase> boids = new();

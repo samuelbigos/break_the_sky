@@ -41,11 +41,13 @@ public partial class BoidAllyBomber : BoidAllyBase
                 break;
             }
             case AIState.Idle:
+            {
                 break;
+            }
         }
         
         // resupply
-        if (_bomb == null)
+        if (_bomb.Null())
         {
             float dist = (Game.Player.GlobalPosition - GlobalPosition).LengthSquared();
             if (dist < Mathf.Pow(_resupplyRadius, 2.0f))
@@ -63,9 +65,15 @@ public partial class BoidAllyBomber : BoidAllyBase
         {
             case BomberState.Bomb:
             {
+                if (_bomb.Null())
+                {
+                    EnterResupplyState();
+                    return;
+                }
+                
                 float distSq = (_targetBoid.GlobalPosition - GlobalPosition).LengthSquared();
                 float dot = _cachedVelocity.Normalized().Dot((TargetPos - GlobalPosition).Normalized());
-                if (distSq < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
+                if (!_bomb.Null() && distSq < Mathf.Pow(_shootRange, 2.0f) && dot > _shootTargetAlignment)
                 {
                     Shoot((TargetPos - GlobalPosition).Normalized());
 
@@ -74,6 +82,7 @@ public partial class BoidAllyBomber : BoidAllyBase
                     _fleeTimer = _fleeTime;
                     _bomberState = BomberState.Flee;
                 }
+                
                 break;
             }
             case BomberState.Flee:
@@ -83,17 +92,14 @@ public partial class BoidAllyBomber : BoidAllyBase
                 {
                     SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, false);
                     SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-                    SetTarget(TargetType.Ally, Game.Player);
-                    _bomberState = BomberState.Resupply;
+                    EnterResupplyState();
                 }
                 break;
             }
             case BomberState.Resupply:
             {
-                if (_bomb != null)
+                if (!_bomb.Null())
                 {
-                    DebugUtils.Assert(_engageTarget != null, "_engageTarget != null");
-                    DebugUtils.Assert(!_engageTarget.Destroyed, "!_engageTarget.Destroyed");
                     SetTarget(TargetType.Enemy, _engageTarget);
                     _bomberState = BomberState.Bomb;
                 }
@@ -102,6 +108,12 @@ public partial class BoidAllyBomber : BoidAllyBase
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void EnterResupplyState()
+    {
+        SetTarget(TargetType.Ally, Game.Player);
+        _bomberState = BomberState.Resupply;
     }
 
     private void Resupply()
@@ -117,14 +129,15 @@ public partial class BoidAllyBomber : BoidAllyBase
     {
         _bomb.OnBulletDestroyed -= OnBulletDestroyed;
         _bomb = null;
+        
+        if (_aiState == AIState.Engaged)
+        {
+            EnterResupplyState();
+        }
     }
 
     private void Shoot(Vector2 dir)
     {
-        DebugUtils.Assert(IsInstanceValid(_bomb), "IsInstanceValid(_bomb)");
-        if (!IsInstanceValid(_bomb))
-            return;
-        
         Vector2 pos = _bomb.GlobalPosition;
         RemoveChild(_bomb);
         Game.Instance.AddChild(_bomb);
