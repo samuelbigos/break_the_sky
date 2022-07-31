@@ -1,11 +1,11 @@
 [gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/enemies/wasp/wasp_antigrav.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_body.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyWasp.cs" type="Script" id=3]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" type="Resource" id=4]
 [ext_resource path="res://scenes/abilities/SeekerMissile.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/mesh/enemies/wasp/wasp_body.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_antigrav.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
 
 [sub_resource type="CapsuleShape" id=1]
@@ -29,16 +29,17 @@ transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = null
-mesh = ExtResource( 6 )
+mesh = ExtResource( 2 )
+material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.063448, 0, -0.0634489 )
 
 [node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
 material_override = ExtResource( 7 )
-mesh = ExtResource( 2 )
+mesh = ExtResource( 6 )
 skeleton = NodePath("../..")
+material/0 = null
 
 [node name="WeaponPosition" type="Spatial" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.81574, -0.708372 )

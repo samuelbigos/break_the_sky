@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded;
+render_mode unshaded, depth_test_disable;
 
 uniform int u_count;
 

@@ -1,10 +1,10 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
 [ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scenes/vfx/DamagedVFX.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/boids/BoidBase.cs" type="Script" id=4]
-[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=5]
+[ext_resource path="res://assets/material/boid_mat_spatial.tres" type="Material" id=5]
 [ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
 [ext_resource path="res://scenes/vfx/HitVFX.tscn" type="PackedScene" id=8]
@@ -14,12 +14,6 @@
 
 [sub_resource type="BoxShape" id=7]
 extents = Vector3( 2.472, 1, 2.241 )
-
-[sub_resource type="ShaderMaterial" id=3]
-resource_local_to_scene = true
-shader = ExtResource( 5 )
-shader_param/u_primary_colour = null
-shader_param/u_secondary_colour = null
 
 [sub_resource type="SpatialMaterial" id=4]
 flags_unshaded = true
@@ -43,7 +37,7 @@ _pickupMaterialScene = ExtResource( 10 )
 shape = SubResource( 7 )
 
 [node name="Mesh" type="MeshInstance" parent="."]
-material_override = SubResource( 3 )
+material_override = ExtResource( 5 )
 script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
@@ -63,3 +57,4 @@ transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 )
 visible = false
 material_override = SubResource( 4 )
 mesh = ExtResource( 12 )
+material/0 = null

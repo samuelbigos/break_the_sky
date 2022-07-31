@@ -1,12 +1,11 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://src/abilities/Turret.cs" type="Script" id=1]
-[ext_resource path="res://assets/mesh/enemies/carrier/carrier_turret.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/ships/human_carrier/carrier_turret.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/abilities/MicroBullet.tscn" type="PackedScene" id=3]
 
 [node name="Turret" type="MeshInstance"]
 mesh = ExtResource( 2 )
-material/0 = null
 script = ExtResource( 1 )
 Barrel1Path = NodePath("Barrel1")
 Barrel2Path = NodePath("Barrel2")

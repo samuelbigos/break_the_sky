@@ -1,12 +1,14 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyDrone.cs" type="Script" id=1]
-[ext_resource path="res://assets/mesh/allies/alien_drone_b/alien_drone_b_body.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/material/boid_mat_spatial.tres" type="Material" id=2]
 [ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=4]
-[ext_resource path="res://assets/mesh/allies/alien_drone_b/alien_drone_b_rotor.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/mesh/ships/alien_drone_b/alien_drone_b_rotor.obj" type="ArrayMesh" id=5]
 [ext_resource path="res://assets/data/stats/allies/stats_ally_drone.tres" type="Resource" id=6]
 [ext_resource path="res://assets/sfx/shot.wav" type="AudioStream" id=7]
+[ext_resource path="res://assets/mesh/ships/alien_drone_b/alien_drone_b_body.obj" type="ArrayMesh" id=8]
+[ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=9]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
@@ -21,6 +23,8 @@ BankingRate = 5.0
 BankingAmount = 1.75
 _baseResourceStats = ExtResource( 6 )
 SfxShootMicroPath = NodePath("SFXShootMicro")
+_destroyTime = 3.0
+_shootSize = 1.5
 _engageRange = 50.0
 RotorMeshPath = NodePath("Mesh/Rotor")
 SfxShootPath = NodePath("SFXShoot")
@@ -31,15 +35,20 @@ _rotorSpinSpeed = 25.0
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = null
-mesh = ExtResource( 2 )
+mesh = ExtResource( 8 )
 
 [node name="BoidTrail" parent="Mesh" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.03809, -0.117465, -1.63363 )
 _lineInterval = 0.016
-_lineWidth = 0.5
+_lineWidth = 0.2
 
-[node name="Rotor" type="MeshInstance" parent="Mesh" index="1"]
+[node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource( 9 )]
+transform = Transform( 0.99883, 0, -0.0483617, 0, 1, 0, 0.0483617, 0, 0.99883, -2.06285, -0.117465, -1.64957 )
+_lineInterval = 0.016
+_lineWidth = 0.2
+
+[node name="Rotor" type="MeshInstance" parent="Mesh" index="2"]
+material_override = ExtResource( 2 )
 mesh = ExtResource( 5 )
 
 [node name="SFXShoot" type="AudioStreamPlayer2D" parent="." index="6"]

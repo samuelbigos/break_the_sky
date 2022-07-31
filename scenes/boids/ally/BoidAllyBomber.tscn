@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/boids/ally/BoidAllyBomber.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/mesh/allies/alien_drone_a/alien_drone_a_body.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/mesh/ships/alien_drone_a/alien_drone_a_body.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=4]
 [ext_resource path="res://assets/shader/boid_velocity.shader" type="Shader" id=5]
 [ext_resource path="res://scenes/abilities/BulletBomber.tscn" type="PackedScene" id=6]
@@ -25,6 +25,8 @@ BankingRate = 2.0
 BankingAmount = 1.5
 _baseResourceStats = ExtResource( 7 )
 SfxShootMicroPath = NodePath("SFXShootMicro")
+_destroyTime = 3.0
+_shootSize = 1.5
 _engageRange = 100.0
 SfxShootPath = NodePath("SFXShoot")
 _bulletScene = ExtResource( 6 )
@@ -39,12 +41,12 @@ shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
 transform = Transform( 1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0 )
-material_override = null
 mesh = ExtResource( 3 )
 _meshMaterials = [ SubResource( 3 ) ]
 
 [node name="BoidTrail" parent="Mesh" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.73763 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0865458, -2.70408 )
+_type = 1
 
 [node name="SFXShoot" type="AudioStreamPlayer2D" parent="." index="6"]
 stream = ExtResource( 4 )

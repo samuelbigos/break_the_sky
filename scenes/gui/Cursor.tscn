@@ -12,9 +12,11 @@ shader_param/u_count = null
 
 [sub_resource type="SpatialMaterial" id=3]
 flags_unshaded = true
+flags_no_depth_test = true
 
 [sub_resource type="SpatialMaterial" id=4]
 flags_unshaded = true
+flags_no_depth_test = true
 
 [node name="Cursor" type="Spatial"]
 transform = Transform( 15, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0 )

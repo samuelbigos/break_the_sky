@@ -1,14 +1,15 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/enemies/carrier/carrier_antigrav.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/mesh/ships/human_carrier/carrier_antigrav.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/boids/enemy/BoidEnemyCarrier.cs" type="Script" id=3]
-[ext_resource path="res://assets/mesh/enemies/carrier/carrier_body.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://assets/mesh/ships/human_carrier/carrier_body.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" type="Resource" id=5]
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" type="Resource" id=6]
 [ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
 [ext_resource path="res://scenes/abilities/Turret.tscn" type="PackedScene" id=8]
 [ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=9]
+[ext_resource path="res://assets/material/boid_mat_spatial.tres" type="Material" id=10]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.56472, 1, 4.19469 )
@@ -42,7 +43,6 @@ transform = Transform( 2.46802, 0, 0, 0, 2.8404, 0, 0, 0, 4.49237, 0, 0, 0.24768
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = null
 mesh = ExtResource( 4 )
 
 [node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
@@ -51,30 +51,36 @@ mesh = ExtResource( 2 )
 
 [node name="Turret1" parent="Mesh" index="2" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499 )
+material_override = ExtResource( 10 )
 ClampRangeDeg = 150.0
 
 [node name="Turret2" parent="Mesh" index="3" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499 )
+material_override = ExtResource( 10 )
 ClampRangeDeg = 150.0
 
 [node name="Turret3" parent="Mesh" index="4" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, 1.02147, -2.97812 )
+material_override = ExtResource( 10 )
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret4" parent="Mesh" index="5" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, 1.01012, -2.97917 )
+material_override = ExtResource( 10 )
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret5" parent="Mesh" index="6" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8.73603, -0.578, -7.43053 )
+material_override = ExtResource( 10 )
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret6" parent="Mesh" index="7" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.95714, -0.577606, -7.64544 )
+material_override = ExtResource( 10 )
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0

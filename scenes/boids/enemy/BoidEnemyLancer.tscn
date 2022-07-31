@@ -6,8 +6,8 @@
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_lancer.tres" type="Resource" id=4]
 [ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=6]
-[ext_resource path="res://assets/mesh/enemies/lancer/lancer_antigrav.obj" type="ArrayMesh" id=7]
-[ext_resource path="res://assets/mesh/enemies/lancer/lancer_body.obj" type="ArrayMesh" id=8]
+[ext_resource path="res://assets/mesh/ships/human_lancer/lancer_antigrav.obj" type="ArrayMesh" id=7]
+[ext_resource path="res://assets/mesh/ships/human_lancer/lancer_body.obj" type="ArrayMesh" id=8]
 
 [sub_resource type="CapsuleShape" id=1]
 
@@ -30,8 +30,8 @@ transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = null
 mesh = ExtResource( 8 )
+material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.711902, -0.852419, -3.94605 )
@@ -43,6 +43,7 @@ _burstParticlesPath = NodePath("../BoidTrail/Particles")
 [node name="Antigrav" type="MeshInstance" parent="Mesh" index="2"]
 material_override = ExtResource( 2 )
 mesh = ExtResource( 7 )
+material/0 = null
 
 [node name="WeaponPosition" type="Spatial" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.49073, -2.20126, 3.12677 )

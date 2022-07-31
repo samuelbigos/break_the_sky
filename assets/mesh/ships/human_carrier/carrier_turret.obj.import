@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/carrier_turret.obj-7276ae96c1d117dc21b4d52ac99443b1.mesh"
+
+[deps]
+
+files=[ "res://.import/carrier_turret.obj-7276ae96c1d117dc21b4d52ac99443b1.mesh" ]
+
+source_file="res://assets/mesh/ships/human_carrier/carrier_turret.obj"
+dest_files=[ "res://.import/carrier_turret.obj-7276ae96c1d117dc21b4d52ac99443b1.mesh", "res://.import/carrier_turret.obj-7276ae96c1d117dc21b4d52ac99443b1.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

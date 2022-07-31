@@ -159,7 +159,7 @@ public class BoidPlayer : BoidAllyBase
         {
             _sending = true;
             _sendTime = 0.0f;
-            _totalSendTime = Mathf.RangeLerp(_totalAllies, _sendScaleMinMax.x, _sendScaleMinMax.y, 5.0f, 1.0f);
+            _totalSendTime = Utils.Remap(_totalAllies, _sendScaleMinMax.x, _sendScaleMinMax.y, 5.0f, 1.0f);
         }
 
         if (@event.IsActionReleased("shoot"))

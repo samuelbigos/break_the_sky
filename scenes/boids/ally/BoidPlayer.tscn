@@ -2,7 +2,7 @@
 
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/ally/BoidPlayer.cs" type="Script" id=2]
-[ext_resource path="res://assets/mesh/allies/alien_drone_b/alien_drone_b_body.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/mesh/ships/alien_a/alien_a_body.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/data/stats/allies/stats_ally_player.tres" type="Resource" id=4]
 [ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=7]
@@ -13,10 +13,13 @@ _behaviours = 1
 MaxVelocity = 120.0
 MaxForce = 200.0
 Bank360 = true
-BankingRate = 5.0
-BankingAmount = 1.75
+BankingRate = 1.0
+BankingAmount = 1.0
 _baseResourceStats = ExtResource( 4 )
 SfxShootMicroPath = NodePath("SFXShootMicro")
+_destroyTime = 3.0
+_shootSize = 1.5
+_engageRange = 0.0
 _bulletScene = ExtResource( 6 )
 _sfxPickupPath = NodePath("SFXPickup")
 _damping = 0.05
@@ -24,7 +27,6 @@ _totalSendTime = 1.0
 _sendScaleMinMax = Vector2( 10, 100 )
 
 [node name="Mesh" parent="." index="1"]
-material_override = null
 mesh = ExtResource( 3 )
 
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="6"]

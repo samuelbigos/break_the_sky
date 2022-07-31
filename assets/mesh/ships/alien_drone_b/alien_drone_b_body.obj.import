@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/alien_drone_b_body.obj-39ad9a9e7271220d71a1142cb7ca5bcd.mesh"
+
+[deps]
+
+files=[ "res://.import/alien_drone_b_body.obj-39ad9a9e7271220d71a1142cb7ca5bcd.mesh" ]
+
+source_file="res://assets/mesh/ships/alien_drone_b/alien_drone_b_body.obj"
+dest_files=[ "res://.import/alien_drone_b_body.obj-39ad9a9e7271220d71a1142cb7ca5bcd.mesh", "res://.import/alien_drone_b_body.obj-39ad9a9e7271220d71a1142cb7ca5bcd.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

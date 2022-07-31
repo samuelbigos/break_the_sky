@@ -233,4 +233,9 @@ public static class Utils
         string[] split = s.Split('(')[1].Split(')')[0].Split(',');
         return new Godot.Vector2(split[0].ToFloat(), split[1].ToFloat());
     }
+    
+    public static float Remap(float x, float a, float b, float c, float d)
+    {
+        return (((x - a) / (b - a)) * (d - c)) + c;
+    }
 }

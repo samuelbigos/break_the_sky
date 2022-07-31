@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/data/ResourceBoidAlly.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBomber.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/mesh/allies/alien_drone_a/alien_drone_a_body.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/mesh/ships/alien_drone_a/alien_drone_a_body.obj" type="ArrayMesh" id=3]
 
 [resource]
 script = ExtResource( 1 )

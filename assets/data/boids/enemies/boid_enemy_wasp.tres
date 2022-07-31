@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/data/ResourceBoidEnemy.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/enemy/BoidEnemyWasp.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/mesh/enemies/wasp/wasp_body.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_body.obj" type="ArrayMesh" id=3]
 
 [resource]
 script = ExtResource( 1 )

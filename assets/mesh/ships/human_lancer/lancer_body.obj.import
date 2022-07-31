@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/lancer_body.obj-dad6cab57ff9d9722444cc4565c52280.mesh"
+
+[deps]
+
+files=[ "res://.import/lancer_body.obj-dad6cab57ff9d9722444cc4565c52280.mesh" ]
+
+source_file="res://assets/mesh/ships/human_lancer/lancer_body.obj"
+dest_files=[ "res://.import/lancer_body.obj-dad6cab57ff9d9722444cc4565c52280.mesh", "res://.import/lancer_body.obj-dad6cab57ff9d9722444cc4565c52280.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
