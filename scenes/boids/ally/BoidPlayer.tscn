@@ -12,15 +12,20 @@ script = ExtResource( 2 )
 _behaviours = 1
 MaxVelocity = 120.0
 MaxForce = 200.0
+Bank360 = true
+BankingRate = 5.0
+BankingAmount = 1.75
 _baseResourceStats = ExtResource( 4 )
+SfxShootMicroPath = NodePath("SFXShootMicro")
 _bulletScene = ExtResource( 6 )
 _sfxPickupPath = NodePath("SFXPickup")
 _damping = 0.05
+_totalSendTime = 1.0
+_sendScaleMinMax = Vector2( 10, 100 )
 
 [node name="Mesh" parent="." index="1"]
 material_override = null
 mesh = ExtResource( 3 )
-material/0 = null
 
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="6"]
 stream = ExtResource( 7 )

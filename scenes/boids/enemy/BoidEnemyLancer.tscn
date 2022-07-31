@@ -32,7 +32,6 @@ shape = SubResource( 1 )
 [node name="Mesh" parent="." index="1"]
 material_override = null
 mesh = ExtResource( 8 )
-material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.711902, -0.852419, -3.94605 )
@@ -44,7 +43,6 @@ _burstParticlesPath = NodePath("../BoidTrail/Particles")
 [node name="Antigrav" type="MeshInstance" parent="Mesh" index="2"]
 material_override = ExtResource( 2 )
 mesh = ExtResource( 7 )
-material/0 = null
 
 [node name="WeaponPosition" type="Spatial" parent="." index="5"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.49073, -2.20126, 3.12677 )

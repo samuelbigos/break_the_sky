@@ -72,7 +72,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
 
                     if ((_targetBoid.GlobalPosition - GlobalPosition).Length() > EngageRange + 50.0f)
                     {
-                        EnterAIState(AIState.Seeking);
+                        SwitchAiState(AIState.Seeking);
                     }
 
                     break;
@@ -152,12 +152,12 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     private void LaserInactive()
     {
         _laserArea.Monitorable = false;
-        EnterAIState(AIState.Seeking);
+        SwitchAiState(AIState.Seeking);
     }
 
-    protected override void _Destroy(Vector2 hitDir, float hitStrength)
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
     {
-        base._Destroy(hitDir, hitStrength);
+        base._OnDestroy(hitDir, hitStrength);
         
         _laserWarningMesh.Visible = false;
     }

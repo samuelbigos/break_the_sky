@@ -8,6 +8,7 @@ public partial class BoidAllyDrone : BoidAllyBase
     [Export] private float _rotorSpinSpeed = 25.0f;
 
     [OnReadyGet] private MeshInstance _rotorMesh;
+    [OnReadyGet] private AudioStreamPlayer2D _sfxShoot;
 
     public float ShootCooldown => _shootCooldown;
     
@@ -17,24 +18,28 @@ public partial class BoidAllyDrone : BoidAllyBase
     public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
         base.Init(data, onDestroy, position, velocity);
-        
-        SetTarget(TargetType.Ally, Game.Player);
+
+        SteeringBoid.DesiredDistFromTargetMin = _engageRange - 10.0f;
+        SteeringBoid.DesiredDistFromTargetMax = _engageRange + 10.0f;
     }
 
     protected override void ProcessAlive(float delta)
     {
         base.ProcessAlive(delta);
-        
-        // shooting
-        Vector2 shootDir = (GameCamera.Instance.MousePosition - GlobalPosition).Normalized();
-        
-        _shootCooldown -= delta;
-        if (_cachedShoot)
+
+        switch (_aiState)
         {
-            if (_CanShoot(shootDir))
+            case AIState.Engaged:
             {
-                _Shoot(shootDir);
+                _shootCooldown -= delta;
+                if (_shootCooldown <= 0.0f)
+                {
+                    Shoot();
+                }
+                break;
             }
+            case AIState.Idle:
+                break;
         }
 
         if (_shootCooldown > 0.0f)
@@ -47,31 +52,17 @@ public partial class BoidAllyDrone : BoidAllyBase
         
         _rotorMesh.RotateY(_rotorSpinSpeed * delta);
     }
-
-    public override void _Input(InputEvent @event)
+    
+    protected override void _OnEnterAIState_Engaged()
     {
-        base._Input(@event);
-
-        if (@event.IsActionPressed("shoot"))
-        {
-            _cachedShoot = true;
-        }
-
-        if (@event.IsActionReleased("shoot"))
-        {
-            _cachedShoot = false;
-        }
+        base._OnEnterAIState_Engaged();
+        
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.MaintainDistance, true);
     }
 
-    protected override bool _CanShoot(Vector2 dir)
+    private void Shoot()
     {
-        return _shootCooldown <= 0.0 && base._CanShoot(dir);
-    }
-
-    protected override void _Shoot(Vector2 dir)
-    {
-        base._Shoot(dir);
-
+        Vector2 dir = (_targetBoid.GlobalPosition - GlobalPosition).Normalized();
         _shootCooldown = _resourceStats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);

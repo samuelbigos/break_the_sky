@@ -1,0 +1,39 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://assets/gui/cursor/cursor_outer.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/gui/cursor/cursor_inner_count.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/gui/cursor/cursor_circle.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://src/gui/Cursor.cs" type="Script" id=4]
+[ext_resource path="res://assets/shader/cursor.shader" type="Shader" id=5]
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = ExtResource( 5 )
+shader_param/u_count = null
+
+[sub_resource type="SpatialMaterial" id=3]
+flags_unshaded = true
+
+[sub_resource type="SpatialMaterial" id=4]
+flags_unshaded = true
+
+[node name="Cursor" type="Spatial"]
+transform = Transform( 15, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0 )
+script = ExtResource( 4 )
+CountMeshPath = NodePath("Count")
+CircleMeshPath = NodePath("Circle")
+OuterMeshPath = NodePath("Outer")
+
+[node name="Count" type="MeshInstance" parent="."]
+material_override = SubResource( 2 )
+cast_shadow = 0
+mesh = ExtResource( 2 )
+
+[node name="Circle" type="MeshInstance" parent="."]
+material_override = SubResource( 3 )
+cast_shadow = 0
+mesh = ExtResource( 3 )
+
+[node name="Outer" type="MeshInstance" parent="."]
+material_override = SubResource( 4 )
+cast_shadow = 0
+mesh = ExtResource( 1 )

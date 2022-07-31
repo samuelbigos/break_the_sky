@@ -70,6 +70,7 @@ public partial class BoidBase : Area
     
     [OnReadyGet] protected MeshInstance _selectedIndicator;
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
+    [OnReadyGet] protected CollisionShape _collisionShape;
 
     #endregion
 
@@ -238,6 +239,9 @@ public partial class BoidBase : Area
         Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
 
+        _cachedVelocity = steeringBoid.Velocity.ToGodot();
+        _cachedHeading = steeringBoid.Heading.ToGodot();
+        
         Basis basis = new Basis(Vector3.Up, _cachedHeading.AngleToY());
 
         // banking
@@ -257,9 +261,7 @@ public partial class BoidBase : Area
         
         // update position and cache velocity from steering boid
         GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
-        _cachedVelocity = steeringBoid.Velocity.ToGodot();
-        _cachedHeading = steeringBoid.Heading.ToGodot();
-        
+
         // process hits
         foreach (HitMessage hit in _hitMessages)
         {
@@ -279,7 +281,7 @@ public partial class BoidBase : Area
 
         if (_health <= 0.0f)
         {
-            _Destroy(_cachedLastHitDir, _cachedLastHitDamage);
+            _OnDestroy(_cachedLastHitDir, _cachedLastHitDamage);
             return;
         }
         _cachedLastHitDir = Vector2.Zero;
@@ -373,7 +375,7 @@ public partial class BoidBase : Area
         _cachedLastHitDamage = damage;
     }
     
-    protected virtual void _Destroy(Vector2 hitDir, float hitStrength)
+    protected virtual void _OnDestroy(Vector2 hitDir, float hitStrength)
     {
         Debug.Assert(_state != State.Destroyed, "_state != State.Destroyed");
         if (_state != State.Destroyed)
@@ -398,8 +400,7 @@ public partial class BoidBase : Area
             rb.GlobalTransform = GlobalTransform;
             GetParent().RemoveChild(this);  
             rb.AddChild(this);
-            CollisionShape shape = GetNode<CollisionShape>("CollisionShape");
-            rb.AddChild(shape.Duplicate());
+            rb.AddChild(_collisionShape.Duplicate());
 
             rb.GlobalTransform = new Transform(Basis.Identity, pos);
             GlobalTransform = new Transform(GlobalTransform.basis, pos);
@@ -416,6 +417,9 @@ public partial class BoidBase : Area
                 rb.ApplyCentralImpulse(hitDir.To3D() * hitStrength);
                 rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);
             }
+
+            Monitorable = false;
+            Monitoring = false;
             
             OnBoidDestroyed?.Invoke(this);
         }
@@ -434,7 +438,7 @@ public partial class BoidBase : Area
         }
     }
 
-    public void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2(), Vector2 offset = new Vector2())
+    protected virtual void SetTarget(TargetType type, BoidBase boid = null, Vector2 pos = new Vector2(), Vector2 offset = new Vector2())
     {
         Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
 
@@ -458,7 +462,7 @@ public partial class BoidBase : Area
                 _targetBoid.OnBoidDestroyed += _OnTargetBoidDestroyed;
                 break;
             case TargetType.Position:
-                steeringBoid.Position = pos.ToNumerics();
+                steeringBoid.Target = pos.ToNumerics();
                 steeringBoid.TargetOffset = offset.ToNumerics();
                 steeringBoid.TargetIndex = -1;
                 break;
@@ -468,6 +472,12 @@ public partial class BoidBase : Area
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
+    }
+    
+    protected void ResetSteeringBehaviours()
+    {
+        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
+        steeringBoid.Behaviours = _behaviours;
     }
 
     public virtual void _OnBoidAreaEntered(Area area)

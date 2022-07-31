@@ -33,6 +33,10 @@ public partial class SteeringManager
         {
             desired.SetMag(limit);
         }
+        else
+        {
+            desired.SetMag(boid.MaxSpeed);
+        }
 
         Vector2 force = desired - boid.Velocity;
         return force;

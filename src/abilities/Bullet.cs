@@ -1,12 +1,15 @@
+using System;
 using Godot;
 using GodotOnReady.Attributes;
 
 public partial class Bullet : Area
 {
 	[Export] private float _baseSpeed = 150.0f;
-	[Export] private float _range = 500.0f;
+	[Export] protected float _range = 500.0f;
 
 	[OnReadyGet] private MeshInstance _mesh;
+	
+	public Action<Bullet> OnBulletDestroyed;
 
 	protected Vector2 _velocity;
 	private BoidBase.BoidAlignment _alignment;
@@ -42,6 +45,11 @@ public partial class Bullet : Area
 	public override void _Process(float delta)
 	{  
 		GlobalTranslate(_velocity.To3D() * delta);
+		ProcessOutOfBounds();
+	}
+
+	protected virtual void ProcessOutOfBounds()
+	{
 		if((_spawnPos - GlobalPosition).LengthSquared() > Mathf.Pow(_range, 2.0f))
 		{
 			QueueFree();
@@ -57,8 +65,9 @@ public partial class Bullet : Area
 		}
 	}
 
-	public void OnHit()
+	private void OnHit()
 	{
+		OnBulletDestroyed?.Invoke(this);
 		QueueFree();
 	}
 }

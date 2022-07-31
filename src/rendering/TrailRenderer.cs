@@ -19,6 +19,8 @@ public class TrailRenderer : MeshInstance
         base._EnterTree();
 
         Instance = this;
+
+        CastShadow = ShadowCastingSetting.Off;
     }
 
     public override void _Process(float delta)

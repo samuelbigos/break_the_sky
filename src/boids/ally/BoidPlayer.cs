@@ -7,12 +7,19 @@ public class BoidPlayer : BoidAllyBase
     [Export] private PackedScene _bulletScene;
     [Export] private NodePath _sfxPickupPath;
     [Export] private float _damping = 0.05f;
+    [Export] private float _totalSendTime = 1.0f;
+    [Export] private Vector2 _sendScaleMinMax = new Vector2(10.0f, 100.0f);
 
     private AudioStreamPlayer2D _sfxPickup;
     private Vector2 _velocity;
     
-    private float _shootCooldown;
-    private bool _cachedShoot;
+    private Vector2 _cachedMousePos;
+    private bool _sending;
+    private float _sendTime;
+    private int _sendCount;
+    private int _totalAllies;
+
+    private List<BoidAllyBase> _alliesSent = new();
 
     public override void _Ready()
     {
@@ -25,94 +32,22 @@ public class BoidPlayer : BoidAllyBase
 
     protected override void ProcessAlive(float delta)
     {
-        // manage ally boid formations
-        int droneCount = 0;
-        foreach (BoidAllyBase ally in BoidFactory.Instance.AllyBoids)
-        {
-            if (ally is not BoidAllyDrone)
-                continue;
-            
-            droneCount++;
-        }
-        
-        // TODO: optimise by caching the column lists
-        if (droneCount > 0)
-        {
-            // int colCount = Mathf.CeilToInt(Mathf.Sqrt(droneCount));
-            // int perCol = Mathf.CeilToInt((float)droneCount / colCount);
-            // List<List<BoidAllyDrone>> boidCols = new();
-            // for (int i = 0; i < colCount; i++)
-            // {
-            //     boidCols.Add(new List<BoidAllyDrone>());
-            // }
-            //
-            // for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
-            // {
-            //     BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
-            //     if (ally is not BoidAllyDrone)
-            //         continue;
-            //
-            //     int col = (i / perCol) % colCount;
-            //     boidCols[col].Add(ally as BoidAllyDrone);
-            // }
-            //
-            // float sqrtDroneCount = (float)Math.Sqrt(droneCount);
-            // for (int x = 0; x < boidCols.Count; x++)
-            // {
-            //     boidCols[x].Sort(DroneSort);
-            //     for (int y = 0; y < boidCols[x].Count; y++)
-            //     {
-            //         BoidBase ally = boidCols[x][y];
-            //         ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
-            //         //boid.TargetOffset = CalcBoidOffset(x, y, colCount, perCol, boid.Radius * 3.5f).ToNumerics();
-            //         
-            //         // set arrive deadzone to some value proportional to the amount of drones we have active
-            //         boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtDroneCount - 1.0f);
-            //         boid.ArriveWeight = 0.5f;
-            //     }
-            // }
+        base.ProcessAlive(delta);
 
-            float sqrtDroneCount = (float)Math.Sqrt(droneCount);
-            for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
-            {
-                BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
-                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
+        ProcessAllySending(delta);
 
-                // set arrive deadzone to some value proportional to the amount of drones we have active
-                boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtDroneCount);
-                boid.ArriveWeight = 0.5f;
-            }
-        }
+        _cachedHeading = (_cachedMousePos - GlobalPosition).Normalized();
 
         if (_acceptInput)
         {
-            Vector2 mousePos = GameCamera.Instance.MousePosition;
-            Vector2 lookAt = (mousePos - GlobalPosition).Normalized();
-            Rotation = new Vector3(0.0f, -Mathf.Atan2(lookAt.x, -lookAt.y), 0.0f);
+            Vector2 forward = new(0.0f, -1.0f);
+            Vector2 left = new(-1.0f, 0.0f);
 
-            Vector2 forward = new Vector2(0.0f, -1.0f);
-            Vector2 left = new Vector2(-1.0f, 0.0f);
-
-            Vector2 dir = new Vector2(0.0f, 0.0f);
-            if (Input.IsActionPressed("w"))
-            {
-                dir += forward;
-            }
-
-            if (Input.IsActionPressed("s"))
-            {
-                dir += -forward;
-            }
-
-            if (Input.IsActionPressed("a"))
-            {
-                dir += left;
-            }
-
-            if (Input.IsActionPressed("d"))
-            {
-                dir += -left;
-            }
+            Vector2 dir = new(0.0f, 0.0f);
+            if (Input.IsActionPressed("w")) dir += forward;
+            if (Input.IsActionPressed("s")) dir += -forward;
+            if (Input.IsActionPressed("a")) dir += left;
+            if (Input.IsActionPressed("d")) dir += -left;
             
             ref SteeringManager.Boid boid = ref SteeringBoid;
 
@@ -131,43 +66,86 @@ public class BoidPlayer : BoidAllyBase
                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, false);
             }
         }
-        
-        // shooting
-        Vector2 shootDir = (GameCamera.Instance.MousePosition - GlobalPosition).Normalized();
-        
-        _shootCooldown -= delta;
-        if (_cachedShoot)
+    }
+
+    private void ProcessAllySending(float delta)
+    {
+        List<BoidAllyBase> idleAllies = new();
+        _totalAllies = 0;
+        foreach (BoidAllyBase ally in BoidFactory.Instance.AllyBoids)
         {
-            if (_CanShoot(shootDir))
+            if (ally is BoidPlayer)
+                continue;
+
+            _totalAllies++;
+            if (_alliesSent.Contains(ally))
+                continue;
+            
+            if (ally.AiState != AIState.Idle)
+                continue;
+            
+            idleAllies.Add(ally);
+        }
+        
+        _cachedMousePos = GameCamera.Instance.MousePosition;
+
+        if (idleAllies.Count > 0)
+        {
+            float sqrtIdleCount = (float)Math.Sqrt(idleAllies.Count);
+            
+            // set ally steering parameters
+            for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
             {
-                _Shoot(shootDir);
+                BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
+                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
+
+                // set arrive deadzone to some value proportional to the amount of drones we have active
+                boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtIdleCount);
+                boid.ArriveWeight = 0.5f;
             }
         }
-
-        if (_shootCooldown > 0.0f)
-        {
-            float t = _shootCooldown / _resourceStats.AttackCooldown;
-            t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
-            Vector3 from = _baseScale * 2.0f;
-            _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
-        }
         
-        base.ProcessAlive(delta);
+        if (_sending)
+        {
+            _sendTime = Mathf.Clamp(_sendTime + delta, 0.0f, _totalSendTime);
+            float t = Mathf.Clamp(_sendTime / _totalSendTime, 0.0f, 1.0f);
+            
+            // +1 ensures we always send one ally as soon as player clicks
+            _sendCount = (int) Mathf.Min(t * Cursor.Instance.TotalPips, _totalAllies - 1) + 1;
+            
+            Cursor.Instance.PipCount = _sendCount;
+            Cursor.Instance.Size = 1.0f + t;
+            Cursor.Instance.Activated = true;
+            
+            idleAllies.Sort(AllySort);
+
+            if (_sendCount > _alliesSent.Count && idleAllies.Count > 0)
+            {
+                BoidAllyBase allyToSend = idleAllies[0];
+                _alliesSent.Add(allyToSend);
+                allyToSend.OnBoidDestroyed += OnSentAllyDestroyed;
+            }
+            
+            float sqrtSendCount = (float)Math.Sqrt(_sendCount);
+            foreach (BoidAllyBase sentAlly in _alliesSent)
+            {
+                sentAlly.NavigateTowards(_cachedMousePos);
+                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(sentAlly.SteeringId);
+                boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtSendCount);
+            }
+        }
     }
 
-    protected override bool _CanShoot(Vector2 dir)
+    private void OnSentAllyDestroyed(BoidBase ally)
     {
-        return _shootCooldown <= 0.0f;
+        _alliesSent.Remove(ally as BoidAllyBase);
     }
-    
-    protected override void _Shoot(Vector2 dir)
-    {
-        base._Shoot(dir);
 
-        _shootCooldown = _resourceStats.AttackCooldown;
-        Bullet bullet = _bulletScene.Instance() as Bullet;
-        Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition.To3D(), dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
+    private int AllySort(BoidAllyBase a, BoidAllyBase b)
+    {
+        float aDist = (a.GlobalPosition - _cachedMousePos).LengthSquared();
+        float bDist = (b.GlobalPosition - _cachedMousePos).LengthSquared();
+        return aDist < bDist ? -1 : 1;
     }
 
     public override void _Input(InputEvent @event)
@@ -179,27 +157,21 @@ public class BoidPlayer : BoidAllyBase
 
         if (@event.IsActionPressed("shoot"))
         {
-            _cachedShoot = true;
+            _sending = true;
+            _sendTime = 0.0f;
+            _totalSendTime = Mathf.RangeLerp(_totalAllies, _sendScaleMinMax.x, _sendScaleMinMax.y, 5.0f, 1.0f);
         }
 
         if (@event.IsActionReleased("shoot"))
         {
-            _cachedShoot = false;
+            _sending = false;
+            Cursor.Instance.Reset();
+            foreach (BoidAllyBase ally in _alliesSent)
+            {
+                ally.OnBoidDestroyed -= OnSentAllyDestroyed;
+            }
+            _alliesSent.Clear();
         }
-    }
-
-    private int DroneSort(BoidAllyDrone x, BoidAllyDrone y)
-    {
-        return x.ShootCooldown < y.ShootCooldown ? -1 : 1;
-    }
-
-    private Vector2 CalcBoidOffset(int col, int idxInCol, int numCols, int perCol, float separation)
-    {
-        Vector2 offset = Vector2.Zero;
-        offset.x = -(float)numCols * 0.5f + (float)col + 0.5f;
-        offset.y = -(float)perCol * 0.5f + (float)idxInCol + 0.5f;
-        offset *= separation;
-        return offset;
     }
 
     public void RegisterPickup(PickupMaterial pickup)
@@ -207,7 +179,7 @@ public class BoidPlayer : BoidAllyBase
         pickup.OnCollected += _OnPickupCollected;
     }
 
-    protected override void _Destroy(Vector2 hitDir, float hitStrength)
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
     {
         // TODO: do something when player destroyed.
         SceneTransitionManager.Instance.RequestReloadCurrentScene();

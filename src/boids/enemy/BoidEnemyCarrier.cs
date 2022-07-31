@@ -97,9 +97,9 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         }
     }
 
-    protected override void _Destroy(Vector2 hitDir, float hitStrength)
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
     {
-        base._Destroy(hitDir, hitStrength);
+        base._OnDestroy(hitDir, hitStrength);
 
         SteeringManager.Instance.Unregister<SteeringManager.FlowField>(_flowFieldId);
     }
@@ -117,10 +117,9 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
             pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
         }
         Vector2 vel = 25.0f * (pos - GlobalPosition).Normalized();
-        BoidEnemyBase enemy = BoidFactory.Instance.CreateEnemyBoid(_minion, pos, vel);
-        enemy.SetTarget(TargetType.Enemy, _targetBoid);
-        enemy.OnBoidDestroyed += _OnMinionDestroyed;
-        _minions.Add(enemy);
+        BoidEnemyBase minion = BoidFactory.Instance.CreateEnemyBoid(_minion, pos, vel);
+        minion.OnBoidDestroyed += _OnMinionDestroyed;
+        _minions.Add(minion);
     }
 
     private void _OnMinionDestroyed(BoidBase minion)

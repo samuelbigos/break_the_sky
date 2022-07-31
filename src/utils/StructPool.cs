@@ -56,7 +56,7 @@ public class StructPool<T> where T: SteeringManager.IPoolable
         _pool[i] = default;
         
         // if we removed the right-most element of _pool, we can reduce _span until we hit a non-empty element.
-        while (_pool[_span - 1].Empty())
+        while (_span > 0 && _pool[_span - 1].Empty())
         {
             _span--;
         }

@@ -9,7 +9,7 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
     private Vector2 _dragCurrent;
     private bool _dragging;
     private TextureRect _dragTextureRect;
-    private List<BoidBase> _selectedBoids = new();
+    private List<BoidAllyBase> _selectedBoids = new();
 
     public override void _Ready()
     {
@@ -86,9 +86,9 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
 
         if (Input.IsActionJustReleased("tactical_command"))
         {
-            foreach (BoidBase boid in _selectedBoids)
+            foreach (BoidAllyBase boid in _selectedBoids)
             {
-                boid.SetTarget(BoidBase.TargetType.Position, null, GameCamera.Instance.MousePosition);
+                boid.NavigateTowards(GameCamera.Instance.MousePosition);
             }
         }
     }

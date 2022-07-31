@@ -26,6 +26,7 @@ public partial class SeekerMissile : Area
     private float _deactivationTimer;
     private State _state = State.Alive;
     private System.Numerics.Vector2 _smoothHeading;
+    private bool _queueExplode;
     
     public void Init(float damage, Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, BoidBase target)
     {
@@ -98,6 +99,12 @@ public partial class SeekerMissile : Area
                     Deactivate();
                 }
 
+                if (_queueExplode)
+                {
+                    _queueExplode = false;
+                    Explode();
+                }
+
                 break;
             }
             case State.Deactivated:
@@ -160,7 +167,7 @@ public partial class SeekerMissile : Area
             ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
             boid.SendHitMessage(_damage, steeringBoid.VelocityG, steeringBoid.PositionG, _alignment);
 
-            Explode();
+            _queueExplode = true;
         }
     }
 

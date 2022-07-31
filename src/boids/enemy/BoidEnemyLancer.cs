@@ -21,7 +21,7 @@ public partial class BoidEnemyLancer : BoidEnemyBase
             _attackCooldownTimer -= delta;
             if (_attackCooldownTimer < 0.0f)
             {
-                EnterAIState(AIState.Seeking);
+                SwitchAiState(AIState.Seeking);
             }
         }
         

@@ -34,7 +34,7 @@ public partial class BoidEnemyBase : BoidBase
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.05f;
         steeringBoid.DesiredDistFromTargetMax = EngageRange + EngageRange * 0.05f;
         
-        EnterAIState(AIState.Seeking);
+        SwitchAiState(AIState.Seeking);
     }
 
     protected override void ProcessAlive(float delta)
@@ -50,7 +50,7 @@ public partial class BoidEnemyBase : BoidBase
                     if (distSq < EngageRange * EngageRange)
                     {
                         SetTarget(TargetType.Enemy, boid);
-                        EnterAIState(AIState.Engaged);
+                        SwitchAiState(AIState.Engaged);
                     }
                 }
                 break;
@@ -94,7 +94,7 @@ public partial class BoidEnemyBase : BoidBase
         base.ProcessAlive(delta);
     }
 
-    protected void EnterAIState(AIState state)
+    protected void SwitchAiState(AIState state)
     {
         switch (state)
         {
@@ -122,12 +122,6 @@ public partial class BoidEnemyBase : BoidBase
     {
     }
 
-    protected void ResetSteeringBehaviours()
-    {
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
-        steeringBoid.Behaviours = _behaviours;
-    }
-
     protected override void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
         base._OnHit(damage, bulletVel, pos);
@@ -135,9 +129,9 @@ public partial class BoidEnemyBase : BoidBase
         GameCamera.Instance.AddTrauma(HitTrauma);
     }
     
-    protected override void _Destroy(Vector2 hitDir, float hitStrength)
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
     {
-        base._Destroy(hitDir, hitStrength);
+        base._OnDestroy(hitDir, hitStrength);
 
         for (int i = 0; i < Data.MaterialDropCount; i++)
         {
@@ -155,6 +149,6 @@ public partial class BoidEnemyBase : BoidBase
     {
         base._OnTargetBoidDestroyed(boid);
         
-        EnterAIState(AIState.Seeking);
+        SwitchAiState(AIState.Seeking);
     }
 }

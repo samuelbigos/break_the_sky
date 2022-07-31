@@ -32,6 +32,7 @@ VfxPath = NodePath("Mesh/Turret/LaserVFX")
 _sfxLaserChargeNode = NodePath("SFXLaserCharge")
 _sfxLaserFireNode = NodePath("SFXLaserFire")
 _laserAreaPath = NodePath("Mesh/Turret/LaserArea")
+GunTrackSpeed = 2.0
 
 [node name="CollisionShape" parent="." index="0"]
 transform = Transform( 1.97819, 0, 0, 0, 2.35269, 0, 0, 0, 3.81871, 0, 0, -2.76924 )
@@ -39,19 +40,16 @@ transform = Transform( 1.97819, 0, 0, 0, 2.35269, 0, 0, 0, 3.81871, 0, 0, -2.769
 [node name="Mesh" parent="." index="1"]
 material_override = null
 mesh = ExtResource( 5 )
-material/0 = null
 
 [node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
 material_override = ExtResource( 10 )
 mesh = ExtResource( 7 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="Turret" type="MeshInstance" parent="Mesh" index="2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.28752 )
 mesh = ExtResource( 6 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="LaserVFX" parent="Mesh/Turret" index="0" instance=ExtResource( 12 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479 )
@@ -63,10 +61,11 @@ material_override = ExtResource( 8 )
 cast_shadow = 0
 mesh = ExtResource( 9 )
 skeleton = NodePath("../../..")
-material/0 = null
 
 [node name="LaserArea" type="Area" parent="Mesh/Turret" index="2" groups=["laser"]]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 250 )
+monitoring = false
+monitorable = false
 
 [node name="CollisionShape" type="CollisionShape" parent="Mesh/Turret/LaserArea" index="0"]
 shape = SubResource( 1 )

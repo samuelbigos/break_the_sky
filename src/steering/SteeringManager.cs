@@ -411,7 +411,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
         int id = obj.GenerateId();
         int index = pool.Add(obj);
-        _boidIdToIndex[id] = index;
+        toIndex[id] = index;
         return id;
     }
 
@@ -424,7 +424,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     public ref T GetObject<T>(int id) where T : IPoolable
     {
         GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int _);
-        Debug.Assert(toIndex.ContainsKey(id), "Object doesn't exist.");
+        DebugUtils.Assert(toIndex.ContainsKey(id), "Object doesn't exist.");
         return ref pool.AsSpan()[toIndex[id]];
     }
 
