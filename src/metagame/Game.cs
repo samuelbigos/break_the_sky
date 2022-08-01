@@ -30,8 +30,6 @@ public partial class Game : Singleton<Game>
 
     [OnReady] private void Ready()
     {
-        SteeringManager.EdgeBounds = _areaRect;
-
         _player = _playerScene.Instance<BoidPlayer>();
         AddChild(_player);
         _player.Init(_playerData, _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
@@ -70,13 +68,6 @@ public partial class Game : Singleton<Game>
         base._ExitTree();
 
         GameCamera.OnPostCameraTransformed -= OnPostCameraTransformed;
-    }
-
-    public override void _Process(float delta)
-    {
-        base._Process(delta);
-
-        SteeringManager.EdgeBounds = SpawningRect;
     }
 
     private void OnPostCameraTransformed()

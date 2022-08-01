@@ -128,8 +128,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 SurfaceNormal;
     }
 
-    public static Rect2 EdgeBounds;
-
     private static readonly int MAX_BOIDS = 1000;
     private static readonly int MAX_OBSTACLES = 100;
     private static readonly int MAX_FLOWFIELDS = 100;
@@ -201,9 +199,6 @@ public partial class SteeringManager : Singleton<SteeringManager>
         if (Game.Instance == null)
             return;
 #endif
-
-        // move area
-        EdgeBounds.Position = Game.Player.GlobalPosition - EdgeBounds.Size * 0.5f;
 
         Span<Boid> boids = _boidPool.AsSpan();
         ReadOnlySpan<Obstacle> obstacles = _obstaclePool.AsSpan();
@@ -290,7 +285,8 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 boid.Heading = Vector2.Normalize(boid.Heading);
             }
 
-            boid.Position = WrapPosition(boid.Position + boid.Velocity * delta, EdgeBounds);
+            boid.Position += boid.Velocity * delta;
+            
             if (float.IsNaN(boid.Position.X))
             {
                 Debug.Assert(!float.IsNaN(boid.Position.X), "!float.IsNaN(boid.Position.X)");

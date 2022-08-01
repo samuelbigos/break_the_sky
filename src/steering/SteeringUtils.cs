@@ -55,16 +55,6 @@ public partial class SteeringManager
         Vector2 c1 = unitPerp * perpDist;
         return (c0 + c1) * sourceLength;
     }
-
-    private static Vector2 WrapPosition(Vector2 pos, Rect2 edge)
-    {
-        pos -= edge.Position.ToNumerics();
-        pos += edge.Size.ToNumerics();
-        pos.X %= edge.Size.x;
-        pos.Y %= edge.Size.y;
-        pos += edge.Position.ToNumerics();
-        return pos;
-    }
     
     private static bool InView(Boid boid, Boid other, float viewDegrees)
     {

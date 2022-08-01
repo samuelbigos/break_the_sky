@@ -157,34 +157,21 @@ public partial class SteeringManager
             }
         }
 
-        // edges
+        // obstacles
+        Span<Obstacle> obstacles = _obstaclePool.AsSpan();
+        foreach (Obstacle obs in obstacles)
         {
-            Vector3 p0 = EdgeBounds.Position.To3D().ToNumerics();
-            Vector3 p1 = new(EdgeBounds.End.x, 0.0f, EdgeBounds.Position.y);
-            Vector3 p2 = EdgeBounds.End.To3D().ToNumerics();
-            Vector3 p3 = new(EdgeBounds.Position.x, 0.0f, EdgeBounds.End.y);
-
-            Utils.Line(p0, p1, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-            Utils.Line(p1, p2, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-            Utils.Line(p2, p3, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-            Utils.Line(p3, p0, Colors.Black, ref v, ref i, _vertList, _colList, _indexList);
-
-            // obstacles
-            Span<Obstacle> obstacles = _obstaclePool.AsSpan();
-            foreach (Obstacle obs in obstacles)
+            if (obs.Empty()) continue;
+            switch (obs.Shape)
             {
-                if (obs.Empty()) continue;
-                switch (obs.Shape)
+                case ObstacleShape.Circle:
                 {
-                    case ObstacleShape.Circle:
-                    {
-                        Utils.Circle(obs.Position.To3D(), 32, obs.Size, Colors.Brown, ref v, ref i, _vertList,
-                            _colList, _indexList);
-                        break;
-                    }
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    Utils.Circle(obs.Position.To3D(), 32, obs.Size, Colors.Brown, ref v, ref i, _vertList,
+                        _colList, _indexList);
+                    break;
                 }
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
