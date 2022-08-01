@@ -14,7 +14,7 @@
 [node name="BoidEnemyLancer" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
 _behaviours = 30
-MaxVelocity = 80.0
+MaxVelocity = 70.0
 MinVelocity = 50.0
 MaxForce = 75.0
 _baseResourceStats = ExtResource( 4 )

@@ -48,4 +48,13 @@ public class MultiViewportMeshInstance : MeshInstance
             _createdMeshes = true;
         }
     }
+
+    public void ClearAltMeshes()
+    {
+        foreach (MeshInstance mesh in AltMeshes)
+        {
+            mesh.QueueFree();
+        }
+        AltMeshes.Clear();
+    }
 }

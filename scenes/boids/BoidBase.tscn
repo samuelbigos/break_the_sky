@@ -23,12 +23,11 @@ script = ExtResource( 4 )
 SelectedIndicatorPath = NodePath("SelectionIndicator")
 MeshPath = NodePath("Mesh")
 CollisionShapePath = NodePath("CollisionShape")
+SfxOnDestroyPath = NodePath("SFXDestroy")
+SfxOnHitPath = NodePath("SFXHit")
 _behaviours = 2159
 MaxVelocity = 250.0
 _hitSfx = [ ExtResource( 6 ) ]
-_meshPath = NodePath("Mesh")
-_sfxDestroyPath = NodePath("SFXDestroy")
-_sfxHitPlayerPath = NodePath("SFXHit")
 _hitParticlesScene = ExtResource( 8 )
 _damagedParticlesScene = ExtResource( 3 )
 _pickupMaterialScene = ExtResource( 10 )
@@ -46,10 +45,10 @@ _meshMaterials = [ ExtResource( 9 ) ]
 [node name="BoidTrail" parent="Mesh" instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 
-[node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
+[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
 
-[node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
+[node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 7 )
 
 [node name="SelectionIndicator" type="MeshInstance" parent="."]

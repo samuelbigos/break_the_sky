@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource( 1 )
-AttackDamage = 25.0
+AttackDamage = 10.0
 AttackCooldown = 2.0
 AttackSpread = 1.0
 AttackVelocity = 75.0

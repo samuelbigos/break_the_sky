@@ -58,10 +58,6 @@ public partial class BoidBase : Area
     
     [Export] private List<AudioStream> _hitSfx;
 
-    [Export] private NodePath _meshPath;
-    [Export] private NodePath _sfxDestroyPath;
-    [Export] private NodePath _sfxHitPlayerPath;
-
     [Export] private PackedScene _hitParticlesScene;
     [Export] private PackedScene _damagedParticlesScene;
     [Export] private PackedScene _destroyParticlesScene;
@@ -71,7 +67,9 @@ public partial class BoidBase : Area
     [OnReadyGet] protected MeshInstance _selectedIndicator;
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
     [OnReadyGet] protected CollisionShape _collisionShape;
-
+    [OnReadyGet] private AudioStreamPlayer2D _sfxOnDestroy;
+    [OnReadyGet] protected AudioStreamPlayer2D _sfxOnHit;
+    
     #endregion
 
     #region Signals
@@ -139,7 +137,6 @@ public partial class BoidBase : Area
     protected Vector2 _targetPos;
     protected Vector3 _baseScale;
     protected bool _acceptInput = true;
-    protected AudioStreamPlayer2D _sfxOnHit;
     protected Vector2 _cachedVelocity;
     protected Vector2 _cachedHeading;
     protected State _state;
@@ -155,25 +152,12 @@ public partial class BoidBase : Area
     private float _hitFlashTimer;
     private List<HitMessage> _hitMessages = new();
     private List<Particles> _damagedParticles = new();
-    private ShaderMaterial _altMaterial;
     private List<Particles> _hitParticles = new();
-    private AudioStreamPlayer2D _sfxOnDestroy;
     private Vector2 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private bool _selected;
     private Vector2 _smoothSteering;
-    private float[] _steeringWeights = new float[(int) SteeringManager.Behaviours.COUNT];
     private int _sharedPropertiesId;
-
-    protected virtual void SetMeshColour()
-    {
-        _meshMaterial?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
-        _meshMaterial?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Ally);
-    }
-    private void SetMeshColour(Color col)
-    {
-        _meshMaterial?.SetShaderParam("u_primary_colour", col);
-    }
 
     #endregion
 
@@ -194,10 +178,6 @@ public partial class BoidBase : Area
         
         _health = _resourceStats.MaxHealth;
 
-        //_mesh = GetNode<MultiViewportMeshInstance>(_meshPath);
-        _sfxOnDestroy = GetNode<AudioStreamPlayer2D>(_sfxDestroyPath);
-        _sfxOnHit = GetNode<AudioStreamPlayer2D>(_sfxHitPlayerPath);
-
         _sfxOnHit.Stream = _hitSfx[0];
         _baseScale = _mesh.Scale;
         
@@ -205,10 +185,7 @@ public partial class BoidBase : Area
         Debug.Assert(altMeshes.Count > 0);
         _meshMaterial = _mesh.MaterialOverride as ShaderMaterial;
         _mesh.SetSurfaceMaterial(0, _meshMaterial);
-        _altMaterial = altMeshes[0].GetActiveMaterial(0) as ShaderMaterial;
-        
-        SetMeshColour();
-        
+
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
         if (!Game.Instance.Null())
@@ -275,7 +252,7 @@ public partial class BoidBase : Area
         // hit flash
         if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
         {
-            SetMeshColour();
+            // TODO: implement hit flash.
         }
         _hitFlashTimer -= delta;
 
@@ -338,8 +315,7 @@ public partial class BoidBase : Area
     protected virtual void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
         _health -= damage;
-
-        SetMeshColour(ColourManager.Instance.White);
+        
         _hitFlashTimer = HitFlashTime;
         
         _sfxOnHit.Play();
@@ -382,7 +358,8 @@ public partial class BoidBase : Area
         {
             _state = State.Destroyed;
             
-            SetMeshColour();
+            // remove mesh from the outline buffer so it doesn't get outlines
+            _mesh.ClearAltMeshes();
             
             _sfxOnDestroy.Play();
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));

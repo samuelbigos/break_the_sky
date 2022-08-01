@@ -7,6 +7,7 @@
 [ext_resource path="res://src/singletons/AISpawningDirector.cs" type="Script" id=5]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_wasp.tres" type="Resource" id=6]
 [ext_resource path="res://assets/Environment.tres" type="Environment" id=7]
+[ext_resource path="res://src/rendering/TargetingRenderer.cs" type="Script" id=8]
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 [ext_resource path="res://src/rendering/TrailRenderer.cs" type="Script" id=11]
@@ -1108,8 +1109,6 @@ flags_unshaded = true
 flags_vertex_lighting = true
 vertex_color_use_as_albedo = true
 
-[sub_resource type="SphereMesh" id=4]
-
 [sub_resource type="PlaneMesh" id=8]
 size = Vector2( 1, 1 )
 subdivide_width = 250
@@ -1176,33 +1175,60 @@ shader_param/u_blue_noise = ExtResource( 24 )
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
 StateMachinePath = NodePath("StateMachine_Game")
-AiSpawningDirectorPath = NodePath("AISpawningDirector")
+AiSpawningDirectorPath = NodePath("Singletons/AISpawningDirector")
 HudPath = NodePath("HUD")
-SandPath = NodePath("Sand")
-CloudsPath = NodePath("CloudBox")
-OutlineViewportPath = NodePath("Viewport")
+SandPath = NodePath("Rendering/Ground")
+CloudsPath = NodePath("Rendering/Clouds")
+OutlineViewportPath = NodePath("OutlineBufferViewport")
 OutlineMeshPath = NodePath("Outline")
 _areaRect = Rect2( -1000, -1000, 1000, 1000 )
 _playerScene = ExtResource( 3 )
 _playerData = SubResource( 14 )
 
-[node name="AISpawningDirector" type="Node" parent="."]
+[node name="StateMachine_Game" type="Node" parent="."]
+script = ExtResource( 9 )
+
+[node name="Singletons" type="Node" parent="."]
+
+[node name="AISpawningDirector" type="Node" parent="Singletons"]
 script = ExtResource( 5 )
 _enabled = false
 _firstEnemy = ExtResource( 6 )
 _enemyBoidPool = [ ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 30 ) ]
 
-[node name="TacticalPauseManager" type="Node" parent="."]
+[node name="TacticalPauseManager" type="Node" parent="Singletons"]
 script = ExtResource( 10 )
 
-[node name="StateMachine_Game" type="Node" parent="."]
-script = ExtResource( 9 )
+[node name="Rendering" type="Spatial" parent="."]
 
-[node name="TrailRenderer" type="MeshInstance" parent="."]
+[node name="TrailRenderer" type="MeshInstance" parent="Rendering"]
 material_override = SubResource( 10 )
+skeleton = NodePath("../..")
 script = ExtResource( 11 )
 
-[node name="Camera" type="Camera" parent="."]
+[node name="TargetingRenderer" type="MeshInstance" parent="Rendering"]
+material_override = SubResource( 10 )
+skeleton = NodePath("../..")
+script = ExtResource( 8 )
+_lineSegmentSize = 3.0
+_lineSpeed = 25.0
+
+[node name="Ground" type="MeshInstance" parent="Rendering"]
+transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -200, 0 )
+cast_shadow = 0
+mesh = SubResource( 8 )
+skeleton = NodePath("../..")
+material/0 = SubResource( 11 )
+
+[node name="Clouds" type="MeshInstance" parent="Rendering"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, 0 )
+cast_shadow = 0
+mesh = SubResource( 12 )
+skeleton = NodePath("../..")
+material/0 = SubResource( 13 )
+script = ExtResource( 26 )
+
+[node name="GameCamera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0 )
 cull_mask = 1047553
 environment = ExtResource( 7 )
@@ -1223,39 +1249,22 @@ shadow_color = Color( 0.737255, 0.737255, 0.737255, 1 )
 directional_shadow_mode = 0
 directional_shadow_max_distance = 1000.0
 
-[node name="MouseCursor" type="MeshInstance" parent="."]
-visible = false
-mesh = SubResource( 4 )
-
 [node name="HUD" parent="." instance=ExtResource( 1 )]
 
-[node name="Sand" type="MeshInstance" parent="."]
-transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -200, 0 )
-cast_shadow = 0
-mesh = SubResource( 8 )
-material/0 = SubResource( 11 )
-
-[node name="CloudBox" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, 0 )
-cast_shadow = 0
-mesh = SubResource( 12 )
-material/0 = SubResource( 13 )
-script = ExtResource( 26 )
+[node name="Cursor" parent="." instance=ExtResource( 31 )]
 
 [node name="Outline" type="MeshInstance" parent="."]
 extra_cull_margin = 16384.0
 mesh = SubResource( 7 )
-skeleton = NodePath("../Camera")
+skeleton = NodePath("../GameCamera")
 material/0 = ExtResource( 33 )
 
-[node name="Cursor" parent="." instance=ExtResource( 31 )]
-
-[node name="Viewport" type="Viewport" parent="."]
+[node name="OutlineBufferViewport" type="Viewport" parent="."]
 msaa = 2
 hdr = false
 keep_3d_linear = true
 
-[node name="Camera" type="Camera" parent="Viewport"]
+[node name="OutlineBufferCamera" type="Camera" parent="OutlineBufferViewport"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0 )
 cull_mask = 1047554
 current = true

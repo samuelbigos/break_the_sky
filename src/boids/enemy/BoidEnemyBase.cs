@@ -16,15 +16,10 @@ public partial class BoidEnemyBase : BoidBase
 
     public bool IsTargetted = false;
     public ResourceBoidEnemy Data => _data as ResourceBoidEnemy;
+    public BoidAllyBase EnemyTarget => _targetType == TargetType.Enemy ? _targetBoid as BoidAllyBase : null;
 
     public override BoidAlignment Alignment => BoidAlignment.Enemy;
     protected AIState _aiState = AIState.Seeking;
-
-    protected override void SetMeshColour()
-    {
-        _meshMaterial?.SetShaderParam("u_primary_colour", ColourManager.Instance.Secondary);
-        _meshMaterial?.SetShaderParam("u_secondary_colour", ColourManager.Instance.Red);
-    }
 
     public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {

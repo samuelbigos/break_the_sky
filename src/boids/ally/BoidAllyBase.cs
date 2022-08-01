@@ -26,6 +26,7 @@ public partial class BoidAllyBase : BoidBase
     public ResourceBoidAlly Data => _data as ResourceBoidAlly;
     public AIState AiState => _aiState;
     public override BoidAlignment Alignment => BoidAlignment.Ally;
+    public BoidEnemyBase EnemyTarget => _targetType == TargetType.Enemy ? _targetBoid as BoidEnemyBase : null;
 
     protected AIState _aiState = AIState.None;
     protected BoidBase _engageTarget;
