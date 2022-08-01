@@ -4,12 +4,12 @@ using System.Diagnostics;
 
 public class MultiViewportMeshInstance : MeshInstance
 {
-    [Export] private int _numExtraMeshes = 0;
+    [Export] private int _numExtraMeshes;
     [Export(PropertyHint.Flags, "0,1,2,3,4,5,6,7")] private List<uint> _meshLayers; 
     [Export] private List<Material> _meshMaterials; 
     
-    private List<MeshInstance> _meshes = new List<MeshInstance>();
-    private bool _createdMeshes = false;
+    private List<MeshInstance> _meshes = new();
+    private bool _createdMeshes;
 
     public List<MeshInstance> AltMeshes => _meshes;
     
@@ -23,7 +23,7 @@ public class MultiViewportMeshInstance : MeshInstance
         Debug.Assert(_meshLayers.Count == _numExtraMeshes && _meshMaterials.Count == _numExtraMeshes);
         for (int i = 0; i < _numExtraMeshes; i++)
         {
-            MeshInstance mesh = new MeshInstance();
+            MeshInstance mesh = new();
             mesh.Mesh = Mesh;
             mesh.Layers = _meshLayers[i];
             mesh.MaterialOverride = _meshMaterials[i];

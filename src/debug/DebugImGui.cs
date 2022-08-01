@@ -181,58 +181,43 @@ public class DebugImGui : Saveable
 
     private void _OnImGuiLayoutPerformance()
     {
-        ImGui.SetNextWindowBgAlpha(_windowAlpha);
-        if (ImGui.Begin("Performance", _windowFlags))
-        {
-            ImGui.Text($"FPS: {_fps:F0}");
-            
-            ImGui.Text(" ### Processing");
-            ImGui.Text($"TimeProcess: {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000.0f:F0}ms");
-            ImGui.Text($"ObjectCount: {Performance.GetMonitor(Performance.Monitor.ObjectCount):F0}");
-            ImGui.Text($"ObjectNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):F0}");
-            ImGui.Text($"ObjectResourceCount: {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):F0}");
-            ImGui.Text($"ObjectOrphanNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount):F0}");
+        ImGui.Text($"FPS: {_fps:F0}");
+        
+        ImGui.Text(" ### Processing");
+        ImGui.Text($"TimeProcess: {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000.0f:F0}ms");
+        ImGui.Text($"ObjectCount: {Performance.GetMonitor(Performance.Monitor.ObjectCount):F0}");
+        ImGui.Text($"ObjectNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):F0}");
+        ImGui.Text($"ObjectResourceCount: {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):F0}");
+        ImGui.Text($"ObjectOrphanNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount):F0}");
 
-            ImGui.Text(" ### Rendering");
-            ImGui.Text($"RenderVerticesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame):F0}");
-            ImGui.Text($"RenderDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame):F0}");
-            ImGui.Text($"Render2dDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame):F0}");
+        ImGui.Text(" ### Rendering");
+        ImGui.Text($"RenderVerticesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame):F0}");
+        ImGui.Text($"RenderDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame):F0}");
+        ImGui.Text($"Render2dDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame):F0}");
 
-            ImGui.Text(" ### Memory");
-            ImGui.Text($"MemoryDynamic: {Performance.GetMonitor(Performance.Monitor.MemoryDynamic) / 1024.0f:F0}KiB");
-            ImGui.Text($"MemoryStatic: {Performance.GetMonitor(Performance.Monitor.MemoryStatic) / 1024.0f:F0}KiB");
-            ImGui.Text($"MemoryMessageBufferMax: {Performance.GetMonitor(Performance.Monitor.MemoryMessageBufferMax) / 1024.0f:F0}KiB");
+        ImGui.Text(" ### Memory");
+        ImGui.Text($"MemoryDynamic: {Performance.GetMonitor(Performance.Monitor.MemoryDynamic) / 1024.0f:F0}KiB");
+        ImGui.Text($"MemoryStatic: {Performance.GetMonitor(Performance.Monitor.MemoryStatic) / 1024.0f:F0}KiB");
+        ImGui.Text($"MemoryMessageBufferMax: {Performance.GetMonitor(Performance.Monitor.MemoryMessageBufferMax) / 1024.0f:F0}KiB");
 
-            ImGui.Text(" ### Physics");
-            ImGui.Text($"Physics3dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3dActiveObjects):F0}");
-            ImGui.Text($"Physics2dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2dActiveObjects):F0}");
-            ImGui.Text($"Physics3dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3dIslandCount):F0}KiB");
-            ImGui.Text($"Physics2dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2dIslandCount):F0}KiB");
-
-            ImGui.End();
-        }
+        ImGui.Text(" ### Physics");
+        ImGui.Text($"Physics3dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3dActiveObjects):F0}");
+        ImGui.Text($"Physics2dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2dActiveObjects):F0}");
+        ImGui.Text($"Physics3dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3dIslandCount):F0}KiB");
+        ImGui.Text($"Physics2dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2dIslandCount):F0}KiB");
     }
     
     private void _OnImGuiLayoutDebug()
     {
-        ImGui.SetNextWindowBgAlpha(_windowAlpha);
-        if (ImGui.Begin("Debug", _windowFlags))
+        if (ImGui.SliderFloat("Timescale", ref _timescale, 0.0f, 1.0f))
         {
-            if (ImGui.SliderFloat("Timescale", ref _timescale, 0.0f, 1.0f))
-            {
-                Engine.TimeScale = _timescale;
-            }
-            ImGui.End();
+            Engine.TimeScale = _timescale;
         }
     }
     
     private void _OnImGuiLayoutGameSettings()
     {
-        ImGui.SetNextWindowBgAlpha(_windowAlpha);
-        if (ImGui.Begin("GameSettings", _windowFlags))
-        {
-            Resources.Instance.ResourceGameSettings._OnImGuiLayout();
-        }
+        Resources.Instance.ResourceGameSettings._OnImGuiLayout();
     }
 
     private void _OnImGuiLayout()

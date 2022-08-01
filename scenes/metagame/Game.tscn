@@ -7,7 +7,6 @@
 [ext_resource path="res://src/singletons/AISpawningDirector.cs" type="Script" id=5]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_wasp.tres" type="Resource" id=6]
 [ext_resource path="res://assets/Environment.tres" type="Environment" id=7]
-[ext_resource path="res://assets/shader/post_process.shader" type="Shader" id=8]
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 [ext_resource path="res://src/rendering/TrailRenderer.cs" type="Script" id=11]
@@ -31,6 +30,8 @@
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_carrier.tres" type="Resource" id=29]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" type="Resource" id=30]
 [ext_resource path="res://scenes/gui/Cursor.tscn" type="PackedScene" id=31]
+[ext_resource path="res://src/rendering/ViewportCamera.cs" type="Script" id=32]
+[ext_resource path="res://assets/material/outline.material" type="Material" id=33]
 
 [sub_resource type="ArrayMesh" id=14]
 surfaces/0 = {
@@ -1159,7 +1160,7 @@ shader_param/u_alpha_exponent = 1.0
 shader_param/u_do_dither = true
 shader_param/u_dither_scale = 1024.0
 shader_param/u_colour_lit = Color( 1, 0.886275, 0.52549, 1 )
-shader_param/u_colour_shadow = Color( 0.266667, 0.137255, 0.0313726, 1 )
+shader_param/u_colour_shadow = Color( 0.333333, 0.180392, 0.0509804, 1 )
 shader_param/u_num_light_steps = 8
 shader_param/u_light_ray_dist = 25.0
 shader_param/u_light_absorbtion = 1.126
@@ -1172,17 +1173,6 @@ shader_param/u_blue_noise = ExtResource( 24 )
 
 [sub_resource type="QuadMesh" id=7]
 
-[sub_resource type="ShaderMaterial" id=6]
-shader = ExtResource( 8 )
-shader_param/edge_color = Color( 0, 0, 0, 1 )
-shader_param/threshold = 0.0
-shader_param/blend = 0.01
-shader_param/enable_depth_pass = true
-shader_param/threshold_depth = 0.0
-shader_param/blend_depth = 0.01
-shader_param/distance_fade_length = 1000.0
-shader_param/distance_fade_blend = 1000.0
-
 [node name="Game" type="Spatial"]
 script = ExtResource( 2 )
 StateMachinePath = NodePath("StateMachine_Game")
@@ -1190,6 +1180,8 @@ AiSpawningDirectorPath = NodePath("AISpawningDirector")
 HudPath = NodePath("HUD")
 SandPath = NodePath("Sand")
 CloudsPath = NodePath("CloudBox")
+OutlineViewportPath = NodePath("Viewport")
+OutlineMeshPath = NodePath("Outline")
 _areaRect = Rect2( -1000, -1000, 1000, 1000 )
 _playerScene = ExtResource( 3 )
 _playerData = SubResource( 14 )
@@ -1250,12 +1242,25 @@ mesh = SubResource( 12 )
 material/0 = SubResource( 13 )
 script = ExtResource( 26 )
 
-[node name="PostProcess" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -140.015, 0 )
-visible = false
+[node name="Outline" type="MeshInstance" parent="."]
 extra_cull_margin = 16384.0
 mesh = SubResource( 7 )
 skeleton = NodePath("../Camera")
-material/0 = SubResource( 6 )
+material/0 = ExtResource( 33 )
 
 [node name="Cursor" parent="." instance=ExtResource( 31 )]
+
+[node name="Viewport" type="Viewport" parent="."]
+msaa = 2
+hdr = false
+keep_3d_linear = true
+
+[node name="Camera" type="Camera" parent="Viewport"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0 )
+cull_mask = 1047554
+current = true
+fov = 60.0
+size = 300.0
+near = 10.0
+far = 1000.0
+script = ExtResource( 32 )

@@ -223,29 +223,17 @@ vec3 cloud_march(vec3 ro, vec3 rd, vec3 light, float max_dist, vec2 fragcoord, o
 
 vec3 volume_cloud(vec3 cam, vec3 pixel, vec3 light, vec2 fragcoord, out float alpha, float depth)
 {
-//	bool inside = cam.x > u_cloud_box_min.x && cam.x < u_cloud_box_max.x &&
-//				  cam.y > u_cloud_box_min.y && cam.y < u_cloud_box_max.y &&
-//				  cam.z > u_cloud_box_min.z && cam.z < u_cloud_box_max.z;
-				
 	vec3 ro;
 	vec3 rd = normalize(v_vertex - cam);
 	float dist;
 	float cam_to_ro;
-//	if (inside)
-//	{
-//		ro = cam;
-//		dist = length(ro - pixel);
-//		cam_to_ro = 0.0;
-//	}
-//	else
+	
+	vec2 intersect = intersect_aabb(cam, rd, u_cloud_box_min, u_cloud_box_max);
+	if (intersect.x < intersect.y) // there is an intersection
 	{
-		vec2 intersect = intersect_aabb(cam, rd, u_cloud_box_min, u_cloud_box_max);
-		if (intersect.x < intersect.y) // there is an intersection
-		{
-			ro = cam + rd * intersect.x;
-			cam_to_ro = intersect.x;
-			dist = intersect.y - intersect.x;
-		}
+		ro = cam + rd * intersect.x;
+		cam_to_ro = intersect.x;
+		dist = intersect.y - intersect.x;
 	}
 	
 	dist = min(dist, depth - cam_to_ro);
@@ -269,7 +257,13 @@ void light()
 
 	float alpha;
 	vec3 col = volume_cloud(v_cam, v_vertex, light, UV, alpha, v_depth);
-
+	
+	// add a shadow effect on the cloud so ships below it are visible
+	float depth_pixel_below_cloud_dist = v_depth - length(v_vertex - v_cam);
+	float depth_peek = clamp(remap(depth_pixel_below_cloud_dist, 10.0, 100.0, 0.0, 1.0), 0.0, 1.0);
+	vec3 ship_shadow_col = mix(u_colour_lit.rgb, u_colour_shadow.rgb, 0.5);
+	col = mix(ship_shadow_col, col, depth_peek);
+	
 	DIFFUSE_LIGHT = col;
 	ALPHA = pow(alpha, u_alpha_exponent);
 }

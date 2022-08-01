@@ -29,5 +29,8 @@ _sendScaleMinMax = Vector2( 10, 100 )
 [node name="Mesh" parent="." index="1"]
 mesh = ExtResource( 3 )
 
+[node name="BoidTrail" parent="Mesh" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.21353 )
+
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="." index="6"]
 stream = ExtResource( 7 )

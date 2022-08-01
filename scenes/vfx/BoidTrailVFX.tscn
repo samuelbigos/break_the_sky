@@ -47,7 +47,6 @@ _burstParticlesPath = NodePath("Particles")
 
 [node name="Particles" type="Particles" parent="."]
 visible = false
-layers = 3
 material_override = SubResource( 7 )
 amount = 25
 lifetime = 0.33
