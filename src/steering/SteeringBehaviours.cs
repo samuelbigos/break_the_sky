@@ -67,7 +67,7 @@ public partial class SteeringManager
         }
 
         influence = Mathf.Clamp(dist / radius, 0.0f, 1.0f);
-        return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f));
+        return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f) * boid.MaxSpeed);
     }
 
     private static Vector2 Steering_Cohesion(in Boid boid, in ReadOnlySpan<Boid> boids)

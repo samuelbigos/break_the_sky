@@ -18,7 +18,7 @@ public partial class BoidEnemyWasp : BoidEnemyBase
     {
         if (_aiState == AIState.Engaged)
         {
-            _cachedHeading = (_targetBoid.GlobalPosition - GlobalPosition).Normalized();
+            _visualHeadingOverride = (_targetBoid.GlobalPosition - GlobalPosition).Normalized();
 
             _attackCooldownTimer -= delta;
             if (_attackCooldownTimer < 0.0f)
@@ -38,6 +38,10 @@ public partial class BoidEnemyWasp : BoidEnemyBase
                     _attackCooldownTimer = _resourceStats.AttackCooldown;
                 }
             }
+        }
+        else
+        {
+            _visualHeadingOverride = Vector2.Zero;
         }
         
         base.ProcessAlive(delta);

@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=2]
 
 [ext_resource path="res://src/singletons/ColourManager.cs" type="Script" id=1]
-[ext_resource path="res://assets/material/spatial_red.material" type="Material" id=2]
 
 [node name="ColourManager" type="Node"]
 script = ExtResource( 1 )
-RedMaterialResource = ExtResource( 2 )
+AllyOutline = Color( 1, 1, 1, 1 )
+EnemyOutline = Color( 0, 0, 0, 1 )
 Primary = Color( 1, 0.831373, 0.639216, 1 )
 Secondary = Color( 0.0509804, 0.168627, 0.270588, 1 )
 Tertiary = Color( 1, 0.666667, 0.368627, 1 )

@@ -15,7 +15,7 @@ public partial class SeekerMissile : Area
     [Export] private float _lifetime = 5.0f;
     [Export] private PackedScene _explodeVfx;
 
-    [OnReadyGet] private MeshInstance _mesh;
+    [OnReadyGet] private MultiViewportMeshInstance _mesh;
     [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
     [OnReadyGet] private BoidTrail _trail;
     [OnReadyGet] private CollisionShape _collisionShape;
@@ -35,6 +35,7 @@ public partial class SeekerMissile : Area
         _deactivationTimer = _lifetime;
         _alignment = alignment;
         _mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
+        _mesh.SetMeshTransform(_mesh.Transform);
         
         Connect("area_entered", this, nameof(_OnAreaEntered));
         
@@ -69,6 +70,9 @@ public partial class SeekerMissile : Area
         _steeringId = SteeringManager.Instance.Register(boid);
         
         _launchSfx.Play();
+        
+        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", _alignment == BoidBase.BoidAlignment.Ally ? 
+            ColourManager.Instance.AllyOutline : ColourManager.Instance.EnemyOutline);
     }
 
     public override void _Process(float delta)

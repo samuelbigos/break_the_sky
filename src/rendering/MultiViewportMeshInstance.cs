@@ -9,9 +9,11 @@ public class MultiViewportMeshInstance : MeshInstance
     [Export] private List<Material> _meshMaterials; 
     
     private List<MeshInstance> _meshes = new();
+    private List<ShaderMaterial> _shaders = new();
     private bool _createdMeshes;
 
     public List<MeshInstance> AltMeshes => _meshes;
+    public List<ShaderMaterial> AltShaders => _shaders;
     
     public override void _Ready()
     {
@@ -26,11 +28,12 @@ public class MultiViewportMeshInstance : MeshInstance
             MeshInstance mesh = new();
             mesh.Mesh = Mesh;
             mesh.Layers = _meshLayers[i];
-            mesh.MaterialOverride = _meshMaterials[i];
+            mesh.MaterialOverride = _meshMaterials[i].Duplicate() as ShaderMaterial;
             mesh.Transform = Transform;
             _meshes.Add(mesh);
             mesh.Visible = Visible;
             mesh.CastShadow = ShadowCastingSetting.Off;
+            _shaders.Add(mesh.MaterialOverride as ShaderMaterial);
         }
     }
 
@@ -46,6 +49,14 @@ public class MultiViewportMeshInstance : MeshInstance
                 GetParent().AddChild(mesh);
             }
             _createdMeshes = true;
+        }
+    }
+
+    public void SetMeshTransform(Transform transform)
+    {
+        foreach (MeshInstance mesh in _meshes)
+        {
+            mesh.Transform = transform;
         }
     }
 

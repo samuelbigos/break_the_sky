@@ -54,6 +54,9 @@ public class TargetingRenderer : MeshInstance
                 LineBetween(enemy, target, Colors.Blue, ref v, ref i);
             }
         }
+
+        if (v == 0)
+            return;
         
         Debug.Assert(v < _vertList.Length, "v < _vertList.Length");
         Debug.Assert(v < _colList.Length, "v < _colList.Length");

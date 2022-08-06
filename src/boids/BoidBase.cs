@@ -139,6 +139,7 @@ public partial class BoidBase : Area
     protected bool _acceptInput = true;
     protected Vector2 _cachedVelocity;
     protected Vector2 _cachedHeading;
+    protected Vector2 _visualHeadingOverride;
     protected State _state;
     protected ShaderMaterial _meshMaterial;
 
@@ -218,7 +219,11 @@ public partial class BoidBase : Area
 
         _cachedVelocity = steeringBoid.Velocity.ToGodot();
         _cachedHeading = steeringBoid.Heading.ToGodot();
-        
+
+        if (_visualHeadingOverride != Vector2.Zero)
+        {
+            _cachedHeading = _visualHeadingOverride;
+        }
         Basis basis = new Basis(Vector3.Up, _cachedHeading.AngleToY());
 
         // banking

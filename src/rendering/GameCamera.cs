@@ -78,8 +78,6 @@ public class GameCamera : Camera
         _noise.Period = 4;
         _noise.Octaves = 2;
 
-        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
-
         _initialTrans = GlobalTransform;
     }
 
@@ -109,8 +107,6 @@ public class GameCamera : Camera
         
         // ignore timescale
         delta = TimeSystem.UnscaledDelta;
-        
-        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
         
         // for clouds
         Debug.Assert(_player != null);

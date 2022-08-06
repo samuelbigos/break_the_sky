@@ -27,8 +27,6 @@ public class BoidTestbedCamera : Camera
     {
         base._Ready();
         
-        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
-        
         _initialTrans = GlobalTransform;
         Instance = this;
     }
@@ -36,8 +34,6 @@ public class BoidTestbedCamera : Camera
     public override void _Process(float delta)
     {
         base._Process(delta);
-
-        VisualServer.SetDefaultClearColor(ColourManager.Instance.Primary);
         
         Vector2 cameraMouseOffset = MousePosition() - Vector2.Zero;
         Vector2 cameraOffset = cameraMouseOffset * 0.5f;

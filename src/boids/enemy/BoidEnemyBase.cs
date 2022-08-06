@@ -30,6 +30,8 @@ public partial class BoidEnemyBase : BoidBase
         steeringBoid.DesiredDistFromTargetMax = EngageRange + EngageRange * 0.05f;
         
         SwitchAiState(AIState.Seeking);
+        
+        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.EnemyOutline);
     }
 
     protected override void ProcessAlive(float delta)
@@ -54,35 +56,6 @@ public partial class BoidEnemyBase : BoidBase
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
-        // switch (_targetType)
-        // {
-        //     case TargetType.None:
-        //     {
-        //         // TODO: optimise
-        //         List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
-        //         foreach (BoidAllyBase boid in allyBoids)
-        //         {
-        //             float distSq = (boid.GlobalPosition - GlobalPosition).LengthSquared();
-        //             if (distSq < EngageRange * EngageRange)
-        //             {
-        //                 SetTarget(TargetType.Enemy, boid);
-        //                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
-        //                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Wander, false);
-        //                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Cohesion, false);
-        //                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Alignment, false);
-        //                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.FlowFieldFollow, false);
-        //             }
-        //         }
-        //         break;
-        //     }
-        //     case TargetType.Ally:
-        //     case TargetType.Enemy:
-        //     case TargetType.Position:
-        //         break;
-        //     default:
-        //         throw new ArgumentOutOfRangeException();
-        // }
         
         // base.ProcessAlive is called after child processing in-case we are destroyed this frame (so we don't do
         // child processing after being destroyed).

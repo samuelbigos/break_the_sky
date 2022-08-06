@@ -16,13 +16,11 @@ public partial class BoidAllyBase : BoidBase
     [Export] private float _shootSize = 1.5f;
     [Export] private float _shootTrauma = 0.05f;
     [Export] private float _destroyTrauma = 0.1f;
-
     [Export] private PackedScene _microBulletScene;
+    [Export] protected float _engageRange;
     
     [OnReadyGet] private AudioStreamPlayer2D _sfxShootMicro;
 
-    [Export] protected float _engageRange;
-    
     public ResourceBoidAlly Data => _data as ResourceBoidAlly;
     public AIState AiState => _aiState;
     public override BoidAlignment Alignment => BoidAlignment.Ally;
@@ -41,6 +39,8 @@ public partial class BoidAllyBase : BoidBase
 
         SpatialMaterial mat = _selectedIndicator.GetActiveMaterial(0) as SpatialMaterial;
         mat.AlbedoColor = ColourManager.Instance.Ally;
+        
+        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.AllyOutline);
     }
 
     protected override void ProcessAlive(float delta)

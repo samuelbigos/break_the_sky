@@ -12,9 +12,9 @@ void vertex()
 	POSITION = vec4(VERTEX, 1.0);
 }
 
-float sampleBuffer(sampler2D sampler, vec2 uv)
+vec4 sampleBuffer(sampler2D sampler, vec2 uv)
 {
-	return texture(sampler, uv).r;
+	return texture(sampler, uv);
 }
 
 float remap(float x, float a, float b, float c, float d)
@@ -27,7 +27,9 @@ void fragment()
 	vec2 uv = SCREEN_UV;
 	vec2 delta = 1.0 / VIEWPORT_SIZE * 1.0;
 	
-	float pixel = sampleBuffer(u_outlineBuffer, uv);
+	vec4 pixelBuffer = sampleBuffer(u_outlineBuffer, uv);
+	float pixel = pixelBuffer.a;
+	vec3 colour;
 	
 	float minVal = pixel;
 	float maxVal = pixel;
@@ -41,10 +43,12 @@ void fragment()
 			if (x == 0 && y == 0)
 				continue;
 				
-			float sample = sampleBuffer(u_outlineBuffer, uv + vec2(delta.x * float(x), delta.y * float(y)));
-			minVal = min(minVal, sample);
-			maxVal = max(maxVal, sample);
-			sum += sample;
+			vec4 sample = sampleBuffer(u_outlineBuffer, uv + vec2(delta.x * float(x), delta.y * float(y)));
+			
+			minVal = min(minVal, sample.a);
+			maxVal = max(maxVal, sample.a);
+			if (sample.a > 0.5) colour = sample.rgb;
+			sum += sample.a;
 			count += 1.0;
 		}
 	}
@@ -54,6 +58,6 @@ void fragment()
 	float diff = smoothstep(minVal, maxVal, sum);
 	diff = clamp(diff, 0.0, 1.0);
 	
-	ALBEDO = u_edgeColor.rgb;
+	ALBEDO = colour;
 	ALPHA = min(diff, 1.0 - pixel);
 }

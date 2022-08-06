@@ -37,9 +37,7 @@ public class PickupMaterial : Spatial
         _matOutside = _meshOutside.GetSurfaceMaterial(0) as SpatialMaterial;
         Debug.Assert(_mat != null);
         Debug.Assert(_matOutside != null);
-
-        _mat.AlbedoColor = ColourManager.Instance.White;
-        _matOutside.AlbedoColor = ColourManager.Instance.Secondary;
+        
         _attractionRadius *= _attractionRadius;
         _collectionRadius *= _collectionRadius;
     }

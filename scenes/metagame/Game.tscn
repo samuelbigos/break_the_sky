@@ -1260,6 +1260,7 @@ skeleton = NodePath("../GameCamera")
 material/0 = ExtResource( 33 )
 
 [node name="OutlineBufferViewport" type="Viewport" parent="."]
+transparent_bg = true
 msaa = 2
 hdr = false
 keep_3d_linear = true

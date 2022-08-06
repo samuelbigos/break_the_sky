@@ -4,12 +4,8 @@ using GodotOnReady.Attributes;
 
 public partial class ColourManager : Singleton<ColourManager>
 {
-	[OnReadyGet] private SpatialMaterial _redMaterial;
-	
-	[OnReady] private void Ready()
-	{
-		_redMaterial.AlbedoColor = Red;
-	}
+	[Export] public Color AllyOutline;
+	[Export] public Color EnemyOutline;
 	
 	[Export] public Color Primary;
 	[Export] public Color Secondary;
