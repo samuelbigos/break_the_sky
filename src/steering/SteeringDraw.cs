@@ -61,13 +61,13 @@ public partial class SteeringManager
             // boid velocity/force
             if (_drawVelocity)
             {
-                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i,
+                Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / 100.0f, Colors.Red, ref v, ref i,
                     _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)
             {
-                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / boid.MaxForce / TimeSystem.Delta,
+                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / boid.Thrust / TimeSystem.Delta,
                     Colors.Purple, ref v, ref i, _vertList, _colList, _indexList);
             }
 

@@ -1,26 +1,19 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/boids/ally/BoidAllyBomber.cs" type="Script" id=1]
 [ext_resource path="res://scenes/boids/ally/BoidAllyBase.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/mesh/ships/alien_drone_a/alien_drone_a_body.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=4]
-[ext_resource path="res://assets/shader/boid_velocity.shader" type="Shader" id=5]
 [ext_resource path="res://scenes/abilities/BulletBomber.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/data/stats/allies/stats_ally_bomber.tres" type="Resource" id=7]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.472, 1, 2.241 )
 
-[sub_resource type="ShaderMaterial" id=3]
-shader = ExtResource( 5 )
-shader_param/u_velocity = null
-
 [node name="BoidAllyBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
 _behaviours = 1438
-MaxVelocity = 75.0
 MinVelocity = 50.0
-MaxForce = 110.0
 BankingRate = 2.0
 BankingAmount = 1.5
 _baseResourceStats = ExtResource( 7 )
@@ -42,7 +35,6 @@ shape = SubResource( 1 )
 [node name="Mesh" parent="." index="1"]
 transform = Transform( 1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0 )
 mesh = ExtResource( 3 )
-_meshMaterials = [ SubResource( 3 ) ]
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0865458, -2.70408 )

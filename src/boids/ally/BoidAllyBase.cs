@@ -9,6 +9,7 @@ public partial class BoidAllyBase : BoidBase
     {
         None,
         Idle,
+        Stationed,
         Engaged
     }
     
@@ -24,7 +25,6 @@ public partial class BoidAllyBase : BoidBase
     public ResourceBoidAlly Data => _data as ResourceBoidAlly;
     public AIState AiState => _aiState;
     public override BoidAlignment Alignment => BoidAlignment.Ally;
-    public BoidEnemyBase EnemyTarget => _targetType == TargetType.Enemy ? _targetBoid as BoidEnemyBase : null;
 
     protected AIState _aiState = AIState.None;
     protected BoidBase _engageTarget;
@@ -49,6 +49,9 @@ public partial class BoidAllyBase : BoidBase
         {
             case AIState.None:
                 SwitchAiState(AIState.Idle);
+                break;
+            case AIState.Stationed:
+                AcquireTarget();
                 break;
             case AIState.Idle:
                 AcquireTarget();
@@ -139,6 +142,11 @@ public partial class BoidAllyBase : BoidBase
     public void NavigateTowards(Vector2 pos)
     {
         SetTarget(TargetType.Position, null, pos);
+        SwitchAiState(AIState.Stationed);
+    }
+
+    public void ReturnToPlayer()
+    {
         SwitchAiState(AIState.Idle);
     }
 
@@ -151,6 +159,9 @@ public partial class BoidAllyBase : BoidBase
         {
             case AIState.Idle:
                 _OnEnterAIState_Idle();
+                break;
+            case AIState.Stationed:
+                _OnEnterAIState_Stationed();
                 break;
             case AIState.Engaged:
                 _OnEnterAIState_Engaged();
@@ -170,6 +181,16 @@ public partial class BoidAllyBase : BoidBase
         }
         ResetSteeringBehaviours();
         SetTarget(TargetType.Ally, Game.Player);
+    }
+    
+    protected virtual void _OnEnterAIState_Stationed()
+    {
+        if (!_engageTarget.Null())
+        {
+            _engageTarget.OnBoidDestroyed -= _OnEngageTargetBoidDestroyed;
+            _engageTarget = null;
+        }
+        ResetSteeringBehaviours();
     }
     
     protected virtual void _OnEnterAIState_Engaged()

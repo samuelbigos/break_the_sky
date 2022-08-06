@@ -137,7 +137,9 @@ public static class Utils
 
     public static Vector2 NormalizeSafe(this Vector2 vec)
     {
-        return vec == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(vec);
+        if (Mathf.Abs(vec.X) < 2e-10f || Mathf.Abs(vec.Y) < 2e-10f)
+            return Vector2.Zero;
+        return Vector2.Normalize(vec);
     }
 
     public static Vector2 SetMag(ref this Vector2 vec, float vMag)

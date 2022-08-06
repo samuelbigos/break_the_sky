@@ -31,7 +31,8 @@ public class TargetingRenderer : MeshInstance
         base._Process(delta);
 
         ArrayMesh outMesh = new();
-
+        Mesh = outMesh;
+        
         int v = 0;
         int i = 0;
 
@@ -39,19 +40,17 @@ public class TargetingRenderer : MeshInstance
         
         foreach (BoidAllyBase ally in BoidFactory.Instance.AllyBoids)
         {
-            BoidEnemyBase target = ally.EnemyTarget;
-            if (!target.Null())
+            if (ally.CurrentTargetType == BoidBase.TargetType.Enemy || ally.CurrentTargetType == BoidBase.TargetType.Position)
             {
-                LineBetween(ally, target, Colors.Green, ref v, ref i);
+                LineBetween(ally.GlobalPosition.ToNumerics().To3D(), ally.TargetPos.ToNumerics().To3D(), Colors.Green, ref v, ref i);
             }
         }
         
         foreach (BoidEnemyBase enemy in BoidFactory.Instance.EnemyBoids)
         {
-            BoidAllyBase target = enemy.EnemyTarget;
-            if (!target.Null())
+            if (enemy.CurrentTargetType == BoidBase.TargetType.Enemy || enemy.CurrentTargetType == BoidBase.TargetType.Position)
             {
-                LineBetween(enemy, target, Colors.Blue, ref v, ref i);
+                LineBetween(enemy.GlobalPosition.ToNumerics().To3D(), enemy.TargetPos.ToNumerics().To3D(), Colors.Green, ref v, ref i);
             }
         }
 
@@ -77,10 +76,10 @@ public class TargetingRenderer : MeshInstance
         Mesh = outMesh;
     }
 
-    private void LineBetween(BoidBase from, BoidBase to, Color col, ref int v, ref int i)
+    private void LineBetween(Vector3 from, Vector3 to, Color col, ref int v, ref int i)
     {
-        Vector3 start = from.GlobalPosition.ToNumerics().To3D();
-        Vector3 end = to.GlobalPosition.ToNumerics().To3D();
+        Vector3 start = from;
+        Vector3 end = to;
         Vector3 dir = Vector3.Normalize(end - start);
         float t = _time % (_lineSegmentSize * 1.5f);
         float dist = (end - start).Length();
@@ -92,7 +91,7 @@ public class TargetingRenderer : MeshInstance
                 
         while (t < dist)
         {
-            Utils.Line(start + dir * t, start + dir * (t + _lineSegmentSize), col, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(start + dir * t, start + dir * Mathf.Min(dist - _lineSegmentSize, t + _lineSegmentSize), col, ref v, ref i, _vertList, _colList, _indexList);
             t += _lineSegmentSize * 1.5f;
         }
     }

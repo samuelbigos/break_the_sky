@@ -10,8 +10,9 @@
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _behaviours = 1
-MaxVelocity = 120.0
-MaxForce = 200.0
+_thrust = 1000.0
+_mass = 5.0
+_dragCoeff = 0.05
 Bank360 = true
 BankingRate = 1.0
 BankingAmount = 1.0

@@ -29,14 +29,15 @@ public partial class SteeringManager
     private static Vector2 Steering_Seek(in Boid boid, Vector2 position, float limit = -1.0f)
     {
         Vector2 desired = position - boid.Position;
-        if (limit >= 0.0)
+        
+        // prevent the case where desired is exactly opposite to current heading, so no perpendicular
+        // force is applied and boid keeps moving away from target.
+        if (Math.Abs(Vector2.Dot(desired.NormalizeSafe(), boid.Heading)) < -0.999f)
         {
-            desired.SetMag(limit);
+            return desired.Rot90();
         }
-        else
-        {
-            desired.SetMag(boid.MaxSpeed);
-        }
+
+        desired.SetMag(limit >= 0.0 ? limit : 100000.0f);
 
         Vector2 force = desired - boid.Velocity;
         return force;
@@ -49,7 +50,8 @@ public partial class SteeringManager
 
     private static Vector2 Steering_Arrive(in Boid boid, Vector2 position, out float influence)
     {
-        float radius = Mathf.Max(1.0f, boid.MaxSpeed / (boid.MaxForce * _delta));
+        //float radius = Mathf.Max(1.0f, boid.Thrust / (boid.Thrust * _delta));
+        float radius = 50.0f;
         float dist = (boid.Position - position).Length();
         influence = 1.0f;
         
@@ -63,11 +65,11 @@ public partial class SteeringManager
 
             float t = Mathf.Clamp((dist - boid.ArriveDeadzone) / radius, 0.0f, 1.0f);
             influence = ScaleInfluence(t);
-            return Steering_Seek(boid, position, t * boid.MaxSpeed);
+            return Steering_Seek(boid, position, t * boid.Thrust);
         }
 
         influence = Mathf.Clamp(dist / radius, 0.0f, 1.0f);
-        return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f) * boid.MaxSpeed);
+        return Steering_Seek(boid, position, Mathf.Clamp(dist / radius, 0.0f, 1.0f) * 100000.0f);
     }
 
     private static Vector2 Steering_Cohesion(in Boid boid, in ReadOnlySpan<Boid> boids)
@@ -139,9 +141,9 @@ public partial class SteeringManager
             if (boid.Id == other.Id) continue;
 
             Vector2 desired = pos - otherPos;
-            desired.SetMag(boid.MaxSpeed);
+            desired.SetMag(boid.Thrust);
             float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
-            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
+            Vector2 force = desired.Limit(boid.Thrust * delta * t);
             forceSum += force;
             count++;
         }
@@ -156,9 +158,9 @@ public partial class SteeringManager
                 continue;
         
             Vector2 desired = boid.Position - other.Position;
-            desired.SetMag(boid.MaxSpeed);
+            desired.SetMag(boid.Thrust);
             float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
-            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
+            Vector2 force = desired.Limit(boid.Thrust * delta * t);
             forceSum += force;
             count++;
         }
@@ -223,7 +225,7 @@ public partial class SteeringManager
         if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)
         {
             Vector2 force = intersection.SurfaceNormal.PerpendicularComponent(boid.Heading);
-            force.SetMag(boid.MaxForce);
+            force.SetMag(boid.Thrust);
             return force;
         }
         return Vector2.Zero;
@@ -297,7 +299,7 @@ public partial class SteeringManager
         if (intersection.Intersect && intersection.IntersectTime < boid.LookAhead)
         {
             Vector2 force = intersection.SurfaceNormal.PerpendicularComponent(boid.Heading);
-            force.SetMag(boid.MaxForce);
+            force.SetMag(boid.Thrust);
             return force;
         }
         return Vector2.Zero;
@@ -340,7 +342,7 @@ public partial class SteeringManager
             return Vector2.Zero;
 
         desired /= count;
-        desired.SetMag(boid.MaxSpeed);
+        desired.SetMag(boid.Thrust);
         return desired - boid.Velocity;
     }
 
@@ -373,7 +375,7 @@ public partial class SteeringManager
         if (perp == Vector2.Zero)
             perp = targetToSelf.Rot90();
         Vector2 force = perp - boid.Velocity;
-        return force.Limit(boid.MaxForce);
+        return force.Limit(boid.Thrust);
     }
     
     private static Vector2 Steering_DesiredVelocityOverride(in Boid boid)

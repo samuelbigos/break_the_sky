@@ -41,9 +41,10 @@ public partial class BoidBase : Area
     [Export(PropertyHint.Flags, "DesiredVelocityOverride,Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
     [Export] protected float _steeringRadius = 5.0f;
     
-    [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
-    [Export] public float MaxForce = 150.0f;
+    [Export] protected float _thrust = 150.0f;
+    [Export] private float _mass = 1.0f;
+    [Export] private float _dragCoeff = 0.1f;
     [Export] public float FieldOfView = 360.0f;
     [Export] public bool Bank360 = false;
     [Export] public float BankingRate = 2.5f;
@@ -109,6 +110,7 @@ public partial class BoidBase : Area
         }
     }
 
+    public TargetType CurrentTargetType => _targetType;
     public Vector2 TargetPos
     {
         get
@@ -291,12 +293,13 @@ public partial class BoidBase : Area
             Position = GlobalPosition.ToNumerics(),
             Velocity = velocity.ToNumerics(),
             Heading = System.Numerics.Vector2.UnitY,
+            Mass = _mass,
+            DragCoeff = _dragCoeff,
+            Thrust = _thrust * _resourceStats.MoveSpeed,
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = -1,
             Behaviours = _behaviours,
-            MaxSpeed = MaxVelocity * _resourceStats.MoveSpeed,
-            MinSpeed = MinVelocity,
-            MaxForce = MaxForce * _resourceStats.MoveSpeed,
+            MinSpeed = MinVelocity * _resourceStats.MoveSpeed,
             DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
             ViewRange = 50.0f,
@@ -306,7 +309,11 @@ public partial class BoidBase : Area
             WanderVariance = 50.0f,
         };
         
-        _steeringId = SteeringManager.Instance.Register(boid);
+        if (!SteeringManager.Instance.Register(boid, out _steeringId))
+        {
+            QueueFree();
+            return;
+        }
     }
 
     public void SendHitMessage(float damage, Vector2 vel, Vector2 pos, BoidAlignment alignment)

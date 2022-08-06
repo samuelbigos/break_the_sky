@@ -16,8 +16,9 @@ extents = Vector3( 2.472, 1, 2.241 )
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
 _behaviours = 918
-MaxVelocity = 110.0
-MaxForce = 200.0
+_thrust = 1000.0
+_mass = 5.0
+_dragCoeff = 1.0
 Bank360 = true
 BankingRate = 5.0
 BankingAmount = 1.75

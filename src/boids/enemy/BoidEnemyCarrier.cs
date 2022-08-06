@@ -46,14 +46,15 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
             _turrets[i].Alignment = Alignment;
         }
     }
-    
+
     public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
     {
         base.Init(data, onDestroy, position, velocity);
-        
-        ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
+
+        ref SteeringManager.Boid steeringBoid =
+            ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.33f;
-        
+
         // minion flowfield
         SteeringManager.FlowField flowField = new()
         {
@@ -61,7 +62,12 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
             TrackID = steeringBoid.Id,
             Size = new System.Numerics.Vector2(500, 500),
         };
-        _flowFieldId = SteeringManager.Instance.Register(flowField);
+        
+        if (!SteeringManager.Instance.Register(flowField, out _flowFieldId))
+        {
+            QueueFree();
+            return;
+        }
     }
 
     public override void _Process(float delta)

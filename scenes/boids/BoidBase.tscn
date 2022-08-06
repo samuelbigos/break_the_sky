@@ -30,7 +30,6 @@ CollisionShapePath = NodePath("CollisionShape")
 SfxOnDestroyPath = NodePath("SFXDestroy")
 SfxOnHitPath = NodePath("SFXHit")
 _behaviours = 2159
-MaxVelocity = 250.0
 _hitSfx = [ ExtResource( 6 ) ]
 _hitParticlesScene = ExtResource( 8 )
 _damagedParticlesScene = ExtResource( 3 )

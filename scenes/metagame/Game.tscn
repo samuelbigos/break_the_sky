@@ -1140,7 +1140,7 @@ shader_param/u_grain_texture = ExtResource( 13 )
 shader_param/u_glitter_texture = ExtResource( 14 )
 
 [sub_resource type="CubeMesh" id=12]
-size = Vector3( 1000, 25, 1000 )
+size = Vector3( 1, 1, 1 )
 
 [sub_resource type="ShaderMaterial" id=13]
 shader = ExtResource( 21 )
@@ -1221,7 +1221,7 @@ skeleton = NodePath("../..")
 material/0 = SubResource( 11 )
 
 [node name="Clouds" type="MeshInstance" parent="Rendering"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, 0 )
+transform = Transform( 1000, 0, 0, 0, 25, 0, 0, 0, 1000, 0, 25, 0 )
 cast_shadow = 0
 mesh = SubResource( 12 )
 skeleton = NodePath("../..")
@@ -1236,7 +1236,7 @@ current = true
 fov = 60.0
 size = 300.0
 near = 10.0
-far = 1000.0
+far = 1500.0
 script = ExtResource( 4 )
 _maxZoom = 300.0
 

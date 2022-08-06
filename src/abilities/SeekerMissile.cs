@@ -10,6 +10,8 @@ public partial class SeekerMissile : Area
     }
     
     [Export] private float _steeringRadius = 5.0f;
+    [Export] private float _mass = 1.0f;
+    [Export] private float _dragCoeff = 0.1f;
     [Export] private float _maxSpeed = 200.0f;
     [Export] private float _maxForce = 50.0f;
     [Export] private float _lifetime = 5.0f;
@@ -49,12 +51,13 @@ public partial class SeekerMissile : Area
             Position = position.To2D().ToNumerics(),
             Velocity = velocity.ToNumerics(),
             Heading = velocity.ToNumerics().NormalizeSafe(),
+            Mass = _mass,
+            DragCoeff = _dragCoeff,
             Target = System.Numerics.Vector2.Zero,
             TargetIndex = target.SteeringId,
             Behaviours = behaviours,
-            MaxSpeed = _maxSpeed,
             MinSpeed = 0.0f,
-            MaxForce = _maxForce,
+            Thrust = _maxForce,
             DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
             ViewRange = 50.0f,
@@ -66,8 +69,12 @@ public partial class SeekerMissile : Area
         };
         
         target.OnBoidDestroyed += _OnTargetBoidDestroyed;
-        
-        _steeringId = SteeringManager.Instance.Register(boid);
+
+        if (!SteeringManager.Instance.Register(boid, out _steeringId))
+        {
+            QueueFree();
+            return;
+        }
         
         _launchSfx.Play();
         

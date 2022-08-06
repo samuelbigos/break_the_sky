@@ -29,11 +29,13 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 DesiredVelocityOverride;
         public Vector2 Steering;
         public Vector2 Heading;
+        public float Thrust;
+        public float Mass;
+        public float DragCoeff;
         public float Radius;
         public float Speed;
         public Vector2 Target;
         public float ArriveDeadzone;
-        public float ArriveWeight;
         public int TargetIndex;
         public Vector2 TargetOffset;
         public float DesiredDistFromTargetMin;
@@ -41,9 +43,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public Vector2 DesiredOffsetFromTarget;
         public int Behaviours;
         public float DesiredSpeed;
-        public float MaxSpeed;
         public float MinSpeed;
-        public float MaxForce;
         public float LookAhead;
         public float ViewRange;
         public float ViewAngle;
@@ -253,7 +253,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
                 float totalForceLength = totalForce.Length();
                 float forceLength = force.Length();
-                float frameMaxForce = boid.MaxForce * delta * 2.0f;
+                float frameMaxForce = boid.Thrust * delta * 2.0f;
                 if (totalForceLength + forceLength > frameMaxForce)
                 {
                     force.Limit(frameMaxForce - totalForceLength);
@@ -266,19 +266,18 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
             totalForce = ApplyMinimumSpeed(boid, totalForce, boid.MinSpeed);
             boid.Steering = totalForce;
+            
+            Vector2 drag = boid.Velocity.NormalizeSafe() * boid.Velocity.LengthSquared() * boid.DragCoeff * delta;
+            Vector2 thrust = totalForce;
+            Vector2 excessThrust = thrust - drag;
+            Vector2 acceleration = excessThrust / boid.Mass;
 
-            boid.Velocity += boid.Steering;
-            boid.Velocity.Limit(boid.MaxSpeed);
-
-            // TODO: replace max speed with drag, so max speed is a derived value from drag and thrust.
-            // float dragCoeff = 0.0001f;
-            // Vector2 drag = -boid.Velocity.NormalizeSafe() * boid.Velocity.LengthSquared() * dragCoeff;
-            //boid.Velocity *= boid.Velocity.LengthSquared();
+            boid.Velocity += acceleration;
 
             boid.Speed = boid.Velocity.Length();
 
             // Smooth heading to eliminate rapid heading changes on small velocity adjustments
-            if (boid.Speed > boid.MaxSpeed * 0.025f)
+            if (boid.Speed > 0.025f)
             {
                 const float smoothing = 0.9f;
                 boid.Heading = Vector2.Normalize(boid.Velocity) * (1.0f - smoothing) + boid.Heading * smoothing;
@@ -316,7 +315,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case Arrive:
                 force += Steering_Arrive(boid, boid.Target, out influence);
-                force = force.Limit(boid.MaxForce * delta) * influence;
+                force = force.Limit(boid.Thrust * delta) * influence;
                 break;
             case Pursuit:
                 force += Steering_Pursuit(boid);
@@ -363,7 +362,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 throw new ArgumentOutOfRangeException();
         }
 
-        return force.Limit(boid.MaxForce * delta) * _behaviourWeights[(int)behaviour];
+        return force.Limit(boid.Thrust * delta) * _behaviourWeights[(int)behaviour];
     }
 
     private void GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int max) where T : IPoolable
@@ -393,22 +392,25 @@ public partial class SteeringManager : Singleton<SteeringManager>
             DebugUtils.Assert(false, "Invalid type in SteeringManager.GetPoolForType()!");
     }
     
-    public int Register<T>(T obj) where T : IPoolable
+    public bool Register<T>(T obj, out int id) where T : IPoolable
     {
+        id = default;
         GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int max);
+        if (!Validate(obj))
+            return false;
         
 #if !FINAL
         if (pool.Count >= max)
         {
             Debug.Assert(false, $"Maximum {typeof(T)} ({max}) reached, check for leaks or increase pool size.");
-            return -1;
+            return false;
         }
 #endif
 
-        int id = obj.GenerateId();
+        id = obj.GenerateId();
         int index = pool.Add(obj);
         toIndex[id] = index;
-        return id;
+        return true;
     }
 
     public bool HasObject<T>(int id) where T : IPoolable
@@ -431,6 +433,18 @@ public partial class SteeringManager : Singleton<SteeringManager>
         int i = toIndex[id];
         pool.Remove(i);
         toIndex.Remove(id);
+    }
+
+    private bool Validate<T>(T obj)
+    {
+        if (typeof(T) == typeof(Boid))
+        {
+            Boid boid = (Boid)Convert.ChangeType(obj, typeof(Boid));
+            DebugUtils.Assert(boid.DragCoeff != 0.0f, "boid.DragCoeff == 0.0f");
+            DebugUtils.Assert(boid.Mass != 0.0f, "boid.Mass == 0.0f");
+        }
+
+        return true;
     }
     
     public override void _EnterTree()
