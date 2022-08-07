@@ -195,6 +195,8 @@ public partial class BoidBase : Area
 
         if (!Game.Instance.Null())
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
+
+        _rbCollider.Disabled = true;
     }
 
     public override void _Process(float delta)
@@ -293,8 +295,8 @@ public partial class BoidBase : Area
         if (_hasHitGround)
         {
             _hitGroundTimer += delta;
-            float rbSleepVel = 15.0f;
-            if ((_destroyedRb.LinearVelocity.Length() <= rbSleepVel && _hitGroundTimer > 1.0f) || _hitGroundTimer > 8.0f)
+            float rbSleepVel = 10.0f;
+            if ((_destroyedRb.LinearVelocity.Length() <= rbSleepVel && _hitGroundTimer > 2.0f) || _hitGroundTimer > 8.0f)
             {
                 _destroyedRb.Sleeping = true;
                 _hitGround = false;
@@ -308,15 +310,16 @@ public partial class BoidBase : Area
             {
                 _hitGround = false;
             
-                Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin);
-                ParticlesMaterial pMat = p.ProcessMaterial.Duplicate() as ParticlesMaterial;
-                float vel = _destroyedRb.LinearVelocity.Length();
-                float t = 1.0f - Utils.Ease_CubicOut(Mathf.Clamp(_hitGroundTimer / 5.0f, 0.0f, 1.0f));
-                t *= _mass;
-                pMat.InitialVelocity *= t;
-                pMat.Scale *= t;
-                pMat.Direction = _destroyedRb.LinearVelocity.To2D().Normalized().To3D();
-                p.ProcessMaterial = pMat;
+                Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin, out ParticlesMaterial mat, true);
+                if (!p.Null())
+                {
+                    //float vel = _destroyedRb.LinearVelocity.Length();
+                    float t = 1.0f - Utils.Ease_CubicOut(Mathf.Clamp(_hitGroundTimer / 5.0f, 0.0f, 1.0f));
+                    t *= _mass;
+                    mat.InitialVelocity *= t;
+                    mat.Scale *= t;
+                    mat.Direction = _destroyedRb.LinearVelocity.To2D().Normalized().To3D();
+                }
             }
         }
     }
@@ -428,7 +431,10 @@ public partial class BoidBase : Area
             _destroyedRb.GlobalTransform = GlobalTransform;
             GetParent().RemoveChild(this);  
             _destroyedRb.AddChild(this);
-            _destroyedRb.AddChild(_rbCollider.Duplicate());
+            CollisionShape collider = _rbCollider.Duplicate() as CollisionShape;
+            collider.Disabled = false;
+            _destroyedRb.AddChild(collider);
+            
             _rbCollider.QueueFree();
             _shipCollider.QueueFree();
 

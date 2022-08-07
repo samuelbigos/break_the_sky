@@ -18,6 +18,7 @@ public class ParticleManager : Spatial
         public Particles Particles;
         public float Lifetime;
         public bool TriggerEmit;
+        public ParticlesMaterial OriginalMaterial;
     }
 
     private List<OneShotParticles> _oneShotParticles = new(100);
@@ -67,14 +68,16 @@ public class ParticleManager : Spatial
             if (osp.Lifetime < 0.0f)
             {
                 _oneShotParticles.RemoveAt(i);
+                osp.Particles.ProcessMaterial = osp.OriginalMaterial;
                 osp.Queue.Enqueue(osp.Particles);
                 osp.Particles.Visible = false;
             }
         }
     }
 
-    public Particles AddOneShotParticles(PackedScene particleScene, Vector3 position)
+    public Particles AddOneShotParticles(PackedScene particleScene, Vector3 position, out ParticlesMaterial mat, bool duplicateMaterial = false)
     {
+        mat = null;
 #if !FINAL
         if (!_pools.ContainsKey(particleScene))
         {
@@ -92,7 +95,18 @@ public class ParticleManager : Spatial
         p.GlobalPosition(position);
         p.Visible = true;
         float lifetime = p.Lifetime + (1.0f - p.Explosiveness) * p.Lifetime; // Account for explosiveness != 1.0.
-        _oneShotParticles.Add(new OneShotParticles() { Queue = list, Particles = p, Lifetime = lifetime, TriggerEmit = true });
+        
+        // Duplicate material if required.
+        ParticlesMaterial originalMat = p.ProcessMaterial as ParticlesMaterial;
+        if (duplicateMaterial) p.ProcessMaterial = originalMat.Duplicate() as ParticlesMaterial;
+        mat = p.ProcessMaterial as ParticlesMaterial;
+        DebugUtils.Assert(!mat.Null(), "Particle doesn't have a ParticlesMaterial.");
+        
+        _oneShotParticles.Add(new OneShotParticles()
+        {
+            Queue = list, Particles = p, Lifetime = lifetime, TriggerEmit = true, OriginalMaterial = originalMat
+        });
+        
         return p;
     }
 }

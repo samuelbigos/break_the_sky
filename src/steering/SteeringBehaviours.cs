@@ -30,7 +30,7 @@ public partial class SteeringManager
     {
         Vector2 desired = position - boid.Position;
         
-        // prevent the case where desired is exactly opposite to current heading, so no perpendicular
+        // Prevent the case where desired is exactly opposite to current heading, so no perpendicular
         // force is applied and boid keeps moving away from target.
         if (Math.Abs(Vector2.Dot(desired.NormalizeSafe(), boid.Heading)) < -0.9999f)
         {
@@ -50,7 +50,7 @@ public partial class SteeringManager
 
     private static Vector2 Steering_Arrive(in Boid boid, Vector2 position, out float influence)
     {
-        float radius = Mathf.Max(1.0f, boid.MaxSpeed / (boid.MaxForce * _delta));
+        float radius = boid.ArriveRadius;//Mathf.Max(1.0f, boid.MaxSpeed / (boid.MaxForce * _delta));
         float dist = (boid.Position - position).Length();
         influence = 1.0f;
         
@@ -58,7 +58,7 @@ public partial class SteeringManager
         {
             if (dist < boid.ArriveDeadzone)
             {
-                influence = 0.1f;
+                influence = 0.25f;
                 return Steering_Stop(boid);
             }
 

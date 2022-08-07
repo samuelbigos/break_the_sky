@@ -104,6 +104,7 @@ public class BoidPlayer : BoidAllyBase
 
                 // set arrive deadzone to some value proportional to the amount of drones we have active
                 boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtIdleCount);
+                boid.ArriveRadius = boid.ArriveDeadzone + boid.Radius * 3.0f;
             }
         }
         
@@ -151,9 +152,10 @@ public class BoidPlayer : BoidAllyBase
                 }
                 else
                 {
-                    sentAlly.NavigateTowards(_cachedMousePos);
                     ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(sentAlly.SteeringId);
-                    boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtSendCount);
+                    boid.ArriveDeadzone = boid.Radius * Mathf.Max(1.0f, sqrtSendCount);
+                    boid.ArriveRadius = boid.ArriveDeadzone;
+                    sentAlly.NavigateTowards(_cachedMousePos);
                 }
             }
         }

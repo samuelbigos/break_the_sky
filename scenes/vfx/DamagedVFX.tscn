@@ -3,13 +3,14 @@
 [ext_resource path="res://assets/mesh/icosphere_lowpoly.obj" type="ArrayMesh" id=1]
 
 [sub_resource type="SpatialMaterial" id=9]
+flags_transparent = true
 flags_unshaded = true
 flags_vertex_lighting = true
 vertex_color_use_as_albedo = true
 
 [sub_resource type="Gradient" id=5]
-offsets = PoolRealArray( 0, 0.394286, 0.725714, 0.994286 )
-colors = PoolColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.963867, 0.140081, 0.0489464, 1, 0, 0, 0, 1 )
+offsets = PoolRealArray( 0, 0.394286, 0.733333, 0.994286 )
+colors = PoolColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.964706, 0.141176, 0.0470588, 0.690196, 0, 0, 0, 0 )
 
 [sub_resource type="GradientTexture" id=6]
 gradient = SubResource( 5 )
@@ -23,7 +24,7 @@ curve = SubResource( 7 )
 [sub_resource type="ParticlesMaterial" id=2]
 lifetime_randomness = 0.5
 emission_shape = 1
-emission_sphere_radius = 3.0
+emission_sphere_radius = 1.0
 gravity = Vector3( 0, 0, 0 )
 scale = 2.0
 scale_random = 1.0
@@ -34,8 +35,7 @@ color_ramp = SubResource( 6 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
 material_override = SubResource( 9 )
 cast_shadow = 0
-amount = 50
-lifetime = 2.0
+amount = 25
 local_coords = false
 process_material = SubResource( 2 )
 draw_pass_1 = ExtResource( 1 )

@@ -42,6 +42,7 @@ shape = SubResource( 10 )
 
 [node name="RBCollider" type="CollisionShape" parent="."]
 shape = SubResource( 9 )
+disabled = true
 
 [node name="Mesh" type="MeshInstance" parent="."]
 material_override = ExtResource( 5 )

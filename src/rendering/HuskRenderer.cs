@@ -1,33 +1,53 @@
 using Godot;
 using System;
-using System.Diagnostics;
-using System.Numerics;
 using Array = Godot.Collections.Array;
-using Vector2 = Godot.Vector2;
-using Vector3 = Godot.Vector3;
 
-public class HuskRenderer : MeshInstance
+public class HuskRenderer : Singleton<HuskRenderer>
 {
-    public static HuskRenderer Instance;
+    [Export] private int _maxChunks = 20;
+    [Export] private int _vertsPerChunk = 50000;
+    [Export] private int _indicesPerChunk = 100000;
+
+    [Export] private Material _huskMaterial;
     
-    private int _v = 0;
-    private int _i = 0;
-    
-    // TODO: Split into chunks so we limit the amount of verts processed when adding a new husk.
-    // maintain maybe 100 husk chunks and destroy old ones when we've used all of them.
-    private Vector3[] _vertList = new Vector3[100000];
-    private Vector3[] _normList = new Vector3[100000];
-    private float[] _tangentList = new float[100000 * 4];
-    private Vector2[] _uvList = new Vector2[100000];
-    private int[] _indexList = new int[200000];
-    
-    public override void _EnterTree()
+    private struct HuskChunk
     {
-        base._EnterTree();
+        public int V;
+        public int I;
+        public Vector3[] VertList;
+        public Vector3[] NormList;
+        public float[] TangentList;
+        public Vector2[] UvList;
+        public int[] IndexList;
+        public MeshInstance MeshInstance;
+    }
 
-        Instance = this;
+    private HuskChunk[] _chunks;
+    private int _currentChunk;
 
-        CastShadow = ShadowCastingSetting.On;
+    public override void _Ready()
+    {
+        base._Ready();
+        
+        // Initialise all chunks up-front.
+        _chunks = new HuskChunk[_maxChunks];
+        for (int i = 0; i < _maxChunks; i++)
+        {
+            MeshInstance mi = new();
+            AddChild(mi);
+            mi.MaterialOverride = _huskMaterial;
+            _chunks[i] = new HuskChunk()
+            {
+                VertList = new Vector3[_vertsPerChunk],
+                NormList = new Vector3[_vertsPerChunk],
+                TangentList = new float[_vertsPerChunk * 4],
+                UvList = new Vector2[_vertsPerChunk],
+                IndexList = new int[_indicesPerChunk],
+                MeshInstance = mi,
+            };
+        }
+
+        _currentChunk = 0;
     }
 
     public void AddHusk(Mesh mesh, Transform transform)
@@ -39,38 +59,40 @@ public class HuskRenderer : MeshInstance
         Vector2[] meshUvs = meshArray[(int) ArrayMesh.ArrayType.TexUv] as Vector2[];
         int[] meshIndices = meshArray[(int) ArrayMesh.ArrayType.Index] as int[];
         
-        if (_v + meshVerts.Length >= _vertList.Length || _i + meshIndices.Length >= _indexList.Length)
+        // Do we need to switch to the next chunk?
+        ref HuskChunk chunk = ref _chunks[_currentChunk];
+        if (chunk.V + meshVerts.Length >= _vertsPerChunk || chunk.I + meshIndices.Length >= _indicesPerChunk)
         {
-            return;
+            _currentChunk = (_currentChunk + 1) % _maxChunks;
+            chunk = ref _chunks[_currentChunk];
+            chunk.V = 0;
+            chunk.I = 0;
         }
 
         for (int v = 0; v < meshVerts.Length; v++)
         {
-            _vertList[_v + v] = transform.Xform(meshVerts[v]);
-            _normList[_v + v] = meshNormals[v];
-            _tangentList[_v + ToTangentIndex(v, 0)] = meshTangents[ToTangentIndex(v, 0)];
-            _tangentList[_v + ToTangentIndex(v, 1)] = meshTangents[ToTangentIndex(v, 1)];
-            _tangentList[_v + ToTangentIndex(v, 2)] = meshTangents[ToTangentIndex(v, 2)];
-            _tangentList[_v + ToTangentIndex(v, 3)] = meshTangents[ToTangentIndex(v, 3)];
-            _uvList[_v + v] = meshUvs[v];
+            chunk.VertList[chunk.V + v] = transform.Xform(meshVerts[v]);
+            chunk.NormList[chunk.V + v] = meshNormals[v];
+            chunk.TangentList[chunk.V + ToTangentIndex(v, 0)] = meshTangents[ToTangentIndex(v, 0)];
+            chunk.TangentList[chunk.V + ToTangentIndex(v, 1)] = meshTangents[ToTangentIndex(v, 1)];
+            chunk.TangentList[chunk.V + ToTangentIndex(v, 2)] = meshTangents[ToTangentIndex(v, 2)];
+            chunk.TangentList[chunk.V + ToTangentIndex(v, 3)] = meshTangents[ToTangentIndex(v, 3)];
+            chunk.UvList[chunk.V + v] = meshUvs[v];
         }
 
         for (int i = 0; i < meshIndices.Length; i++)
         {
-            _indexList[_i + i] = meshIndices[i] + _v;
+            chunk.IndexList[chunk.I + i] = meshIndices[i] + chunk.V;
         }
 
-        _v += meshVerts.Length;
-        _i += meshIndices.Length;
-        
-        Debug.Assert(_v < _vertList.Length, "v < _vertList.Length");
-        Debug.Assert(_i < _indexList.Length, "i < _indexList.Length");
+        chunk.V += meshVerts.Length;
+        chunk.I += meshIndices.Length;
 
-        Span<Vector3> verts = _vertList.AsSpan(0, _v);
-        Span<Vector3> normals = _normList.AsSpan(0, _v);
-        Span<float> tangents = _tangentList.AsSpan(0, _v * 4);
-        Span<Vector2> uvs = _uvList.AsSpan(0, _v);
-        Span<int> indices = _indexList.AsSpan(0, _i);
+        Span<Vector3> verts = chunk.VertList.AsSpan(0, chunk.V);
+        Span<Vector3> normals = chunk.NormList.AsSpan(0, chunk.V);
+        Span<float> tangents = chunk.TangentList.AsSpan(0, chunk.V * 4);
+        Span<Vector2> uvs = chunk.UvList.AsSpan(0, chunk.V);
+        Span<int> indices = chunk.IndexList.AsSpan(0, chunk.I);
         
         Array arrays = new();
         arrays.Resize((int) ArrayMesh.ArrayType.Max);
@@ -82,7 +104,7 @@ public class HuskRenderer : MeshInstance
 
         ArrayMesh outMesh = new();
         outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
-        Mesh = outMesh;
+        chunk.MeshInstance.Mesh = outMesh;
     }
 
     private int ToTangentIndex(int i, int t)

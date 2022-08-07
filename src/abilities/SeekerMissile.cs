@@ -119,8 +119,8 @@ public partial class SeekerMissile : Area
             {
                 if (_hitGround)
                 {
-                    Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin);
-                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin);
+                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin, out _);
+                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin, out _);
                     QueueFree();
                 }
 
@@ -164,7 +164,7 @@ public partial class SeekerMissile : Area
     {
         _state = State.Deactivated;
         SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
-        ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin);
+        ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin, out _);
         QueueFree();
 
         Monitorable = false;

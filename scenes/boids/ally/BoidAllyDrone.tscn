@@ -57,10 +57,10 @@ flags_unshaded = true
 
 [node name="BoidAllyDrone" instance=ExtResource( 4 )]
 script = ExtResource( 1 )
-_behaviours = 918
+_behaviours = 534
 _mass = 0.5
 MaxVelocity = 75.0
-MaxForce = 50.0
+MaxForce = 100.0
 Bank360 = true
 BankingRate = 5.0
 BankingAmount = 1.75

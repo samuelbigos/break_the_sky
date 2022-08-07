@@ -33,6 +33,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         public float Speed;
         public Vector2 Target;
         public float ArriveDeadzone;
+        public float ArriveRadius;
         public int TargetIndex;
         public Vector2 TargetOffset;
         public float DesiredDistFromTargetMin;
@@ -227,8 +228,14 @@ public partial class SteeringManager : Singleton<SteeringManager>
 
             Vector2 totalForce = Vector2.Zero;
 
-            // update target
-            if (boid.TargetIndex != -1)
+            // Update target.
+#if !FINAL
+            if (boid.TargetIndex != -1 && !_boidIdToIndex.ContainsKey(boid.TargetIndex))
+            {
+                Debug.Assert(boid.TargetIndex == -1 || _boidIdToIndex.ContainsKey(boid.TargetIndex), "Invalid boid.TargetIndex");
+            }
+#endif
+            if (boid.TargetIndex != -1 && _boidIdToIndex.ContainsKey(boid.TargetIndex))
             {
                 Boid targetBoid = boids[_boidIdToIndex[boid.TargetIndex]];
                 Vector2 side = new(targetBoid.Heading.Y, -targetBoid.Heading.X);
@@ -248,7 +255,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                     Debug.Assert(!float.IsNaN(force.X) && !float.IsInfinity(force.X), "NaN in steering calculation!");
                 }
 
-                // truncate by max force per unit time
+                // Truncate by max force per unit time.
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
                 float totalForceLength = totalForce.Length();
                 float forceLength = force.Length();

@@ -1239,9 +1239,9 @@ skeleton = NodePath("../..")
 material/0 = SubResource( 13 )
 script = ExtResource( 26 )
 
-[node name="HuskRenderer" type="MeshInstance" parent="Rendering"]
-material_override = ExtResource( 35 )
+[node name="HuskRenderer" type="Spatial" parent="Rendering"]
 script = ExtResource( 34 )
+_huskMaterial = ExtResource( 35 )
 
 [node name="GameCamera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0 )

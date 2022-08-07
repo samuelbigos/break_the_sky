@@ -75,7 +75,7 @@ public partial class SteeringManager
     private static float ScaleInfluence(float influence)
     {
         float t = 1.0f - influence;
-        return 1.0f - Mathf.Clamp(t * t * t, 0.0f, 1.0f);
+        return 1.0f - Mathf.Clamp(t * t, 0.0f, 1.0f);
     }
     
     private static float ScaleInfluenceInv(float influence)

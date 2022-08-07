@@ -43,6 +43,15 @@ public partial class BoidAllyBase : BoidBase
 
     protected override void ProcessAlive(float delta)
     {
+#if !FINAL
+        // Hack-fix this because I don't know why it's happening :(
+        if (_targetBoid.Null() || _engageTarget.Null() ||
+            !SteeringManager.Instance.HasObject<SteeringManager.Boid>(SteeringBoid.TargetIndex))
+        {
+            SwitchAiState(AIState.Idle);
+        }
+#endif
+        
         switch (_aiState)
         {
             case AIState.None:
