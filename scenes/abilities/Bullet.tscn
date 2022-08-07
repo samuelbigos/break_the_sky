@@ -1,7 +1,7 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://assets/material/boid_mat.tres" type="Material" id=1]
-[ext_resource path="res://assets/material/water_mesh_mat.tres" type="Material" id=2]
+[ext_resource path="res://assets/material/bullet.material" type="Material" id=1]
+[ext_resource path="res://assets/shader/boid_outline_buffer.shader" type="Shader" id=2]
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
 [ext_resource path="res://src/abilities/Bullet.cs" type="Script" id=4]
 
@@ -10,6 +10,10 @@
 [sub_resource type="CapsuleMesh" id=2]
 flip_faces = true
 radial_segments = 16
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = ExtResource( 2 )
+shader_param/u_outline_colour = null
 
 [node name="Bullet" type="Area"]
 script = ExtResource( 4 )
@@ -22,5 +26,6 @@ shape = SubResource( 1 )
 material_override = ExtResource( 1 )
 mesh = SubResource( 2 )
 script = ExtResource( 3 )
+_numExtraMeshes = 1
 _meshLayers = [ 2 ]
-_meshMaterials = [ ExtResource( 2 ) ]
+_meshMaterials = [ SubResource( 3 ) ]

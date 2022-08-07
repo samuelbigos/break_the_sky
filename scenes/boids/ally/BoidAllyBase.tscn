@@ -7,9 +7,13 @@
 
 [node name="BoidAllyBase" instance=ExtResource( 1 )]
 script = ExtResource( 4 )
+SfxShootMicroPath = null
+_destroyTime = 3.0
+_shootSize = 1.5
 _shootTrauma = 0.05
 _destroyTrauma = 0.1
 _microBulletScene = ExtResource( 2 )
+_engageRange = 0.0
 
 [node name="SFXShootMicro" type="AudioStreamPlayer2D" parent="." index="5"]
 stream = ExtResource( 5 )

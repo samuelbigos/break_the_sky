@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://assets/mesh/circle.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/mesh/icosphere_lowpoly.obj" type="ArrayMesh" id=1]
 
 [sub_resource type="SpatialMaterial" id=9]
 flags_unshaded = true

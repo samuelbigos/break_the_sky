@@ -15,6 +15,8 @@ public class GameCamera : Camera
     [Export] private float _maxZoom = 500.0f;
     [Export] private float _minZoom = 100.0f;
 
+    [Export] private float _tacticalMapHeight = 1000.0f;
+
     public static Action OnPostCameraTransformed;
     
     public Transform BaseTransform;
@@ -148,10 +150,8 @@ public class GameCamera : Camera
         {
             case StateMachine_Game.States.TacticalPause:
             {
-                Vector2 cameraMouseOffset = _cachedMousePosOnTacticalPauseEnter - _player.GlobalPosition;
-                Vector2 cameraOffset = cameraMouseOffset * 0.33f;
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
-                cameraTransform.origin.y = _initialTrans.origin.y;
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin));
+                cameraTransform.origin.y = _tacticalMapHeight;
 
                 return cameraTransform;
             }

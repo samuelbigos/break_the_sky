@@ -1,23 +1,14 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://assets/shader/boid.shader" type="Shader" id=1]
 [ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=2]
 
-[sub_resource type="ShaderMaterial" id=1]
+[sub_resource type="CapsuleMesh" id=1]
 resource_local_to_scene = true
-shader = ExtResource( 1 )
-shader_param/u_primary_colour = Color( 0, 0, 0, 1 )
-shader_param/u_secondary_colour = null
-
-[sub_resource type="CapsuleMesh" id=2]
-resource_local_to_scene = true
+radius = 0.25
 radial_segments = 8
 rings = 4
 
 [node name="BulletMicro" instance=ExtResource( 2 )]
 
 [node name="Mesh" parent="." index="1"]
-material_override = SubResource( 1 )
-cast_shadow = 0
-mesh = SubResource( 2 )
-script = null
+mesh = SubResource( 1 )

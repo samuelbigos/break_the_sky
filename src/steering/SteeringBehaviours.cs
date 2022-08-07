@@ -29,14 +29,15 @@ public partial class SteeringManager
     private static Vector2 Steering_Seek(in Boid boid, Vector2 position, float limit = -1.0f)
     {
         Vector2 desired = position - boid.Position;
-        if (limit >= 0.0)
+        
+        // prevent the case where desired is exactly opposite to current heading, so no perpendicular
+        // force is applied and boid keeps moving away from target.
+        if (Math.Abs(Vector2.Dot(desired.NormalizeSafe(), boid.Heading)) < -0.9999f)
         {
-            desired.SetMag(limit);
+            desired = desired.Rot90() * boid.MaxSpeed * Mathf.Sign(Utils.Rng.Randf() - 0.5f);
         }
-        else
-        {
-            desired.SetMag(boid.MaxSpeed);
-        }
+
+        desired.SetMag(limit >= 0.0 ? limit : boid.MaxSpeed);
 
         Vector2 force = desired - boid.Velocity;
         return force;

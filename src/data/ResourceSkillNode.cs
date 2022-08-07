@@ -17,7 +17,6 @@ public class ResourceSkillNode : Resource
     [Export] public float Size = 1.0f;
     [Export] public float MicroTurretRange = 1.0f;
     [Export] public float MicroTurretCooldown = 1.0f;
-    [Export] public bool MicroTurretBallistics = false;
     [Export] public float MicroTurretDamage = 1.0f;
     [Export] public float MicroTurretVelocity = 1.0f;
     

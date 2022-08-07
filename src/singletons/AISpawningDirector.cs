@@ -363,7 +363,7 @@ public class AISpawningDirector : Node
     {
         // spawn at a random location around the spawning circle centred on the player
         Vector2 spawnPos = _game.SpawningRect.RandPointOnEdge();
-        Vector2 spawnVel = new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * 100.0f;
+        Vector2 spawnVel = Vector2.Zero;// new Vector2(Utils.RandfUnit(), Utils.RandfUnit()).Normalized() * 100.0f;
         return SpawnEnemy(enemyData, spawnPos, spawnVel);
     }
 
@@ -480,14 +480,8 @@ public class AISpawningDirector : Node
         {
             if (ImGui.Button($"{enemy.DisplayName}"))
             {
-                BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
+                SpawnEnemyRandom(enemy);
             }
-
-            // if (ImGui.Button($"{enemy.DisplayName} x10"))
-            // {
-            //     for (int i = 0; i < 10; i++)
-            //         BoidFactory.Instance.CreateEnemyBoid(enemy, Vector2.Zero, Vector2.Zero);
-            // }
         }
     }
 }

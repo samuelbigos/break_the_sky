@@ -7,7 +7,7 @@ public partial class Bullet : Area
 	[Export] private float _baseSpeed = 150.0f;
 	[Export] protected float _range = 500.0f;
 
-	[OnReadyGet] private MeshInstance _mesh;
+	[OnReadyGet] private MultiViewportMeshInstance _mesh;
 	
 	public Action<Bullet> OnBulletDestroyed;
 
@@ -43,6 +43,9 @@ public partial class Bullet : Area
 		{
 			Connect("area_entered", this, nameof(_OnAreaEntered));
 		}
+		
+		_mesh.AltShaders[0].SetShaderParam("u_outline_colour", _alignment == BoidBase.BoidAlignment.Ally ? 
+			ColourManager.Instance.AllyOutline : ColourManager.Instance.EnemyOutline);
 	}
 	
 	public override void _Process(float delta)

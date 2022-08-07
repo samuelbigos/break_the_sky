@@ -13,7 +13,6 @@ uniform sampler2D u_ripple_normal_tex;
 
 uniform vec4 u_sand_lit : hint_color;
 uniform vec4 u_sand_shadow : hint_color;
-uniform vec3 u_light_dir = vec3(0.0, 1.0, 0.0);
 uniform sampler2D u_grain_texture;
 uniform float u_grain_scale = 25.0f;
 uniform float u_fresnel_pow = 25.0;

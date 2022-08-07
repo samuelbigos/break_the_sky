@@ -11,10 +11,14 @@ public partial class Cursor : Spatial
     [OnReadyGet] private MeshInstance _circleMesh;
     [OnReadyGet] private MeshInstance _outerMesh;
 
+    [Export] public float BaseRadius = 50.0f;
     [Export] public int TotalPips = 48;
     [Export] public float RotSpeed = 5.0f;
     [Export] public float YFromCamera = 250.0f;
 
+    public float Radius => BaseRadius * Size;
+    public float RadiusSq => Radius * Radius;
+    
     public int PipCount = 0;
     public float Size = 1.0f;
     public bool Activated;

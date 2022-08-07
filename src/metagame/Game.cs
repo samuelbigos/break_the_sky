@@ -56,6 +56,8 @@ public partial class Game : Singleton<Game>
         
         DebugImGui.Instance.RegisterWindow("render_textures", "Render Textures", _OnImGuiLayoutRenderTextures);
         DebugImGui.Instance.RegisterWindow("render_settings", "Render Settings", _OnImGuiLayoutRenderSettings);
+
+        OnPostCameraTransformed();
     }
 
     private void _OnWindowSizeChanged()
@@ -82,9 +84,14 @@ public partial class Game : Singleton<Game>
             _sand.GlobalPosition(pos);
         }
 
-        // position clouds
-        Vector3 cloudPos = GameCamera.Instance.GlobalTransform.origin;
-        _clouds.GlobalPosition(new Vector3(cloudPos.x, _clouds.GlobalTransform.origin.y, cloudPos.z));
+        // scale and position clouds
+        {
+            Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), _clouds.GlobalTransform.origin.y);
+            Vector3 bottomRight = GameCamera.Instance.ProjectToY(GetViewport().Size, _clouds.GlobalTransform.origin.y);
+            _clouds.Scale = new Vector3(bottomRight.x - topLeft.x, _clouds.Scale.y, bottomRight.z - topLeft.z);
+            Vector3 cloudPos = GameCamera.Instance.GlobalTransform.origin;
+            _clouds.GlobalPosition(new Vector3(cloudPos.x, _clouds.GlobalTransform.origin.y, cloudPos.z));
+        }
     }
 
     public void RegisterPickup(PickupMaterial pickup)

@@ -7,7 +7,7 @@
 [ext_resource path="res://scenes/abilities/SeekerMissile.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/mesh/ships/human_wasp/wasp_antigrav.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
-[ext_resource path="res://assets/material/boid_mat_spatial.tres" type="Material" id=8]
+[ext_resource path="res://assets/material/boid.material" type="Material" id=8]
 [ext_resource path="res://assets/mesh/ships/human_wasp/wasp_turret.obj" type="ArrayMesh" id=9]
 
 [sub_resource type="CapsuleShape" id=1]
@@ -16,13 +16,13 @@ radius = 1.18034
 [node name="BoidEnemyWasp" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
 _behaviours = 30
-MaxVelocity = 100.0
-MaxForce = 100.0
+MaxVelocity = 50.0
+MaxForce = 75.0
 Bank360 = true
 _baseResourceStats = ExtResource( 4 )
 DestroyTrauma = 0.1
 HitTrauma = 0.05
-EngageRange = 120.0
+EngageRange = 100.0
 WeaponPositionPath = NodePath("WeaponPosition")
 _bulletScene = ExtResource( 5 )
 

@@ -10,16 +10,13 @@
 [node name="BoidPlayer" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 _behaviours = 1
-MaxVelocity = 120.0
-MaxForce = 200.0
+MaxVelocity = 75.0
+MaxForce = 100.0
 Bank360 = true
 BankingRate = 1.0
 BankingAmount = 1.0
 _baseResourceStats = ExtResource( 4 )
 SfxShootMicroPath = NodePath("SFXShootMicro")
-_destroyTime = 3.0
-_shootSize = 1.5
-_engageRange = 0.0
 _bulletScene = ExtResource( 6 )
 _sfxPickupPath = NodePath("SFXPickup")
 _damping = 0.05

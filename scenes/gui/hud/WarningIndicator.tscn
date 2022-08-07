@@ -4,7 +4,9 @@
 [ext_resource path="res://assets/mesh/ui/warning.obj" type="ArrayMesh" id=2]
 
 [sub_resource type="SpatialMaterial" id=1]
+render_priority = 1
 flags_unshaded = true
+flags_no_depth_test = true
 
 [node name="WarningIndicator" type="Spatial"]
 script = ExtResource( 1 )

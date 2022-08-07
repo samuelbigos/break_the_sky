@@ -11,13 +11,13 @@ public class BoidPlayer : BoidAllyBase
     [Export] private Vector2 _sendScaleMinMax = new Vector2(10.0f, 100.0f);
 
     private AudioStreamPlayer2D _sfxPickup;
-    private Vector2 _velocity;
     
     private Vector2 _cachedMousePos;
     private bool _sending;
     private float _sendTime;
     private int _sendCount;
     private int _totalAllies;
+    private bool _returning;
 
     private List<BoidAllyBase> _alliesSent = new();
 
@@ -36,7 +36,7 @@ public class BoidPlayer : BoidAllyBase
 
         ProcessAllySending(delta);
 
-        _cachedHeading = (_cachedMousePos - GlobalPosition).Normalized();
+        //_visualHeadingOverride = (_cachedMousePos - GlobalPosition).Normalized();
 
         if (_acceptInput)
         {
@@ -54,8 +54,7 @@ public class BoidPlayer : BoidAllyBase
             if (dir != new Vector2(0.0f, 0.0f))
             {
                 dir = dir.Normalized();
-                dir *= MaxVelocity;
-                boid.DesiredVelocityOverride = dir.ToNumerics();
+                boid.DesiredVelocityOverride = dir.ToNumerics() * 5000.0f;
                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, false);
                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, true);
             }
@@ -74,14 +73,14 @@ public class BoidPlayer : BoidAllyBase
         _totalAllies = 0;
         foreach (BoidAllyBase ally in BoidFactory.Instance.AllyBoids)
         {
-            if (ally is BoidPlayer)
+            if (ally == this)
                 continue;
 
             _totalAllies++;
             if (_alliesSent.Contains(ally))
                 continue;
             
-            if (ally.AiState != AIState.Idle)
+            if (ally.AiState != AIState.Idle && ally.AiState != AIState.Stationed)
                 continue;
             
             idleAllies.Add(ally);
@@ -89,6 +88,7 @@ public class BoidPlayer : BoidAllyBase
         
         _cachedMousePos = GameCamera.Instance.MousePosition;
 
+        // set idle ally steering parameters (group on player)
         if (idleAllies.Count > 0)
         {
             float sqrtIdleCount = (float)Math.Sqrt(idleAllies.Count);
@@ -97,16 +97,32 @@ public class BoidPlayer : BoidAllyBase
             for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
             {
                 BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
+                if (ally == this)
+                    continue;
+                
                 ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(ally.SteeringId);
 
                 // set arrive deadzone to some value proportional to the amount of drones we have active
                 boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtIdleCount);
-                boid.ArriveWeight = 0.5f;
             }
         }
         
         if (_sending)
         {
+            // get closest enemy under the cursor
+            BoidEnemyBase closestEnemy = null;
+            float closestDistSq = 9999999.0f;
+            for (int i = 0; i < BoidFactory.Instance.EnemyBoids.Count; i++)
+            {
+                BoidEnemyBase enemy = BoidFactory.Instance.EnemyBoids[i];
+                float distSq = (enemy.GlobalPosition - _cachedMousePos).LengthSquared();
+                if (distSq < Cursor.Instance.RadiusSq && distSq < closestDistSq)
+                {
+                    closestDistSq = distSq;
+                    closestEnemy = enemy;
+                }
+            }
+
             _sendTime = Mathf.Clamp(_sendTime + delta, 0.0f, _totalSendTime);
             float t = Mathf.Clamp(_sendTime / _totalSendTime, 0.0f, 1.0f);
             
@@ -129,9 +145,31 @@ public class BoidPlayer : BoidAllyBase
             float sqrtSendCount = (float)Math.Sqrt(_sendCount);
             foreach (BoidAllyBase sentAlly in _alliesSent)
             {
-                sentAlly.NavigateTowards(_cachedMousePos);
-                ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(sentAlly.SteeringId);
-                boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtSendCount);
+                if (!closestEnemy.Null())
+                {
+                    sentAlly.EngageEnemy(closestEnemy);
+                }
+                else
+                {
+                    sentAlly.NavigateTowards(_cachedMousePos);
+                    ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(sentAlly.SteeringId);
+                    boid.ArriveDeadzone = _steeringRadius + boid.Radius * Mathf.Max(1.0f, sqrtSendCount);
+                }
+            }
+        }
+
+        if (_returning)
+        {
+            for (int i = 0; i < BoidFactory.Instance.AllyBoids.Count; i++)
+            {
+                BoidAllyBase ally = BoidFactory.Instance.AllyBoids[i];
+                if (ally == this)
+                    continue;
+                
+                if ((ally.GlobalPosition - _cachedMousePos).LengthSquared() > Cursor.Instance.RadiusSq)
+                    continue;
+                
+                ally.ReturnToPlayer();
             }
         }
     }
@@ -171,6 +209,16 @@ public class BoidPlayer : BoidAllyBase
                 ally.OnBoidDestroyed -= OnSentAllyDestroyed;
             }
             _alliesSent.Clear();
+        }
+
+        if (@event.IsActionPressed("return"))
+        {
+            _returning = true;
+        }
+
+        if (@event.IsActionReleased("return"))
+        {
+            _returning = false;
         }
     }
 

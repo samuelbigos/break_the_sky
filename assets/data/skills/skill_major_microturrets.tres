@@ -17,7 +17,6 @@ Regeneration = 0.0
 Size = 1.0
 MicroTurretRange = 1.0
 MicroTurretCooldown = 1.0
-MicroTurretBallistics = false
 MicroTurretDamage = 1.0
 MicroTurretVelocity = 1.0
 MicroTurrets = true

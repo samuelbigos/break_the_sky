@@ -66,8 +66,12 @@ public partial class SeekerMissile : Area
         };
         
         target.OnBoidDestroyed += _OnTargetBoidDestroyed;
-        
-        _steeringId = SteeringManager.Instance.Register(boid);
+
+        if (!SteeringManager.Instance.Register(boid, out _steeringId))
+        {
+            QueueFree();
+            return;
+        }
         
         _launchSfx.Play();
         

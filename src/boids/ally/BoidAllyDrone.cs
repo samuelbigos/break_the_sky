@@ -32,7 +32,8 @@ public partial class BoidAllyDrone : BoidAllyBase
             case AIState.Engaged:
             {
                 _shootCooldown -= delta;
-                if (_shootCooldown <= 0.0f)
+                float distToTargetSq = (_targetBoid.GlobalPosition - GlobalPosition).LengthSquared();
+                if (distToTargetSq < _resourceStats.AttackRangeSq && _shootCooldown <= 0.0f)
                 {
                     Shoot();
                 }
@@ -41,14 +42,6 @@ public partial class BoidAllyDrone : BoidAllyBase
             case AIState.Idle:
                 break;
         }
-
-        // if (_shootCooldown > 0.0f)
-        // {
-        //     float t = _shootCooldown / _resourceStats.AttackCooldown;
-        //     t = Mathf.Pow(Mathf.Clamp(t, 0.0f, 1.0f), 5.0f);
-        //     Vector3 from = _baseScale * 2.0f;
-        //     _mesh.Scale = from.LinearInterpolate(_baseScale, 1.0f - t);
-        // }
         
         _rotorMesh.RotateY(_rotorSpinSpeed * delta);
     }

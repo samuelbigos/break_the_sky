@@ -50,7 +50,7 @@ public partial class BoidBase : Area
     [Export] public float BankingAmount = 2.5f;
     
     [Export] public float DestroyTime = 3.0f;
-    [Export] public float HitFlashTime = 1.0f / 30.0f;
+    [Export] public float HitFlashTime = 0.5f;
 
     [Export] private ResourceStats _baseResourceStats;
     
@@ -84,6 +84,7 @@ public partial class BoidBase : Area
     public bool Destroyed => _state == State.Destroyed;
     public int SteeringId => _steeringId;
     public Vector2 Heading => _cachedHeading;
+    public Vector2 Velocity => _cachedVelocity;
     
     public Vector2 GlobalPosition
     {
@@ -109,6 +110,7 @@ public partial class BoidBase : Area
         }
     }
 
+    public TargetType CurrentTargetType => _targetType;
     public Vector2 TargetPos
     {
         get
@@ -156,6 +158,7 @@ public partial class BoidBase : Area
     private List<Particles> _hitParticles = new();
     private Vector2 _cachedLastHitDir;
     private float _cachedLastHitDamage;
+    private Vector2 _cachedLastHitPos;
     private bool _selected;
     private Vector2 _smoothSteering;
     private int _sharedPropertiesId;
@@ -184,8 +187,8 @@ public partial class BoidBase : Area
         
         List<MeshInstance> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
-        _meshMaterial = _mesh.MaterialOverride as ShaderMaterial;
-        _mesh.SetSurfaceMaterial(0, _meshMaterial);
+        _meshMaterial = _mesh.MaterialOverride.Duplicate() as ShaderMaterial;
+        _mesh.MaterialOverride = _meshMaterial;
 
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
         
@@ -255,11 +258,15 @@ public partial class BoidBase : Area
         _hitMessages.Clear();
 
         // hit flash
-        if (_hitFlashTimer > 0.0 && _hitFlashTimer - delta < 0.0f)
+        if (_hitFlashTimer > 0.0f)
         {
-            // TODO: implement hit flash.
+            _meshMaterial.SetShaderParam("u_hit_time", _hitFlashTimer);
+            _hitFlashTimer -= delta;
+            if (_hitFlashTimer <= 0.0f)
+            {
+                _meshMaterial.SetShaderParam("u_hits", 0);
+            }
         }
-        _hitFlashTimer -= delta;
 
         if (_health <= 0.0f)
         {
@@ -306,7 +313,11 @@ public partial class BoidBase : Area
             WanderVariance = 50.0f,
         };
         
-        _steeringId = SteeringManager.Instance.Register(boid);
+        if (!SteeringManager.Instance.Register(boid, out _steeringId))
+        {
+            QueueFree();
+            return;
+        }
     }
 
     public void SendHitMessage(float damage, Vector2 vel, Vector2 pos, BoidAlignment alignment)
@@ -320,8 +331,13 @@ public partial class BoidBase : Area
     protected virtual void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
         _health -= damage;
-        
+
+        _cachedLastHitPos = pos;
         _hitFlashTimer = HitFlashTime;
+        _meshMaterial.SetShaderParam("u_hit_duration", HitFlashTime);
+        _meshMaterial.SetShaderParam("u_hits", 1);
+        _meshMaterial.SetShaderParam("u_centre", GlobalPosition.To3D());
+        _meshMaterial.SetShaderParam("u_hit_pos", _cachedLastHitPos.To3D());
         
         _sfxOnHit.Play();
 
@@ -528,7 +544,6 @@ public partial class BoidBase : Area
             _resourceStats.Regeneration += skill.Regeneration;
             _resourceStats.MicroTurrets |= skill.MicroTurrets;
             _resourceStats.MicroTurretRange *= skill.MicroTurretRange;
-            _resourceStats.MicroTurretBallistics |= skill.MicroTurretBallistics;
             _resourceStats.MicroTurretDamage *= skill.MicroTurretDamage;
             _resourceStats.MicroTurretVelocity *= skill.MicroTurretVelocity;
         }
