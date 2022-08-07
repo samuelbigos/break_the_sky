@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/boids/enemy/BoidEnemyLaser.cs" type="Script" id=2]
@@ -13,6 +13,10 @@
 [ext_resource path="res://assets/data/stats/enemies/stats_enemy_laser.tres" type="Resource" id=11]
 [ext_resource path="res://scenes/vfx/LaserVFX.tscn" type="PackedScene" id=12]
 [ext_resource path="res://assets/material/boid.material" type="Material" id=13]
+
+[sub_resource type="CapsuleShape" id=2]
+radius = 6.46633
+height = 11.8796
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 2.5, 5, 250 )
@@ -36,7 +40,8 @@ _laserAreaPath = NodePath("Mesh/Turret/LaserArea")
 GunTrackSpeed = 2.0
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 1.97819, 0, 0, 0, 2.35269, 0, 0, 0, 3.81871, 0, 0, -2.76924 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.308326 )
+shape = SubResource( 2 )
 
 [node name="Mesh" parent="." index="1"]
 mesh = ExtResource( 7 )

@@ -11,7 +11,8 @@
 [ext_resource path="res://assets/mesh/ships/human_wasp/wasp_turret.obj" type="ArrayMesh" id=9]
 
 [sub_resource type="CapsuleShape" id=1]
-radius = 1.18034
+radius = 3.7911
+height = 4.13986
 
 [node name="BoidEnemyWasp" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
@@ -27,7 +28,7 @@ WeaponPositionPath = NodePath("WeaponPosition")
 _bulletScene = ExtResource( 5 )
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.664519 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]

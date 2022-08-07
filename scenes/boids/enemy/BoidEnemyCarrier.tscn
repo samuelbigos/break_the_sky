@@ -11,8 +11,9 @@
 [ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=9]
 [ext_resource path="res://assets/material/boid.material" type="Material" id=10]
 
-[sub_resource type="BoxShape" id=1]
-extents = Vector3( 2.56472, 1, 4.19469 )
+[sub_resource type="CapsuleShape" id=1]
+radius = 9.26746
+height = 19.4829
 
 [node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
@@ -39,7 +40,7 @@ _minion = ExtResource( 5 )
 _minionFlowField = ExtResource( 9 )
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 2.46802, 0, 0, 0, 2.8404, 0, 0, 0, 4.49237, 0, 0, 0.24768 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.24768 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]

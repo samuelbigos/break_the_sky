@@ -49,9 +49,9 @@ public partial class BoidBase : Area
     [Export] public float BankingRate = 2.5f;
     [Export] public float BankingAmount = 2.5f;
     
-    [Export] public float DestroyTime = 3.0f;
-    [Export] public float HitFlashTime = 0.5f;
-
+    [Export] private float _hitVfxDuration = 1.0f;
+    [Export] private float _flashVfxDuration = 1.0f / 30.0f;
+    
     [Export] private ResourceStats _baseResourceStats;
     
     [Export] private int _damageVfxCount = 2;
@@ -211,8 +211,17 @@ public partial class BoidBase : Area
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        //_altMaterial.SetShaderParam("u_velocity", _cachedVelocity);
+        
+        // Hit VFX.
+        if (_hitFlashTimer > 0.0f)
+        {
+            _meshMaterial.SetShaderParam("u_hit_time", _hitVfxDuration - _hitFlashTimer);
+            _hitFlashTimer -= delta;
+            if (_hitFlashTimer <= 0.0f)
+            {
+                _meshMaterial.SetShaderParam("u_hits", 0);
+            }
+        }
     }
 
     protected virtual void ProcessAlive(float delta)
@@ -229,7 +238,7 @@ public partial class BoidBase : Area
         }
         Basis basis = new Basis(Vector3.Up, _cachedHeading.AngleToY());
 
-        // banking
+        // Banking.
         if (delta > 0.0f)
         {
             System.Numerics.Vector2 right = new(-_cachedHeading.y, _cachedHeading.x);
@@ -244,10 +253,10 @@ public partial class BoidBase : Area
                 basis = basis.Rotated(basis.x, bankX);
         }
         
-        // update position and cache velocity from steering boid
+        // Update position and cache velocity from steering boid.
         GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
 
-        // process hits
+        // Process hits.
         foreach (HitMessage hit in _hitMessages)
         {
             if (hit.Alignment != Alignment)
@@ -256,17 +265,6 @@ public partial class BoidBase : Area
             }
         }
         _hitMessages.Clear();
-
-        // hit flash
-        if (_hitFlashTimer > 0.0f)
-        {
-            _meshMaterial.SetShaderParam("u_hit_time", _hitFlashTimer);
-            _hitFlashTimer -= delta;
-            if (_hitFlashTimer <= 0.0f)
-            {
-                _meshMaterial.SetShaderParam("u_hits", 0);
-            }
-        }
 
         if (_health <= 0.0f)
         {
@@ -333,8 +331,9 @@ public partial class BoidBase : Area
         _health -= damage;
 
         _cachedLastHitPos = pos;
-        _hitFlashTimer = HitFlashTime;
-        _meshMaterial.SetShaderParam("u_hit_duration", HitFlashTime);
+        _hitFlashTimer = _hitVfxDuration;
+        _meshMaterial.SetShaderParam("u_hit_duration", _hitVfxDuration);
+        _meshMaterial.SetShaderParam("u_flash_duration", _flashVfxDuration);
         _meshMaterial.SetShaderParam("u_hits", 1);
         _meshMaterial.SetShaderParam("u_centre", GlobalPosition.To3D());
         _meshMaterial.SetShaderParam("u_hit_pos", _cachedLastHitPos.To3D());
@@ -354,7 +353,7 @@ public partial class BoidBase : Area
             _hitParticles.Add(hitParticles);
         }
 
-        // does this cause us to go past a new damage threshold?
+        // Does this cause us to go past a new damage threshold?
         if (_damagedParticles.Count < _damageVfxCount)
         {
             float damageVfxThresholds = 1.0f / (_damageVfxCount + 1.0f);
@@ -379,19 +378,19 @@ public partial class BoidBase : Area
         {
             _state = State.Destroyed;
             
-            // remove mesh from the outline buffer so it doesn't get outlines
+            // Remove mesh from the outline buffer so it doesn't get outlines.
             _mesh.ClearAltMeshes();
             
             _sfxOnDestroy.Play();
             Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
             
-            // clear target
+            // Clear target.
             SetTarget(TargetType.None);
             
             // unregister steering boid
             SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
 
-            // convert to rigid body for 'ragdoll' death physics.
+            // Convert to rigid body for 'ragdoll' death physics.
             Vector3 pos = GlobalTransform.origin;
             RigidBody rb = new RigidBody();
             GetParent().AddChild(rb);
@@ -410,7 +409,7 @@ public partial class BoidBase : Area
                         .Normalized();
                 rb.ApplyImpulse(GlobalTransform.origin, randVec);
             }
-            else // impulse from hit direction
+            else // Impulse from hit direction.
             {
                 rb.ApplyCentralImpulse(hitDir.To3D() * hitStrength);
                 rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);

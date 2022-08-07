@@ -10,6 +10,7 @@
 [ext_resource path="res://assets/mesh/ships/human_lancer/lancer_body.obj" type="ArrayMesh" id=8]
 
 [sub_resource type="CapsuleShape" id=1]
+radius = 1.2798
 
 [node name="BoidEnemyLancer" instance=ExtResource( 1 )]
 script = ExtResource( 3 )

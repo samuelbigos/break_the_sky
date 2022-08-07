@@ -36,7 +36,8 @@ public partial class Bullet : Area
 		_spawnPos = position.To2D();
 		
 		_mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
-
+		_mesh.SetMeshTransform(_mesh.Transform);
+		
 		Rotation = new Vector3(0.0f, -Mathf.Atan2(_velocity.x, -_velocity.y), 0.0f);
 
 		if (!IsConnected("area_entered", this, nameof(_OnAreaEntered)))

@@ -33,6 +33,7 @@ color_ramp = SubResource( 6 )
 [node name="ParticlesDamaged" type="Particles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
 material_override = SubResource( 9 )
+cast_shadow = 0
 amount = 50
 lifetime = 2.0
 local_coords = false

@@ -13,7 +13,7 @@
 [ext_resource path="res://assets/mesh/ui/selection_circle.obj" type="ArrayMesh" id=12]
 
 [sub_resource type="BoxShape" id=7]
-extents = Vector3( 2.472, 1, 2.241 )
+extents = Vector3( 3.37094, 1, 2.8088 )
 
 [sub_resource type="ShaderMaterial" id=8]
 shader = ExtResource( 9 )

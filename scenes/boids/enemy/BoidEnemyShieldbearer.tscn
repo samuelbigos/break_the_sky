@@ -7,6 +7,8 @@
 [ext_resource path="res://scenes/abilities/Forcefield.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CapsuleShape" id=1]
+radius = 3.03112
+height = 5.68947
 
 [node name="BoidEnemyShieldbearer" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
@@ -17,15 +19,14 @@ MaxForce = 50.0
 _baseResourceStats = ExtResource( 4 )
 DestroyTrauma = 0.1
 HitTrauma = 0.05
+EngageRange = 100.0
 _forcefieldScene = ExtResource( 5 )
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 3.22635, 0, 0, 0, 3.22635, 0, 0, 0, 3.22635, 0, 0, 0 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
 mesh = ExtResource( 2 )
-material/0 = null
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0395321, -0.852419, -6.29935 )

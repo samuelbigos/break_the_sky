@@ -7,8 +7,9 @@
 [ext_resource path="res://scenes/abilities/BulletBomber.tscn" type="PackedScene" id=6]
 [ext_resource path="res://assets/data/stats/allies/stats_ally_bomber.tres" type="Resource" id=7]
 
-[sub_resource type="BoxShape" id=1]
-extents = Vector3( 2.472, 1, 2.241 )
+[sub_resource type="CapsuleShape" id=1]
+radius = 2.44266
+height = 2.36602
 
 [node name="BoidAllyBomber" instance=ExtResource( 2 )]
 script = ExtResource( 1 )
@@ -30,6 +31,7 @@ _shootTargetAlignment = 0.5
 _fleeTime = 0.5
 
 [node name="CollisionShape" parent="." index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.36054 )
 shape = SubResource( 1 )
 
 [node name="Mesh" parent="." index="1"]
