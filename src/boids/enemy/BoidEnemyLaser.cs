@@ -160,6 +160,8 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         base._OnDestroy(hitDir, hitStrength);
         
         _laserWarningMesh.Visible = false;
+        _laserArea.Monitorable = false;
+        _vfx.QueueFree();
     }
     
     protected override void OnEnterAIState_Seeking()

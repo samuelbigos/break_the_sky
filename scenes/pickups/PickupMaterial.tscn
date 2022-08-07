@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/pickups/PickupMaterial.cs" type="Script" id=1]
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=2]
@@ -9,25 +9,13 @@
 flags_unshaded = true
 albedo_color = Color( 0, 0, 0, 1 )
 
-[sub_resource type="SphereMesh" id=1]
-flip_faces = true
-radius = 1.5
-height = 3.0
-
-[sub_resource type="SpatialMaterial" id=4]
-flags_unshaded = true
-
 [node name="PickupMaterial" type="Spatial"]
 script = ExtResource( 1 )
 _meshPath = NodePath("MeshInside")
-_meshOutsidePath = NodePath("MeshOutside")
+_meshOutsidePath = NodePath("")
 
 [node name="MeshInside" type="MeshInstance" parent="."]
+cast_shadow = 0
 mesh = SubResource( 3 )
 material/0 = SubResource( 2 )
-script = ExtResource( 2 )
-
-[node name="MeshOutside" type="MeshInstance" parent="."]
-mesh = SubResource( 1 )
-material/0 = SubResource( 4 )
 script = ExtResource( 2 )

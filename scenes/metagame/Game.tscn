@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=44 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
@@ -33,6 +33,8 @@
 [ext_resource path="res://scenes/gui/Cursor.tscn" type="PackedScene" id=31]
 [ext_resource path="res://src/rendering/ViewportCamera.cs" type="Script" id=32]
 [ext_resource path="res://assets/material/outline.material" type="Material" id=33]
+[ext_resource path="res://src/rendering/HuskRenderer.cs" type="Script" id=34]
+[ext_resource path="res://assets/material/boid_husk.material" type="Material" id=35]
 
 [sub_resource type="ArrayMesh" id=14]
 surfaces/0 = {
@@ -1111,12 +1113,13 @@ vertex_color_use_as_albedo = true
 
 [sub_resource type="PlaneMesh" id=8]
 size = Vector2( 1, 1 )
-subdivide_width = 250
-subdivide_depth = 250
+subdivide_width = 100
+subdivide_depth = 100
 
 [sub_resource type="ShaderMaterial" id=11]
 shader = ExtResource( 12 )
 shader_param/u_scale = 0.002
+shader_param/u_dune_scale_y = 10.0
 shader_param/u_ripple_scale = 0.098
 shader_param/u_sand_lit = Color( 0.854902, 0.576471, 0.388235, 1 )
 shader_param/u_sand_shadow = Color( 0.207843, 0.0941176, 0.027451, 1 )
@@ -1137,6 +1140,8 @@ shader_param/u_ripple_height_tex = ExtResource( 19 )
 shader_param/u_ripple_normal_tex = ExtResource( 18 )
 shader_param/u_grain_texture = ExtResource( 13 )
 shader_param/u_glitter_texture = ExtResource( 14 )
+
+[sub_resource type="BoxShape" id=15]
 
 [sub_resource type="CubeMesh" id=12]
 size = Vector3( 1, 1, 1 )
@@ -1213,11 +1218,18 @@ _lineSegmentSize = 3.0
 _lineSpeed = 25.0
 
 [node name="Ground" type="MeshInstance" parent="Rendering"]
-transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -200, 0 )
+transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -100, 0 )
 cast_shadow = 0
 mesh = SubResource( 8 )
 skeleton = NodePath("../..")
 material/0 = SubResource( 11 )
+
+[node name="StaticBody" type="StaticBody" parent="Rendering/Ground" groups=["ground"]]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Rendering/Ground/StaticBody"]
+transform = Transform( 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0 )
+shape = SubResource( 15 )
 
 [node name="Clouds" type="MeshInstance" parent="Rendering"]
 transform = Transform( 1000, 0, 0, 0, 25, 0, 0, 0, 1000, 0, 25, 0 )
@@ -1226,6 +1238,10 @@ mesh = SubResource( 12 )
 skeleton = NodePath("../..")
 material/0 = SubResource( 13 )
 script = ExtResource( 26 )
+
+[node name="HuskRenderer" type="MeshInstance" parent="Rendering"]
+material_override = ExtResource( 35 )
+script = ExtResource( 34 )
 
 [node name="GameCamera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0 )

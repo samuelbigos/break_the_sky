@@ -476,6 +476,7 @@ public class AISpawningDirector : Node
 
     private void _OnImGuiLayoutSpawning()
     {
+        ImGui.Text($"Enemy Boids: {BoidFactory.Instance.AllyBoids.Count}");
         foreach (ResourceBoidEnemy enemy in _enemyBoidPool)
         {
             if (ImGui.Button($"{enemy.DisplayName}"))

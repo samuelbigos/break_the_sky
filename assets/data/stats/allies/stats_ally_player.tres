@@ -19,5 +19,5 @@ CollisionDamage = 100.0
 MicroTurrets = true
 MicroTurretRange = 100.0
 MicroTurretCooldown = 0.25
-MicroTurretDamage = 1.0
+MicroTurretDamage = 10.0
 MicroTurretVelocity = 200.0

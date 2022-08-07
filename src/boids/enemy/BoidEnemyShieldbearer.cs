@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Godot;
 using GodotOnReady.Attributes;
+using Vector2 = Godot.Vector2;
 using Vector3 = Godot.Vector3;
 
 public partial class BoidEnemyShieldbearer : BoidEnemyBase
@@ -26,6 +27,13 @@ public partial class BoidEnemyShieldbearer : BoidEnemyBase
         }
 
         base.ProcessAlive(delta);
+    }
+
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
+    {
+        base._OnDestroy(hitDir, hitStrength);
+        
+        _forcefield.QueueFree();
     }
 
     protected override void OnEnterAIState_Seeking()

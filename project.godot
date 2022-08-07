@@ -280,6 +280,7 @@ return={
 
 common/physics_fps=90
 common/enable_pause_aware_picking=true
+3d/default_gravity=19.6
 
 [rendering]
 

@@ -57,7 +57,7 @@ public class ParticleManager : Spatial
             osp.Lifetime -= delta;
             if (osp.TriggerEmit)
             {
-                // start emitting the frame after we set position, otherwise the first particles will
+                // Start emitting the frame after we set position, otherwise the first particles will
                 // appear at the previous location.
                 osp.Particles.Emitting = true;
                 osp.TriggerEmit = false;
@@ -73,24 +73,26 @@ public class ParticleManager : Spatial
         }
     }
 
-    public void AddOneShotParticles(PackedScene particleScene, Vector3 position)
+    public Particles AddOneShotParticles(PackedScene particleScene, Vector3 position)
     {
 #if !FINAL
         if (!_pools.ContainsKey(particleScene))
         {
             Debug.Assert(false, $"ParticleManager does not pool {particleScene}!");
-            return;
+            return null;
         }
 #endif
         Queue<Particles> list = _pools[particleScene];
         if (list.Count == 0)
         {
             Debug.Assert(false, $"Increase pool size for {particleScene}!");
-            return;
+            return null;
         }
         Particles p = list.Dequeue();
         p.GlobalPosition(position);
         p.Visible = true;
-        _oneShotParticles.Add(new OneShotParticles() { Queue = list, Particles = p, Lifetime = p.Lifetime, TriggerEmit = true });
+        float lifetime = p.Lifetime + (1.0f - p.Explosiveness) * p.Lifetime; // Account for explosiveness != 1.0.
+        _oneShotParticles.Add(new OneShotParticles() { Queue = list, Particles = p, Lifetime = lifetime, TriggerEmit = true });
+        return p;
     }
 }

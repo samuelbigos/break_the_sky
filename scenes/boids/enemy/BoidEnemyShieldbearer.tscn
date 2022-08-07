@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/mesh/ships/human_a/a.obj" type="ArrayMesh" id=2]
@@ -7,8 +7,11 @@
 [ext_resource path="res://scenes/abilities/Forcefield.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CapsuleShape" id=1]
-radius = 3.03112
-height = 5.68947
+radius = 3.65646
+height = 3.84362
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 2.91563, 2.75, 5.67688 )
 
 [node name="BoidEnemyShieldbearer" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
@@ -22,10 +25,13 @@ HitTrauma = 0.05
 EngageRange = 100.0
 _forcefieldScene = ExtResource( 5 )
 
-[node name="CollisionShape" parent="." index="0"]
+[node name="ShipCollider" parent="." index="0"]
 shape = SubResource( 1 )
 
-[node name="Mesh" parent="." index="1"]
+[node name="RBCollider" parent="." index="1"]
+shape = SubResource( 2 )
+
+[node name="Mesh" parent="." index="2"]
 mesh = ExtResource( 2 )
 
 [node name="BoidTrail" parent="Mesh" index="0"]

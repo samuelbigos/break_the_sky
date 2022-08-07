@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/mesh/ships/human_carrier/carrier_antigrav.obj" type="ArrayMesh" id=2]
@@ -12,13 +12,17 @@
 [ext_resource path="res://assets/material/boid.material" type="Material" id=10]
 
 [sub_resource type="CapsuleShape" id=1]
-radius = 9.26746
-height = 19.4829
+radius = 6.92402
+height = 24.2838
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 7.06956, 3.79281, 17.759 )
 
 [node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
 script = ExtResource( 3 )
 _behaviours = 0
 _steeringRadius = 25.0
+_mass = 5.0
 MaxVelocity = 25.0
 MinVelocity = 10.0
 MaxForce = 25.0
@@ -39,11 +43,14 @@ _gunTrackSpeed = 2.0
 _minion = ExtResource( 5 )
 _minionFlowField = ExtResource( 9 )
 
-[node name="CollisionShape" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.24768 )
+[node name="ShipCollider" parent="." index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.58213 )
 shape = SubResource( 1 )
 
-[node name="Mesh" parent="." index="1"]
+[node name="RBCollider" parent="." index="1"]
+shape = SubResource( 2 )
+
+[node name="Mesh" parent="." index="2"]
 mesh = ExtResource( 4 )
 
 [node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]

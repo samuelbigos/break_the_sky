@@ -35,8 +35,6 @@ public partial class BoidAllyBase : BoidBase
 
     [OnReady] private void Ready()
     {
-        _baseScale = _mesh.Scale;
-
         SpatialMaterial mat = _selectedIndicator.GetActiveMaterial(0) as SpatialMaterial;
         mat.AlbedoColor = ColourManager.Instance.Ally;
         

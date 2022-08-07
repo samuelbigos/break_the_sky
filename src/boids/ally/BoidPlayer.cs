@@ -233,7 +233,7 @@ public class BoidPlayer : BoidAllyBase
         SceneTransitionManager.Instance.RequestReloadCurrentScene();
     }
 
-    public override void _OnBoidAreaEntered(Area area)
+    protected override void _OnBoidAreaEntered(Area area)
     {
     }
 

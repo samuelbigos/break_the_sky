@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode world_vertex_coords;
 
 uniform float u_scale = 0.001;
+uniform float u_dune_scale_y = 10.0;
 uniform sampler2D u_albedo_tex;
 uniform sampler2D u_height_tex;
 uniform sampler2D u_normal_tex;
@@ -27,7 +28,6 @@ uniform vec2 u_wind = vec2(0.0, 1.0);
 
 varying vec2 v_uv;
 varying vec3 v_vertex;
-varying vec3 v_normal;
 varying vec2 v_ripple_uv;
 varying float v_ripple_strength;
 
@@ -35,21 +35,20 @@ void vertex()
 {
 	v_uv = VERTEX.xz * u_scale;
 	
-	v_ripple_uv = v_uv / u_ripple_scale;
-	//v_ripple_uv += vec2(TIME * 0.2);
-	vec3 normal = normalize(texture(u_normal_tex, v_uv).rbg * 2.0 - 1.0);
-	normal.y *= 0.25;
-	float windDotRipple = dot(normalize(vec3(u_wind.x, 0.0, u_wind.y)), normalize(normal));
-	v_ripple_strength = max(0.0, pow(0.25 + windDotRipple, 1.0));
+//	v_ripple_uv = v_uv / u_ripple_scale;
+//	//v_ripple_uv += vec2(TIME * 0.2);
+//	vec3 normal = normalize(texture(u_normal_tex, v_uv).rbg * 2.0 - 1.0);
+//	normal.y *= 0.25;
+//	float windDotRipple = dot(normalize(vec3(u_wind.x, 0.0, u_wind.y)), normalize(normal));
+//	v_ripple_strength = max(0.0, pow(0.25 + windDotRipple, 1.0));
 	
 	// texture
 	float duneHeight = texture(u_height_tex, v_uv).r;
-	VERTEX.y += duneHeight * 25.0;
-	VERTEX.y += texture(u_ripple_height_tex, v_ripple_uv).r * 5.0 * v_ripple_strength * u_ripple_scale;
+	VERTEX.y += duneHeight * u_dune_scale_y;
+	//VERTEX.y += texture(u_ripple_height_tex, v_ripple_uv).r * 5.0 * v_ripple_strength * u_ripple_scale;
 	
 	// store worldspace vert/normal
 	v_vertex = VERTEX;
-	v_normal = NORMAL;
 }
 
 vec3 sandNormal(vec2 uv)

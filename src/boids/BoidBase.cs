@@ -40,7 +40,8 @@ public partial class BoidBase : Area
 
     [Export(PropertyHint.Flags, "DesiredVelocityOverride,Separation,AvoidObstacles,AvoidAllies,AvoidEnemies,Flee,MaintainSpeed,Cohesion,Alignment,Arrive,Pursuit,Wander,FlowFieldFollow")] protected int _behaviours;
     [Export] protected float _steeringRadius = 5.0f;
-    
+
+    [Export] public float _mass = 1.0f;
     [Export] public float MaxVelocity = 500.0f;
     [Export] public float MinVelocity = 0.0f;
     [Export] public float MaxForce = 150.0f;
@@ -58,15 +59,12 @@ public partial class BoidBase : Area
     
     [Export] private List<AudioStream> _hitSfx;
 
-    [Export] private PackedScene _hitParticlesScene;
-    [Export] private PackedScene _damagedParticlesScene;
-    [Export] private PackedScene _destroyParticlesScene;
-    
     [Export] protected PackedScene _pickupMaterialScene;
     
     [OnReadyGet] protected MeshInstance _selectedIndicator;
     [OnReadyGet] protected MultiViewportMeshInstance _mesh;
-    [OnReadyGet] protected CollisionShape _collisionShape;
+    [OnReadyGet] protected CollisionShape _shipCollider;
+    [OnReadyGet] protected CollisionShape _rbCollider;
     [OnReadyGet] private AudioStreamPlayer2D _sfxOnDestroy;
     [OnReadyGet] protected AudioStreamPlayer2D _sfxOnHit;
     
@@ -137,7 +135,6 @@ public partial class BoidBase : Area
     protected TargetType _targetType = TargetType.None;
     protected BoidBase _targetBoid;
     protected Vector2 _targetPos;
-    protected Vector3 _baseScale;
     protected bool _acceptInput = true;
     protected Vector2 _cachedVelocity;
     protected Vector2 _cachedHeading;
@@ -162,6 +159,11 @@ public partial class BoidBase : Area
     private bool _selected;
     private Vector2 _smoothSteering;
     private int _sharedPropertiesId;
+    private RigidBody _destroyedRb;
+    private bool _beginHitGround;
+    private bool _hasHitGround;
+    private bool _hitGround;
+    private float _hitGroundTimer;
 
     #endregion
 
@@ -183,7 +185,6 @@ public partial class BoidBase : Area
         _health = _resourceStats.MaxHealth;
 
         _sfxOnHit.Stream = _hitSfx[0];
-        _baseScale = _mesh.Scale;
         
         List<MeshInstance> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
@@ -191,7 +192,7 @@ public partial class BoidBase : Area
         _mesh.MaterialOverride = _meshMaterial;
 
         Connect("area_entered", this, nameof(_OnBoidAreaEntered));
-        
+
         if (!Game.Instance.Null())
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
     }
@@ -274,16 +275,49 @@ public partial class BoidBase : Area
         _cachedLastHitDir = Vector2.Zero;
         _cachedLastHitDamage = 0.0f;
     }
-    
-    protected virtual void ProcessDestroyed(float delta)
+
+    private void ProcessDestroyed(float delta)
     {
-        if (GlobalTransform.origin.y < -100.0f)
+        if (_beginHitGround)
         {
-            foreach (Particles p in _hitParticles)
+            foreach (Particles particles in _damagedParticles)
             {
-                p.QueueFree();
+                particles.QueueFree();
             }
-            BoidFactory.Instance.FreeBoid(this);
+            _damagedParticles.Clear();
+            _damageVfxCount = 0;
+            _beginHitGround = false;
+            _hitGroundTimer = 0.0f;
+        }
+
+        if (_hasHitGround)
+        {
+            _hitGroundTimer += delta;
+            float rbSleepVel = 15.0f;
+            if ((_destroyedRb.LinearVelocity.Length() <= rbSleepVel && _hitGroundTimer > 1.0f) || _hitGroundTimer > 8.0f)
+            {
+                _destroyedRb.Sleeping = true;
+                _hitGround = false;
+            
+                HuskRenderer.Instance.AddHusk(_mesh.Mesh, _mesh.GlobalTransform);
+                BoidFactory.Instance.FreeBoid(this);
+            }
+            
+            // Occurs every time physics reports a collision between ground and ship.
+            if (_hitGround)
+            {
+                _hitGround = false;
+            
+                Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin);
+                ParticlesMaterial pMat = p.ProcessMaterial.Duplicate() as ParticlesMaterial;
+                float vel = _destroyedRb.LinearVelocity.Length();
+                float t = 1.0f - Utils.Ease_CubicOut(Mathf.Clamp(_hitGroundTimer / 5.0f, 0.0f, 1.0f));
+                t *= _mass;
+                pMat.InitialVelocity *= t;
+                pMat.Scale *= t;
+                pMat.Direction = _destroyedRb.LinearVelocity.To2D().Normalized().To3D();
+                p.ProcessMaterial = pMat;
+            }
         }
     }
 
@@ -342,7 +376,7 @@ public partial class BoidBase : Area
 
         if (bulletVel != Vector2.Zero)
         {
-            Particles hitParticles = _hitParticlesScene.Instance<Particles>();
+            Particles hitParticles = Resources.Instance.HitVFX.Instance<Particles>();
             Game.Instance.AddChild(hitParticles);
             ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
             DebugUtils.Assert(mat != null, "mat != null");
@@ -360,7 +394,7 @@ public partial class BoidBase : Area
             float nextThreshold = 1.0f - (_damagedParticles.Count + 1.0f) * damageVfxThresholds;
             if (_health / _resourceStats.MaxHealth < nextThreshold)
             {
-                Particles particles = _damagedParticlesScene.Instance<Particles>();
+                Particles particles = Resources.Instance.DamagedVFX.Instance<Particles>();
                 _damagedParticles.Add(particles);
                 AddChild(particles);
                 particles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
@@ -386,37 +420,39 @@ public partial class BoidBase : Area
             
             // Clear target.
             SetTarget(TargetType.None);
-            
-            // unregister steering boid
-            SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
 
             // Convert to rigid body for 'ragdoll' death physics.
             Vector3 pos = GlobalTransform.origin;
-            RigidBody rb = new RigidBody();
-            GetParent().AddChild(rb);
-            rb.GlobalTransform = GlobalTransform;
+            _destroyedRb = new RigidBody();
+            GetParent().AddChild(_destroyedRb);
+            _destroyedRb.GlobalTransform = GlobalTransform;
             GetParent().RemoveChild(this);  
-            rb.AddChild(this);
-            rb.AddChild(_collisionShape.Duplicate());
+            _destroyedRb.AddChild(this);
+            _destroyedRb.AddChild(_rbCollider.Duplicate());
+            _rbCollider.QueueFree();
+            _shipCollider.QueueFree();
 
-            rb.GlobalTransform = new Transform(Basis.Identity, pos);
+            SteeringManager.Boid boid = SteeringBoid;
+
+            _destroyedRb.GlobalTransform = new Transform(Basis.Identity, pos);
             GlobalTransform = new Transform(GlobalTransform.basis, pos);
 
-            if (hitDir.To3D() == Vector3.Zero) // random impulse
-            {
-                Vector3 randVec =
-                    new Vector3(Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f, Utils.Rng.Randf() * 10.0f)
-                        .Normalized();
-                rb.ApplyImpulse(GlobalTransform.origin, randVec);
-            }
-            else // Impulse from hit direction.
-            {
-                rb.ApplyCentralImpulse(hitDir.To3D() * hitStrength);
-                rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 100.0f);
-            }
+            _destroyedRb.LinearDamp = 0.1f;
+            _destroyedRb.AngularDamp = 0.2f;
+
+            // Apply impulse in direction of travel.
+            _destroyedRb.ApplyCentralImpulse(boid.VelocityG.To3D());
+            _destroyedRb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 50.0f * (1.0f / _mass));
+            
+            _destroyedRb.Connect("body_entered", this, nameof(_WhenTheBodyHitsTheFloor));
+            _destroyedRb.ContactMonitor = true;
+            _destroyedRb.ContactsReported = 2;
 
             Monitorable = false;
             Monitoring = false;
+            
+            // Unregister steering boid.
+            SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
             
             OnBoidDestroyed?.Invoke(this);
         }
@@ -477,7 +513,7 @@ public partial class BoidBase : Area
         steeringBoid.Behaviours = _behaviours;
     }
 
-    public virtual void _OnBoidAreaEntered(Area area)
+    protected virtual void _OnBoidAreaEntered(Area area)
     {
         if (!IsInstanceValid(area))
             return;
@@ -503,6 +539,20 @@ public partial class BoidBase : Area
             return;
         }
     }
+
+    protected void _WhenTheBodyHitsTheFloor(Node body)
+    {
+        if (body.IsInGroup("ground"))
+        {
+            if (!_hasHitGround)
+            {
+                _hasHitGround = true;
+                _beginHitGround = true;
+            }
+
+            _hitGround = true;
+        }
+    }   
     
     protected virtual void _OnGameStateChanged(StateMachine_Game.States state, StateMachine_Game.States prevState)
     {

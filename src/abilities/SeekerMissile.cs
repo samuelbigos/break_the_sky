@@ -13,7 +13,6 @@ public partial class SeekerMissile : Area
     [Export] private float _maxSpeed = 200.0f;
     [Export] private float _maxForce = 50.0f;
     [Export] private float _lifetime = 5.0f;
-    [Export] private PackedScene _explodeVfx;
 
     [OnReadyGet] private MultiViewportMeshInstance _mesh;
     [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
@@ -27,6 +26,7 @@ public partial class SeekerMissile : Area
     private State _state = State.Alive;
     private System.Numerics.Vector2 _smoothHeading;
     private bool _queueExplode;
+    private bool _hitGround;
     
     public void Init(float damage, Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, BoidBase target)
     {
@@ -117,8 +117,10 @@ public partial class SeekerMissile : Area
             }
             case State.Deactivated:
             {
-                if (GlobalTransform.origin.y < -100.0f)
+                if (_hitGround)
                 {
+                    Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin);
+                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin);
                     QueueFree();
                 }
 
@@ -148,6 +150,10 @@ public partial class SeekerMissile : Area
         rb.ApplyCentralImpulse(steeringBoid.Velocity.ToGodot().To3D());
         rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 1.0f);
         
+        rb.Connect("body_entered", this, nameof(_WhenTheBodyHitsTheFloor));
+        rb.ContactMonitor = true;
+        rb.ContactsReported = 2;
+
         SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
         _trail.QueueFree();
         _state = State.Deactivated;
@@ -158,11 +164,19 @@ public partial class SeekerMissile : Area
     {
         _state = State.Deactivated;
         SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
-        ParticleManager.Instance.AddOneShotParticles(_explodeVfx, GlobalTransform.origin);
+        ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin);
         QueueFree();
 
         Monitorable = false;
         Monitoring = false;
+    }
+    
+    protected void _WhenTheBodyHitsTheFloor(Node body)
+    {
+        if (body.IsInGroup("ground"))
+        {
+            _hitGround = true;
+        }
     }
 
     public virtual void _OnAreaEntered(Area area)

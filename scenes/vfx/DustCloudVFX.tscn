@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://assets/mesh/icosphere_lowpoly.obj" type="ArrayMesh" id=1]
+
+[sub_resource type="SpatialMaterial" id=1]
+flags_transparent = true
+vertex_color_use_as_albedo = true
+
+[sub_resource type="Gradient" id=2]
+offsets = PoolRealArray( 0, 0.0814815, 0.6, 1 )
+colors = PoolColorArray( 1, 1, 1, 0, 1, 1, 1, 0.694118, 0.541992, 0.541992, 0.541992, 0.717647, 0.268555, 0.268555, 0.268555, 0 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="Curve" id=5]
+_data = [ Vector2( 0, 0.303681 ), 0.0, 0.0521686, 0, 0, Vector2( 0.689145, 0.56135 ), 0.789051, 0.789051, 0, 0, Vector2( 0.978619, 1 ), 2.60327, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=6]
+curve = SubResource( 5 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+spread = 180.0
+flatness = 1.0
+gravity = Vector3( 0, 19.6, 0 )
+initial_velocity = 10.0
+initial_velocity_random = 0.66
+damping = 15.0
+damping_random = 0.5
+scale = 8.0
+scale_random = 0.5
+scale_curve = SubResource( 6 )
+color = Color( 0.639216, 0.368627, 0.188235, 1 )
+color_ramp = SubResource( 3 )
+
+[node name="DustCloudVFX" type="Particles"]
+material_override = SubResource( 1 )
+cast_shadow = 0
+emitting = false
+amount = 50
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource( 4 )
+draw_pass_1 = ExtResource( 1 )

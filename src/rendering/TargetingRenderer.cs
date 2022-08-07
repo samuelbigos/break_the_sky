@@ -75,8 +75,6 @@ public class TargetingRenderer : MeshInstance
         arrays[(int) ArrayMesh.ArrayType.Index] = indices.ToArray();
 
         outMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arrays);
-
-        Mesh = outMesh;
     }
 
     private void LineBetween(Vector3 from, Vector3 to, Color col, ref int v, ref int i)

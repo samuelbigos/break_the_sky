@@ -103,7 +103,7 @@ public class FabricateManager : Singleton<FabricateManager>
     
     private void _OnImGuiLayoutWindow()
     {
-        ImGui.Text($"Boid #: {BoidFactory.Instance.AllBoids.Count}");
+        ImGui.Text($"Ally Boids: {BoidFactory.Instance.AllyBoids.Count}");
         foreach (ResourceBoidAlly fabricant in _fabricantPool)
         {
             if (ImGui.Button($"{fabricant.DisplayName}"))

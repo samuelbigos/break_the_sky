@@ -14,9 +14,7 @@ public class PickupMaterial : Spatial
     public Action<PickupMaterial> OnCollected;
      
     private MeshInstance _mesh;
-    private MeshInstance _meshOutside;
     private SpatialMaterial _mat;
-    private SpatialMaterial _matOutside;
     private float _time;
     private Vector2 _velocity;
     private BoidBase _target;
@@ -32,11 +30,8 @@ public class PickupMaterial : Spatial
         base._Ready();
 
         _mesh = GetNode<MeshInstance>(_meshPath);
-        _meshOutside = GetNode<MeshInstance>(_meshOutsidePath);
         _mat = _mesh.GetSurfaceMaterial(0) as SpatialMaterial;
-        _matOutside = _meshOutside.GetSurfaceMaterial(0) as SpatialMaterial;
         Debug.Assert(_mat != null);
-        Debug.Assert(_matOutside != null);
         
         _attractionRadius *= _attractionRadius;
         _collectionRadius *= _collectionRadius;
@@ -67,7 +62,6 @@ public class PickupMaterial : Spatial
         GlobalTransform = new Transform(GlobalTransform.basis, pos);
         float scale =  (Mathf.Sin(_time) + 1.0f) * 0.25f + 1.0f;
         _mesh.Scale = Vector3.One * scale;
-        _meshOutside.Scale = Vector3.One * scale;
         
         _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
     }

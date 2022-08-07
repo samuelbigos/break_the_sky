@@ -7,9 +7,10 @@ using GodotOnReady.Attributes;
 public partial class BoidEnemyLancer : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
-    
+
+    [OnReadyGet] private MeshInstance _antiGravMesh;
     [OnReadyGet] private Spatial _weaponPosition1; 
-    [OnReadyGet] private Spatial _weaponPosition2; 
+    [OnReadyGet] private Spatial _weaponPosition2;
     
     private float _attackCooldownTimer;
     private int _shotsFired;
@@ -40,6 +41,13 @@ public partial class BoidEnemyLancer : BoidEnemyBase
         Vector2 spawnVel = (_targetBoid.GlobalPosition - GlobalPosition).Normalized() * _resourceStats.AttackVelocity;
         Game.Instance.AddChild(bullet);
         bullet.Init(spawnPos, spawnVel, Alignment, _resourceStats.AttackDamage);
+    }
+
+    protected override void _OnDestroy(Vector2 hitDir, float hitStrength)
+    {
+        base._OnDestroy(hitDir, hitStrength);
+        
+        _antiGravMesh.QueueFree();
     }
 
     protected override void OnEnterAIState_Seeking()
