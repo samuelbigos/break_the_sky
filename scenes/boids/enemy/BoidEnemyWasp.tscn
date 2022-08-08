@@ -27,6 +27,7 @@ _baseResourceStats = ExtResource( 4 )
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 100.0
+SeekPlayerOnSpawn = true
 WeaponPositionPath = NodePath("WeaponPosition")
 _bulletScene = ExtResource( 5 )
 

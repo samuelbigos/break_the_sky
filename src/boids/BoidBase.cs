@@ -339,6 +339,7 @@ public partial class BoidBase : Area
             MaxSpeed = MaxVelocity * _resourceStats.MoveSpeed,
             MinSpeed = MinVelocity,
             MaxForce = MaxForce * _resourceStats.MoveSpeed,
+            ArriveRadius = 25.0f,
             DesiredSpeed = 0.0f,
             LookAhead = 1.0f,
             ViewRange = 50.0f,

@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://assets/material/bullet.material" type="Material" id=1]
-[ext_resource path="res://assets/shader/boid_outline_buffer.shader" type="Shader" id=2]
+[ext_resource path="res://assets/shader/outline_buffer.shader" type="Shader" id=2]
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
 [ext_resource path="res://src/abilities/Bullet.cs" type="Script" id=4]
 

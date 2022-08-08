@@ -55,10 +55,9 @@ public partial class BoidAllyDrone : BoidAllyBase
 
     private void Shoot()
     {
-        Vector2 dir = (_targetBoid.GlobalPosition - GlobalPosition).Normalized();
         _shootCooldown = _resourceStats.AttackCooldown;
         Bullet bullet = _bulletScene.Instance() as Bullet;
         Game.Instance.AddChild(bullet);
-        bullet.Init(GlobalPosition.To3D(), dir * _resourceStats.AttackVelocity, Alignment, _resourceStats.AttackDamage);
+        bullet.Init(GlobalPosition.To3D(),  _targetBoid, true, _resourceStats.AttackVelocity, _resourceStats.AttackDamage, Alignment);
     }
 }

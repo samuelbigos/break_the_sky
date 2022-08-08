@@ -136,16 +136,9 @@ public partial class BoidAllyBase : BoidBase
                 }
                 else
                 {
-                    // ballistics
-                    Vector2 target = _microTurretTarget.GlobalPosition;
-                    float dist = toTarget.Length();
-                    float t = dist / _resourceStats.MicroTurretVelocity;
-                    target += _microTurretTarget.Velocity * t;
-                    
-                    Vector2 dir = (target - GlobalPosition).Normalized();
                     Bullet bullet = _microBulletScene.Instance() as Bullet; // TODO: use bullet pool
                     Game.Instance.AddChild(bullet);
-                    bullet.Init(GlobalTransform.origin, dir * _resourceStats.MicroTurretVelocity, Alignment, _resourceStats.MicroTurretDamage);
+                    bullet.Init(GlobalTransform.origin, _microTurretTarget, true, _resourceStats.MicroTurretVelocity, _resourceStats.MicroTurretDamage, Alignment);
                 }
             }
         }

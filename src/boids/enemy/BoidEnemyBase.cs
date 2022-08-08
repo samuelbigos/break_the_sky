@@ -6,13 +6,16 @@ public partial class BoidEnemyBase : BoidBase
 {
     protected enum AIState
     {
+        Idle,
         Seeking,
-        Engaged
+        Engaged,
+        Flee
     }
     
     [Export] public float DestroyTrauma = 0.1f;
     [Export] public float HitTrauma = 0.05f;
     [Export] public float EngageRange = 100.0f;
+    [Export] public bool SeekPlayerOnSpawn = true;
 
     public bool IsTargetted = false;
     public ResourceBoidEnemy Data => _data as ResourceBoidEnemy;
@@ -29,7 +32,14 @@ public partial class BoidEnemyBase : BoidBase
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.05f;
         steeringBoid.DesiredDistFromTargetMax = EngageRange + EngageRange * 0.05f;
         
-        SwitchAiState(AIState.Seeking);
+        if (SeekPlayerOnSpawn)
+        {
+            SwitchAiState(AIState.Seeking);
+        }
+        else
+        {
+            SwitchAiState(AIState.Idle);
+        }
         
         _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.EnemyOutline);
     }
@@ -38,10 +48,10 @@ public partial class BoidEnemyBase : BoidBase
     {
         switch (_aiState)
         {
+            case AIState.Idle:
             case AIState.Seeking:
-                // if we're seeking, we move generally towards the player looking for a target.
-                List<BoidAllyBase> allyBoids = BoidFactory.Instance.AllyBoids;
-                foreach (BoidAllyBase boid in allyBoids)
+            {
+                foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
                 {
                     float distSq = (boid.GlobalPosition - GlobalPosition).LengthSquared();
                     if (distSq < EngageRange * EngageRange)
@@ -51,12 +61,15 @@ public partial class BoidEnemyBase : BoidBase
                     }
                 }
                 break;
+            }
             case AIState.Engaged:
+                break;
+            case AIState.Flee:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
+
         // base.ProcessAlive is called after child processing in-case we are destroyed this frame (so we don't do
         // child processing after being destroyed).
         base.ProcessAlive(delta);
@@ -66,11 +79,17 @@ public partial class BoidEnemyBase : BoidBase
     {
         switch (state)
         {
+            case AIState.Idle:
+                OnEnterAIState_Idle();
+                break;
             case AIState.Seeking:
                 OnEnterAIState_Seeking();
                 break;
             case AIState.Engaged:
                 OnEnterAIState_Engaged();
+                break;
+            case AIState.Flee:
+                OnEnterAIState_Flee();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -78,9 +97,14 @@ public partial class BoidEnemyBase : BoidBase
         _aiState = state;
     }
 
+    protected virtual void OnEnterAIState_Idle()
+    {
+        SetTarget(TargetType.None);
+        ResetSteeringBehaviours();
+    }
+
     protected virtual void OnEnterAIState_Seeking()
     {
-        // set target as player
         SetTarget(TargetType.Enemy, Game.Player);
         ResetSteeringBehaviours();
         SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Pursuit, true);
@@ -88,6 +112,13 @@ public partial class BoidEnemyBase : BoidBase
     
     protected virtual void OnEnterAIState_Engaged()
     {
+    }
+    
+    protected virtual void OnEnterAIState_Flee()
+    {
+        SetTarget(TargetType.Enemy, Game.Player);
+        ResetSteeringBehaviours();
+        SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Flee, true);
     }
 
     protected override void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)

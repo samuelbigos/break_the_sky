@@ -56,7 +56,7 @@ vec3 sandNormal(vec2 uv)
 	vec3 dunes = normalize(texture(u_normal_tex, v_uv).rbg * 2.0 - 1.0);
 	vec3 grain = normalize(texture(u_grain_texture, uv / u_grain_scale).rgb * 2.0 - 1.0);
 	vec3 ripple = normalize(texture(u_ripple_normal_tex, v_ripple_uv).rbg * 2.0 - 1.0);
-	vec3 n = normalize(mix(dunes, ripple, v_ripple_strength));
+	vec3 n = normalize(dunes);//normalize(mix(dunes, ripple, v_ripple_strength));
 	return normalize(mix(n, grain, u_grain_strength));
 }
 
@@ -67,7 +67,7 @@ vec3 diffuseCol(vec3 n, vec3 l)
 	lum = max(0.0, 2.0 * dot(n, l)); // john edwards
 	vec3 albedoDune = texture(u_albedo_tex, v_uv).rgb;
 	vec3 albedoRipple = texture(u_ripple_albedo_tex, v_ripple_uv).rgb;
-	vec3 sandLit = mix(albedoDune, albedoRipple, v_ripple_strength);
+	vec3 sandLit = albedoDune;// mix(albedoDune, albedoRipple, v_ripple_strength);
 	vec3 sandShadow = sandLit * u_sand_shadow.rgb;
 	
 	sandLit = u_sand_lit.rgb * sandLit;

@@ -285,6 +285,7 @@ common/enable_pause_aware_picking=true
 [rendering]
 
 threads/thread_model=2
+quality/directional_shadow/size=2048
 environment/default_clear_color=Color( 0, 0, 0, 1 )
 quality/filters/msaa=3
 environment/default_environment="res://assets/Environment.tres"

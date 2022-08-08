@@ -14,6 +14,7 @@ public partial class Game : Singleton<Game>
     [OnReadyGet] private CloudBox _clouds;
     [OnReadyGet] private Viewport _outlineViewport;
     [OnReadyGet] private MeshInstance _outlineMesh;
+    [OnReadyGet] private DirectionalLight _directionalLight;
 
     [Export] private Rect2 _areaRect;
     [Export] private PackedScene _playerScene;
@@ -92,6 +93,8 @@ public partial class Game : Singleton<Game>
             Vector3 cloudPos = GameCamera.Instance.GlobalTransform.origin;
             _clouds.GlobalPosition(new Vector3(cloudPos.x, _clouds.GlobalTransform.origin.y, cloudPos.z));
         }
+
+        _directionalLight.DirectionalShadowMaxDistance = GameCamera.Instance.GlobalTransform.origin.y - _sand.GlobalTransform.origin.y;
     }
 
     public void RegisterPickup(PickupMaterial pickup)

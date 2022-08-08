@@ -6,7 +6,14 @@ public class BulletBomber : Bullet
     public BoidBase Target;
 
     private Vector2 _cachedParentPos;
-    
+
+    public override void Init(Vector3 position, BoidBase target, bool leadTarget, float speed, float damage, BoidBase.BoidAlignment alignment)
+    {
+        base.Init(position, target, leadTarget, speed, damage, alignment);
+
+        Target = target;
+    }
+
     public override void _Process(float delta)
     {
         base._Process(delta);

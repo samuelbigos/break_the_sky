@@ -1,12 +1,12 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
 [ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/material/outline_buffer.material" type="Material" id=3]
 [ext_resource path="res://src/boids/BoidBase.cs" type="Script" id=4]
 [ext_resource path="res://assets/material/boid.material" type="Material" id=5]
 [ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
-[ext_resource path="res://assets/shader/boid_outline_buffer.shader" type="Shader" id=9]
 [ext_resource path="res://scenes/pickups/PickupMaterial.tscn" type="PackedScene" id=10]
 [ext_resource path="res://assets/mesh/ui/selection_circle.obj" type="ArrayMesh" id=12]
 
@@ -16,10 +16,6 @@ height = 24.2838
 
 [sub_resource type="BoxShape" id=9]
 extents = Vector3( 7.06956, 3.79281, 17.759 )
-
-[sub_resource type="ShaderMaterial" id=8]
-shader = ExtResource( 9 )
-shader_param/u_outline_colour = Color( 1, 1, 1, 1 )
 
 [sub_resource type="SpatialMaterial" id=4]
 flags_unshaded = true
@@ -49,7 +45,7 @@ material_override = ExtResource( 5 )
 script = ExtResource( 1 )
 _numExtraMeshes = 1
 _meshLayers = [ 2 ]
-_meshMaterials = [ SubResource( 8 ) ]
+_meshMaterials = [ ExtResource( 3 ) ]
 
 [node name="BoidTrail" parent="Mesh" instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )

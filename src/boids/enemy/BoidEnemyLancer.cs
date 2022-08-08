@@ -38,9 +38,8 @@ public partial class BoidEnemyLancer : BoidEnemyBase
         if (_shotsFired % 2 == 0)
             spawnPos = _weaponPosition2.GlobalTransform.origin;
         
-        Vector2 spawnVel = (_targetBoid.GlobalPosition - GlobalPosition).Normalized() * _resourceStats.AttackVelocity;
         Game.Instance.AddChild(bullet);
-        bullet.Init(spawnPos, spawnVel, Alignment, _resourceStats.AttackDamage);
+        bullet.Init(spawnPos, _targetBoid, false, _resourceStats.AttackVelocity, _resourceStats.AttackDamage, Alignment);
     }
 
     protected override void _OnDestroy(Vector2 hitDir, float hitStrength)

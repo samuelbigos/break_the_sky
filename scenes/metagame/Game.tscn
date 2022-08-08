@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
@@ -11,15 +11,7 @@
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 [ext_resource path="res://src/rendering/TrailRenderer.cs" type="Script" id=11]
-[ext_resource path="res://assets/shader/sand.shader" type="Shader" id=12]
-[ext_resource path="res://assets/textures/noise/grain.png" type="Texture" id=13]
-[ext_resource path="res://assets/textures/noise/glitter.png" type="Texture" id=14]
-[ext_resource path="res://assets/textures/dunes/LargeDunes_Normal.tga" type="Texture" id=15]
-[ext_resource path="res://assets/textures/dunes/LargeDunes_Alb.tga" type="Texture" id=16]
-[ext_resource path="res://assets/textures/dunes/LargeDunes_Height.tga" type="Texture" id=17]
-[ext_resource path="res://assets/textures/dunes/SmallDunes_Normal.tga" type="Texture" id=18]
-[ext_resource path="res://assets/textures/dunes/SmallDunes_Height.tga" type="Texture" id=19]
-[ext_resource path="res://assets/textures/dunes/SmallDunes_Alb.tga" type="Texture" id=20]
+[ext_resource path="res://assets/material/sand.material" type="Material" id=13]
 [ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=21]
 [ext_resource path="res://assets/textures/clouds/billow_cloud_noise_128.tex3d" type="Texture3D" id=22]
 [ext_resource path="res://assets/textures/clouds/coverage.tex" type="Texture" id=23]
@@ -32,9 +24,10 @@
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" type="Resource" id=30]
 [ext_resource path="res://scenes/gui/Cursor.tscn" type="PackedScene" id=31]
 [ext_resource path="res://src/rendering/ViewportCamera.cs" type="Script" id=32]
-[ext_resource path="res://assets/material/outline.material" type="Material" id=33]
+[ext_resource path="res://assets/material/outline_postprocess.material" type="Material" id=33]
 [ext_resource path="res://src/rendering/HuskRenderer.cs" type="Script" id=34]
 [ext_resource path="res://assets/material/boid_husk.material" type="Material" id=35]
+[ext_resource path="res://assets/data/boids/enemies/boid_enemy_sentry.tres" type="Resource" id=36]
 
 [sub_resource type="ArrayMesh" id=14]
 surfaces/0 = {
@@ -1116,31 +1109,6 @@ size = Vector2( 1, 1 )
 subdivide_width = 100
 subdivide_depth = 100
 
-[sub_resource type="ShaderMaterial" id=11]
-shader = ExtResource( 12 )
-shader_param/u_scale = 0.002
-shader_param/u_dune_scale_y = 10.0
-shader_param/u_ripple_scale = 0.098
-shader_param/u_sand_lit = Color( 0.854902, 0.576471, 0.388235, 1 )
-shader_param/u_sand_shadow = Color( 0.207843, 0.0941176, 0.027451, 1 )
-shader_param/u_grain_scale = 50.0
-shader_param/u_fresnel_pow = 1.943
-shader_param/u_fresnel_strength = 0.0
-shader_param/u_grain_strength = 0.04
-shader_param/u_oceanspec_pow = 250.0
-shader_param/u_oceanspec_strength = 0.0
-shader_param/u_glitter_scale = 25.0
-shader_param/u_glitter_threshold = 0.0
-shader_param/u_wind = Vector2( 1, 1 )
-shader_param/u_albedo_tex = ExtResource( 16 )
-shader_param/u_height_tex = ExtResource( 17 )
-shader_param/u_normal_tex = ExtResource( 15 )
-shader_param/u_ripple_albedo_tex = ExtResource( 20 )
-shader_param/u_ripple_height_tex = ExtResource( 19 )
-shader_param/u_ripple_normal_tex = ExtResource( 18 )
-shader_param/u_grain_texture = ExtResource( 13 )
-shader_param/u_glitter_texture = ExtResource( 14 )
-
 [sub_resource type="BoxShape" id=15]
 
 [sub_resource type="CubeMesh" id=12]
@@ -1185,6 +1153,7 @@ SandPath = NodePath("Rendering/Ground")
 CloudsPath = NodePath("Rendering/Clouds")
 OutlineViewportPath = NodePath("OutlineBufferViewport")
 OutlineMeshPath = NodePath("Outline")
+DirectionalLightPath = NodePath("DirectionalLight")
 _areaRect = Rect2( -500, -500, 500, 500 )
 _playerScene = ExtResource( 3 )
 _playerData = SubResource( 14 )
@@ -1197,8 +1166,8 @@ script = ExtResource( 9 )
 [node name="AISpawningDirector" type="Node" parent="Singletons"]
 script = ExtResource( 5 )
 _enabled = false
-_firstEnemy = ExtResource( 6 )
-_enemyBoidPool = [ ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 30 ) ]
+_firstEnemy = ExtResource( 36 )
+_enemyBoidPool = [ ExtResource( 36 ), ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 30 ) ]
 
 [node name="TacticalPauseManager" type="Node" parent="Singletons"]
 script = ExtResource( 10 )
@@ -1222,10 +1191,10 @@ transform = Transform( 1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -100, 0 )
 cast_shadow = 0
 mesh = SubResource( 8 )
 skeleton = NodePath("../..")
-material/0 = SubResource( 11 )
+material/0 = ExtResource( 13 )
 
 [node name="StaticBody" type="StaticBody" parent="Rendering/Ground" groups=["ground"]]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, 0 )
 
 [node name="CollisionShape" type="CollisionShape" parent="Rendering/Ground/StaticBody"]
 transform = Transform( 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0 )
@@ -1260,8 +1229,9 @@ transform = Transform( 1, 0, 0, 0, 0.0871558, 0.996195, 0, -0.996195, 0.0871558,
 light_color = Color( 0.980392, 0.933333, 0.843137, 1 )
 light_cull_mask = 4294966273
 shadow_enabled = true
-shadow_color = Color( 0.737255, 0.737255, 0.737255, 1 )
+shadow_color = Color( 0.478431, 0.478431, 0.478431, 1 )
 directional_shadow_mode = 0
+directional_shadow_blend_splits = true
 directional_shadow_max_distance = 1000.0
 
 [node name="HUD" parent="." instance=ExtResource( 1 )]

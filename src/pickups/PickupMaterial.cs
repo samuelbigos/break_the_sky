@@ -5,7 +5,6 @@ using System.Diagnostics;
 public class PickupMaterial : Spatial
 {
     [Export] private NodePath _meshPath;
-    [Export] private NodePath _meshOutsidePath;
     [Export] private float _bounceDelta = 5.0f;
     [Export] private float _damping = 0.05f;
     [Export] private float _attractionRadius = 50.0f;
@@ -59,9 +58,10 @@ public class PickupMaterial : Spatial
         pos.y = Mathf.Sin(_time) * _bounceDelta;
         pos += _velocity.To3D() * delta;
         
-        GlobalTransform = new Transform(GlobalTransform.basis, pos);
+        //GlobalTransform = new Transform(GlobalTransform.basis, pos);
         float scale =  (Mathf.Sin(_time) + 1.0f) * 0.25f + 1.0f;
-        _mesh.Scale = Vector3.One * scale;
+        //_mesh.Scale = Vector3.One * scale;
+        //RotateY(delta * 2.0f);
         
         _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
     }

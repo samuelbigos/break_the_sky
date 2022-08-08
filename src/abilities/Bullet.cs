@@ -27,10 +27,18 @@ public partial class Bullet : Area
 		set { GlobalTransform = new Transform(GlobalTransform.basis, value.To3D()); }
 	}
 	
-	public void Init(Vector3 position, Vector2 velocity, BoidBase.BoidAlignment alignment, float damage)
+	public virtual void Init(Vector3 position, BoidBase target, bool leadTarget, float speed, float damage, BoidBase.BoidAlignment alignment)
 	{
+		Vector2 targetPos = target.GlobalPosition;
+		if (leadTarget)
+		{
+			Vector2 toTarget = targetPos - position.To2D();
+			float dist = toTarget.Length();
+			float t = dist / speed;
+			targetPos += target.Velocity * t;
+		}
 		_damage = damage;
-		_velocity = velocity;
+		_velocity = (targetPos - position.To2D()).Normalized() * speed;
 		_alignment = alignment;
 		GlobalPosition = position.To2D();
 		_spawnPos = position.To2D();

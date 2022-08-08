@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/sentry_body.obj-4519ceb02e0d28e3c6747a5fc633944c.mesh"
+
+[deps]
+
+files=[ "res://.import/sentry_body.obj-4519ceb02e0d28e3c6747a5fc633944c.mesh" ]
+
+source_file="res://assets/mesh/ships/human_sentry/sentry_body.obj"
+dest_files=[ "res://.import/sentry_body.obj-4519ceb02e0d28e3c6747a5fc633944c.mesh", "res://.import/sentry_body.obj-4519ceb02e0d28e3c6747a5fc633944c.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

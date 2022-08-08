@@ -4,20 +4,20 @@
 
 [resource]
 script = ExtResource( 1 )
-AttackDamage = 1.0
-AttackCooldown = 0.25
+AttackDamage = 5.0
+AttackCooldown = 2.0
 AttackSpread = 0.0
-AttackVelocity = 250.0
-AttackCharge = 1.0
-AttackDuration = 1.0
+AttackVelocity = 200.0
+AttackCharge = 0.0
+AttackDuration = 0.0
 AttackCount = 1
 AttackRange = 100.0
 MoveSpeed = 1.0
-MaxHealth = 1e+07
+MaxHealth = 10.0
 Regeneration = 0.0
-CollisionDamage = 100.0
-MicroTurrets = true
+CollisionDamage = 10.0
+MicroTurrets = false
 MicroTurretRange = 100.0
-MicroTurretCooldown = 0.25
-MicroTurretDamage = 1.0
-MicroTurretVelocity = 200.0
+MicroTurretCooldown = 0.5
+MicroTurretDamage = 2.0
+MicroTurretVelocity = 300.0

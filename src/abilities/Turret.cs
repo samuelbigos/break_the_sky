@@ -95,7 +95,7 @@ public partial class Turret : MeshInstance
         {
             spawnPos = _barrel1.GlobalTransform.origin;
         }
-        bullet.Init(spawnPos, GlobalTransform.basis.z.To2D() * ShootVelocity, Alignment, ShootDamage);
+        bullet.Init(spawnPos, Target, false, ShootVelocity, ShootDamage, Alignment);
         
         _shootTimer = ShootCooldown;
         _shootCount++;
