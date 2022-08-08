@@ -24,7 +24,6 @@ public class DebugImGui : Saveable
         public string ShortcutDisplay;
     }
     
-    private float _fps;
     private float _timescale;
     private List<RegisteredWindow> _registeredWindows = new();
     private bool _hasMovedParent;
@@ -113,13 +112,6 @@ public class DebugImGui : Saveable
             root.AddChild(this);
             _hasMovedParent = true;
         }
-
-        delta = TimeSystem.UnscaledDelta;
-        if (delta != 0.0f)
-        {
-            float fps = 1.0f / Performance.GetMonitor(Performance.Monitor.TimeProcess);
-            _fps = 0.033f * fps + 0.966f * _fps;
-        }
     }
     
     public override void _Input(InputEvent evt)
@@ -181,7 +173,7 @@ public class DebugImGui : Saveable
 
     private void _OnImGuiLayoutPerformance()
     {
-        ImGui.Text($"FPS: {_fps:F0}");
+        ImGui.Text($"FPS: {Performance.GetMonitor(Performance.Monitor.TimeFps):F0}");
         
         ImGui.Text(" ### Processing");
         ImGui.Text($"TimeProcess: {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000.0f:F0}ms");

@@ -120,7 +120,7 @@ public partial class BoidAllyBomber : BoidAllyBase
     {
         _bomb = _bulletScene.Instance() as BulletBomber;
         AddChild(_bomb);
-        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D().To3D(), _targetBoid, false, 0.0f, 0.0f, BoidAlignment.Ally);
+        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D().To3D(), this, false, 0.0f, 0.0f, BoidAlignment.Ally);
         _bomb.Parent = this;
         _bomb.OnBulletDestroyed += OnBulletDestroyed;
     }

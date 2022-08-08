@@ -14,7 +14,7 @@ dest_files=[ "res://.import/SmallDunes_Height.tga-5aad0c062009ce3e3c3d6db36df62d
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/lossy_quality=0.99
 compress/hdr_mode=0
 compress/bptc_ldr=0

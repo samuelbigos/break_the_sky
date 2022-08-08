@@ -94,6 +94,7 @@ public partial class Game : Singleton<Game>
             _clouds.GlobalPosition(new Vector3(cloudPos.x, _clouds.GlobalTransform.origin.y, cloudPos.z));
         }
 
+        // Keep the shadow max distance at the distance between camera and ground, to maximise shadow resolution.
         _directionalLight.DirectionalShadowMaxDistance = GameCamera.Instance.GlobalTransform.origin.y - _sand.GlobalTransform.origin.y;
     }
 

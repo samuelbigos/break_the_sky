@@ -14,7 +14,7 @@ dest_files=[ "res://.import/LargeDunes_Normal.tga-eacada71659479899b314f9a1cb205
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/lossy_quality=0.99
 compress/hdr_mode=0
 compress/bptc_ldr=0

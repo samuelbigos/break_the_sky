@@ -52,6 +52,7 @@ ParticleManager="*res://scenes/singletons/ParticleManager.tscn"
 
 window/size/width=1440
 window/size/height=810
+window/vsync/use_vsync=false
 
 [editor_plugins]
 
