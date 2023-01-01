@@ -1,18 +1,13 @@
 <Project Sdk="Godot.NET.Sdk/3.3.0">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <RootNamespace>BreakTheSky</RootNamespace>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GodotOnReady" Version="1.2.1" />
-    <PackageReference Include="ImGui.NET" Version="1.87.3" />
+    <PackageReference Include="GodotOnReady" Version="1.2.3" />
+    <PackageReference Include="ImGui.NET" Version="1.88.0" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="GodotSharpEditor">
-      <HintPath>.mono\assemblies\Debug\GodotSharpEditor.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>

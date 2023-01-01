@@ -17,13 +17,12 @@ public partial class Game : Singleton<Game>
     [OnReadyGet] private DirectionalLight _directionalLight;
 
     [Export] private Rect2 _areaRect;
-    [Export] private PackedScene _playerScene;
 
     [Export] private ResourceBoidAlly _playerData;
 
-    private BoidPlayer _player;
+    private BoidAllyBase _player;
 
-    public static BoidPlayer Player => Instance._player;
+    public static BoidAllyBase Player => Instance._player;
     public Rect2 SpawningRect => new(Player.GlobalPosition - _areaRect.Size * 0.5f, _areaRect.Size);
 
     private float _debugRenderSize = 1.0f;
@@ -31,17 +30,20 @@ public partial class Game : Singleton<Game>
 
     [OnReady] private void Ready()
     {
-        _player = _playerScene.Instance<BoidPlayer>();
+        ResourceBoidAlly playerBoidRes = FabricateManager.Instance.GetBoidResourceByUID(SaveDataPlayer.InitialPlayerBoid);
+        _player = playerBoidRes.Scene.Instance<BoidAllyBase>();
+        _player.SetIsPlayer(true);
+        
         AddChild(_player);
         _player.Init(_playerData, _OnPlayerDestroyed, Vector2.Zero, Vector2.Zero);
         BoidFactory.Instance.AllyBoids.Add(_player);
         BoidFactory.Instance.AllBoids.Add(_player);
 
-        _aiSpawningDirector.Init(this, _player);
+        _aiSpawningDirector.Init(this);
 
         GD.Randomize();
 
-        GameCamera.Instance.Init(_player);
+        GameCamera.Instance.Init();
         MusicPlayer.Instance.PlayGame();
 
         StateMachine_Game.Instance.SendInitialStateChange();

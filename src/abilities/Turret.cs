@@ -30,7 +30,7 @@ public partial class Turret : MeshInstance
     {
         base._Process(delta);
 
-        BoidPlayer player = Game.Player;
+        BoidAllyBase player = Game.Player;
         if (IsInstanceValid(player))
         {
             Vector2 toPlayer = (player.GlobalTransform.origin - GlobalTransform.origin).Normalized().To2D();

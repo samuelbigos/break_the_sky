@@ -15,6 +15,7 @@ public class SaveDataPlayer : Saveable
     private Godot.Collections.Dictionary<string, object> _defaults = new()
     {
         { "level", 0 },
+        { "initialPlayerBoid", "" },
         { "totalExperience", 50 },
         { "skillPoints", 0 },
         { "materialCount", 0 },
@@ -48,6 +49,7 @@ public class SaveDataPlayer : Saveable
     }
 
     public static int Level => Convert.ToInt32(_instance._data["level"]);
+    public static string InitialPlayerBoid => Convert.ToString(_instance._data["initialPlayerBoid"]);
 
     public static int MaterialCount
     {
@@ -184,6 +186,9 @@ public class SaveDataPlayer : Saveable
                 // }
             }
         }
+
+        Debug.Assert(FabricateManager.Instance.Fabricants.Count > 0);
+        _data["initialPlayerBoid"] = FabricateManager.Instance.Fabricants[0].UniqueID;
 
         // TODO: _activeSkills isn't saved.
         foreach (ResourceBoidAlly allyData in FabricateManager.Instance.Fabricants)

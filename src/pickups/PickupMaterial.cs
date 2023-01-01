@@ -58,8 +58,8 @@ public class PickupMaterial : Spatial
         pos.y = Mathf.Sin(_time) * _bounceDelta;
         pos += _velocity.To3D() * delta;
         
-        //GlobalTransform = new Transform(GlobalTransform.basis, pos);
-        float scale =  (Mathf.Sin(_time) + 1.0f) * 0.25f + 1.0f;
+        GlobalTransform = new Transform(GlobalTransform.basis, pos);
+        //float scale =  (Mathf.Sin(_time) + 1.0f) * 0.25f + 1.0f;
         //_mesh.Scale = Vector3.One * scale;
         //RotateY(delta * 2.0f);
         

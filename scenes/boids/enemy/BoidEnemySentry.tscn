@@ -29,6 +29,7 @@ SeekPlayerOnSpawn = false
 WeaponPosition1Path = NodePath("WeaponPosition1")
 WeaponPosition2Path = NodePath("WeaponPosition2")
 _bulletScene = ExtResource( 4 )
+_fleeOnAttacked = false
 
 [node name="ShipCollider" parent="." index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.117741 )

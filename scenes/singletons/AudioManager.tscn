@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=1]
+[ext_resource path="res://src/singletons/AudioManager.cs" type="Script" id=2]
+
+[node name="AudioManager" type="Node"]
+script = ExtResource( 2 )
+SFXPickupPath = NodePath("SFXPickup")
+
+[node name="SFXPickup" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 1 )

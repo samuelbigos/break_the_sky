@@ -32,7 +32,6 @@ public class AISpawningDirector : Node
     }
     
     private Game _game;
-    private BoidPlayer _player;
 
     private SpawningState _state;
     private float _totalTime;
@@ -45,10 +44,9 @@ public class AISpawningDirector : Node
     private List<DataWave> _triggeredWaves = new List<DataWave>();
     private DataWave _scriptedWaveToTrigger;
  
-    public void Init(Game game, BoidPlayer player)
+    public void Init(Game game)
     {
         _game = game;
-        _player = player;
     }
     
     public override void _Ready()

@@ -1,16 +1,17 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=37 format=2]
 
 [ext_resource path="res://scenes/gui/hud/HUD.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/metagame/Game.cs" type="Script" id=2]
-[ext_resource path="res://scenes/boids/ally/BoidPlayer.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/singletons/AudioManager.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/rendering/GameCamera.cs" type="Script" id=4]
 [ext_resource path="res://src/singletons/AISpawningDirector.cs" type="Script" id=5]
 [ext_resource path="res://assets/data/boids/enemies/boid_enemy_wasp.tres" type="Resource" id=6]
-[ext_resource path="res://assets/Environment.tres" type="Environment" id=7]
+[ext_resource path="res://assets/environment.tres" type="Environment" id=7]
 [ext_resource path="res://src/rendering/TargetingRenderer.cs" type="Script" id=8]
 [ext_resource path="res://src/state/game/StateMachine_Game.cs" type="Script" id=9]
 [ext_resource path="res://src/singletons/TacticalPauseManager.cs" type="Script" id=10]
 [ext_resource path="res://src/rendering/TrailRenderer.cs" type="Script" id=11]
+[ext_resource path="res://assets/data/boids/enemies/boid_enemy_floater.tres" type="Resource" id=12]
 [ext_resource path="res://assets/material/sand.material" type="Material" id=13]
 [ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=21]
 [ext_resource path="res://assets/textures/clouds/billow_cloud_noise_128.tex3d" type="Texture3D" id=22]
@@ -1155,7 +1156,6 @@ OutlineViewportPath = NodePath("OutlineBufferViewport")
 OutlineMeshPath = NodePath("Outline")
 DirectionalLightPath = NodePath("DirectionalLight")
 _areaRect = Rect2( -500, -500, 500, 500 )
-_playerScene = ExtResource( 3 )
 _playerData = SubResource( 14 )
 
 [node name="StateMachine_Game" type="Node" parent="."]
@@ -1166,11 +1166,13 @@ script = ExtResource( 9 )
 [node name="AISpawningDirector" type="Node" parent="Singletons"]
 script = ExtResource( 5 )
 _enabled = false
-_firstEnemy = ExtResource( 36 )
-_enemyBoidPool = [ ExtResource( 36 ), ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 30 ) ]
+_firstEnemy = ExtResource( 12 )
+_enemyBoidPool = [ ExtResource( 12 ), ExtResource( 36 ), ExtResource( 6 ), ExtResource( 27 ), ExtResource( 28 ), ExtResource( 29 ), ExtResource( 30 ) ]
 
 [node name="TacticalPauseManager" type="Node" parent="Singletons"]
 script = ExtResource( 10 )
+
+[node name="AudioManager" parent="Singletons" instance=ExtResource( 3 )]
 
 [node name="Rendering" type="Spatial" parent="."]
 

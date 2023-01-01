@@ -69,10 +69,11 @@ public class HuskRenderer : Singleton<HuskRenderer>
             chunk.I = 0;
         }
 
+        Transform normTrans = new Transform(transform.basis, Vector3.Zero);
         for (int v = 0; v < meshVerts.Length; v++)
         {
             chunk.VertList[chunk.V + v] = transform.Xform(meshVerts[v]);
-            chunk.NormList[chunk.V + v] = meshNormals[v];
+            chunk.NormList[chunk.V + v] = normTrans.Xform(meshNormals[v]);
             chunk.TangentList[chunk.V + ToTangentIndex(v, 0)] = meshTangents[ToTangentIndex(v, 0)];
             chunk.TangentList[chunk.V + ToTangentIndex(v, 1)] = meshTangents[ToTangentIndex(v, 1)];
             chunk.TangentList[chunk.V + ToTangentIndex(v, 2)] = meshTangents[ToTangentIndex(v, 2)];

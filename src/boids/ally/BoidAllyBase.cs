@@ -26,6 +26,7 @@ public partial class BoidAllyBase : BoidBase
     public AIState AiState => _aiState;
     public override BoidAlignment Alignment => BoidAlignment.Ally;
 
+    protected bool _isPlayer;
     protected AIState _aiState = AIState.None;
     protected BoidBase _engageTarget;
 
@@ -41,6 +42,11 @@ public partial class BoidAllyBase : BoidBase
         _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.AllyOutline);
     }
 
+    public void SetIsPlayer(bool isPlayer)
+    {
+        _isPlayer = isPlayer;
+    }
+
     protected override void ProcessAlive(float delta)
     {
 #if !FINAL
@@ -51,6 +57,11 @@ public partial class BoidAllyBase : BoidBase
             SwitchAiState(AIState.Idle);
         }
 #endif
+
+        if (_isPlayer)
+        {
+            DoPlayerInput();
+        }
         
         switch (_aiState)
         {
@@ -72,6 +83,41 @@ public partial class BoidAllyBase : BoidBase
         ProcessMicroturrets(delta);
         
         base.ProcessAlive(delta);
+    }
+
+    private void DoPlayerInput()
+    {
+        if (_acceptInput)
+        {
+            Vector2 forward = new(0.0f, -1.0f);
+            Vector2 left = new(-1.0f, 0.0f);
+
+            Vector2 dir = new(0.0f, 0.0f);
+            if (Input.IsActionPressed("w")) dir += forward;
+            if (Input.IsActionPressed("s")) dir += -forward;
+            if (Input.IsActionPressed("a")) dir += left;
+            if (Input.IsActionPressed("d")) dir += -left;
+
+            ref SteeringManager.Boid boid = ref SteeringBoid;
+            
+            float boost = Input.IsActionPressed("boost") ? 2.0f : 1.0f;
+            boid.MaxSpeed = MaxVelocity * boost;
+            boid.MaxForce = MaxForce * boost;
+            
+            if (dir != new Vector2(0.0f, 0.0f))
+            {
+                dir = dir.Normalized();
+                boid.DesiredVelocityOverride = dir.ToNumerics() * 5000.0f;
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, false);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, true);
+            }
+            else
+            {
+                boid.DesiredVelocityOverride = System.Numerics.Vector2.Zero;
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, true);
+                SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, false);
+            }
+        }
     }
 
     private void AcquireTarget()
@@ -144,6 +190,11 @@ public partial class BoidAllyBase : BoidBase
         }
     }
     
+    public void RegisterPickup(PickupMaterial pickup)
+    {
+        pickup.OnCollected += _OnPickupCollected;
+    }
+    
     public void NavigateTowards(Vector2 pos)
     {
         SetTarget(TargetType.Position, null, pos);
@@ -181,6 +232,17 @@ public partial class BoidAllyBase : BoidBase
                 throw new ArgumentOutOfRangeException();
         }
         _aiState = state;
+    }
+
+    protected override void ResetSteeringBehaviours()
+    {
+        base.ResetSteeringBehaviours();
+
+        if (_isPlayer)
+        {
+            ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
+            steeringBoid.Behaviours = 0;
+        }
     }
 
     protected virtual void _OnEnterAIState_Idle()
@@ -248,5 +310,11 @@ public partial class BoidAllyBase : BoidBase
     {
         boid.OnBoidDestroyed -= _OnMicroTurretTargetDestroyed;
         _microTurretTarget = null;
+    }
+    
+    private void _OnPickupCollected(PickupMaterial pickup)
+    {
+        SaveDataPlayer.MaterialCount += 1;
+        AudioManager.Instance.SFXPickup.Play();
     }
 }

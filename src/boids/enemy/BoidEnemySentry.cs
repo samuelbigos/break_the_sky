@@ -7,6 +7,7 @@ using GodotOnReady.Attributes;
 public partial class BoidEnemySentry : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
+    [Export] private bool _fleeOnAttacked;
     
     [OnReadyGet] private Spatial _weaponPosition1; 
     [OnReadyGet] private Spatial _weaponPosition2; 
@@ -57,8 +58,11 @@ public partial class BoidEnemySentry : BoidEnemyBase
     protected override void _OnHit(float damage, Vector2 bulletVel, Vector2 pos)
     {
         base._OnHit(damage, bulletVel, pos);
-        
-        SwitchAiState(AIState.Flee);
+
+        if (_fleeOnAttacked)
+        {
+            SwitchAiState(AIState.Flee);
+        }
     }
 
     private void Shoot()

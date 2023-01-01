@@ -24,7 +24,6 @@ public class GameCamera : Camera
 
     private OpenSimplexNoise _noise = new OpenSimplexNoise();
     private float _trauma = 0.0f;
-    private BoidPlayer _player = null;
     private float _noiseY = 0.0f;
     private float _stateTransitionTimer;
     private Transform _initialTrans;
@@ -36,9 +35,8 @@ public class GameCamera : Camera
         _trauma = Mathf.Min(_trauma + trauma, MaxTrauma);
     }
 
-    public void Init(BoidPlayer player)
+    public void Init()
     {
-        _player = player;
     }
 
     private void UpdateMousePosition()
@@ -111,8 +109,7 @@ public class GameCamera : Camera
         delta = TimeSystem.UnscaledDelta;
         
         // for clouds
-        Debug.Assert(_player != null);
-        Vector3 basePos = _player.GlobalTransform.origin;
+        Vector3 basePos = Game.Player.GlobalTransform.origin;
         basePos.y = GlobalTransform.origin.y;
         BaseTransform = new Transform(GlobalTransform.basis, basePos);
 
@@ -146,20 +143,21 @@ public class GameCamera : Camera
 
     private Transform GetTransform(StateMachine_Game.States state, float delta)
     {
+        BoidAllyBase player = Game.Player;
         switch (state)
         {
             case StateMachine_Game.States.TacticalPause:
             {
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin));
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin));
                 cameraTransform.origin.y = _tacticalMapHeight;
 
                 return cameraTransform;
             }
             case StateMachine_Game.States.Play:
             {
-                Vector2 cameraMouseOffset = MousePosition - _player.GlobalPosition;
+                Vector2 cameraMouseOffset = MousePosition - player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin + cameraOffset.To3D()));
                 cameraTransform.origin.y = _initialTrans.origin.y;
                 
                 if (_trauma > 0.0f)
@@ -179,9 +177,9 @@ public class GameCamera : Camera
             }
             case StateMachine_Game.States.Construct:
             {
-                Vector2 cameraMouseOffset = MousePosition - _player.GlobalPosition;
+                Vector2 cameraMouseOffset = MousePosition - player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.1f + Vector2.Right * 30.0f;
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(_player.GlobalTransform.origin + cameraOffset.To3D()));
+                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin + cameraOffset.To3D()));
                 cameraTransform.origin.y = _initialTrans.origin.y * 0.5f;
 
                 return cameraTransform;

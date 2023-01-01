@@ -5,16 +5,17 @@
 [ext_resource path="res://assets/material/outline_buffer.material" type="Material" id=3]
 
 [sub_resource type="SpatialMaterial" id=1]
-metallic = 0.73
-metallic_specular = 0.78
-roughness = 0.19
+metallic = 0.9
+roughness = 0.48
 
-[sub_resource type="CubeMesh" id=2]
-size = Vector3( 2, 0.25, 2 )
+[sub_resource type="SphereMesh" id=2]
 
 [node name="PickupMaterial" type="Spatial"]
 script = ExtResource( 1 )
 _meshPath = NodePath("Mesh")
+_damping = 2.0
+_attractionRadius = 33.0
+_collectionRadius = 5.0
 
 [node name="Mesh" type="MeshInstance" parent="."]
 material_override = SubResource( 1 )

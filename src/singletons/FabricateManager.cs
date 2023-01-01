@@ -42,6 +42,17 @@ public class FabricateManager : Singleton<FabricateManager>
             SaveDataPlayer.UnlockFabricant(_fabricantPool[0]);
     }
 
+    public ResourceBoidAlly GetBoidResourceByUID(string UID)
+    {
+        foreach (ResourceBoidAlly res in _fabricantPool)
+        {
+            if (res.UniqueID == UID)
+                return res;
+        }
+
+        return null;
+    }
+
     public override void _Process(float delta)
     {
         base._Process(delta);
@@ -63,13 +74,16 @@ public class FabricateManager : Singleton<FabricateManager>
         OnPushQueue?.Invoke(fabricant);
     }
 
-    private void RemoveFromQueue(int idx)
+    private void RemoveFromQueue(int idx, bool cancelled = false)
     {
         Debug.Assert(_queue.Count > idx, "Invalid index when trying to remove from queue.");
         
         // refund
-        SaveDataPlayer.MaterialCount += _queue[idx].FabricantData.FabricateCost;
-        
+        if (cancelled)
+        {
+            SaveDataPlayer.MaterialCount += _queue[idx].FabricantData.FabricateCost;
+        }
+
         _queue.RemoveAt(idx);
         OnPopQueue?.Invoke(idx);
     }
@@ -86,7 +100,7 @@ public class FabricateManager : Singleton<FabricateManager>
     
     private void _OnQueueButtonPressed(int idx)
     {
-        RemoveFromQueue(idx);
+        RemoveFromQueue(idx, true);
     }
     
     public override void _EnterTree()

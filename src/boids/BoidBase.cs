@@ -54,11 +54,8 @@ public partial class BoidBase : Area
     [Export] private float _flashVfxDuration = 1.0f / 30.0f;
     
     [Export] private ResourceStats _baseResourceStats;
-    
     [Export] private int _damageVfxCount = 2;
-    
     [Export] private List<AudioStream> _hitSfx;
-
     [Export] protected PackedScene _pickupMaterialScene;
     
     [OnReadyGet] protected MeshInstance _selectedIndicator;
@@ -354,6 +351,8 @@ public partial class BoidBase : Area
             QueueFree();
             return;
         }
+        
+        ResetSteeringBehaviours();
     }
 
     public void SendHitMessage(float damage, Vector2 vel, Vector2 pos, BoidAlignment alignment)
@@ -514,7 +513,7 @@ public partial class BoidBase : Area
         }
     }
     
-    protected void ResetSteeringBehaviours()
+    protected virtual void ResetSteeringBehaviours()
     {
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         steeringBoid.Behaviours = _behaviours;

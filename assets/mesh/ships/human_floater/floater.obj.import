@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/floater.obj-e5a7e157130db29c70af05128cef1703.mesh"
+
+[deps]
+
+files=[ "res://.import/floater.obj-e5a7e157130db29c70af05128cef1703.mesh" ]
+
+source_file="res://assets/mesh/ships/human_floater/floater.obj"
+dest_files=[ "res://.import/floater.obj-e5a7e157130db29c70af05128cef1703.mesh", "res://.import/floater.obj-e5a7e157130db29c70af05128cef1703.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
