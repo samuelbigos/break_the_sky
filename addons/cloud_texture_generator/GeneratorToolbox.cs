@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -278,3 +279,4 @@ public class GeneratorToolbox : Control
         return invert ? 1.0f - noise : noise;
     }
 }
+#endif

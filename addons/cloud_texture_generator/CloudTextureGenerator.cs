@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 
 [Tool]
@@ -22,3 +23,4 @@ public class CloudTextureGenerator : EditorPlugin
         _dock.Free();
     }
 }
+#endif

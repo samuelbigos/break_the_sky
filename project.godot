@@ -282,6 +282,10 @@ return={
  ]
 }
 
+[mono]
+
+project/assembly_name="Break The Sky"
+
 [physics]
 
 common/physics_fps=90

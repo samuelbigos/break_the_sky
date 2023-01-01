@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 using GodotOnReady.Attributes;
@@ -80,3 +81,4 @@ public class ChannelOptions : VBoxContainer
         }
     }
 }
+#endif

@@ -7,12 +7,8 @@ reloadable=false
 
 [entry]
 
-X11.64="res://gdnative/bin/x11/libanl.so"
 Windows.64="res://gdnative/bin/win64/libanl.dll"
-OSX.64="res://gdnative/bin/osx/libanl.dylib"
 
 [dependencies]
 
-X11.64=[]
-Windows.64=[]
-OSX.64=[]
+Windows.64=[  ]

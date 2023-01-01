@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 
@@ -84,3 +85,4 @@ public class NoiseGenerators
         return worley;
     }
 }
+#endif
