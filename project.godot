@@ -294,4 +294,4 @@ threads/thread_model=2
 quality/directional_shadow/size=2048
 environment/default_clear_color=Color( 0, 0, 0, 1 )
 quality/filters/msaa=3
-environment/default_environment="res://assets/environment.tres"
+environment/default_environment="res://assets/env.tres"
