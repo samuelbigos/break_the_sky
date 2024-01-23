@@ -4,6 +4,8 @@ using Vector2 = System.Numerics.Vector2;
 
 public partial class SteeringManager
 {
+    public static readonly RandomNumberGenerator Rng = new();
+    
     private static Vector2 ApplyMinimumSpeed(Boid boid, Vector2 force, float minSpeed)
     {
         if (boid.Speed > minSpeed || force == Vector2.Zero || boid.Speed == 0.0f)

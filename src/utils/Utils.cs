@@ -137,7 +137,7 @@ public static class Utils
 
     public static Vector2 NormalizeSafe(this Vector2 vec)
     {
-        if (Mathf.Abs(vec.X) < 2e-10f || Mathf.Abs(vec.Y) < 2e-10f)
+        if (Mathf.Abs(vec.X) < 2e-10f || Mathf.Abs(vec.Y) < 2e-10f) // TODO: is this right?
             return Vector2.Zero;
         return Vector2.Normalize(vec);
     }
