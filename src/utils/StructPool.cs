@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Godot.Collections;
 
-public class StructPool<T> where T: SteeringManager.IPoolable
+public partial class StructPool<T> where T: SteeringManager.IPoolable
 {
     /*
      * StructPool is a simple wrapper over an array of structs that allows re-use without moving around elements

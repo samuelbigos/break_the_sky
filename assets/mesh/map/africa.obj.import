@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh"
+uid="uid://dckxuhln0tiwl"
+path="res://.godot/imported/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh"
 
 [deps]
 
-files=[ "res://.import/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh" ]
+files=["res://.godot/imported/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh"]
 
 source_file="res://assets/mesh/map/africa.obj"
-dest_files=[ "res://.import/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh", "res://.import/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh" ]
+dest_files=["res://.godot/imported/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh", "res://.godot/imported/africa.obj-d76157b2a646ef9d0c4ea53bef20ee1f.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

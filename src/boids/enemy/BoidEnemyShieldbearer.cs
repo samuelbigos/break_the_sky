@@ -1,5 +1,4 @@
 using Godot;
-using GodotOnReady.Attributes;
 using Vector2 = Godot.Vector2;
 
 public partial class BoidEnemyShieldbearer : BoidEnemyBase
@@ -8,14 +7,14 @@ public partial class BoidEnemyShieldbearer : BoidEnemyBase
 
     private Forcefield _forcefield;
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
-        _forcefield = _forcefieldScene.Instance<Forcefield>();
+        _forcefield = _forcefieldScene.Instantiate<Forcefield>();
         AddChild(_forcefield);
         _forcefield.Init(Alignment, this, 25.0f, _resourceStats.MaxHealth);
     }
     
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         if (_aiState == AIState.Engaged)
         {

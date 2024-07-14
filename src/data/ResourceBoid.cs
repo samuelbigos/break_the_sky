@@ -1,6 +1,6 @@
 using Godot;
 
-public class ResourceBoid : Resource
+public partial class ResourceBoid : Resource
 {
     [Export] public string UniqueID;
     [Export] public string DisplayName;

@@ -116,7 +116,7 @@ public partial class SteeringManager
         return force;
     }
 
-    private static Vector2 Steering_Separate(in Boid boid, in ReadOnlySpan<Boid> boids, in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<Obstacle> obstacles, float delta)
+    private static Vector2 Steering_Separate(in Boid boid, in ReadOnlySpan<Boid> boids, in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<Obstacle> obstacles, double delta)
     {
         Vector2 forceSum = Vector2.Zero;
         int count = 0;
@@ -142,7 +142,7 @@ public partial class SteeringManager
             Vector2 desired = pos - otherPos;
             desired.SetMag(boid.MaxSpeed);
             float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
-            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
+            Vector2 force = desired.Limit(boid.MaxForce * (float)delta * t);
             forceSum += force;
             count++;
         }
@@ -159,7 +159,7 @@ public partial class SteeringManager
             Vector2 desired = boid.Position - other.Position;
             desired.SetMag(boid.MaxSpeed);
             float t = 1.0f - Mathf.Pow(distSq / radiusSq, 2.0f);
-            Vector2 force = desired.Limit(boid.MaxForce * delta * t);
+            Vector2 force = desired.Limit(boid.MaxForce * (float)delta * t);
             forceSum += force;
             count++;
         }
@@ -187,7 +187,7 @@ public partial class SteeringManager
         for (int i = 0; i < obstacles.Length; i++)
         {
             Obstacle obstacle = obstacles[i];
-            switch (obstacle.Shape)
+            switch (obstacle.Shape3D)
             {
                 case ObstacleShape.Circle:
                 {
@@ -311,12 +311,12 @@ public partial class SteeringManager
         return force;
     }
     
-    private static Vector2 Steering_Wander(ref Boid boid, float delta)
+    private static Vector2 Steering_Wander(ref Boid boid, double delta)
     {
         Vector2 circleCentre = boid.Position + boid.Heading * boid.WanderCircleDist;
         float angle = -boid.Heading.AngleTo(Vector2.UnitX) + boid.WanderAngle;
         Vector2 displacement = Vector2.Normalize(new Vector2(Mathf.Cos(angle), Mathf.Sin(angle))) * boid.WanderCircleRadius;
-        boid.WanderAngle += (Utils.Rng.Randf() - 0.5f) * delta * boid.WanderVariance;
+        boid.WanderAngle += (Utils.Rng.Randf() - 0.5f) * (float)delta * boid.WanderVariance;
 
         Vector2 desired = (circleCentre + displacement) - boid.Position;
         Vector2 force = desired - boid.Velocity;

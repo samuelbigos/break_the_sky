@@ -14,14 +14,14 @@
 [ext_resource path="res://scenes/vfx/LaserVFX.tscn" type="PackedScene" id=12]
 [ext_resource path="res://assets/material/boid.material" type="Material" id=13]
 
-[sub_resource type="CapsuleShape" id=2]
+[sub_resource type="CapsuleShape3D" id=2]
 radius = 6.92402
 height = 9.3375
 
-[sub_resource type="BoxShape" id=3]
+[sub_resource type="BoxShape3D" id=3]
 extents = Vector3( 7.06956, 2.8672, 10.7243 )
 
-[sub_resource type="BoxShape" id=1]
+[sub_resource type="BoxShape3D" id=1]
 extents = Vector3( 2.5, 5, 250 )
 
 [node name="BoidEnemyLaser" instance=ExtResource( 1 )]
@@ -47,40 +47,40 @@ GunTrackSpeed = 2.0
 shape = SubResource( 2 )
 
 [node name="RBCollider" parent="." index="1"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811162, 0 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811162, 0 )
 shape = SubResource( 3 )
 
 [node name="Mesh" parent="." index="2"]
 mesh = ExtResource( 7 )
 
-[node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
+[node name="AntiGrav" type="MeshInstance3D" parent="Mesh" index="1"]
 material_override = ExtResource( 10 )
 mesh = ExtResource( 6 )
 skeleton = NodePath("../..")
 
-[node name="Turret" type="MeshInstance" parent="Mesh" index="2"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.28752 )
+[node name="Turret" type="MeshInstance3D" parent="Mesh" index="2"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.28752 )
 material_override = ExtResource( 13 )
 mesh = ExtResource( 5 )
 skeleton = NodePath("../..")
 
 [node name="LaserVFX" parent="Mesh/Turret" index="0" instance=ExtResource( 12 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479 )
 
-[node name="LaserWarningMesh" type="MeshInstance" parent="Mesh/Turret" index="1"]
-transform = Transform( -2, 0, -1.74846e-07, 0, 2, 0, 1.74846e-07, 0, -2, 0, 0, 13.5693 )
+[node name="LaserWarningMesh" type="MeshInstance3D" parent="Mesh/Turret" index="1"]
+transform = Transform3D( -2, 0, -1.74846e-07, 0, 2, 0, 1.74846e-07, 0, -2, 0, 0, 13.5693 )
 visible = false
 material_override = ExtResource( 8 )
 cast_shadow = 0
 mesh = ExtResource( 9 )
 skeleton = NodePath("../../..")
 
-[node name="LaserArea" type="Area" parent="Mesh/Turret" index="2" groups=["laser"]]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 250 )
+[node name="LaserArea" type="Area3D" parent="Mesh/Turret" index="2" groups=["laser"]]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 250 )
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape" type="CollisionShape" parent="Mesh/Turret/LaserArea" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Mesh/Turret/LaserArea" index="0"]
 shape = SubResource( 1 )
 
 [node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="5"]

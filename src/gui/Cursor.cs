@@ -1,15 +1,13 @@
 using Godot;
-using System;
-using GodotOnReady.Attributes;
 
-public partial class Cursor : Spatial
+public partial class Cursor : Node3D
 {
     private static Cursor _instance;
     public static Cursor Instance => _instance;
     
-    [OnReadyGet] private MeshInstance _countMesh;
-    [OnReadyGet] private MeshInstance _circleMesh;
-    [OnReadyGet] private MeshInstance _outerMesh;
+    [Export] private MeshInstance3D _countMesh;
+    [Export] private MeshInstance3D _circleMesh;
+    [Export] private MeshInstance3D _outerMesh;
 
     [Export] public float BaseRadius = 50.0f;
     [Export] public int TotalPips = 48;
@@ -24,8 +22,8 @@ public partial class Cursor : Spatial
     public bool Activated;
 
     private ShaderMaterial _countMat;
-
-    [OnReady] private void Ready()
+    
+    public override void _Ready()
     {
         _instance = this;
         
@@ -43,7 +41,7 @@ public partial class Cursor : Spatial
         Activated = false;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
         
@@ -51,14 +49,14 @@ public partial class Cursor : Spatial
         Vector3 origin = GameCamera.Instance.ProjectRayOrigin(mouse);
         Vector3 normal = GameCamera.Instance.ProjectRayNormal(mouse);
         Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * YFromCamera;
-        Vector3 pos = new(hit.x, GameCamera.Instance.GlobalTransform.origin.y - YFromCamera, hit.z);
+        Vector3 pos = new(hit.X, GameCamera.Instance.GlobalTransform.Origin.Y - YFromCamera, hit.Z);
 
-        GlobalTransform = new Transform(GlobalTransform.basis, pos);
-        _countMat.SetShaderParam("u_count", PipCount);
+        GlobalTransform = new Transform3D(GlobalTransform.Basis, pos);
+        _countMat.SetShaderParameter("u_count", PipCount);
 
         if (Activated)
         {
-            _outerMesh.RotateY(delta * RotSpeed);
+            _outerMesh.RotateY((float)delta * RotSpeed);
             _outerMesh.Scale = Vector3.One * Size;
         }
     }

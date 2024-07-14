@@ -6,16 +6,16 @@
 [sub_resource type="Curve" id=1]
 _data = [ Vector2( 0, 1 ), 0.0, -0.989792, 0, 0, Vector2( 0.9475, 0 ), -0.997806, 0.0, 0, 0 ]
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="StandardMaterial3D" id=7]
 flags_transparent = true
 flags_unshaded = true
 vertex_color_use_as_albedo = true
 
 [sub_resource type="Gradient" id=8]
-offsets = PoolRealArray( 0, 0.453608, 0.706186, 1 )
-colors = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 0.256836, 0.256836, 0.256836, 1, 0, 0, 0, 0 )
+offsets = PackedFloat32Array( 0, 0.453608, 0.706186, 1 )
+colors = PackedColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 0.256836, 0.256836, 0.256836, 1, 0, 0, 0, 0 )
 
-[sub_resource type="GradientTexture" id=9]
+[sub_resource type="GradientTexture2D" id=9]
 gradient = SubResource( 8 )
 
 [sub_resource type="Curve" id=5]
@@ -24,7 +24,7 @@ _data = [ Vector2( 0, 0.610429 ), 0.0, 0.796602, 0, 0, Vector2( 0.51555, 0.89263
 [sub_resource type="CurveTexture" id=6]
 curve = SubResource( 5 )
 
-[sub_resource type="ParticlesMaterial" id=2]
+[sub_resource type="ParticleProcessMaterial" id=2]
 lifetime_randomness = 0.5
 emission_shape = 1
 emission_sphere_radius = 0.25
@@ -36,8 +36,8 @@ scale_random = 0.75
 scale_curve = SubResource( 6 )
 color_ramp = SubResource( 9 )
 
-[node name="BoidTrail" type="Spatial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
+[node name="BoidTrail" type="Node3D"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00265479, -0.0101357, 0.00485945 )
 script = ExtResource( 1 )
 _linePoints = 5
 _lineInterval = 0.033

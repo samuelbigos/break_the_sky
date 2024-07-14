@@ -9,5 +9,5 @@ public abstract class BaseState<T>
     public abstract bool ShouldEnter(T currentState, T prevState);
     public abstract void Enter(T prevState);
     public abstract void Exit(T toState);
-    public abstract void Update(float delta);
+    public abstract void Update(double delta);
 }

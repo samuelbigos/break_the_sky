@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class ResourceStats : Resource
+public partial class ResourceStats : Resource
 {
     [Export] public float AttackDamage = 1.0f;
     [Export] public float AttackCooldown = 1.0f;

@@ -2,19 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class BoidEnemyWasp : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
     
-    [OnReadyGet] private Spatial _weaponPosition; 
+    [Export] private Node3D _weaponPosition; 
 
-    private float _attackCooldownTimer;
-    private float _shotCooldownTimer;
+    private double _attackCooldownTimer;
+    private double _shotCooldownTimer;
     private int _shotsFired;
     
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         if (_aiState == AIState.Engaged)
         {
@@ -49,9 +48,9 @@ public partial class BoidEnemyWasp : BoidEnemyBase
 
     private void Shoot()
     {
-        SeekerMissile missile = _bulletScene.Instance() as SeekerMissile;
+        SeekerMissile missile = _bulletScene.Instantiate() as SeekerMissile;
         DebugUtils.Assert(missile != null, nameof(missile) + " != null");
-        Vector3 spawnPos = _weaponPosition.GlobalTransform.origin;
+        Vector3 spawnPos = _weaponPosition.GlobalTransform.Origin;
         float angle = (_shotsFired - _resourceStats.AttackCount * 0.5f + 0.5f) * Mathf.Pi / 10.0f;
         Vector2 spawnVel = _cachedVelocity + (_targetBoid.GlobalPosition - GlobalPosition).Normalized().Rotated(angle) * 20.0f;
         Game.Instance.AddChild(missile);

@@ -3,6 +3,6 @@ using System;
 using System.Collections.Generic;
 using Godot.Collections;
 
-public abstract class DataEntry : Node
+public abstract partial class DataEntry : Node
 {
 }

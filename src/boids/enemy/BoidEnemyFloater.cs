@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class BoidEnemyFloater : BoidEnemyBase
 {
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         switch (_aiState)
         {

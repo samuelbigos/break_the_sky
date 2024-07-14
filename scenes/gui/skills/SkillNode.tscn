@@ -1,15 +1,15 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://src/gui/skills/SkillNode.cs" type="Script" id=1]
-[ext_resource path="res://assets/gui/skills/skill_power.png" type="Texture" id=2]
-[ext_resource path="res://assets/gui/9-patch.png" type="Texture" id=4]
+[ext_resource path="res://assets/gui/skills/skill_power.png" type="Texture2D" id=2]
+[ext_resource path="res://assets/gui/9-patch.png" type="Texture2D" id=4]
 
 [node name="SkillNode" type="Button"]
 anchor_left = 0.00390625
 anchor_top = 0.00694444
 anchor_right = 0.0273438
 anchor_bottom = 0.0486111
-rect_min_size = Vector2( 28, 28 )
+custom_minimum_size = Vector2( 28, 28 )
 icon = ExtResource( 2 )
 expand_icon = true
 script = ExtResource( 1 )

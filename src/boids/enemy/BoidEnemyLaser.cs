@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class BoidEnemyLaser : BoidEnemyBase
 {
@@ -9,11 +8,11 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     [Export] private NodePath _laserAreaPath;
     [Export] private float GunTrackSpeed = 2.0f;
 
-    [OnReadyGet] private MeshInstance _laserWarningMesh;
-    [OnReadyGet] private MeshInstance _gunMesh;
-    [OnReadyGet] private LaserVFX _vfx;
+    [Export] private MeshInstance3D _laserWarningMesh;
+    [Export] private MeshInstance3D _gunMesh;
+    [Export] private LaserVFX _vfx;
 
-    private Area _laserArea;
+    private Area3D _laserArea;
     private AudioStreamPlayer2D _sfxLaserCharge;
     private AudioStreamPlayer2D _sfxLaserFire;
 
@@ -25,17 +24,17 @@ public partial class BoidEnemyLaser : BoidEnemyBase
     }
 
     private LaserState _laserState = LaserState.Inactive;
-    private float _laserCooldownTimer;
-    private float _laserChargeTimer;
-    private float _laserDurationTimer;
-    private float _flashingTimer;
+    private double _laserCooldownTimer;
+    private double _laserChargeTimer;
+    private double _laserDurationTimer;
+    private double _flashingTimer;
     private int _flashState;
     private Vector2 _desiredGunHeading;
     private Vector2 _gunHeading = Vector2.Up;
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
-        _laserArea = GetNode<Area>(_laserAreaPath);
+        _laserArea = GetNode<Area3D>(_laserAreaPath);
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);
     }
@@ -48,12 +47,12 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         steeringBoid.DesiredDistFromTargetMin = EngageRange - EngageRange * 0.5f;
     }
 
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         _laserCooldownTimer -= delta;
 
         Basis basis = new(Vector3.Up, _gunHeading.AngleToY());
-        _gunMesh.GlobalTransform = new Transform(basis, _gunMesh.GlobalTransform.origin);
+        _gunMesh.GlobalTransform = new Transform3D(basis, _gunMesh.GlobalTransform.Origin);
         
         if (_aiState == AIState.Engaged)
         {
@@ -61,7 +60,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
             {
                 case LaserState.Inactive:
                 {
-                    _desiredGunHeading = (_targetBoid.GlobalPosition - _gunMesh.GlobalTransform.origin.To2D()).Normalized();
+                    _desiredGunHeading = (_targetBoid.GlobalPosition - _gunMesh.GlobalTransform.Origin.To2D()).Normalized();
 
                     if (_laserCooldownTimer < 0.0f && CanFire())
                     {
@@ -119,7 +118,7 @@ public partial class BoidEnemyLaser : BoidEnemyBase
         {
             _desiredGunHeading = Vector2.Up;
         }
-        _gunHeading = _gunHeading.Slerp(_desiredGunHeading, delta * GunTrackSpeed).Normalized();
+        _gunHeading = _gunHeading.Slerp(_desiredGunHeading, (float)delta * GunTrackSpeed).Normalized();
         
         base.ProcessAlive(delta);
     }

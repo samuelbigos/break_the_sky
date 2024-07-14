@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/shot2.wav-96d95d56838c12dbe9a4dd4129917bc1.sample"
+type="AudioStreamWAV"
+uid="uid://b1gaee7eyhlcu"
+path="res://.godot/imported/shot2.wav-96d95d56838c12dbe9a4dd4129917bc1.sample"
 
 [deps]
 
 source_file="res://assets/sfx/shot2.wav"
-dest_files=[ "res://.import/shot2.wav-96d95d56838c12dbe9a4dd4129917bc1.sample" ]
+dest_files=["res://.godot/imported/shot2.wav-96d95d56838c12dbe9a4dd4129917bc1.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

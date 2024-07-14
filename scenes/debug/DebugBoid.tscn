@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=2]
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="StandardMaterial3D" id=1]
 flags_unshaded = true
 flags_vertex_lighting = true
 vertex_color_use_as_albedo = true
 
-[node name="DebugBoid" type="ImmediateGeometry"]
+[node name="DebugBoid" type="ImmediateMesh"]
 material_override = SubResource( 1 )

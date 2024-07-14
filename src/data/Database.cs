@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-public abstract class Database : Node
+public partial class Database : Node
 {
     public static Database Waves;
     

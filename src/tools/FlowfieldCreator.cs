@@ -3,19 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using GodotOnReady.Attributes;
 using ImGuiNET;
 using Array = Godot.Collections.Array;
 using Color = Godot.Color;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
-public partial class FlowFieldCreator : Spatial
+public partial class FlowFieldCreator : Node3D
 {
-    [OnReadyGet] private MeshInstance _mesh;
-    [OnReadyGet] private Camera _camera;
-    [OnReadyGet] private FileDialog _dialogSave;
-    [OnReadyGet] private FileDialog _dialogLoad;
+    [Export] private MeshInstance3D _mesh;
+    [Export] private Camera3D _camera;
+    [Export] private FileDialog _dialogSave;
+    [Export] private FileDialog _dialogLoad;
 
     [Export] private CSharpScript _resourceScript;
     
@@ -35,18 +34,19 @@ public partial class FlowFieldCreator : Spatial
     private Color[] _colList = new Color[50000];
     private int[] _indexList = new int[100000];
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
         _vectors = new Vector2[(int)_fieldSize.X, (int)_fieldSize.Y];
-        
-        Vector2 size = GetViewport().Size.ToNumerics();
+
+        Vector2I iSize = DisplayServer.ScreenGetSize();
+        Vector2 size = new Vector2(iSize.X, iSize.Y); 
         _cellSize = size.Y / _fieldSize.Y;
         
         _camera.Size = size.Y;
-        _camera.GlobalTransform = new Transform(_camera.GlobalTransform.basis, new Vector3(_fieldSize.X * _cellSize * 0.5f, 10.0f, size.Y * 0.5f).ToGodot());
+        _camera.GlobalTransform = new Transform3D(_camera.GlobalTransform.Basis, new Vector3(_fieldSize.X * _cellSize * 0.5f, 10.0f, size.Y * 0.5f).ToGodot());
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -61,11 +61,11 @@ public partial class FlowFieldCreator : Spatial
     
     public override void _Input(InputEvent evt)
     {
-        if (ImGuiGD.ProcessInput(evt))
-        {
-            GetTree().SetInputAsHandled();
-            return;
-        }
+        // if (ImGuiGD.ProcessInput(evt))
+        // {
+        //     GetViewport().SetInputAsHandled();
+        //     return;
+        // }
         
         // process vectors
         Vector2 mousePos = MousePos().To2D();
@@ -219,21 +219,20 @@ public partial class FlowFieldCreator : Spatial
     {
         _saving = true;
         _dialogSave.PopupCentered();
-        _dialogSave.Connect("file_selected", this, nameof(_on_FileDialogSave_file_selected));
+        _dialogSave.Connect("file_selected", new Callable(this, nameof(_on_FileDialogSave_file_selected)));
     }
     
     private void LoadFlowField()
     {
         _saving = true;
         _dialogLoad.PopupCentered();
-        _dialogLoad.Connect("file_selected", this, nameof(_on_FileDialogLoad_file_selected));
+        _dialogLoad.Connect("file_selected", new Callable(this, nameof(_on_FileDialogLoad_file_selected)));
     }
 
     public void _on_FileDialogSave_file_selected(string path)
     {
         //CSharpScript script = ResourceLoader.Load<CSharpScript>("res://src/tools/FlowFieldResource.cs");
-        CSharpScript script = _resourceScript;
-        FlowFieldResource res = script.New() as FlowFieldResource;
+        FlowFieldResource res = _resourceScript.New().As<FlowFieldResource>();
         res.X = (int) _fieldSize.X;
         res.Y = (int) _fieldSize.Y;
         res.Vectors = new Godot.Vector2[res.X * res.Y];
@@ -245,7 +244,7 @@ public partial class FlowFieldCreator : Spatial
             }
         }
         string ext = path.Contains(".res") ? "" : ".res";
-        GD.Print(ResourceSaver.Save($"{path}{ext}", res));
+        GD.Print(ResourceSaver.Save(res, $"{path}{ext}"));
         
         _saving = false;
     }
@@ -315,7 +314,7 @@ public partial class FlowFieldCreator : Spatial
         ImGui.Spacing();
         if (ImGui.Button("Test"))
         {
-            GetTree().ChangeScene("res://scenes/debug/BoidTestbed.tscn");
+            GetTree().ChangeSceneToFile("res://scenes/debug/BoidTestbed.tscn");
         }
         ImGui.EndTabItem();
     }

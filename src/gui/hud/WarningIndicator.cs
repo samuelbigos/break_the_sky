@@ -1,14 +1,14 @@
 using Godot;
 using System.Diagnostics;
 
-public class WarningIndicator : Spatial
+public partial class WarningIndicator : Node3D
 {
     [Export] private float _flashDistance;
     [Export] private float _flashTime;
     [Export] private NodePath _meshPath;
     
-    private MeshInstance _mesh;
-    private SpatialMaterial _mat;
+    private MeshInstance3D _mesh;
+    private StandardMaterial3D _mat;
     private int _flashState;
     private float _flashingTimer;
     
@@ -18,21 +18,21 @@ public class WarningIndicator : Spatial
     {
         base._Ready();
 
-        _mesh = GetNode<MeshInstance>(_meshPath);
+        _mesh = GetNode<MeshInstance3D>(_meshPath);
         Debug.Assert(_mesh != null);
-        _mat = _mesh.GetSurfaceMaterial(0) as SpatialMaterial;
+        _mat = _mesh.GetSurfaceOverrideMaterial(0) as StandardMaterial3D;
         Debug.Assert(_mat != null);
         _mat.AlbedoColor = ColourManager.Instance.Red;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
-        float distance = (GlobalTransform.origin - Target.GlobalTransform.origin).LengthSquared();
+        float distance = (GlobalTransform.Origin - Target.GlobalTransform.Origin).LengthSquared();
         if (distance < Mathf.Pow(_flashDistance, 2.0f))
         {
-            _flashingTimer -= delta;
+            _flashingTimer -= (float)delta;
             if (_flashingTimer <= 0.0f)
             {
                 _flashingTimer = 0.1f;

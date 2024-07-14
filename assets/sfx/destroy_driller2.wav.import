@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/destroy_driller2.wav-de2d8bc1bcf2d6b88d8a4761c4b7b273.sample"
+type="AudioStreamWAV"
+uid="uid://bipyxttkhber1"
+path="res://.godot/imported/destroy_driller2.wav-de2d8bc1bcf2d6b88d8a4761c4b7b273.sample"
 
 [deps]
 
 source_file="res://assets/sfx/destroy_driller2.wav"
-dest_files=[ "res://.import/destroy_driller2.wav-de2d8bc1bcf2d6b88d8a4761c4b7b273.sample" ]
+dest_files=["res://.godot/imported/destroy_driller2.wav-de2d8bc1bcf2d6b88d8a4761c4b7b273.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

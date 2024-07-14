@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh"
+uid="uid://n8wwi3t2qwdl"
+path="res://.godot/imported/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh"
 
 [deps]
 
-files=[ "res://.import/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh" ]
+files=["res://.godot/imported/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh"]
 
 source_file="res://assets/mesh/ui/warning.obj"
-dest_files=[ "res://.import/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh", "res://.import/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh" ]
+dest_files=["res://.godot/imported/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh", "res://.godot/imported/warning.obj-eded3c72a4435cf55725e559bda654c1.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

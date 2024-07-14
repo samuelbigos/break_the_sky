@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh"
+uid="uid://btcbj4xyyer4k"
+path="res://.godot/imported/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh"
 
 [deps]
 
-files=[ "res://.import/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh" ]
+files=["res://.godot/imported/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh"]
 
 source_file="res://assets/mesh/ui/selection_circle.obj"
-dest_files=[ "res://.import/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh", "res://.import/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh" ]
+dest_files=["res://.godot/imported/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh", "res://.godot/imported/selection_circle.obj-02075bbf087af48dc025ad0a252ffda8.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

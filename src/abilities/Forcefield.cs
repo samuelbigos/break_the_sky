@@ -2,21 +2,20 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using Godot.Collections;
-using GodotOnReady.Attributes;
 
-public partial class Forcefield : Area
+public partial class Forcefield : Area3D
 {
     private struct ForceFieldHit
     {
         public Vector3 Pos;
-        public float Time;
+        public double Time;
     }
     
     [Export] private int _maxForcefieldHits = 10;
     [Export] private float _forcefieldHitDuration = 0.5f;
 
-    [OnReadyGet] private MeshInstance _mesh;
-    [OnReadyGet] private Camera _testCamera;
+    [Export] private MeshInstance3D _mesh;
+    [Export] private Camera3D _testCamera;
     
     private ShaderMaterial _forcefieldMat;
     private List<ForceFieldHit> _forcefieldHits = new();
@@ -25,21 +24,23 @@ public partial class Forcefield : Area
     private float _maxHealth;
     private float _health;
     private BoidBase _parentBoid;
-    private float _activeTimer;
-    private float _destroyTimer;
-    private float _regenTimer;
+    private double _activeTimer;
+    private double _destroyTimer;
+    private double _regenTimer;
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
-        Connect("area_entered", this, nameof(_OnForceFieldAreaEntered));
+        Connect("area_entered", new Callable(this, nameof(_OnForceFieldAreaEntered)));
         _forcefieldMat = _mesh.MaterialOverride as ShaderMaterial;
+        
+        Init(BoidBase.BoidAlignment.Ally, null, 10.0f, 10.0f);
     }
 
     public void Init(BoidBase.BoidAlignment alignment, BoidBase parent, float radius, float health)
     {
         _alignment = alignment;
         Scale = Vector3.One * radius;
-        _forcefieldMat.SetShaderParam($"u_radius", radius);
+        _forcefieldMat.SetShaderParameter($"u_radius", radius);
         _parentBoid = parent;
         _maxHealth = health;
         
@@ -52,7 +53,7 @@ public partial class Forcefield : Area
         _destroyTimer = 0.0f;
         _health = health;
         
-        _forcefieldMat.SetShaderParam($"u_destroy_timer", _destroyTimer);
+        _forcefieldMat.SetShaderParameter($"u_destroy_timer", _destroyTimer);
     }
 
     private void Deactivate()
@@ -60,19 +61,19 @@ public partial class Forcefield : Area
         _regenTimer = 5.0f;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
         
         // keep rotation static
         Vector3 scale = Scale;
-        GlobalTransform = new Transform(Basis.Identity, GlobalTransform.origin);
+        GlobalTransform = new Transform3D(Basis.Identity, GlobalTransform.Origin);
         Scale = scale;
 
         if (_health <= 0.0f)
         {
             _destroyTimer += delta;
-            _forcefieldMat.SetShaderParam($"u_destroy_timer", _destroyTimer);
+            _forcefieldMat.SetShaderParameter($"u_destroy_timer", _destroyTimer);
 
             _regenTimer -= delta;
             if (_regenTimer < 0.0f)
@@ -95,17 +96,19 @@ public partial class Forcefield : Area
 
             if (numAddedInShader < _maxForcefieldHits)
             {
-                Rect2 hitData = new Rect2(hit.Pos.x, hit.Pos.y, hit.Pos.z, hit.Time);
-                _forcefieldMat.SetShaderParam($"u_hit_{numAddedInShader + 1}", hitData);
+                Rect2 hitData = new Rect2(hit.Pos.X, hit.Pos.Y, hit.Pos.Z, (float) hit.Time);
+                _forcefieldMat.SetShaderParameter($"u_hit_{numAddedInShader + 1}", hitData);
                 numAddedInShader++;
             }
-            _forcefieldMat.SetShaderParam($"u_hits", numAddedInShader);
+            _forcefieldMat.SetShaderParameter($"u_hits", numAddedInShader);
         }
 
-        _activeTimer += delta;
-        _forcefieldMat.SetShaderParam($"u_active_timer", _activeTimer);
-        _forcefieldMat.SetShaderParam($"u_heading", _parentBoid.Heading.To3D());
-        _forcefieldMat.SetShaderParam("u_centre", GlobalTransform.origin);
+        _activeTimer += delta * 0.1f;
+        
+        _forcefieldMat.SetShaderParameter($"u_active_timer", _activeTimer);
+        if (_parentBoid != null)
+            _forcefieldMat.SetShaderParameter($"u_heading", _parentBoid.Heading.To3D());
+        _forcefieldMat.SetShaderParameter("u_centre", GlobalTransform.Origin);
     }
 
     // public override void _PhysicsProcess(float delta)
@@ -128,14 +131,14 @@ public partial class Forcefield : Area
     //     }
     // }
 
-    private void _OnForceFieldAreaEntered(Area other)
+    private void _OnForceFieldAreaEntered(Area3D other)
     {
         if (_health <= 0.0f)
             return;
         
         if (other is Bullet bullet && bullet.Alignment != _alignment)
         {
-            Vector3 pos = (bullet.GlobalTransform.origin - GlobalTransform.origin).Normalized();
+            Vector3 pos = (bullet.GlobalTransform.Origin - GlobalTransform.Origin).Normalized();
             ForceFieldHit hit = new() {Pos = pos, Time = 0.0f};
             _forcefieldHits.Add(hit);
             _health -= bullet.Damage;

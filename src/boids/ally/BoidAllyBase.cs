@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class BoidAllyBase : BoidBase
 {
@@ -20,7 +19,7 @@ public partial class BoidAllyBase : BoidBase
     [Export] private PackedScene _microBulletScene;
     [Export] protected float _engageRange;
     
-    [OnReadyGet] private AudioStreamPlayer2D _sfxShootMicro;
+    [Export] private AudioStreamPlayer2D _sfxShootMicro;
 
     public ResourceBoidAlly Data => _data as ResourceBoidAlly;
     public AIState AiState => _aiState;
@@ -30,16 +29,18 @@ public partial class BoidAllyBase : BoidBase
     protected AIState _aiState = AIState.None;
     protected BoidBase _engageTarget;
 
-    private float _microTurretSearchTimer;
-    private float _microTurretCooldown;
+    private double _microTurretSearchTimer;
+    private double _microTurretCooldown;
     private BoidEnemyBase _microTurretTarget;
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
-        SpatialMaterial mat = _selectedIndicator.GetActiveMaterial(0) as SpatialMaterial;
+        base._Ready();
+        
+        StandardMaterial3D mat = _selectedIndicator.GetActiveMaterial(0) as StandardMaterial3D;
         mat.AlbedoColor = ColourManager.Instance.Ally;
         
-        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.AllyOutline);
+        _mesh.AltShaders[0].SetShaderParameter("u_outline_colour", ColourManager.Instance.AllyOutline);
     }
 
     public void SetIsPlayer(bool isPlayer)
@@ -47,7 +48,7 @@ public partial class BoidAllyBase : BoidBase
         _isPlayer = isPlayer;
     }
 
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
 #if !FINAL
         // Hack-fix this because I don't know why it's happening :(
@@ -144,7 +145,7 @@ public partial class BoidAllyBase : BoidBase
         }
     }
 
-    private void ProcessMicroturrets(float delta)
+    private void ProcessMicroturrets(double delta)
     {
         if (_resourceStats.MicroTurrets)
         {
@@ -182,9 +183,9 @@ public partial class BoidAllyBase : BoidBase
                 }
                 else
                 {
-                    Bullet bullet = _microBulletScene.Instance() as Bullet; // TODO: use bullet pool
+                    Bullet bullet = _microBulletScene.Instantiate() as Bullet; // TODO: use bullet pool
                     Game.Instance.AddChild(bullet);
-                    bullet.Init(GlobalTransform.origin, _microTurretTarget, true, _resourceStats.MicroTurretVelocity, _resourceStats.MicroTurretDamage, Alignment);
+                    bullet.Init(GlobalTransform.Origin, _microTurretTarget, true, _resourceStats.MicroTurretVelocity, _resourceStats.MicroTurretDamage, Alignment);
                 }
             }
         }

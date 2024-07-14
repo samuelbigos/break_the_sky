@@ -77,7 +77,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     {
         public int Id;
         public Vector2 Position;
-        public ObstacleShape Shape;
+        public ObstacleShape Shape3D;
         public float Size;
         
         public bool Empty() => Id == 0;
@@ -147,9 +147,9 @@ public partial class SteeringManager : Singleton<SteeringManager>
     private static int _obstacleIdGen = 1;
     private static int _flowFieldIdGen = 1;
     private static float[] _behaviourWeights;
-    private static float _delta;
+    private static double _delta;
 
-    public MeshInstance _debugMesh;
+    public MeshInstance3D _debugMesh;
 
     public override void _Ready()
     {
@@ -159,12 +159,11 @@ public partial class SteeringManager : Singleton<SteeringManager>
         Obstacle.IdGen = 1;
         FlowField.IdGen = 1;
         
-        _debugMesh = new MeshInstance();
-        SpatialMaterial mat = new();
-        mat.FlagsUnshaded = true;
+        _debugMesh = new MeshInstance3D();
+        StandardMaterial3D mat = new();
         mat.VertexColorUseAsAlbedo = true;
         mat.VertexColorIsSrgb = true;
-        mat.FlagsNoDepthTest = true;
+        mat.NoDepthTest = true;
         _debugMesh.MaterialOverride = mat;
         AddChild(_debugMesh);
 
@@ -189,7 +188,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         _behaviourWeights[(int) MaintainBroadside] = 0.1f;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -259,7 +258,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 // https://gamedev.stackexchange.com/questions/173223/framerate-dependant-steering-behaviour
                 float totalForceLength = totalForce.Length();
                 float forceLength = force.Length();
-                float frameMaxForce = boid.MaxForce * delta * 2.0f;
+                float frameMaxForce = (float) (boid.MaxForce * delta * 2.0f);
                 if (totalForceLength + forceLength > frameMaxForce)
                 {
                     force.Limit(frameMaxForce - totalForceLength);
@@ -291,7 +290,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 boid.Heading = Vector2.Normalize(boid.Heading);
             }
 
-            boid.Position += boid.Velocity * delta;
+            boid.Position += boid.Velocity * (float) delta;
             
             if (float.IsNaN(boid.Position.X))
             {
@@ -304,7 +303,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
     }
 
     private static Vector2 CalculateSteeringForce(Behaviours behaviour, ref Boid boid, int index, ReadOnlySpan<Boid> boids, 
-        in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<byte> boidAlignments, ReadOnlySpan<Obstacle> obstacles, ReadOnlySpan<FlowField> flowFields, float delta)
+        in ReadOnlySpan<Vector2> boidPositions, in ReadOnlySpan<byte> boidAlignments, ReadOnlySpan<Obstacle> obstacles, ReadOnlySpan<FlowField> flowFields, double delta)
     {
         Vector2 force = Vector2.Zero;
         float influence;
@@ -322,7 +321,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 break;
             case Arrive:
                 force += Steering_Arrive(boid, boid.Target, out influence);
-                force = force.Limit(boid.MaxForce * delta) * influence;
+                force = force.Limit(boid.MaxForce * (float)delta) * influence;
                 break;
             case Pursuit:
                 force += Steering_Pursuit(boid);
@@ -369,7 +368,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
                 throw new ArgumentOutOfRangeException();
         }
 
-        return force.Limit(boid.MaxForce * delta) * _behaviourWeights[(int)behaviour];
+        return force.Limit(boid.MaxForce * (float)delta) * _behaviourWeights[(int)behaviour];
     }
 
     private void GetPoolForType<T>(out StructPool<T> pool, out Dictionary<int, int> toIndex, out int max) where T : IPoolable

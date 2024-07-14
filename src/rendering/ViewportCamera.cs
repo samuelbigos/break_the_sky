@@ -1,9 +1,9 @@
 using Godot;
 using System;
 
-public class ViewportCamera : Camera
+public partial class ViewportCamera : Camera3D
 {
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

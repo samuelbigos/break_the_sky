@@ -1,6 +1,6 @@
 using Godot;
 using System;
 
-public abstract class BaseStateMachine<T, U> : Singleton<T>  where T : class
+public abstract partial class BaseStateMachine<T, U> : Singleton<T>  where T : class
 {
 }

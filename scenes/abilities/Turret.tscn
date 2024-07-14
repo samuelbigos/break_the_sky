@@ -4,15 +4,15 @@
 [ext_resource path="res://assets/mesh/ships/human_carrier/carrier_turret.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://scenes/abilities/BulletMicro.tscn" type="PackedScene" id=3]
 
-[node name="Turret" type="MeshInstance"]
+[node name="Turret" type="MeshInstance3D"]
 mesh = ExtResource( 2 )
 script = ExtResource( 1 )
 Barrel1Path = NodePath("Barrel1")
 Barrel2Path = NodePath("Barrel2")
 _bulletScene = ExtResource( 3 )
 
-[node name="Barrel1" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.264764, 3.85232, 4.37758 )
+[node name="Barrel1" type="Node3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.264764, 3.85232, 4.37758 )
 
-[node name="Barrel2" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.37067, 3.85232, 4.37758 )
+[node name="Barrel2" type="Node3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.37067, 3.85232, 4.37758 )

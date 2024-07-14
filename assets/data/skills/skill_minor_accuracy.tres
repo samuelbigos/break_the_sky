@@ -1,6 +1,6 @@
 [gd_resource type="Resource" load_steps=3 format=2]
 
-[ext_resource path="res://assets/gui/skills/skill_accuracy.png" type="Texture" id=1]
+[ext_resource path="res://assets/gui/skills/skill_accuracy.png" type="Texture2D" id=1]
 [ext_resource path="res://src/data/ResourceSkillNode.cs" type="Script" id=2]
 
 [resource]

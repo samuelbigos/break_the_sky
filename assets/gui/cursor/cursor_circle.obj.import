@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh"
+uid="uid://bmrlml57qgevm"
+path="res://.godot/imported/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh"
 
 [deps]
 
-files=[ "res://.import/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh" ]
+files=["res://.godot/imported/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh"]
 
 source_file="res://assets/gui/cursor/cursor_circle.obj"
-dest_files=[ "res://.import/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh", "res://.import/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh" ]
+dest_files=["res://.godot/imported/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh", "res://.godot/imported/cursor_circle.obj-2179da54716587c76069acc58dcb2713.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

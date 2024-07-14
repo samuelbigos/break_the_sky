@@ -2,21 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class BoidEnemySentry : BoidEnemyBase
 {
     [Export] private PackedScene _bulletScene;
     [Export] private bool _fleeOnAttacked;
     
-    [OnReadyGet] private Spatial _weaponPosition1; 
-    [OnReadyGet] private Spatial _weaponPosition2; 
+    [Export] private Node3D _weaponPosition1; 
+    [Export] private Node3D _weaponPosition2; 
     
-    private float _attackCooldownTimer;
-    private float _shotCooldownTimer;
+    private double _attackCooldownTimer;
+    private double _shotCooldownTimer;
     private int _shotsFired;
     
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         switch (_aiState)
         {
@@ -67,9 +66,9 @@ public partial class BoidEnemySentry : BoidEnemyBase
 
     private void Shoot()
     {
-        Bullet bullet = _bulletScene.Instance() as Bullet;
+        Bullet bullet = _bulletScene.Instantiate() as Bullet;
         DebugUtils.Assert(bullet != null, nameof(bullet) + " != null");
-        Vector3 spawnPos = (_shotsFired % 2 == 0) ? _weaponPosition1.GlobalTransform.origin : _weaponPosition2.GlobalTransform.origin;
+        Vector3 spawnPos = (_shotsFired % 2 == 0) ? _weaponPosition1.GlobalTransform.Origin : _weaponPosition2.GlobalTransform.Origin;
         Game.Instance.AddChild(bullet);
         bullet.Init(spawnPos, _targetBoid, false, _resourceStats.AttackVelocity, _resourceStats.AttackDamage, Alignment);
         _shotsFired++;

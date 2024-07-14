@@ -2,9 +2,10 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot.Collections;
 using ImGuiNET;
 
-public class AISpawningDirector : Node
+public partial class AISpawningDirector : Node
 {
     [Export] private bool _enabled = true;
     [Export] private float _intensityWavelength = 0.036f;
@@ -20,7 +21,7 @@ public class AISpawningDirector : Node
     [Export] private float _swarmRampUpTime = 15.0f; // time it takes to fill the budget when swarming
     
     [Export] private ResourceBoidEnemy _firstEnemy;
-    [Export] private List<ResourceBoidEnemy> _enemyBoidPool = new();
+    [Export] private Array<ResourceBoidEnemy> _enemyBoidPool = new();
 
     private enum SpawningState
     {
@@ -34,9 +35,9 @@ public class AISpawningDirector : Node
     private Game _game;
 
     private SpawningState _state;
-    private float _totalTime;
-    private float _totalBudgetDestoyed;
-    private float _timeInState;
+    private double _totalTime;
+    private double _totalBudgetDestoyed;
+    private double _timeInState;
     private List<BoidEnemyBase> _activeEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _waveEnemies = new List<BoidEnemyBase>();
     private List<BoidEnemyBase> _swarmingEnemies = new List<BoidEnemyBase>();
@@ -71,7 +72,7 @@ public class AISpawningDirector : Node
         DebugImGui.Instance.UnRegisterWindow("aispawning", _OnImGuiLayoutSpawning);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -95,19 +96,19 @@ public class AISpawningDirector : Node
         switch (_state)
         {
             case SpawningState.Idle:
-                ProcessStateIdle(delta, intensity);
+                ProcessStateIdle((float) delta, intensity);
                 break;
             case SpawningState.Swarming:
-                ProcessStateSwarming(delta, intensity);
+                ProcessStateSwarming((float) delta, intensity);
                 break;
             case SpawningState.Wave:
-                ProcessStateWave(delta, intensity);
+                ProcessStateWave((float) delta, intensity);
                 break;
             // case SpawningState.Patrol:
             //     ProcessStatePatrol(delta, intensity);
             //     break;
             case SpawningState.Scripted:
-                ProcessStateScripted(delta, intensity);
+                ProcessStateScripted((float) delta, intensity);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -139,7 +140,7 @@ public class AISpawningDirector : Node
     }
     private void ProcessStateSwarming(float delta, float intensity)
     {
-        float budgetGoal = Mathf.Clamp(_timeInState / _swarmRampUpTime, 0.0f, 1.0f) * CalcBudget(intensity);
+        float budgetGoal = (float) (Mathf.Clamp(_timeInState / _swarmRampUpTime, 0.0f, 1.0f) * CalcBudget(intensity));
         
         // add up total swarming enemy budget on the field
         float activeBudget = 0.0f;
@@ -293,18 +294,18 @@ public class AISpawningDirector : Node
         }
     }
     
-    private float CalcIntensity(float time)
+    private float CalcIntensity(double time)
     {
-        float wavelength = _intensityWavelength + (time * _intensityWavelengthScaling * 0.01f);
-        float amplitude = _intensityAmplitude + (time * _intensityAmplitudeScaling * 0.01f);
+        double wavelength = _intensityWavelength + (time * _intensityWavelengthScaling * 0.01f);
+        double amplitude = _intensityAmplitude + (time * _intensityAmplitudeScaling * 0.01f);
 
         wavelength = Mathf.Clamp(wavelength, 0.0f, 1.0f);
         
-        float intensity = Mathf.Sin(time * wavelength) * amplitude;
+        double intensity = Mathf.Sin(time * wavelength) * amplitude;
 
         intensity += _intensityOffset + _intensityOffsetScale * time;
         
-        return Mathf.Clamp(intensity, 0.0f, 1.0f);
+        return (float) Mathf.Clamp(intensity, 0.0f, 1.0f);
     }
 
     private float CalcBudget(float intensity)
@@ -373,7 +374,7 @@ public class AISpawningDirector : Node
         return enemy;
     }
 
-    private void SpawnEnemyEscort(ResourceBoidEnemy leaderData, List<ResourceBoidEnemy> escortDatas, out BoidEnemyBase leaderBoid, out List<BoidEnemyBase> escortBoids)
+    private void SpawnEnemyEscort(ResourceBoidEnemy leaderData, Array<ResourceBoidEnemy> escortDatas, out BoidEnemyBase leaderBoid, out List<BoidEnemyBase> escortBoids)
     {
         escortBoids = new List<BoidEnemyBase>();
         BoidEnemyBase leader = SpawnEnemyRandom(leaderData);

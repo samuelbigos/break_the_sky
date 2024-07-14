@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh"
+uid="uid://cngdb557bo1ne"
+path="res://.godot/imported/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh"
 
 [deps]
 
-files=[ "res://.import/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh" ]
+files=["res://.godot/imported/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh"]
 
 source_file="res://assets/mesh/map/uk.obj"
-dest_files=[ "res://.import/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh", "res://.import/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh" ]
+dest_files=["res://.godot/imported/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh", "res://.godot/imported/uk.obj-efa108a8a7ec3ee4e62f77637d6021dd.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

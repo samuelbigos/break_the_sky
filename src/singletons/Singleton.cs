@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Diagnostics;
 
-public class Singleton<T> : Node where T : class
+public partial class Singleton<T> : Node where T : class
 {
     private static Singleton<T> _instance;
     public static T Instance => _instance as T;

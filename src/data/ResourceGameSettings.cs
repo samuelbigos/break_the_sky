@@ -2,7 +2,7 @@ using Godot;
 using System;
 using ImGuiNET;
 
-public class ResourceGameSettings : Resource
+public partial class ResourceGameSettings : Resource
 {
     [Export] public int ExperiencePerLevelBase;
     [Export] public float ExperiencePerLevelExponent;

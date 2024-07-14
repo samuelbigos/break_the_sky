@@ -41,10 +41,10 @@ public partial class BoidEnemyBase : BoidBase
             SwitchAiState(AIState.Idle);
         }
         
-        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", ColourManager.Instance.EnemyOutline);
+        _mesh.AltShaders[0].SetShaderParameter("u_outline_colour", ColourManager.Instance.EnemyOutline);
     }
 
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         switch (_aiState)
         {
@@ -134,7 +134,7 @@ public partial class BoidEnemyBase : BoidBase
 
         for (int i = 0; i < Data.MaterialDropCount; i++)
         {
-            PickupMaterial drop = _pickupMaterialScene.Instance<PickupMaterial>();
+            PickupMaterial drop = _pickupMaterialScene.Instantiate<PickupMaterial>();
             Game.Instance.RegisterPickup(drop);
             drop.GlobalTransform = GlobalTransform;
             float eject = 25.0f;

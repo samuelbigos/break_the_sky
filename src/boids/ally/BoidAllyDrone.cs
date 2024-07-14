@@ -1,18 +1,17 @@
 using Godot;
 using System;
-using GodotOnReady.Attributes;
 
 public partial class BoidAllyDrone : BoidAllyBase
 {
     [Export] private PackedScene _bulletScene;
     [Export] private float _rotorSpinSpeed = 25.0f;
 
-    [OnReadyGet] private MeshInstance _rotorMesh;
-    [OnReadyGet] private AudioStreamPlayer2D _sfxShoot;
+    [Export] private MeshInstance3D _rotorMesh;
+    [Export] private AudioStreamPlayer2D _sfxShoot;
 
-    public float ShootCooldown => _shootCooldown;
+    public double ShootCooldown => _shootCooldown;
     
-    private float _shootCooldown;
+    private double _shootCooldown;
     private bool _cachedShoot;
 
     public override void Init(ResourceBoid data, Action<BoidBase> onDestroy, Vector2 position, Vector2 velocity)
@@ -23,7 +22,7 @@ public partial class BoidAllyDrone : BoidAllyBase
         SteeringBoid.DesiredDistFromTargetMax = _engageRange + 10.0f;
     }
 
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         base.ProcessAlive(delta);
 
@@ -43,7 +42,7 @@ public partial class BoidAllyDrone : BoidAllyBase
                 break;
         }
         
-        _rotorMesh.RotateY(_rotorSpinSpeed * delta);
+        _rotorMesh.RotateY((float) (_rotorSpinSpeed * delta));
     }
     
     protected override void _OnEnterAIState_Engaged()
@@ -56,7 +55,7 @@ public partial class BoidAllyDrone : BoidAllyBase
     private void Shoot()
     {
         _shootCooldown = _resourceStats.AttackCooldown;
-        Bullet bullet = _bulletScene.Instance() as Bullet;
+        Bullet bullet = _bulletScene.Instantiate<Bullet>();
         Game.Instance.AddChild(bullet);
         bullet.Init(GlobalPosition.To3D(),  _targetBoid, true, _resourceStats.AttackVelocity, _resourceStats.AttackDamage, Alignment);
     }

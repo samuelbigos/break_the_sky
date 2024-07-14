@@ -1,21 +1,21 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=5 format=3 uid="uid://bof0moywyxpig"]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/abilities/BulletMicro.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/boids/ally/BoidAllyBase.cs" type="Script" id=4]
-[ext_resource path="res://assets/sfx/shot_micro.wav" type="AudioStream" id=5]
+[ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/BulletMicro.tscn" id="2"]
+[ext_resource type="Script" path="res://src/boids/ally/BoidAllyBase.cs" id="4"]
+[ext_resource type="AudioStream" uid="uid://dtqm5aywn5gx5" path="res://assets/sfx/shot_micro.wav" id="5"]
 
-[node name="BoidAllyBase" instance=ExtResource( 1 )]
-script = ExtResource( 4 )
-SfxShootMicroPath = null
+[node name="BoidAllyBase" node_paths=PackedStringArray("_sfxShootMicro") instance=ExtResource("1")]
+script = ExtResource("4")
 _destroyTime = 3.0
 _shootSize = 1.5
 _shootTrauma = 0.05
 _destroyTrauma = 0.1
-_microBulletScene = ExtResource( 2 )
+_microBulletScene = ExtResource("2")
 _engageRange = 0.0
+_sfxShootMicro = NodePath("SFXShootMicro")
 
 [node name="SFXShootMicro" type="AudioStreamPlayer2D" parent="." index="5"]
-stream = ExtResource( 5 )
+stream = ExtResource("5")
 volume_db = -10.0
 pitch_scale = 0.8

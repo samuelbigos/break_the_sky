@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/laser_fire.wav-dd99a8acaaae088eaf9544283d4670d3.sample"
+type="AudioStreamWAV"
+uid="uid://56x8llon7lxg"
+path="res://.godot/imported/laser_fire.wav-dd99a8acaaae088eaf9544283d4670d3.sample"
 
 [deps]
 
 source_file="res://assets/sfx/laser_fire.wav"
-dest_files=[ "res://.import/laser_fire.wav-dd99a8acaaae088eaf9544283d4670d3.sample" ]
+dest_files=["res://.godot/imported/laser_fire.wav-dd99a8acaaae088eaf9544283d4670d3.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

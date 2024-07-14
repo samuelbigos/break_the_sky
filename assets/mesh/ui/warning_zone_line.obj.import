@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh"
+uid="uid://c8wfdrxiu4nbt"
+path="res://.godot/imported/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh"
 
 [deps]
 
-files=[ "res://.import/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh" ]
+files=["res://.godot/imported/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh"]
 
 source_file="res://assets/mesh/ui/warning_zone_line.obj"
-dest_files=[ "res://.import/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh", "res://.import/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh" ]
+dest_files=["res://.godot/imported/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh", "res://.godot/imported/warning_zone_line.obj-76190eed1e0b41a78152751584c45e7c.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

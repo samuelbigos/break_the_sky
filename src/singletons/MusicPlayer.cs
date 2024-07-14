@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Godot;
 
-public class MusicPlayer : Singleton<MusicPlayer>
+public partial class MusicPlayer : Singleton<MusicPlayer>
 {
     public AudioStreamPlayer2D Player;
     public bool MusicEnabled = false;
@@ -10,7 +10,7 @@ public class MusicPlayer : Singleton<MusicPlayer>
     {
         Player = new AudioStreamPlayer2D();
         AddChild(Player);
-        PauseMode = PauseModeEnum.Process;
+        //ProcessMode = PauseModeEnum.Process;
     }
 
     public void PlayMenu()

@@ -2,14 +2,18 @@
 
 importer="mp3"
 type="AudioStreamMP3"
-path="res://.import/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str"
+uid="uid://d13mu407xsd6q"
+path="res://.godot/imported/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str"
 
 [deps]
 
 source_file="res://assets/music/Visager - The Great Tree [Loop].mp3"
-dest_files=[ "res://.import/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str" ]
+dest_files=["res://.godot/imported/Visager - The Great Tree [Loop].mp3-ab5115994c46b42c1edf5bc806f26649.mp3str"]
 
 [params]
 
 loop=true
 loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

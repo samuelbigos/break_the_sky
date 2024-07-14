@@ -67,7 +67,7 @@ public partial class SteeringManager
 
             if (_drawSteering)
             {
-                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / boid.MaxForce / TimeSystem.Delta,
+                Utils.Line(boidPos, boidPos + boid.Steering.To3D() * 10.0f / boid.MaxForce / (float) TimeSystem.Delta,
                     Colors.Purple, ref v, ref i, _vertList, _colList, _indexList);
             }
 
@@ -117,7 +117,7 @@ public partial class SteeringManager
         {
             float flowFieldVisCellSize = 10.0f;
             Vector2 topLeft = GameCamera.Instance.ScreenPosition(Godot.Vector2.Zero).ToNumerics();
-            Vector2 botRight = GameCamera.Instance.ScreenPosition(GetViewport().Size).ToNumerics();
+            Vector2 botRight = GameCamera.Instance.ScreenPosition(DisplayServer.ScreenGetSize()).ToNumerics();
 
             for (float x = topLeft.X; x < botRight.X; x += flowFieldVisCellSize)
             {
@@ -149,7 +149,7 @@ public partial class SteeringManager
                         Mathf.Lerp(0.0f, 1.0f, dir.X * 0.5f + 0.5f),
                         Mathf.Lerp(0.0f, 1.0f, dir.Z * 0.5f + 0.5f),
                         Mathf.Lerp(0.0f, 1.0f, 1.0f - (dir.Z * 0.5f + 0.5f)));
-                    col.a = 0.5f;
+                    col.A = 0.5f;
 
                     Utils.Line(pos, pos + dir * flowFieldVisCellSize, col, ref v, ref i, _vertList, _colList,
                         _indexList);
@@ -162,7 +162,7 @@ public partial class SteeringManager
         foreach (Obstacle obs in obstacles)
         {
             if (obs.Empty()) continue;
-            switch (obs.Shape)
+            switch (obs.Shape3D)
             {
                 case ObstacleShape.Circle:
                 {

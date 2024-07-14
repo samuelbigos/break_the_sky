@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class Tooltip : Control
+public partial class Tooltip : Control
 {
     [Export] private NodePath _namePath;
 
@@ -14,11 +14,11 @@ public class Tooltip : Control
 
     public Vector3 WorldPosition
     {
-        get => GameCamera.Instance.ProjectPosition(RectGlobalPosition, 0.0f);
+        get => GameCamera.Instance.ProjectPosition(GlobalPosition, 0.0f);
         set
         {
-            if (GetViewport()?.GetCamera() != null)
-                RectGlobalPosition = GetViewport().GetCamera().UnprojectPosition(value);
+            if (GetViewport()?.GetCamera3D() != null)
+                GlobalPosition = GetViewport().GetCamera3D().UnprojectPosition(value);
         }
     }
 
@@ -35,7 +35,7 @@ public class Tooltip : Control
         _label = GetNode<Label>(_namePath);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
     }

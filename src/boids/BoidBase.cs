@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
+using Godot.Collections;
 using Vector2 = Godot.Vector2;
 using Vector3 = Godot.Vector3;
 
-public partial class BoidBase : Area
+public partial class BoidBase : Area3D
 {
     public enum BoidAlignment
     {
@@ -55,15 +55,15 @@ public partial class BoidBase : Area
     
     [Export] private ResourceStats _baseResourceStats;
     [Export] private int _damageVfxCount = 2;
-    [Export] private List<AudioStream> _hitSfx;
+    [Export] private Array<AudioStream> _hitSfx;
     [Export] protected PackedScene _pickupMaterialScene;
     
-    [OnReadyGet] protected MeshInstance _selectedIndicator;
-    [OnReadyGet] protected MultiViewportMeshInstance _mesh;
-    [OnReadyGet] protected CollisionShape _shipCollider;
-    [OnReadyGet] protected CollisionShape _rbCollider;
-    [OnReadyGet] private AudioStreamPlayer2D _sfxOnDestroy;
-    [OnReadyGet] protected AudioStreamPlayer2D _sfxOnHit;
+    [Export] protected MeshInstance3D _selectedIndicator;
+    [Export] protected MultiViewportMeshInstance _mesh;
+    [Export] protected CollisionShape3D _shipCollider;
+    [Export] protected CollisionShape3D _rbCollider;
+    [Export] private AudioStreamPlayer2D _sfxOnDestroy;
+    [Export] protected AudioStreamPlayer2D _sfxOnHit;
     
     #endregion
 
@@ -83,14 +83,14 @@ public partial class BoidBase : Area
     
     public Vector2 GlobalPosition
     {
-        get => new(GlobalTransform.origin.x, GlobalTransform.origin.z);
+        get => new(GlobalTransform.Origin.X, GlobalTransform.Origin.Z);
         protected set
         {
             if (SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId))
             {
                 ref SteeringManager.Boid boid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
                 boid.Position = value.ToNumerics();
-                GlobalTransform = new Transform(new Basis(Vector3.Down, boid.Heading.AngleToY()), value.To3D());
+                GlobalTransform = new Transform3D(new Basis(Vector3.Down, boid.Heading.AngleToY()), value.To3D());
             }
         }
     }
@@ -146,21 +146,21 @@ public partial class BoidBase : Area
     #region Private
 
     private float _health;
-    private float _hitFlashTimer;
+    private double _hitFlashTimer;
     private List<HitMessage> _hitMessages = new();
-    private List<Particles> _damagedParticles = new();
-    private List<Particles> _hitParticles = new();
+    private List<GpuParticles3D> _damagedParticles = new();
+    private List<GpuParticles3D> _hitParticles = new();
     private Vector2 _cachedLastHitDir;
     private float _cachedLastHitDamage;
     private Vector2 _cachedLastHitPos;
     private bool _selected;
     private Vector2 _smoothSteering;
     private int _sharedPropertiesId;
-    private RigidBody _destroyedRb;
+    private RigidBody3D _destroyedRb;
     private bool _beginHitGround;
     private bool _hasHitGround;
     private bool _hitGround;
-    private float _hitGroundTimer;
+    private double _hitGroundTimer;
 
     #endregion
 
@@ -173,8 +173,10 @@ public partial class BoidBase : Area
         GlobalPosition = position;
     }
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
+        base._Ready();
+        
         DebugUtils.Assert(_baseResourceStats != null, "_baseStats != null");
         _resourceStats = _baseResourceStats.Duplicate() as ResourceStats;
         //_OnSkillsChanged(SaveDataPlayer.GetActiveSkills(Id));
@@ -183,12 +185,12 @@ public partial class BoidBase : Area
 
         _sfxOnHit.Stream = _hitSfx[0];
         
-        List<MeshInstance> altMeshes = _mesh.AltMeshes;
+        List<MeshInstance3D> altMeshes = _mesh.AltMeshes;
         Debug.Assert(altMeshes.Count > 0);
         _meshMaterial = _mesh.MaterialOverride.Duplicate() as ShaderMaterial;
         _mesh.MaterialOverride = _meshMaterial;
 
-        Connect("area_entered", this, nameof(_OnBoidAreaEntered));
+        Connect("area_entered", new Callable(this, nameof(_OnBoidAreaEntered)));
 
         if (!Game.Instance.Null())
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
@@ -196,7 +198,7 @@ public partial class BoidBase : Area
         _rbCollider.Disabled = true;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -215,16 +217,16 @@ public partial class BoidBase : Area
         // Hit VFX.
         if (_hitFlashTimer > 0.0f)
         {
-            _meshMaterial.SetShaderParam("u_hit_time", _hitVfxDuration - _hitFlashTimer);
+            _meshMaterial.SetShaderParameter("u_hit_time", _hitVfxDuration - _hitFlashTimer);
             _hitFlashTimer -= delta;
             if (_hitFlashTimer <= 0.0f)
             {
-                _meshMaterial.SetShaderParam("u_hits", 0);
+                _meshMaterial.SetShaderParameter("u_hits", 0);
             }
         }
     }
 
-    protected virtual void ProcessAlive(float delta)
+    protected virtual void ProcessAlive(double delta)
     {
         Debug.Assert(SteeringManager.Instance.HasObject<SteeringManager.Boid>(_steeringId));
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
@@ -241,20 +243,20 @@ public partial class BoidBase : Area
         // Banking.
         if (delta > 0.0f)
         {
-            System.Numerics.Vector2 right = new(-_cachedHeading.y, _cachedHeading.x);
+            System.Numerics.Vector2 right = new(-_cachedHeading.Y, _cachedHeading.X);
             System.Numerics.Vector2 localSteering = Utils.LocaliseDirection(steeringBoid.Steering, _cachedHeading.ToNumerics(), right);
-            localSteering /= delta;
+            localSteering /= (float)delta;
             localSteering /= 100.0f;
-            _smoothSteering = _smoothSteering.LinearInterpolate(localSteering.ToGodot(), Mathf.Clamp(delta * BankingRate, 0.0f, 1.0f));
+            _smoothSteering = _smoothSteering.Lerp(localSteering.ToGodot(), Mathf.Clamp((float)delta * BankingRate, 0.0f, 1.0f));
             float bankX = Mathf.Clamp(_smoothSteering.Dot(Vector2.Down) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
             float bankZ = Mathf.Clamp(_smoothSteering.Dot(Vector2.Right) * BankingAmount, -Mathf.Pi * 0.25f, Mathf.Pi * 0.25f);
-            basis = basis.Rotated(basis.z, bankZ);
+            basis = basis.Rotated(basis.Z, bankZ);
             if (Bank360)
-                basis = basis.Rotated(basis.x, bankX);
+                basis = basis.Rotated(basis.X, bankX);
         }
         
         // Update position and cache velocity from steering boid.
-        GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
+        GlobalTransform = new Transform3D(basis, steeringBoid.PositionG.To3D());
 
         // Process hits.
         foreach (HitMessage hit in _hitMessages)
@@ -275,11 +277,11 @@ public partial class BoidBase : Area
         _cachedLastHitDamage = 0.0f;
     }
 
-    private void ProcessDestroyed(float delta)
+    private void ProcessDestroyed(double delta)
     {
         if (_beginHitGround)
         {
-            foreach (Particles particles in _damagedParticles)
+            foreach (GpuParticles3D particles in _damagedParticles)
             {
                 particles.QueueFree();
             }
@@ -307,14 +309,16 @@ public partial class BoidBase : Area
             {
                 _hitGround = false;
             
-                Particles p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin, out ParticlesMaterial mat, true);
+                GpuParticles3D p = ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.Origin, out ParticleProcessMaterial mat, true);
                 if (!p.Null())
                 {
                     //float vel = _destroyedRb.LinearVelocity.Length();
-                    float t = 1.0f - Utils.Ease_CubicOut(Mathf.Clamp(_hitGroundTimer / 5.0f, 0.0f, 1.0f));
+                    float t = (float) (1.0f - Utils.Ease_CubicOut(Mathf.Clamp((float)_hitGroundTimer / 5.0f, 0.0f, 1.0f)));
                     t *= _mass;
-                    mat.InitialVelocity *= t;
-                    mat.Scale *= t;
+                    mat.InitialVelocityMin *= t;
+                    mat.InitialVelocityMax = mat.InitialVelocityMin;
+                    mat.ScaleMin *= t;
+                    mat.ScaleMax = mat.ScaleMin;
                     mat.Direction = _destroyedRb.LinearVelocity.To2D().Normalized().To3D();
                 }
             }
@@ -325,7 +329,7 @@ public partial class BoidBase : Area
     {
         SteeringManager.Boid boid = new()
         {   
-            Alignment = (byte)(this is BoidEnemyBase ? 0 : 1),
+            Alignment = (byte)Alignment,
             Radius = _steeringRadius,
             Position = GlobalPosition.ToNumerics(),
             Velocity = velocity.ToNumerics(),
@@ -369,21 +373,21 @@ public partial class BoidBase : Area
 
         _cachedLastHitPos = pos;
         _hitFlashTimer = _hitVfxDuration;
-        _meshMaterial.SetShaderParam("u_hit_duration", _hitVfxDuration);
-        _meshMaterial.SetShaderParam("u_flash_duration", _flashVfxDuration);
-        _meshMaterial.SetShaderParam("u_hits", 1);
-        _meshMaterial.SetShaderParam("u_centre", GlobalPosition.To3D());
-        _meshMaterial.SetShaderParam("u_hit_pos", _cachedLastHitPos.To3D());
+        _meshMaterial.SetShaderParameter("u_hit_duration", _hitVfxDuration);
+        _meshMaterial.SetShaderParameter("u_flash_duration", _flashVfxDuration);
+        _meshMaterial.SetShaderParameter("u_hits", 1);
+        _meshMaterial.SetShaderParameter("u_centre", GlobalPosition.To3D());
+        _meshMaterial.SetShaderParameter("u_hit_pos", _cachedLastHitPos.To3D());
         
         _sfxOnHit.Play();
 
         if (bulletVel != Vector2.Zero)
         {
-            Particles hitParticles = Resources.Instance.HitVFX.Instance<Particles>();
+            GpuParticles3D hitParticles = Resources.Instance.HitVFX.Instantiate<GpuParticles3D>();
             Game.Instance.AddChild(hitParticles);
-            ParticlesMaterial mat = hitParticles.ProcessMaterial as ParticlesMaterial;
+            ParticleProcessMaterial mat = hitParticles.ProcessMaterial as ParticleProcessMaterial;
             DebugUtils.Assert(mat != null, "mat != null");
-            Vector3 fromCentre = pos.To3D() - GlobalTransform.origin;
+            Vector3 fromCentre = pos.To3D() - GlobalTransform.Origin;
             mat.Direction = -bulletVel.Reflect(fromCentre.Normalized().To2D()).To3D();
             hitParticles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
             hitParticles.Emitting = true;
@@ -397,7 +401,7 @@ public partial class BoidBase : Area
             float nextThreshold = 1.0f - (_damagedParticles.Count + 1.0f) * damageVfxThresholds;
             if (_health / _resourceStats.MaxHealth < nextThreshold)
             {
-                Particles particles = Resources.Instance.DamagedVFX.Instance<Particles>();
+                GpuParticles3D particles = Resources.Instance.DamagedVFX.Instantiate<GpuParticles3D>();
                 _damagedParticles.Add(particles);
                 AddChild(particles);
                 particles.GlobalPosition(pos.To3D() + Vector3.Up * 5.0f);
@@ -419,19 +423,19 @@ public partial class BoidBase : Area
             _mesh.ClearAltMeshes();
             
             _sfxOnDestroy.Play();
-            Disconnect("area_entered", this, nameof(_OnBoidAreaEntered));
+            Disconnect("area_entered", new Callable(this, nameof(_OnBoidAreaEntered)));
             
             // Clear target.
             SetTarget(TargetType.None);
 
             // Convert to rigid body for 'ragdoll' death physics.
-            Vector3 pos = GlobalTransform.origin;
-            _destroyedRb = new RigidBody();
+            Vector3 pos = GlobalTransform.Origin;
+            _destroyedRb = new RigidBody3D();
             GetParent().AddChild(_destroyedRb);
             _destroyedRb.GlobalTransform = GlobalTransform;
             GetParent().RemoveChild(this);  
             _destroyedRb.AddChild(this);
-            CollisionShape collider = _rbCollider.Duplicate() as CollisionShape;
+            CollisionShape3D collider = _rbCollider.Duplicate() as CollisionShape3D;
             collider.Disabled = false;
             _destroyedRb.AddChild(collider);
             
@@ -440,8 +444,8 @@ public partial class BoidBase : Area
 
             SteeringManager.Boid boid = SteeringBoid;
 
-            _destroyedRb.GlobalTransform = new Transform(Basis.Identity, pos);
-            GlobalTransform = new Transform(GlobalTransform.basis, pos);
+            _destroyedRb.GlobalTransform = new Transform3D(Basis.Identity, pos);
+            GlobalTransform = new Transform3D(GlobalTransform.Basis, pos);
 
             _destroyedRb.LinearDamp = 0.1f;
             _destroyedRb.AngularDamp = 0.2f;
@@ -450,9 +454,9 @@ public partial class BoidBase : Area
             _destroyedRb.ApplyCentralImpulse(boid.VelocityG.To3D());
             _destroyedRb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 50.0f * (1.0f / _mass));
             
-            _destroyedRb.Connect("body_entered", this, nameof(_WhenTheBodyHitsTheFloor));
+            _destroyedRb.Connect("body_entered", new Callable(this, nameof(_WhenTheBodyHitsTheFloor)));
             _destroyedRb.ContactMonitor = true;
-            _destroyedRb.ContactsReported = 2;
+            _destroyedRb.MaxContactsReported = 2;
 
             Monitorable = false;
             Monitoring = false;
@@ -519,7 +523,7 @@ public partial class BoidBase : Area
         steeringBoid.Behaviours = _behaviours;
     }
 
-    protected virtual void _OnBoidAreaEntered(Area area)
+    protected virtual void _OnBoidAreaEntered(Area3D area)
     {
         if (!IsInstanceValid(area))
             return;
@@ -535,7 +539,7 @@ public partial class BoidBase : Area
         
         if (!boid.Null() && !boid.Destroyed)
         {
-            boid.SendHitMessage(_resourceStats.CollisionDamage, _cachedVelocity, GlobalTransform.origin.To2D(), Alignment);
+            boid.SendHitMessage(_resourceStats.CollisionDamage, _cachedVelocity, GlobalTransform.Origin.To2D(), Alignment);
             return;
         }
         

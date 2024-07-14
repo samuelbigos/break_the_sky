@@ -4,21 +4,22 @@
 [ext_resource path="res://assets/vfx/forcefield_mesh.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://src/abilities/Forcefield.cs" type="Script" id=3]
 
-[sub_resource type="SphereShape" id=2]
+[sub_resource type="SphereShape3D" id=2]
 
-[node name="Forcefield" type="Area"]
+[node name="Forcefield" type="Area3D"]
 script = ExtResource( 3 )
 MeshPath = NodePath("Mesh")
-TestCameraPath = NodePath("Camera")
+TestCameraPath = NodePath("Camera3D")
 
-[node name="CollisionShape" type="CollisionShape" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource( 2 )
 
-[node name="Mesh" type="MeshInstance" parent="."]
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00298917, 0.00218606, 0.00956213 )
 material_override = ExtResource( 1 )
 cast_shadow = 0
 mesh = ExtResource( 2 )
 skeleton = NodePath("../../Mesh")
 
-[node name="Camera" type="Camera" parent="."]
-transform = Transform( 0.323004, -0.334958, 0.885139, 0.114826, 0.942233, 0.314662, -0.939406, 0, 0.342807, 3.07165, 1.52667, 0 )
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.85451 )

@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Diagnostics;
-using GodotOnReady.Attributes;
 using Vector3 = System.Numerics.Vector3;
 
 public partial class BoidAllyBomber : BoidAllyBase
@@ -20,18 +19,18 @@ public partial class BoidAllyBomber : BoidAllyBase
     [Export] private float _shootTargetAlignment = 0.8f;
     [Export] private float _fleeTime = 0.5f;
     
-    [OnReadyGet] private AudioStreamPlayer2D _sfxShoot;
+    [Export] private AudioStreamPlayer2D _sfxShoot;
 
     private BomberState _bomberState = BomberState.Bomb;
-    private float _fleeTimer;
+    private double _fleeTimer;
     private BulletBomber _bomb;
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
         Resupply();
     }
 
-    protected override void ProcessAlive(float delta)
+    protected override void ProcessAlive(double delta)
     {
         switch (_aiState)
         {
@@ -59,7 +58,7 @@ public partial class BoidAllyBomber : BoidAllyBase
         base.ProcessAlive(delta);
     }
 
-    private void ProcessBomber(float delta)
+    private void ProcessBomber(double delta)
     {
         switch (_bomberState)
         {
@@ -118,9 +117,9 @@ public partial class BoidAllyBomber : BoidAllyBase
 
     private void Resupply()
     {
-        _bomb = _bulletScene.Instance() as BulletBomber;
+        _bomb = _bulletScene.Instantiate<BulletBomber>();
         AddChild(_bomb);
-        _bomb.Init((GlobalTransform.origin - GlobalTransform.basis.z * 2.1f).To2D().To3D(), this, false, 0.0f, 0.0f, BoidAlignment.Ally);
+        _bomb.Init((GlobalTransform.Origin - GlobalTransform.Basis.Z * 2.1f).To2D().To3D(), this, false, 0.0f, 0.0f, BoidAlignment.Ally);
         _bomb.Parent = this;
         _bomb.OnBulletDestroyed += OnBulletDestroyed;
     }

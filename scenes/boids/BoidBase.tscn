@@ -1,63 +1,75 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=13 format=3 uid="uid://cndgrycgqwr2l"]
 
-[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=1]
-[ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/material/outline_buffer.material" type="Material" id=3]
-[ext_resource path="res://src/boids/BoidBase.cs" type="Script" id=4]
-[ext_resource path="res://assets/material/boid.material" type="Material" id=5]
-[ext_resource path="res://assets/sfx/hit1.wav" type="AudioStream" id=6]
-[ext_resource path="res://assets/sfx/hit2.wav" type="AudioStream" id=7]
-[ext_resource path="res://scenes/pickups/PickupMaterial.tscn" type="PackedScene" id=10]
-[ext_resource path="res://assets/mesh/ui/selection_circle.obj" type="ArrayMesh" id=12]
+[ext_resource type="Script" path="res://src/rendering/MultiViewportMeshInstance.cs" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/BoidTrailVFX.tscn" id="2"]
+[ext_resource type="Material" uid="uid://cyol8qeynxtti" path="res://assets/material/outline_buffer.material" id="3"]
+[ext_resource type="Script" path="res://src/boids/BoidBase.cs" id="4"]
+[ext_resource type="Material" uid="uid://bqv6wig020okj" path="res://assets/material/boid.material" id="5"]
+[ext_resource type="AudioStream" uid="uid://ddui4eviu1gs3" path="res://assets/sfx/hit1.wav" id="6"]
+[ext_resource type="AudioStream" uid="uid://03krh5nss5ix" path="res://assets/sfx/hit2.wav" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/PickupMaterial.tscn" id="10"]
+[ext_resource type="ArrayMesh" uid="uid://btcbj4xyyer4k" path="res://assets/mesh/ui/selection_circle.obj" id="12"]
 
-[sub_resource type="CapsuleShape" id=10]
+[sub_resource type="CapsuleShape3D" id="10"]
 radius = 6.92402
 height = 24.2838
 
-[sub_resource type="BoxShape" id=9]
-extents = Vector3( 7.06956, 3.79281, 17.759 )
+[sub_resource type="BoxShape3D" id="9"]
+size = Vector3(14.1391, 7.58562, 35.518)
 
-[sub_resource type="SpatialMaterial" id=4]
-flags_unshaded = true
+[sub_resource type="StandardMaterial3D" id="4"]
+shading_mode = 0
 
-[node name="BoidBase" type="Area"]
-script = ExtResource( 4 )
-SelectedIndicatorPath = NodePath("SelectionIndicator")
-MeshPath = NodePath("Mesh")
-ShipColliderPath = NodePath("ShipCollider")
-RbColliderPath = NodePath("RBCollider")
-SfxOnDestroyPath = NodePath("SFXDestroy")
-SfxOnHitPath = NodePath("SFXHit")
+[node name="BoidBase" type="Area3D" node_paths=PackedStringArray("_selectedIndicator", "_mesh", "_shipCollider", "_rbCollider", "_sfxOnDestroy", "_sfxOnHit")]
+script = ExtResource("4")
 _behaviours = 2159
+_steeringRadius = null
+_mass = null
 MaxVelocity = 250.0
-_hitSfx = [ ExtResource( 6 ) ]
-_pickupMaterialScene = ExtResource( 10 )
+MinVelocity = null
+MaxForce = null
+FieldOfView = null
+Bank360 = null
+BankingRate = null
+BankingAmount = null
+_hitVfxDuration = null
+_flashVfxDuration = null
+_damageVfxCount = null
+_hitSfx = [ExtResource("6")]
+_pickupMaterialScene = ExtResource("10")
+_selectedIndicator = NodePath("SelectionIndicator")
+_mesh = NodePath("Mesh")
+_shipCollider = NodePath("ShipCollider")
+_rbCollider = NodePath("RBCollider")
+_sfxOnDestroy = NodePath("SFXDestroy")
+_sfxOnHit = NodePath("SFXHit")
 
-[node name="ShipCollider" type="CollisionShape" parent="."]
-shape = SubResource( 10 )
+[node name="ShipCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("10")
 
-[node name="RBCollider" type="CollisionShape" parent="."]
-shape = SubResource( 9 )
+[node name="RBCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("9")
 disabled = true
 
-[node name="Mesh" type="MeshInstance" parent="."]
-material_override = ExtResource( 5 )
-script = ExtResource( 1 )
+[node name="Mesh" type="MeshInstance3D" parent="."]
+material_override = ExtResource("5")
+script = ExtResource("1")
 _numExtraMeshes = 1
-_meshLayers = [ 2 ]
-_meshMaterials = [ ExtResource( 3 ) ]
+_meshLayers = [2]
+_meshMaterials = [ExtResource("3")]
 
-[node name="BoidTrail" parent="Mesh" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+[node name="BoidTrail" parent="Mesh" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+_type = null
 
 [node name="SFXDestroy" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )
+stream = ExtResource("7")
 
 [node name="SFXHit" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 7 )
+stream = ExtResource("7")
 
-[node name="SelectionIndicator" type="MeshInstance" parent="."]
-transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 )
+[node name="SelectionIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 visible = false
-material_override = SubResource( 4 )
-mesh = ExtResource( 12 )
+material_override = SubResource("4")
+mesh = ExtResource("12")

@@ -1,7 +1,6 @@
 using Godot;
-using GodotOnReady.Attributes;
 
-public partial class SeekerMissile : Area
+public partial class SeekerMissile : Area3D
 {
     protected enum State
     {
@@ -14,15 +13,15 @@ public partial class SeekerMissile : Area
     [Export] private float _maxForce = 50.0f;
     [Export] private float _lifetime = 5.0f;
 
-    [OnReadyGet] private MultiViewportMeshInstance _mesh;
-    [OnReadyGet] private AudioStreamPlayer2D _launchSfx;
-    [OnReadyGet] private BoidTrail _trail;
-    [OnReadyGet] private CollisionShape _collisionShape;
+    [Export] private MultiViewportMeshInstance _mesh;
+    [Export] private AudioStreamPlayer2D _launchSfx;
+    [Export] private BoidTrail _trail;
+    [Export] private CollisionShape3D _collisionShape;
     
     private BoidBase.BoidAlignment _alignment;
     private float _damage;
     private int _steeringId;
-    private float _deactivationTimer;
+    private double _deactivationTimer;
     private State _state = State.Alive;
     private System.Numerics.Vector2 _smoothHeading;
     private bool _queueExplode;
@@ -34,10 +33,10 @@ public partial class SeekerMissile : Area
         _damage = damage;
         _deactivationTimer = _lifetime;
         _alignment = alignment;
-        _mesh.Transform = new Transform(_mesh.Transform.basis, _mesh.Transform.origin + Vector3.Up * position.y);
+        _mesh.Transform = new Transform3D(_mesh.Transform.Basis, _mesh.Transform.Origin + Vector3.Up * position.Y);
         _mesh.SetMeshTransform(_mesh.Transform);
         
-        Connect("area_entered", this, nameof(_OnAreaEntered));
+        Connect("area_entered", new Callable(this, nameof(_OnAreaEntered)));
         
         int behaviours = 0;
         behaviours |= (1 << (int) SteeringManager.Behaviours.Pursuit);
@@ -75,11 +74,11 @@ public partial class SeekerMissile : Area
         
         _launchSfx.Play();
         
-        _mesh.AltShaders[0].SetShaderParam("u_outline_colour", _alignment == BoidBase.BoidAlignment.Ally ? 
+        _mesh.AltShaders[0].SetShaderParameter("u_outline_colour", _alignment == BoidBase.BoidAlignment.Ally ? 
             ColourManager.Instance.AllyOutline : ColourManager.Instance.EnemyOutline);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -97,7 +96,7 @@ public partial class SeekerMissile : Area
                     System.Numerics.Vector2.Lerp(steeringBoid.Heading, steeringBoid.Steering.NormalizeSafe(), steeringStrength);
 
                 Basis basis = new(Vector3.Up, _smoothHeading.AngleToY());
-                GlobalTransform = new Transform(basis, steeringBoid.PositionG.To3D());
+                GlobalTransform = new Transform3D(basis, steeringBoid.PositionG.To3D());
 
                 _trail.Thrust = -_smoothHeading.ToGodot();
 
@@ -119,8 +118,8 @@ public partial class SeekerMissile : Area
             {
                 if (_hitGround)
                 {
-                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.origin, out _);
-                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin, out _);
+                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.DustCloudVFX, GlobalTransform.Origin, out _);
+                    ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.Origin, out _);
                     QueueFree();
                 }
 
@@ -132,27 +131,27 @@ public partial class SeekerMissile : Area
     private void Deactivate()
     {
         // convert to rigid body for 'ragdoll' death physics.
-        Vector3 pos = GlobalTransform.origin;
+        Vector3 pos = GlobalTransform.Origin;
         
         // TODO: pool RigidBodies.
-        RigidBody rb = new RigidBody();
+        RigidBody3D rb = new RigidBody3D();
         GetParent().AddChild(rb);
         rb.GlobalTransform = GlobalTransform;
         GetParent().RemoveChild(this);  
         rb.AddChild(this);
-        CollisionShape shape = _collisionShape;
+        CollisionShape3D shape = _collisionShape;
         rb.AddChild(shape.Duplicate());
 
-        rb.GlobalTransform = new Transform(Basis.Identity, pos);
-        GlobalTransform = new Transform(GlobalTransform.basis, pos);
+        rb.GlobalTransform = new Transform3D(Basis.Identity, pos);
+        GlobalTransform = new Transform3D(GlobalTransform.Basis, pos);
         
         ref SteeringManager.Boid steeringBoid = ref SteeringManager.Instance.GetObject<SteeringManager.Boid>(_steeringId);
         rb.ApplyCentralImpulse(steeringBoid.Velocity.ToGodot().To3D());
         rb.ApplyTorqueImpulse(new Vector3(Utils.Rng.Randf(), Utils.Rng.Randf(), Utils.Rng.Randf()) * 1.0f);
         
-        rb.Connect("body_entered", this, nameof(_WhenTheBodyHitsTheFloor));
+        rb.Connect("body_entered", new Callable(this, nameof(_WhenTheBodyHitsTheFloor)));
         rb.ContactMonitor = true;
-        rb.ContactsReported = 2;
+        rb.MaxContactsReported = 2;
 
         SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
         _trail.QueueFree();
@@ -164,7 +163,7 @@ public partial class SeekerMissile : Area
     {
         _state = State.Deactivated;
         SteeringManager.Instance.Unregister<SteeringManager.Boid>(_steeringId);
-        ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.origin, out _);
+        ParticleManager.Instance.AddOneShotParticles(Resources.Instance.ExplodeVFX, GlobalTransform.Origin, out _);
         QueueFree();
 
         Monitorable = false;
@@ -179,7 +178,7 @@ public partial class SeekerMissile : Area
         }
     }
 
-    public virtual void _OnAreaEntered(Area area)
+    public virtual void _OnAreaEntered(Area3D area)
     {
         if (_state == State.Deactivated)
             return;

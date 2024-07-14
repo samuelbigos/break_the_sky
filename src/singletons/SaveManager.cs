@@ -3,13 +3,13 @@ using System;
 using System.Diagnostics;
 using Godot.Collections;
 
-public class SaveManager : Singleton<SaveManager>
+public partial class SaveManager : Singleton<SaveManager>
 {
 	private const string SAVE_FOLDER = "user://savegame";
 	private bool _loadedThisSession = false;
 
-	private static int Version => Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
-	private static string SavePath => SAVE_FOLDER.PlusFile($"save_{Version:D3}.tres");
+	private static int Version => ProjectSettings.GetSetting("application/config/save_version").AsInt32();
+	private static string SavePath => SAVE_FOLDER + "/" + ($"save_{Version:D3}.tres");
 
 	public override void _Ready()
 	{
@@ -21,19 +21,18 @@ public class SaveManager : Singleton<SaveManager>
 
 	public static void DoSave()
 	{
-		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
-		
-		Directory directory = new Directory();
+		int version = ProjectSettings.GetSetting("application/config/save_version").AsInt32();
+
+		DirAccess directory = DirAccess.Open("user://");
 		if (!directory.DirExists(SAVE_FOLDER))
 		{
 			directory.MakeDirRecursive(SAVE_FOLDER);
 		}
-		
-		File saveGame = new File();
-		saveGame.Open(SavePath, File.ModeFlags.Write);
-		
+
+		FileAccess saveGame = FileAccess.Open(SavePath, FileAccess.ModeFlags.Write);
+
 		// first add the version
-		saveGame.StoreLine(JSON.Print(version));
+		saveGame.StoreLine(Json.Stringify(version));
 
 		// then store each persistent node
 		Dictionary saveData = new Dictionary();
@@ -45,28 +44,32 @@ public class SaveManager : Singleton<SaveManager>
 
 			saveData[saveableNode.Name] = saveableNode.DoSave();
 		}
-		saveGame.StoreLine(JSON.Print(saveData));
+		saveGame.StoreLine(Json.Stringify(saveData));
 		saveGame.Close();
 	}
 
 	private static void DoLoad()
 	{
-		int version = Convert.ToInt32(ProjectSettings.GetSetting("application/config/save_version"));
+		int version = ProjectSettings.GetSetting("application/config/save_version").AsInt32();
 
-		File saveGame = new File();
-		string path = SavePath;
-		if (!saveGame.FileExists(path))
+		FileAccess saveGame = FileAccess.Open(SavePath, FileAccess.ModeFlags.Read);
+		if (!saveGame.IsOpen())
+		{
 			Instance.CreateSave();
-		
-		saveGame.Open(path, File.ModeFlags.Read);
+			saveGame = FileAccess.Open(SavePath, FileAccess.ModeFlags.Read);
+		}
+
+		Json json = new Json();
 		
 		// first read in the save game version
-		int saveVersion = Convert.ToInt32(JSON.Parse(saveGame.GetLine()).Result);
+		json.Parse(saveGame.GetLine());
+		int saveVersion = json.Data.AsInt32();
 		
 		if (saveVersion != version)
 			return;
-		
-		Dictionary saveData = (Dictionary) JSON.Parse(saveGame.GetLine()).Result;
+
+		json.Parse(saveGame.GetLine());
+		Dictionary saveData = (Dictionary) json.Data;
 		
 		foreach (Node node in Instance.GetTree().GetNodesInGroup("persistent"))
 		{
@@ -74,13 +77,13 @@ public class SaveManager : Singleton<SaveManager>
 			if (saveableNode == null)
 				continue;
 
-			if (!saveData.Contains(saveableNode.Name))
+			if (!saveData.ContainsKey(saveableNode.Name))
 			{
 				saveableNode.InitialiseSaveData();
 				saveableNode.DoSave();
 				continue;
 			}
-			saveableNode.DoLoad(saveData[saveableNode.Name] as Dictionary);
+			saveableNode.DoLoad(saveData[saveableNode.Name].AsGodotDictionary());
 		}
 		
 		saveGame.Close();
@@ -91,7 +94,7 @@ public class SaveManager : Singleton<SaveManager>
 
 	public void Reset()
 	{
-		Directory dir = new Directory();
+		DirAccess dir = DirAccess.Open("user://");
 		dir.Remove(SaveManager.SavePath);
 		DoLoad();
 	}

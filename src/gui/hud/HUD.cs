@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using GodotOnReady.Attributes;
 
 public partial class HUD : Singleton<HUD>
 {
@@ -10,21 +9,21 @@ public partial class HUD : Singleton<HUD>
     [Export] private PackedScene _boidIconScene;
     
     // level
-    [OnReadyGet] private Button _openSkillTreeButton;
-    [OnReadyGet] private ProgressBar _levelBar;
-    [OnReadyGet] private Label _progressLabel;
-    [OnReadyGet] private Label _levelLabel;
+    [Export] private Button _openSkillTreeButton;
+    [Export] private ProgressBar _levelBar;
+    [Export] private Label _progressLabel;
+    [Export] private Label _levelLabel;
     
     // resources
     [Export] private NodePath _materialsValuePath;
     
     // fabrication
-    [OnReadyGet] private Control _tabUIContainer;
+    [Export] private Control _tabUIContainer;
     [Export] private NodePath _fabicateMenuPath;
     [Export] private NodePath _fabricateQueuePath;
     
     // skill trees
-    [OnReadyGet] private Label _skillPointsValue;
+    [Export] private Label _skillPointsValue;
 
     public Action<ResourceBoidAlly> OnFabricateButtonPressed;
     public Action<int> OnQueueButtonPressed;
@@ -38,7 +37,7 @@ public partial class HUD : Singleton<HUD>
     private Label _materialValue;
     private List<BoidIcon> _queueIcons = new();
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
         _fabricateQueue = GetNode<Control>(_fabricateQueuePath);
         _fabricateMenu = GetNode<Control>(_fabicateMenuPath);
@@ -53,7 +52,7 @@ public partial class HUD : Singleton<HUD>
             StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
         }
 
-        _openSkillTreeButton.Connect("pressed", this, nameof(_OnOpenSkillTreeButtonPressed));
+        _openSkillTreeButton.Connect("pressed", new Callable(this, nameof(_OnOpenSkillTreeButtonPressed)));
 
         SaveDataPlayer.OnLevelUp += _OnPlayedLevelUp;
     }
@@ -76,14 +75,14 @@ public partial class HUD : Singleton<HUD>
             if (!SaveDataPlayer.IsFabricantUnlocked(fabricant))
                 continue;
             
-            BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
+            BoidIcon icon = _boidIconScene.Instantiate<BoidIcon>();
             _fabricateMenu.AddChild(icon);
             icon.OnPressed += _OnFabricateButtonPressed;
             icon.Init(fabricant, false);
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -108,7 +107,7 @@ public partial class HUD : Singleton<HUD>
                 }
                 else
                 {
-                    WarningIndicator newIndicator = _warningIndicatorScene.Instance<WarningIndicator>();
+                    WarningIndicator newIndicator = _warningIndicatorScene.Instantiate<WarningIndicator>();
                     newIndicator.Target = boid;
                     AddChild(newIndicator);
                     newIndicator.GlobalPosition(GameCamera.Instance.ProjectToZero(pos));
@@ -140,21 +139,21 @@ public partial class HUD : Singleton<HUD>
         {
             BoidIcon icon = _queueIcons[i];
             FabricateManager.Fabricant fab = FabricateManager.Instance.Queue[i];
-            icon.UpdateProgress(1.0f - fab.TimeLeft / fab.TotalTime);
+            icon.UpdateProgress((float) (1.0f - fab.TimeLeft / fab.TotalTime));
         }
     }
 
     private bool BoidOffScreen(BoidBase boid, out Vector2 edgePosition, float marginPercent)
     {
         edgePosition = Vector2.Zero;
-        Vector2 screenPos = GameCamera.Instance.UnprojectPosition(boid.GlobalTransform.origin);
-        Vector2 screen = GetViewport().Size;
+        Vector2 screenPos = GameCamera.Instance.UnprojectPosition(boid.GlobalTransform.Origin);
+        Vector2 screen = DisplayServer.ScreenGetSize();
 
-        if (screenPos.x < 0.0f || screenPos.x > screen.x || screenPos.y < 0.0f || screenPos.y > screen.y)
+        if (screenPos.X < 0.0f || screenPos.X > screen.X || screenPos.Y < 0.0f || screenPos.Y > screen.Y)
         {
-            float margin = marginPercent * screen.y;
-            edgePosition = new Vector2(Mathf.Clamp(screenPos.x, 0.0f + margin, screen.x - margin),
-                Mathf.Clamp(screenPos.y, 0.0f + margin, screen.y - margin));
+            float margin = marginPercent * screen.Y;
+            edgePosition = new Vector2(Mathf.Clamp(screenPos.X, 0.0f + margin, screen.X - margin),
+                Mathf.Clamp(screenPos.Y, 0.0f + margin, screen.Y - margin));
             return true;
         }
 
@@ -170,7 +169,7 @@ public partial class HUD : Singleton<HUD>
 
     private void _OnPushQueue(ResourceBoidAlly data)
     {
-        BoidIcon icon = _boidIconScene.Instance<BoidIcon>();
+        BoidIcon icon = _boidIconScene.Instantiate<BoidIcon>();
         _fabricateQueue.AddChild(icon);
         icon.OnPressed += _OnQueueButtonPressed;
         icon.Init(data, true);

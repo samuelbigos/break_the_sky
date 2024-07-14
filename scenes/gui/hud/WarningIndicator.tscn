@@ -3,19 +3,19 @@
 [ext_resource path="res://src/gui/hud/WarningIndicator.cs" type="Script" id=1]
 [ext_resource path="res://assets/mesh/ui/warning.obj" type="ArrayMesh" id=2]
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="StandardMaterial3D" id=1]
 render_priority = 1
 flags_unshaded = true
 flags_no_depth_test = true
 
-[node name="WarningIndicator" type="Spatial"]
+[node name="WarningIndicator" type="Node3D"]
 script = ExtResource( 1 )
 _flashDistance = 100.0
 _flashTime = 0.1
-_meshPath = NodePath("MeshInstance")
+_meshPath = NodePath("MeshInstance3D")
 
-[node name="MeshInstance" type="MeshInstance" parent="."]
-transform = Transform( 1.46379, 0, 0, 0, 1, 0, 0, 0, 1.46379, 0, 10, 0 )
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D( 1.46379, 0, 0, 0, 1, 0, 0, 0, 1.46379, 0, 10, 0 )
 cast_shadow = 0
 mesh = ExtResource( 2 )
 material/0 = SubResource( 1 )

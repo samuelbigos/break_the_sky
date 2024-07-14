@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Godot.Collections;
 
-public class Metagame : Saveable
+public partial class Metagame : Saveable
 {
     public static Metagame Instance;
 
@@ -21,8 +21,8 @@ public class Metagame : Saveable
 
     public GameState CurrentState
     {
-        get => (GameState) Convert.ToInt32(_data["currentState"]);
-        private set => _data["currentState"] = value;
+        get => (GameState) _data["currentState"].AsInt32();
+        private set => _data["currentState"] = (int)value;
     }
     
     public override void _Ready()

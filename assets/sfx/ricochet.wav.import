@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/ricochet.wav-29de3faad34e9342b049aa784cd48bc0.sample"
+type="AudioStreamWAV"
+uid="uid://m1sjcfuhtaf7"
+path="res://.godot/imported/ricochet.wav-29de3faad34e9342b049aa784cd48bc0.sample"
 
 [deps]
 
 source_file="res://assets/sfx/ricochet.wav"
-dest_files=[ "res://.import/ricochet.wav-29de3faad34e9342b049aa784cd48bc0.sample" ]
+dest_files=["res://.godot/imported/ricochet.wav-29de3faad34e9342b049aa784cd48bc0.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

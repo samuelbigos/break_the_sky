@@ -1,18 +1,18 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://cmwn1t1edwsfx"]
 
-[ext_resource path="res://src/singletons/Resources.cs" type="Script" id=1]
-[ext_resource path="res://scenes/gui/Tooltip.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/data/game_settings.tres" type="Resource" id=3]
-[ext_resource path="res://scenes/vfx/DamagedVFX.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/vfx/HitVFX.tscn" type="PackedScene" id=5]
-[ext_resource path="res://scenes/vfx/DustCloudVFX.tscn" type="PackedScene" id=6]
-[ext_resource path="res://scenes/vfx/ExplodeVFX.tscn" type="PackedScene" id=7]
+[ext_resource type="Script" path="res://src/singletons/Resources.cs" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/gui/Tooltip.tscn" id="2"]
+[ext_resource type="Resource" path="res://assets/data/game_settings.tres" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/DamagedVFX.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://dlkilwpty6a64" path="res://scenes/vfx/HitVFX.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/DustCloudVFX.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/ExplodeVFX.tscn" id="7"]
 
 [node name="Node" type="Node"]
-script = ExtResource( 1 )
-Tooltip = ExtResource( 2 )
-ResourceGameSettings = ExtResource( 3 )
-HitVFX = ExtResource( 5 )
-DamagedVFX = ExtResource( 4 )
-DustCloudVFX = ExtResource( 6 )
-ExplodeVFX = ExtResource( 7 )
+script = ExtResource("1")
+Tooltip = ExtResource("2")
+ResourceGameSettings = ExtResource("3")
+HitVFX = ExtResource("5")
+DamagedVFX = ExtResource("4")
+DustCloudVFX = ExtResource("6")
+ExplodeVFX = ExtResource("7")

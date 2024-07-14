@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Array = Godot.Collections.Array;
 
-public class TrailRenderer : MeshInstance
+public partial class TrailRenderer : MeshInstance3D
 {
     public static TrailRenderer Instance;
     
@@ -23,7 +23,7 @@ public class TrailRenderer : MeshInstance
         CastShadow = ShadowCastingSetting.Off;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -52,7 +52,7 @@ public class TrailRenderer : MeshInstance
                 Vector3 posLast = trailPositions[(idx - 1 + linePoints) % linePoints];
                 Vector3 dir = -(pos - posLast).Normalized();
 
-                float w = lineWidth * lineWidthCurve.Interpolate((float)j / linePoints) * 0.5f;
+                float w = lineWidth * lineWidthCurve.Sample((float)j / linePoints) * 0.5f;
 
                 Vector3 cross = dir.Cross(Vector3.Up) * w;
                 _colList[v] = ColourManager.Instance.White;

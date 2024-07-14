@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class GameState_TacticalPause : BaseState<StateMachine_Game.States>
+public partial class GameState_TacticalPause : BaseState<StateMachine_Game.States>
 {
     public GameState_TacticalPause()
     {
@@ -35,7 +35,7 @@ public class GameState_TacticalPause : BaseState<StateMachine_Game.States>
     {
     }
 
-    public override void Update(float delta)
+    public override void Update(double delta)
     {
     }
 }

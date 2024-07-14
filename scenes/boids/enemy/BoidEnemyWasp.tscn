@@ -1,58 +1,57 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=12 format=3 uid="uid://bmug1140msttv"]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_body.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://src/boids/enemy/BoidEnemyWasp.cs" type="Script" id=3]
-[ext_resource path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" type="Resource" id=4]
-[ext_resource path="res://scenes/abilities/SeekerMissile.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_antigrav.obj" type="ArrayMesh" id=6]
-[ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
-[ext_resource path="res://assets/material/boid.material" type="Material" id=8]
-[ext_resource path="res://assets/mesh/ships/human_wasp/wasp_turret.obj" type="ArrayMesh" id=9]
+[ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://bmsx7pw3xh2cm" path="res://assets/mesh/ships/human_wasp/wasp_body.obj" id="2"]
+[ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyWasp.cs" id="3"]
+[ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/SeekerMissile.tscn" id="5"]
+[ext_resource type="ArrayMesh" uid="uid://pp42mlprfmwe" path="res://assets/mesh/ships/human_wasp/wasp_antigrav.obj" id="6"]
+[ext_resource type="Material" path="res://assets/material/antigrav.tres" id="7"]
+[ext_resource type="Material" uid="uid://bqv6wig020okj" path="res://assets/material/boid.material" id="8"]
+[ext_resource type="ArrayMesh" uid="uid://batqobpvff3hh" path="res://assets/mesh/ships/human_wasp/wasp_turret.obj" id="9"]
 
-[sub_resource type="CapsuleShape" id=1]
-radius = 4.66725
+[sub_resource type="CapsuleShape3D" id="1"]
+radius = 0.96618
 height = 1.93236
 
-[sub_resource type="BoxShape" id=2]
-extents = Vector3( 4.30497, 3.10853, 5.63343 )
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(8.60994, 6.21706, 11.2669)
 
-[node name="BoidEnemyWasp" instance=ExtResource( 1 )]
-script = ExtResource( 3 )
+[node name="BoidEnemyWasp" instance=ExtResource("1")]
+script = ExtResource("3")
 _behaviours = 30
 MaxVelocity = 50.0
 MaxForce = 75.0
 Bank360 = true
-_baseResourceStats = ExtResource( 4 )
+_bulletScene = ExtResource("5")
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 100.0
 SeekPlayerOnSpawn = true
-WeaponPositionPath = NodePath("WeaponPosition")
-_bulletScene = ExtResource( 5 )
+_baseResourceStats = ExtResource("4")
 
 [node name="ShipCollider" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.724571 )
-shape = SubResource( 1 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.724571)
+shape = SubResource("1")
 
 [node name="RBCollider" parent="." index="1"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.335616, -0.579655 )
-shape = SubResource( 2 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.335616, -0.579655)
+shape = SubResource("2")
 
 [node name="Mesh" parent="." index="2"]
-mesh = ExtResource( 2 )
+mesh = ExtResource("2")
 
 [node name="BoidTrail" parent="Mesh" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.063448, 0, -0.0634489 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.063448, 0, -0.0634489)
 
-[node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
-material_override = ExtResource( 7 )
-mesh = ExtResource( 6 )
+[node name="AntiGrav" type="MeshInstance3D" parent="Mesh" index="1"]
+material_override = ExtResource("7")
+mesh = ExtResource("6")
 skeleton = NodePath("../..")
 
-[node name="Turret" type="MeshInstance" parent="Mesh" index="2"]
-material_override = ExtResource( 8 )
-mesh = ExtResource( 9 )
+[node name="Turret" type="MeshInstance3D" parent="Mesh" index="2"]
+material_override = ExtResource("8")
+mesh = ExtResource("9")
 
-[node name="WeaponPosition" type="Spatial" parent="." index="5"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.16277, 0.893151 )
+[node name="WeaponPosition" type="Node3D" parent="." index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.16277, 0.893151)

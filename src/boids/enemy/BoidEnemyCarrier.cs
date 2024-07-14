@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using GodotOnReady.Attributes;
+using Godot.Collections;
 
 public partial class BoidEnemyCarrier : BoidEnemyBase
 {
-    [Export] private List<NodePath> _turretPaths;
+    [Export] private Array<NodePath> _turretPaths;
 
     [Export] private float _dronePulseCooldown = 2.0f;
     [Export] private float _droneSpawnInterval = 1.0f;
@@ -16,27 +16,27 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
     [Export] private FlowFieldResource _minionFlowField;
 
     private List<Turret> _turrets = new List<Turret>();
-    private List<Spatial> _turretBarrels = new List<Spatial>();
+    private List<Node3D> _turretBarrels = new List<Node3D>();
     private float _beaconCooldown;
     private float _beaconCharge;
     private float _beaconDuration;
     private int _pulses;
     private bool _firstFrame = true;
-    private float _droneSpawnTimer;
+    private double _droneSpawnTimer;
     private bool _spawningDrones = false;
-    private float _dronePulseTimer;
+    private double _dronePulseTimer;
     private int _dronePulseSpawned;
     private int _droneSpawnSide;
     private int _flowFieldId;
 
     private List<BoidEnemyBase> _minions = new List<BoidEnemyBase>();
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
         for (int i = 0; i < _turretPaths.Count; i++)
         {
             _turrets.Add(GetNode<Turret>(_turretPaths[i]));
-            _turretBarrels.Add(_turrets[i].GetChild<Spatial>(0));
+            _turretBarrels.Add(_turrets[i].GetChild<Node3D>(0));
             _turrets[i].Owner = this;
             _turrets[i].ShootCooldown = _resourceStats.AttackCooldown;
             _turrets[i].ShootVelocity = _resourceStats.AttackVelocity;
@@ -70,7 +70,7 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -116,11 +116,11 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
         Vector2 pos;
         if (_droneSpawnSide == 0)
         {
-            pos = (GetNode("SpawnLeft") as Spatial).GlobalTransform.origin.To2D();
+            pos = (GetNode("SpawnLeft") as Node3D).GlobalTransform.Origin.To2D();
         }
         else
         {
-            pos = (GetNode("SpawnRight") as Spatial).GlobalTransform.origin.To2D();
+            pos = (GetNode("SpawnRight") as Node3D).GlobalTransform.Origin.To2D();
         }
         Vector2 vel = 25.0f * (pos - GlobalPosition).Normalized();
         BoidEnemyBase minion = BoidFactory.Instance.CreateEnemyBoid(_minion, pos, vel);

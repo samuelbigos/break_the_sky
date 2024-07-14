@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh"
+uid="uid://c2oubobfb1wlf"
+path="res://.godot/imported/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh"
 
 [deps]
 
-files=[ "res://.import/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh" ]
+files=["res://.godot/imported/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh"]
 
 source_file="res://assets/mesh/map/asia.obj"
-dest_files=[ "res://.import/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh", "res://.import/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh" ]
+dest_files=["res://.godot/imported/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh", "res://.godot/imported/asia.obj-8ea7be383b57ce18e1c0688f71d81054.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

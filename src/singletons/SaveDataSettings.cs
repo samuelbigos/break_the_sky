@@ -4,11 +4,11 @@ using System.Diagnostics;
 using Godot.Collections;
 using ImGuiNET;
 
-public class SaveDataSettings : Saveable
+public partial class SaveDataSettings : Saveable
 {
     public static SaveDataSettings Instance;
 
-    private Dictionary<string, object> _defaults = new()
+    private Dictionary<string, Variant> _defaults = new()
     {
         { "fullscreen", false },
         { "windowed_resolution", new Vector2(1440, 810) },
@@ -16,13 +16,13 @@ public class SaveDataSettings : Saveable
 
     private static bool Fullscreen
     {
-        get => Convert.ToBoolean(Instance._data["fullscreen"]);
+        get => Instance._data["fullscreen"].AsBool();
         set => Instance._data["fullscreen"] = value;
     }
     
-    private static Vector2 WindowedResolution
+    private static Vector2I WindowedResolution
     {
-        get => Utils.Vector2FromString(Convert.ToString(Instance._data["windowed_resolution"]));
+        get => (Vector2I) Utils.Vector2FromString(Instance._data["windowed_resolution"].AsString());
         set => Instance._data["windowed_resolution"] = value;
     }
 
@@ -36,7 +36,7 @@ public class SaveDataSettings : Saveable
     {
         foreach (string key in _defaults.Keys)
         {
-            if (!_data.Contains(key))
+            if (!_data.ContainsKey(key))
             {
                 _data[key] = _defaults[key];
             }
@@ -59,7 +59,7 @@ public class SaveDataSettings : Saveable
     {
         base._EnterTree();
         DebugImGui.Instance.RegisterWindow("savedata_settings", "Settings", _OnImGuiLayout);
-        GetViewport().Connect("size_changed", this, nameof(_OnWindowSizeChanged));
+        GetViewport().Connect("size_changed", new Callable(this, nameof(_OnWindowSizeChanged)));
     }
 
     public override void _ExitTree()
@@ -82,16 +82,14 @@ public class SaveDataSettings : Saveable
     {
         if (fullscreen)
         {
-            WindowedResolution = OS.WindowSize;
-            OS.WindowFullscreen = true;
-            OS.WindowBorderless = true;
+            WindowedResolution = DisplayServer.WindowGetSize();
+            DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
             
         }
         else
         {
-            OS.WindowFullscreen = false;
-            OS.WindowBorderless = false;
-            OS.WindowSize = WindowedResolution;
+            DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
+            DisplayServer.WindowSetSize(WindowedResolution);
         }
         Fullscreen = fullscreen;
         SaveManager.DoSave();
@@ -99,8 +97,8 @@ public class SaveDataSettings : Saveable
 
     private void _OnWindowSizeChanged()
     {
-        if (!OS.WindowFullscreen)
-            WindowedResolution = OS.WindowSize;
+        if (DisplayServer.WindowGetMode() == DisplayServer.WindowMode.Windowed)
+            WindowedResolution = DisplayServer.WindowGetSize();
     }
 
     private void _OnImGuiLayout()

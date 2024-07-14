@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
+using Godot.Collections;
 
 [Tool]
-public class SkillNode : Button
+public partial class SkillNode : Button
 {
     [Export] public bool IsRoot;
     [Export] public ResourceBoidAlly AllyType;
     [Export] public ResourceSkillNode ResourceSkill;
-    [Export] public List<NodePath> Connections = new();
+    [Export] public Array<NodePath> Connections = new();
     [Export] public Vector2 SizeMinor;
     [Export] public Vector2 SizeMajor;
 
@@ -26,7 +26,7 @@ public class SkillNode : Button
     {
         base._Ready();
     
-        Connect("pressed", this, nameof(_OnPressed));
+        Connect("pressed", new Callable(this, nameof(_OnPressed)));
     
          _activeIndicator = GetNode<Control>(_activeIndicatorPath);
          _root = GetNode<SkillNode>(_rootPath);
@@ -41,15 +41,15 @@ public class SkillNode : Button
         if (!IsRoot)
         {
             Icon = ResourceSkill.Icon;
-            RectMinSize = ResourceSkill.Major ? SizeMajor : SizeMinor; 
+            CustomMinimumSize = ResourceSkill.Major ? SizeMajor : SizeMinor; 
         }
     }
     
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
     
-        if (Engine.EditorHint && ResourceSkill != null)
+        if (Engine.IsEditorHint() && ResourceSkill != null)
         {
             Icon = ResourceSkill.Icon;
             Refresh();

@@ -1,24 +1,25 @@
 using Godot;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot.Collections;
 
-public class ParticleManager : Spatial
+public partial class ParticleManager : Node3D
 {
     [Export] private int _poolSize = 100;
-    [Export] private List<PackedScene> _particlesToPool;
+    [Export] private Array _particlesToPool;
 
     private static ParticleManager _instance;
     public static ParticleManager Instance => _instance;
 
-    private Dictionary<PackedScene, Queue<Particles>> _pools = new();
+    private System.Collections.Generic.Dictionary<PackedScene, Queue<GpuParticles3D>> _pools = new();
     
     private struct OneShotParticles
     {
-        public Queue<Particles> Queue;
-        public Particles Particles;
-        public float Lifetime;
+        public Queue<GpuParticles3D> Queue;
+        public GpuParticles3D Particles;
+        public double Lifetime;
         public bool TriggerEmit;
-        public ParticlesMaterial OriginalMaterial;
+        public ParticleProcessMaterial OriginalMaterial;
     }
 
     private List<OneShotParticles> _oneShotParticles = new(100);
@@ -36,10 +37,10 @@ public class ParticleManager : Spatial
 
         foreach (PackedScene particleScene in _particlesToPool)
         {
-            Queue<Particles> list = new(_poolSize);
+            Queue<GpuParticles3D> list = new(_poolSize);
             for (int i = 0; i < _poolSize; i++)
             {
-                Particles particles = particleScene.Instance() as Particles;
+                GpuParticles3D particles = particleScene.Instantiate() as GpuParticles3D;
                 particles.Visible = false;
                 AddChild(particles);
                 list.Enqueue(particles);
@@ -48,7 +49,7 @@ public class ParticleManager : Spatial
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -75,7 +76,7 @@ public class ParticleManager : Spatial
         }
     }
 
-    public Particles AddOneShotParticles(PackedScene particleScene, Vector3 position, out ParticlesMaterial mat, bool duplicateMaterial = false)
+    public GpuParticles3D AddOneShotParticles(PackedScene particleScene, Vector3 position, out ParticleProcessMaterial mat, bool duplicateMaterial = false)
     {
         mat = null;
 #if !FINAL
@@ -85,22 +86,22 @@ public class ParticleManager : Spatial
             return null;
         }
 #endif
-        Queue<Particles> list = _pools[particleScene];
+        Queue<GpuParticles3D> list = _pools[particleScene];
         if (list.Count == 0)
         {
             Debug.Assert(false, $"Increase pool size for {particleScene}!");
             return null;
         }
-        Particles p = list.Dequeue();
+        GpuParticles3D p = list.Dequeue();
         p.GlobalPosition(position);
         p.Visible = true;
-        float lifetime = p.Lifetime + (1.0f - p.Explosiveness) * p.Lifetime; // Account for explosiveness != 1.0.
+        double lifetime = p.Lifetime + (1.0f - p.Explosiveness) * p.Lifetime; // Account for explosiveness != 1.0.
         
         // Duplicate material if required.
-        ParticlesMaterial originalMat = p.ProcessMaterial as ParticlesMaterial;
-        if (duplicateMaterial) p.ProcessMaterial = originalMat.Duplicate() as ParticlesMaterial;
-        mat = p.ProcessMaterial as ParticlesMaterial;
-        DebugUtils.Assert(!mat.Null(), "Particle doesn't have a ParticlesMaterial.");
+        ParticleProcessMaterial originalMat = p.ProcessMaterial as ParticleProcessMaterial;
+        if (duplicateMaterial) p.ProcessMaterial = originalMat.Duplicate() as ParticleProcessMaterial;
+        mat = p.ProcessMaterial as ParticleProcessMaterial;
+        DebugUtils.Assert(mat != null, "Particle doesn't have a ParticleProcessMaterial.");
         
         _oneShotParticles.Add(new OneShotParticles()
         {

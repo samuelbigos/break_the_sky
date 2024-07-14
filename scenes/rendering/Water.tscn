@@ -3,8 +3,8 @@
 [ext_resource path="res://src/rendering/Water.cs" type="Script" id=1]
 [ext_resource path="res://assets/material/water_mat.tres" type="Material" id=2]
 [ext_resource path="res://assets/material/water_wave_mat.tres" type="Material" id=3]
-[ext_resource path="res://assets/shader/blur_x.shader" type="Shader" id=4]
-[ext_resource path="res://assets/shader/blur_y.shader" type="Shader" id=5]
+[ext_resource path="res://assets/shader/blur_x.gdshader" type="Shader" id=4]
+[ext_resource path="res://assets/shader/blur_y.gdshader" type="Shader" id=5]
 
 [sub_resource type="PlaneMesh" id=7]
 size = Vector2( 512, 512 )
@@ -15,8 +15,8 @@ shader = ExtResource( 5 )
 [sub_resource type="ShaderMaterial" id=9]
 shader = ExtResource( 4 )
 
-[node name="Water" type="MeshInstance"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )
+[node name="Water" type="MeshInstance3D"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )
 visible = false
 mesh = SubResource( 7 )
 material/0 = ExtResource( 2 )
@@ -27,7 +27,7 @@ _waveTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodeP
 _blurViewportPaths = [ NodePath("WaveBlurY"), NodePath("WaveBlurX") ]
 _blurTextureRectPaths = [ NodePath("WaveBlurY/TextureRect"), NodePath("WaveBlurX/TextureRect") ]
 
-[node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
+[node name="WaveRenderViewportSwapA" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -38,10 +38,10 @@ render_target_update_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapA"]
 material = ExtResource( 3 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="WaveRenderViewportSwapB" type="Viewport" parent="."]
+[node name="WaveRenderViewportSwapB" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -52,10 +52,10 @@ render_target_update_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapB"]
 material = ExtResource( 3 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="WaveBlurY" type="Viewport" parent="."]
+[node name="WaveBlurY" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -65,10 +65,10 @@ render_target_v_flip = true
 
 [node name="TextureRect" type="TextureRect" parent="WaveBlurY"]
 material = SubResource( 12 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="WaveBlurX" type="Viewport" parent="."]
+[node name="WaveBlurX" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -78,18 +78,18 @@ render_target_v_flip = true
 
 [node name="TextureRect" type="TextureRect" parent="WaveBlurX"]
 material = SubResource( 9 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="WaterMeshViewport" type="Viewport" parent="."]
+[node name="WaterMeshViewport" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
 render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="WaterMeshViewport"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0 )
+[node name="Camera3D" type="Camera3D" parent="WaterMeshViewport"]
+transform = Transform3D( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 5, 0 )
 cull_mask = 1047554
 projection = 1
 size = 512.0

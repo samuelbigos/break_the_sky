@@ -6,11 +6,11 @@ using System.Diagnostics;
 using Godot.Collections;
 using ImGuiNET;
 
-public class SaveDataWorld : Saveable
+public partial class SaveDataWorld : Saveable
 {
     private static SaveDataWorld _instance;
 
-    private Godot.Collections.Dictionary<string, object> _defaults = new()
+    private Godot.Collections.Dictionary<string, Variant> _defaults = new()
     {
     };
     
@@ -24,7 +24,7 @@ public class SaveDataWorld : Saveable
     {
         foreach (string key in _defaults.Keys)
         {
-            if (!_data.Contains(key))
+            if (!_data.ContainsKey(key))
             {
                 _data[key] = _defaults[key];
             }

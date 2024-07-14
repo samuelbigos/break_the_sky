@@ -2,15 +2,15 @@
 
 [ext_resource path="res://assets/mesh/circle.obj" type="ArrayMesh" id=1]
 
-[sub_resource type="SpatialMaterial" id=9]
+[sub_resource type="StandardMaterial3D" id=9]
 flags_unshaded = true
 vertex_color_use_as_albedo = true
 
 [sub_resource type="Gradient" id=5]
-offsets = PoolRealArray( 0, 0.394286, 0.725714, 0.994286 )
-colors = PoolColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.963867, 0.140081, 0.0489464, 1, 0, 0, 0, 1 )
+offsets = PackedFloat32Array( 0, 0.394286, 0.725714, 0.994286 )
+colors = PackedColorArray( 1, 1, 1, 1, 1, 0.555588, 0.0234375, 1, 0.963867, 0.140081, 0.0489464, 1, 0, 0, 0, 1 )
 
-[sub_resource type="GradientTexture" id=6]
+[sub_resource type="GradientTexture2D" id=6]
 gradient = SubResource( 5 )
 
 [sub_resource type="Curve" id=7]
@@ -19,7 +19,7 @@ _data = [ Vector2( 0, 0 ), 0.0, 9.07945, 0, 0, Vector2( 0.195479, 0.732258 ), 1.
 [sub_resource type="CurveTexture" id=8]
 curve = SubResource( 7 )
 
-[sub_resource type="ParticlesMaterial" id=2]
+[sub_resource type="ParticleProcessMaterial" id=2]
 lifetime_randomness = 0.5
 emission_shape = 1
 emission_sphere_radius = 3.0
@@ -30,7 +30,7 @@ scale_curve = SubResource( 8 )
 color_ramp = SubResource( 6 )
 
 [node name="ParticlesExplode" type="Particles"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
 material_override = SubResource( 9 )
 emitting = false
 amount = 50

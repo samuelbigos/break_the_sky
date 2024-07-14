@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using Object = Godot.Object;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
@@ -10,12 +9,12 @@ public static class Utils
 
     public static Godot.Vector2 To2D(this Godot.Vector3 vec)
     {
-        return new Godot.Vector2(vec.x, vec.z);
+        return new Godot.Vector2(vec.X, vec.Z);
     }
 
     public static Godot.Vector3 To3D(this Godot.Vector2 vec)
     {
-        return new Godot.Vector3(vec.x, 0.0f, vec.y);
+        return new Godot.Vector3(vec.X, 0.0f, vec.Y);
     }
     
     public static Vector2 To2D(this Vector3 vec)
@@ -28,15 +27,15 @@ public static class Utils
         return new Vector3(vec.X, 0.0f, vec.Y);
     }
 
-    public static void GlobalPosition(this Spatial spatial, Godot.Vector3 position)
+    public static void GlobalPosition(this Node3D spatial, Godot.Vector3 position)
     {
-        spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, position);
+        spatial.GlobalTransform = new Transform3D(spatial.GlobalTransform.Basis, position);
     }
 
-    public static void GlobalPosition(this Spatial spatial, Godot.Vector2 position)
+    public static void GlobalPosition(this Node3D spatial, Godot.Vector2 position)
     {
         Godot.Vector3 pos = position.To3D();
-        spatial.GlobalTransform = new Transform(spatial.GlobalTransform.basis, pos);
+        spatial.GlobalTransform = new Transform3D(spatial.GlobalTransform.Basis, pos);
     }
 
     public static float RandfUnit()
@@ -49,14 +48,14 @@ public static class Utils
         return new Godot.Vector2(RandfUnit(), RandfUnit()).Normalized();
     }
 
-    public static float Ease_CubicInOut(float t)
+    public static double Ease_CubicInOut(double t)
     {
         return t < 0.5f
             ? 4.0f * t * t * t
             : 0.5f * Mathf.Pow(2.0f * t - 2.0f, 3.0f) + 1.0f;
     }
     
-    public static float Ease_CubicOut(float t)
+    public static double Ease_CubicOut(double t)
     {
         return 1 - Mathf.Pow(1 - t, 3);
     }
@@ -66,11 +65,11 @@ public static class Utils
         Godot.Vector2 r = new(Rng.Randf(), Rng.Randf());
         if (Rng.Randf() > 0.5f)
         {
-            r.x = Mathf.Floor(Rng.Randf() + 0.5f);
+            r.X = Mathf.Floor(Rng.Randf() + 0.5f);
         }
         else
         {
-            r.y = Mathf.Floor(Rng.Randf() + 0.5f);
+            r.Y = Mathf.Floor(Rng.Randf() + 0.5f);
         }
 
         return rect.Position + r * rect.Size;
@@ -102,12 +101,12 @@ public static class Utils
     
     public static Vector2 ToNumerics(this Godot.Vector2 vec)
     {
-        return new Vector2(vec.x, vec.y);
+        return new Vector2(vec.X, vec.Y);
     }
     
     public static Vector3 ToNumerics(this Godot.Vector3 vec)
     {
-        return new Vector3(vec.x, vec.y, vec.z);
+        return new Vector3(vec.X, vec.Y, vec.Z);
     }
     
     public static float AngleToY(this Vector2 vec)
@@ -117,7 +116,7 @@ public static class Utils
     
     public static float AngleToY(this Godot.Vector2 vec)
     {
-        return (float) Math.Atan2(vec.x, vec.y);
+        return (float) Math.Atan2(vec.X, vec.Y);
     }
     
     public static float AngleTo(this Vector2 v1, Vector2 v2)
@@ -214,8 +213,8 @@ public static class Utils
             return;
         }
         
-        float segmentArc = Mathf.Deg2Rad(arcDeg / (segments - 1));
-        float headingAngle = heading.AngleTo(-Vector2.UnitY) - Mathf.Deg2Rad(arcDeg * 0.5f);
+        float segmentArc = Mathf.DegToRad(arcDeg / (segments - 1));
+        float headingAngle = heading.AngleTo(-Vector2.UnitY) - Mathf.DegToRad(arcDeg * 0.5f);
         cols[v] = col;
         verts[v] = pos.ToGodot();
         v++;
@@ -244,6 +243,6 @@ public static class Utils
     
     public static bool Null(this Object instance)
     {
-        return instance == null || instance.NativeInstance == IntPtr.Zero;
+        return instance == null;// || instance.native == IntPtr.Zero;
     }
 }

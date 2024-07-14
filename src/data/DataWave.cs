@@ -1,8 +1,9 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using Godot.Collections;
 
-public class DataWave : DataEntry
+public partial class DataWave : DataEntry
 {
     public enum Type
     {
@@ -15,6 +16,6 @@ public class DataWave : DataEntry
     [Export] public Type WaveType;
     [Export] public float TriggerTimeMinutes;
     [Export] public float TriggerBudget;
-    [Export] public List<ResourceBoidEnemy> PrimarySpawns;
-    [Export] public List<ResourceBoidEnemy> SecondarySpawns;
+    [Export] public Array<ResourceBoidEnemy> PrimarySpawns;
+    [Export] public Array<ResourceBoidEnemy> SecondarySpawns;
 }

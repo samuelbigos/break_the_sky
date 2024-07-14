@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public class StateMachine_Game : BaseStateMachine<StateMachine_Game, StateMachine_Game.States>
+public partial class StateMachine_Game : BaseStateMachine<StateMachine_Game, StateMachine_Game.States>
 {
     public enum States
     {
@@ -36,7 +36,7 @@ public class StateMachine_Game : BaseStateMachine<StateMachine_Game, StateMachin
         OnGameStateChanged?.Invoke(_currentState, States.COUNT);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

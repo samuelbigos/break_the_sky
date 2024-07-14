@@ -11,11 +11,11 @@
 [ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=9]
 [ext_resource path="res://assets/material/boid.material" type="Material" id=10]
 
-[sub_resource type="CapsuleShape" id=1]
+[sub_resource type="CapsuleShape3D" id=1]
 radius = 6.92402
 height = 24.2838
 
-[sub_resource type="BoxShape" id=2]
+[sub_resource type="BoxShape3D" id=2]
 extents = Vector3( 7.06956, 3.79281, 17.759 )
 
 [node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
@@ -44,7 +44,7 @@ _minion = ExtResource( 5 )
 _minionFlowField = ExtResource( 9 )
 
 [node name="ShipCollider" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.58213 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.58213 )
 shape = SubResource( 1 )
 
 [node name="RBCollider" parent="." index="1"]
@@ -53,48 +53,48 @@ shape = SubResource( 2 )
 [node name="Mesh" parent="." index="2"]
 mesh = ExtResource( 4 )
 
-[node name="AntiGrav" type="MeshInstance" parent="Mesh" index="1"]
+[node name="AntiGrav" type="MeshInstance3D" parent="Mesh" index="1"]
 material_override = ExtResource( 7 )
 mesh = ExtResource( 2 )
 
 [node name="Turret1" parent="Mesh" index="2" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499 )
 material_override = ExtResource( 10 )
 ClampRangeDeg = 150.0
 
 [node name="Turret2" parent="Mesh" index="3" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499 )
 material_override = ExtResource( 10 )
 ClampRangeDeg = 150.0
 
 [node name="Turret3" parent="Mesh" index="4" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, 1.02147, -2.97812 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, 1.02147, -2.97812 )
 material_override = ExtResource( 10 )
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret4" parent="Mesh" index="5" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, 1.01012, -2.97917 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, 1.01012, -2.97917 )
 material_override = ExtResource( 10 )
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret5" parent="Mesh" index="6" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8.73603, -0.578, -7.43053 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8.73603, -0.578, -7.43053 )
 material_override = ExtResource( 10 )
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
 [node name="Turret6" parent="Mesh" index="7" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.95714, -0.577606, -7.64544 )
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.95714, -0.577606, -7.64544 )
 material_override = ExtResource( 10 )
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0
 
-[node name="SpawnLeft" type="Spatial" parent="." index="5"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0 )
+[node name="SpawnLeft" type="Node3D" parent="." index="5"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0 )
 
-[node name="SpawnRight" type="Spatial" parent="." index="6"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0 )
+[node name="SpawnRight" type="Node3D" parent="." index="6"]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0 )

@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh"
+uid="uid://batqobpvff3hh"
+path="res://.godot/imported/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh"
 
 [deps]
 
-files=[ "res://.import/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh" ]
+files=["res://.godot/imported/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh"]
 
 source_file="res://assets/mesh/ships/human_wasp/wasp_turret.obj"
-dest_files=[ "res://.import/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh", "res://.import/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh" ]
+dest_files=["res://.godot/imported/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh", "res://.godot/imported/wasp_turret.obj-ca337984bbc17fb84db33bc8b5032592.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Godot.Collections;
 
-public abstract class Saveable : Node
+public abstract partial class Saveable : Node
 {
     protected Dictionary _data = new Dictionary();
     

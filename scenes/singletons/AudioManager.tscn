@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3 uid="uid://6ppa3n2p08ll"]
 
-[ext_resource path="res://assets/sfx/pickup.wav" type="AudioStream" id=1]
-[ext_resource path="res://src/singletons/AudioManager.cs" type="Script" id=2]
+[ext_resource type="AudioStream" uid="uid://cc1urd5ueeqg8" path="res://assets/sfx/pickup.wav" id="1"]
+[ext_resource type="Script" path="res://src/singletons/AudioManager.cs" id="2"]
 
-[node name="AudioManager" type="Node"]
-script = ExtResource( 2 )
-SFXPickupPath = NodePath("SFXPickup")
+[node name="AudioManager" type="Node" node_paths=PackedStringArray("SFXPickup")]
+script = ExtResource("2")
+SFXPickup = NodePath("SFXPickup")
 
 [node name="SFXPickup" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 1 )
+stream = ExtResource("1")

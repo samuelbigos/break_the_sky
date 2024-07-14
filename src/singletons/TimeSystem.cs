@@ -2,10 +2,10 @@ using Godot;
 using System;
 using System.Diagnostics;
 
-public class TimeSystem : Node
+public partial class TimeSystem : Node
 {
     public static float UnscaledDelta;
-    public static float Delta;
+    public static double Delta;
     
     private Stopwatch _stopwatch = new Stopwatch();
     private float _stopwatchTickMs;
@@ -18,7 +18,7 @@ public class TimeSystem : Node
         _stopwatch.Start();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

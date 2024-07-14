@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/shot_micro.wav-dd0a52f41584a4271f2aff30eade3f8b.sample"
+type="AudioStreamWAV"
+uid="uid://dtqm5aywn5gx5"
+path="res://.godot/imported/shot_micro.wav-dd0a52f41584a4271f2aff30eade3f8b.sample"
 
 [deps]
 
 source_file="res://assets/sfx/shot_micro.wav"
-dest_files=[ "res://.import/shot_micro.wav-dd0a52f41584a4271f2aff30eade3f8b.sample" ]
+dest_files=["res://.godot/imported/shot_micro.wav-dd0a52f41584a4271f2aff30eade3f8b.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

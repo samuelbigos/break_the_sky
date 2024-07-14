@@ -1,6 +1,6 @@
 using Godot;
 
-public class ResourceBoidEnemy : ResourceBoid
+public partial class ResourceBoidEnemy : ResourceBoid
 {
     [Export] public float SpawningCost;
     [Export] public int MaterialDropCount;

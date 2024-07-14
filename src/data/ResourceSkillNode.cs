@@ -2,9 +2,9 @@ using Godot;
 using System;
 
 [Tool]
-public class ResourceSkillNode : Resource
+public partial class ResourceSkillNode : Resource
 {
-    [Export] public Texture Icon;
+    [Export] public Texture2D Icon;
     [Export] public bool Major;
     
     [Export] public float AttackDamage = 1.0f;

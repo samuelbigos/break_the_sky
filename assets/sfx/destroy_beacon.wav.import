@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample"
+type="AudioStreamWAV"
+uid="uid://dwk11c5haiwk2"
+path="res://.godot/imported/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample"
 
 [deps]
 
 source_file="res://assets/sfx/destroy_beacon.wav"
-dest_files=[ "res://.import/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample" ]
+dest_files=["res://.godot/imported/destroy_beacon.wav-e01d4446065c9d8b6abae7d6ca538af3.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

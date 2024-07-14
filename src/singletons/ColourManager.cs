@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Godot;
-using GodotOnReady.Attributes;
 
 public partial class ColourManager : Singleton<ColourManager>
 {

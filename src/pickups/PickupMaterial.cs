@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Diagnostics;
 
-public class PickupMaterial : Spatial
+public partial class PickupMaterial : Node3D
 {
     [Export] private NodePath _meshPath;
     [Export] private float _bounceDelta = 5.0f;
@@ -12,8 +12,8 @@ public class PickupMaterial : Spatial
 
     public Action<PickupMaterial> OnCollected;
      
-    private MeshInstance _mesh;
-    private SpatialMaterial _mat;
+    private MeshInstance3D _mesh;
+    private StandardMaterial3D _mat;
     private float _time;
     private Vector2 _velocity;
     private BoidBase _target;
@@ -28,22 +28,22 @@ public class PickupMaterial : Spatial
     {
         base._Ready();
 
-        _mesh = GetNode<MeshInstance>(_meshPath);
-        _mat = _mesh.GetSurfaceMaterial(0) as SpatialMaterial;
+        _mesh = GetNode<MeshInstance3D>(_meshPath);
+        _mat = _mesh.GetSurfaceOverrideMaterial(0) as StandardMaterial3D;
         Debug.Assert(_mat != null);
         
         _attractionRadius *= _attractionRadius;
         _collectionRadius *= _collectionRadius;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
-        _time += delta * 2.0f;
-        Vector3 pos = GlobalTransform.origin;
+        _time += (float)delta * 2.0f;
+        Vector3 pos = GlobalTransform.Origin;
         
-        float dist = (_target.GlobalTransform.origin - GlobalTransform.origin).LengthSquared();
+        float dist = (_target.GlobalTransform.Origin - GlobalTransform.Origin).LengthSquared();
         if (dist < _attractionRadius)
         {
             if (dist < _collectionRadius)
@@ -51,18 +51,18 @@ public class PickupMaterial : Spatial
                 OnCollected?.Invoke(this);
                 QueueFree();
             }
-            pos += (_target.GlobalTransform.origin - GlobalTransform.origin).Normalized() *
-                   (1.0f - (dist / _attractionRadius)) * delta * 100.0f;
+            pos += (_target.GlobalTransform.Origin - GlobalTransform.Origin).Normalized() *
+                   (1.0f - (dist / _attractionRadius)) * (float)delta * 100.0f;
         }
         
-        pos.y = Mathf.Sin(_time) * _bounceDelta;
-        pos += _velocity.To3D() * delta;
+        pos.Y = Mathf.Sin(_time) * _bounceDelta;
+        pos += _velocity.To3D() * (float)delta;
         
-        GlobalTransform = new Transform(GlobalTransform.basis, pos);
+        GlobalTransform = new Transform3D(GlobalTransform.Basis, pos);
         //float scale =  (Mathf.Sin(_time) + 1.0f) * 0.25f + 1.0f;
         //_mesh.Scale = Vector3.One * scale;
         //RotateY(delta * 2.0f);
         
-        _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), delta * 60.0f);
+        _velocity *= Mathf.Pow(1.0f - Mathf.Clamp(_damping, 0.0f, 1.0f), (float)delta * 60.0f);
     }
 }

@@ -1,6 +1,6 @@
 using Godot;
 
-public class BulletBomber : Bullet
+public partial class BulletBomber : Bullet
 {
     public BoidBase Parent;
     public BoidBase Target;
@@ -14,7 +14,7 @@ public class BulletBomber : Bullet
         Target = target;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

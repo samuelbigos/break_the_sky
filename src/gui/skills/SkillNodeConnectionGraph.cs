@@ -2,13 +2,13 @@ using Godot;
 using Godot.Collections;
 
 [Tool]
-public class SkillNodeConnectionGraph : Control
+public partial class SkillNodeConnectionGraph : Control
 {
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
         
-        Update();
+        //Update();
     }
 
     public override void _Draw()
@@ -32,8 +32,8 @@ public class SkillNodeConnectionGraph : Control
                                 found = true;
                         }
                         if (found)
-                            DrawLine(skillNode1.RectPosition + skillNode1.RectSize * 0.5f, 
-                            skillNode2.RectPosition + skillNode2.RectSize * 0.5f, Colors.Black, 5.0f);
+                            DrawLine(skillNode1.Position + skillNode1.Size * 0.5f, 
+                            skillNode2.Position + skillNode2.Size * 0.5f, Colors.Black, 5.0f);
                     }
                 }
             }

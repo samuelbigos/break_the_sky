@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Array = Godot.Collections.Array;
 using Vector3 = System.Numerics.Vector3;
 
-public class TargetingRenderer : MeshInstance
+public partial class TargetingRenderer : MeshInstance3D
 {
     public static TargetingRenderer Instance;
 
@@ -15,7 +15,7 @@ public class TargetingRenderer : MeshInstance
     private Color[] _colList = new Color[10000];
     private int[] _indexList = new int[20000];
 
-    private float _time;
+    private double _time;
 
     public override void _EnterTree()
     {
@@ -26,7 +26,7 @@ public class TargetingRenderer : MeshInstance
         CastShadow = ShadowCastingSetting.Off;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -82,17 +82,17 @@ public class TargetingRenderer : MeshInstance
         Vector3 start = from;
         Vector3 end = to;
         Vector3 dir = Vector3.Normalize(end - start);
-        float t = _time % (_lineSegmentSize * 1.5f);
+        double t = _time % (_lineSegmentSize * 1.5f);
         float dist = (end - start).Length();
 
         if (t > _lineSegmentSize * 0.5f)
         {
-            Utils.Line(start, start + dir * (t - _lineSegmentSize * 0.5f), col, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(start, start + dir * (float) (t - _lineSegmentSize * 0.5f), col, ref v, ref i, _vertList, _colList, _indexList);
         }
                 
         while (t < dist)
         {
-            Utils.Line(start + dir * t, start + dir * Mathf.Min(dist - _lineSegmentSize, t + _lineSegmentSize), col, ref v, ref i, _vertList, _colList, _indexList);
+            Utils.Line(start + dir * (float) t, start + dir * (float) Mathf.Min(dist - _lineSegmentSize, t + _lineSegmentSize), col, ref v, ref i, _vertList, _colList, _indexList);
             t += _lineSegmentSize * 1.5f;
         }
     }

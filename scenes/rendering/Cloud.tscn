@@ -1,9 +1,9 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://assets/shader/cloud.shader" type="Shader" id=1]
+[ext_resource path="res://assets/shader/cloud.gdshader" type="Shader" id=1]
 [ext_resource path="res://src/rendering/Clouds.cs" type="Script" id=2]
-[ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture" id=4]
-[ext_resource path="res://assets/shader/cloud_volumetric.shader" type="Shader" id=5]
+[ext_resource path="res://assets/textures/noise/bayer16tile2.png" type="Texture2D" id=4]
+[ext_resource path="res://assets/shader/cloud_volumetric.gdshader" type="Shader" id=5]
 [ext_resource path="res://assets/material/cloud_displacement_mat.tres" type="Material" id=6]
 
 [sub_resource type="PlaneMesh" id=1]
@@ -79,57 +79,57 @@ viewport_path = NodePath("BoidVelMapViewport")
 [sub_resource type="ViewportTexture" id=4]
 viewport_path = NodePath("WaveRenderViewportSwapA")
 
-[node name="Clouds" type="Spatial"]
+[node name="Clouds" type="Node3D"]
 script = ExtResource( 2 )
 _cloudLayerPaths = [ NodePath("Layer1"), NodePath("Layer2") ]
 _boidVelocityMapPath = NodePath("BoidVelMapViewport")
 _boidTransparentMapPath = NodePath("BoidTransparentMapViewport")
 _displacementMapPaths = [ NodePath("WaveRenderViewportSwapA"), NodePath("WaveRenderViewportSwapB") ]
 _displacementTextureRectPaths = [ NodePath("WaveRenderViewportSwapA/TextureRect"), NodePath("WaveRenderViewportSwapB/TextureRect") ]
-_boidVelMapCameraPath = NodePath("BoidVelMapViewport/Camera")
+_boidVelMapCameraPath = NodePath("BoidVelMapViewport/Camera3D")
 
-[node name="Layer1" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
+[node name="Layer1" type="MeshInstance3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
 visible = false
 mesh = SubResource( 1 )
 material/0 = SubResource( 2 )
 
-[node name="Layer2" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -25, 0 )
+[node name="Layer2" type="MeshInstance3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -25, 0 )
 visible = false
 mesh = SubResource( 1 )
 material/0 = SubResource( 3 )
 
-[node name="DebugCamera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 100, 0 )
+[node name="DebugCamera" type="Camera3D" parent="."]
+transform = Transform3D( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 100, 0 )
 far = 500.0
 
-[node name="BoidVelMapViewport" type="Viewport" parent="."]
+[node name="BoidVelMapViewport" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
 render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="BoidVelMapViewport"]
+[node name="Camera3D" type="Camera3D" parent="BoidVelMapViewport"]
 cull_mask = 1047554
 projection = 1
 size = 512.0
 far = 1000.0
 
-[node name="BoidTransparentMapViewport" type="Viewport" parent="."]
+[node name="BoidTransparentMapViewport" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 transparent_bg = true
 hdr = false
 keep_3d_linear = true
 render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="BoidTransparentMapViewport"]
+[node name="Camera3D" type="Camera3D" parent="BoidTransparentMapViewport"]
 cull_mask = 1047554
 size = 512.0
 far = 1000.0
 
-[node name="WaveRenderViewportSwapA" type="Viewport" parent="."]
+[node name="WaveRenderViewportSwapA" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -140,11 +140,11 @@ render_target_update_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapA"]
 material = ExtResource( 6 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 texture = SubResource( 5 )
 
-[node name="WaveRenderViewportSwapB" type="Viewport" parent="."]
+[node name="WaveRenderViewportSwapB" type="SubViewport" parent="."]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
@@ -155,16 +155,16 @@ render_target_update_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="WaveRenderViewportSwapB"]
 material = ExtResource( 6 )
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 texture = SubResource( 6 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="DebugRect1" type="TextureRect" parent="CanvasLayer"]
 visible = false
-margin_right = 640.0
-margin_bottom = 720.0
+offset_right = 640.0
+offset_bottom = 720.0
 texture = SubResource( 4 )
 expand = true
 stretch_mode = 7

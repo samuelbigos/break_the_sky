@@ -1,33 +1,31 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=6 format=3 uid="uid://dlkilwpty6a64"]
 
-[ext_resource path="res://assets/mesh/circle.obj" type="ArrayMesh" id=1]
+[ext_resource type="ArrayMesh" uid="uid://bn71dwt3cc0ch" path="res://assets/mesh/circle.obj" id="1"]
 
-[sub_resource type="SpatialMaterial" id=3]
-flags_unshaded = true
+[sub_resource type="StandardMaterial3D" id="3"]
+shading_mode = 0
 vertex_color_use_as_albedo = true
 
-[sub_resource type="Curve" id=5]
-_data = [ Vector2( 0, 0.551613 ), 0.0, 0.0, 0, 0, Vector2( 0.950798, 0 ), -1.18958, 0.0, 0, 0 ]
+[sub_resource type="Curve" id="5"]
+_data = [Vector2(0, 0.551613), 0.0, 0.0, 0, 0, Vector2(0.950798, 0), -1.18958, 0.0, 0, 0]
+point_count = 2
 
-[sub_resource type="CurveTexture" id=6]
-curve = SubResource( 5 )
+[sub_resource type="CurveTexture" id="6"]
+curve = SubResource("5")
 
-[sub_resource type="ParticlesMaterial" id=2]
+[sub_resource type="ParticleProcessMaterial" id="2"]
 lifetime_randomness = 0.5
-direction = Vector3( 0, 0, 1 )
+direction = Vector3(0, 0, 1)
 spread = 30.0
-gravity = Vector3( 0, 0, 0 )
-initial_velocity = 100.0
-initial_velocity_random = 1.0
-scale_curve = SubResource( 6 )
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("6")
 
-[node name="ParticlesHit" type="Particles"]
-material_override = SubResource( 3 )
+[node name="ParticlesHit" type="GPUParticles3D"]
+material_override = SubResource("3")
 emitting = false
 amount = 50
 lifetime = 0.25
 one_shot = true
 explosiveness = 1.0
-local_coords = false
-process_material = SubResource( 2 )
-draw_pass_1 = ExtResource( 1 )
+process_material = SubResource("2")
+draw_pass_1 = ExtResource("1")

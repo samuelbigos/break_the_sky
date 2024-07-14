@@ -2,17 +2,18 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Godot.Collections;
 using ImGuiNET;
 
-public class FabricateManager : Singleton<FabricateManager>
+public partial class FabricateManager : Singleton<FabricateManager>
 {
-    [Export] private List<ResourceBoidAlly> _fabricantPool = new();
+    [Export] private Array<ResourceBoidAlly> _fabricantPool = new();
     
-    public class Fabricant
+    public partial class Fabricant
     {
         public ResourceBoidAlly FabricantData;
-        public float TotalTime;
-        public float TimeLeft;
+        public double TotalTime;
+        public double TimeLeft;
     }
 
     public IReadOnlyList<ResourceBoidAlly> Fabricants => _fabricantPool;
@@ -53,7 +54,7 @@ public class FabricateManager : Singleton<FabricateManager>
         return null;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

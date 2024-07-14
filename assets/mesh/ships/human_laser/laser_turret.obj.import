@@ -1,20 +1,22 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh"
+uid="uid://7kcdalbkertn"
+path="res://.godot/imported/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh"
 
 [deps]
 
-files=[ "res://.import/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh" ]
+files=["res://.godot/imported/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh"]
 
 source_file="res://assets/mesh/ships/human_laser/laser_turret.obj"
-dest_files=[ "res://.import/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh", "res://.import/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh" ]
+dest_files=["res://.godot/imported/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh", "res://.godot/imported/laser_turret.obj-0fb2f29917025568fc0a7c3d058417fa.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

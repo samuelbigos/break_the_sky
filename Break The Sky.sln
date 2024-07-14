@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Break The Sky", "Break The Sky.csproj", "{59108865-F4B7-432F-86AE-422E3FA44F2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Break The Sky", "Break The Sky.csproj", "{66A661E1-6594-4790-9905-79727C7B32FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,11 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{59108865-F4B7-432F-86AE-422E3FA44F2D}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{66A661E1-6594-4790-9905-79727C7B32FD}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal

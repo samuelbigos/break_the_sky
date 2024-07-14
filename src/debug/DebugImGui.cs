@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Threading;
 using ImGuiNET;
 
-public class DebugImGui : Saveable
+public partial class DebugImGui : Saveable
 {
     public static DebugImGui Instance;
     
@@ -31,7 +31,7 @@ public class DebugImGui : Saveable
     private const float _windowAlpha = 0.75f;
     private ImGuiWindowFlags _windowFlags = ImGuiWindowFlags.AlwaysAutoResize;
     
-    private Godot.Collections.Dictionary<string, object> _defaults = new()
+    private Godot.Collections.Dictionary<string, Variant> _defaults = new()
     {
         { "performance", false },
         { "debug", false },
@@ -40,19 +40,19 @@ public class DebugImGui : Saveable
 
     private bool ShowPerformance
     {
-        get => Convert.ToBoolean(_data["performance"]);
+        get => _data["performance"].AsBool();
         set { _data["performance"] = value; SaveManager.DoSave();}
     }
 
     private bool ShowDebug
     {
-        get => Convert.ToBoolean(_data["debug"]);
+        get => _data["debug"].AsBool();
         set { _data["debug"] = value; SaveManager.DoSave(); }
     }
     
     private bool ShowGameSettings
     {
-        get => Convert.ToBoolean(_data["gamesettings"]);
+        get => _data["gamesettings"].AsBool();
         set { _data["gamesettings"] = value; SaveManager.DoSave(); }
     }
 
@@ -60,13 +60,13 @@ public class DebugImGui : Saveable
     {
         base._Ready();
         
-        GetNode<ImGuiNode>("ImGuiNode").Connect("IGLayout", this, nameof(_OnImGuiLayout));
+        //GetNode<DebugImGui>("ImGuiNode").Connect("IGLayout", new Callable(this, nameof(_OnImGuiLayout)));
         
         RegisterWindow("performance", "Performance", _OnImGuiLayoutPerformance);
         RegisterWindow("debug", "Debug", _OnImGuiLayoutDebug);
         RegisterWindow("gamesettings", "Game Settings", _OnImGuiLayoutGameSettings);
         
-        _timescale = Engine.TimeScale;
+        _timescale = (float)Engine.TimeScale;
     }
 
     public override void _EnterTree()
@@ -85,7 +85,7 @@ public class DebugImGui : Saveable
     {
         foreach (string key in _defaults.Keys)
         {
-            if (!_data.Contains(key))
+            if (!_data.ContainsKey(key))
             {
                 _data[key] = _defaults[key];
             }
@@ -93,38 +93,40 @@ public class DebugImGui : Saveable
 
         foreach (RegisteredWindow window in _registeredWindows)
         {
-            if (!_data.Contains(window.Id))
+            if (!_data.ContainsKey(window.Id))
             {
                 _data[window.Id] = false;
             }
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
         if (!_hasMovedParent)
         {
             // move to the bottom of the scene hierarchy so we can consume input events.
-            Viewport root = GetTree().Root;
+            Window root = GetTree().Root;
             GetParent().RemoveChild(this);
             root.AddChild(this);
             _hasMovedParent = true;
         }
+        
+        _OnImGuiLayout();
     }
     
     public override void _Input(InputEvent evt)
     {
-        if (ImGuiGD.ProcessInput(evt) && !ManualInputHandling)
-        {
-            GetTree().SetInputAsHandled();
-        }
+        // if (ImGuiGD.ProcessInput(evt) && !ManualInputHandling)
+        // {
+        //     GetViewport().SetInputAsHandled();
+        // }
         
         foreach (RegisteredWindow window in _registeredWindows)
         {
             if (evt.IsActionPressed(window.Shortcut))
-                SetCustomWindowEnabled(window.Id, !Convert.ToBoolean(_data[window.Id]));
+                SetCustomWindowEnabled(window.Id, !_data[window.Id].AsBool());
         }
     }
 
@@ -142,16 +144,16 @@ public class DebugImGui : Saveable
             return;
         }
 
-        foreach (object action in InputMap.GetActionList(window.Shortcut))
+        foreach (Variant action in InputMap.ActionGetEvents(window.Shortcut))
         {
-            InputEventKey key = action as InputEventKey;
-            DebugUtils.Assert(key.Control, $"RegisterWindow: {window.Id} action does not have Control modifier.");
-            window.ShortcutDisplay += "CTRL+" + (char)key.Scancode;
+            InputEventKey key = action.As<InputEventKey>();
+            DebugUtils.Assert(key.CtrlPressed, $"RegisterWindow: {window.Id} action does not have Control modifier.");
+            window.ShortcutDisplay += "CTRL+" + (char)key.Keycode;
         }
         
         _registeredWindows.Add(window);
 
-        if (!_data.Contains(id))
+        if (!_data.ContainsKey(id))
             _data[id] = false;
     }
     
@@ -183,20 +185,19 @@ public class DebugImGui : Saveable
         ImGui.Text($"ObjectOrphanNodeCount: {Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount):F0}");
 
         ImGui.Text(" ### Rendering");
-        ImGui.Text($"RenderVerticesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame):F0}");
-        ImGui.Text($"RenderDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame):F0}");
-        ImGui.Text($"Render2dDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame):F0}");
+        ImGui.Text($"RenderTotalDrawCallsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):F0}");
+        ImGui.Text($"RenderTotalObjectsInFrame: {Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame):F0}");
+        ImGui.Text($"RenderTotalPrimitivesInFrame: {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):F0}");
 
         ImGui.Text(" ### Memory");
-        ImGui.Text($"MemoryDynamic: {Performance.GetMonitor(Performance.Monitor.MemoryDynamic) / 1024.0f:F0}KiB");
         ImGui.Text($"MemoryStatic: {Performance.GetMonitor(Performance.Monitor.MemoryStatic) / 1024.0f:F0}KiB");
         ImGui.Text($"MemoryMessageBufferMax: {Performance.GetMonitor(Performance.Monitor.MemoryMessageBufferMax) / 1024.0f:F0}KiB");
 
         ImGui.Text(" ### Physics");
-        ImGui.Text($"Physics3dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3dActiveObjects):F0}");
-        ImGui.Text($"Physics2dActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2dActiveObjects):F0}");
-        ImGui.Text($"Physics3dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3dIslandCount):F0}KiB");
-        ImGui.Text($"Physics2dIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2dIslandCount):F0}KiB");
+        ImGui.Text($"Physics3DActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics3DActiveObjects):F0}");
+        ImGui.Text($"Physics2DActiveObjects: {Performance.GetMonitor(Performance.Monitor.Physics2DActiveObjects):F0}");
+        ImGui.Text($"Physics3DIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics3DIslandCount):F0}KiB");
+        ImGui.Text($"Physics2DIslandCount: {Performance.GetMonitor(Performance.Monitor.Physics2DIslandCount):F0}KiB");
     }
     
     private void _OnImGuiLayoutDebug()
@@ -221,7 +222,7 @@ public class DebugImGui : Saveable
                 if (ImGui.MenuItem("Reset Save"))
                 {
                     SaveManager.Instance.Reset();
-                    GetTree().ChangeSceneTo(_initialScene);
+                    GetTree().ChangeSceneToPacked(_initialScene);
                 }
                 if (ImGui.MenuItem("Reload"))
                 {
@@ -240,7 +241,7 @@ public class DebugImGui : Saveable
             {
                 foreach (RegisteredWindow window in _registeredWindows)
                 {
-                    bool selected = Convert.ToBoolean(_data[window.Id]);
+                    bool selected = _data[window.Id].AsBool();
                     if (ImGui.MenuItem($"{window.Name}", window.ShortcutDisplay, selected))
                     {
                         SetCustomWindowEnabled(window.Id, !selected);
@@ -256,7 +257,7 @@ public class DebugImGui : Saveable
 
         foreach (RegisteredWindow window in _registeredWindows)
         {
-            if (Convert.ToBoolean(_data[window.Id]))
+            if (_data[window.Id].AsBool())
             {
                 ImGui.SetNextWindowBgAlpha(_windowAlpha);
                 if (ImGui.Begin(window.Name, _windowFlags))

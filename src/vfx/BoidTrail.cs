@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using Vector3 = Godot.Vector3;
 
-public class BoidTrail : Spatial
+public partial class BoidTrail : Node3D
 {
     // TODO: Burst trail should emit in the direction of steering forces if attached to a boid.
     
@@ -29,9 +29,9 @@ public class BoidTrail : Spatial
     
     private int _trailIdx;
     private Vector3[] _trailPositions;
-    private float _updateTimer;
-    private Particles _burstParticles;
-    private ParticlesMaterial _burstMaterial;
+    private double _updateTimer;
+    private GpuParticles3D _burstParticles;
+    private ParticleProcessMaterial _burstMaterial;
     private bool _initialised;
     private bool _registered;
     private Vector2 _thrust;
@@ -40,8 +40,8 @@ public class BoidTrail : Spatial
     {
         base._Ready();
 
-        _burstParticles = GetNode<Particles>(_burstParticlesPath);
-        _burstMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;;
+        _burstParticles = GetNode<GpuParticles3D>(_burstParticlesPath);
+        _burstMaterial = _burstParticles.ProcessMaterial as ParticleProcessMaterial;;
 
         _initialised = false;
     }
@@ -56,7 +56,7 @@ public class BoidTrail : Spatial
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -68,7 +68,7 @@ public class BoidTrail : Spatial
                     _trailPositions = new Vector3[_linePoints];
                     for (int i = 0; i < _linePoints; i++)
                     {
-                        _trailPositions[i] = GlobalTransform.origin;
+                        _trailPositions[i] = GlobalTransform.Origin;
                     }
                     _burstParticles.Visible = false;
                     if (Visible)
@@ -79,7 +79,7 @@ public class BoidTrail : Spatial
                     break;
                 case TrailType.Burst:
                     _burstParticles.Visible = true;
-                    ParticlesMaterial processMaterial = _burstParticles.ProcessMaterial as ParticlesMaterial;
+                    ParticleProcessMaterial processMaterial = _burstParticles.ProcessMaterial as ParticleProcessMaterial;
                     DebugUtils.Assert(processMaterial != null, "processMaterial != null");
                     processMaterial.Color = ColourManager.Instance.White;
                     _burstParticles.Emitting = true;
@@ -104,19 +104,20 @@ public class BoidTrail : Spatial
         }
     }
 
-    private void ProcessBurst(float delta)
+    private void ProcessBurst(double delta)
     {
         // TODO: take parent velocity into account.
-        _burstMaterial.InitialVelocity = _thrust.Length() * 50.0f;
+        _burstMaterial.InitialVelocityMin = _thrust.Length() * 50.0f;
+        _burstMaterial.InitialVelocityMax = _thrust.Length() * 50.0f;
     }
 
-    private void ProcessSmooth(float delta)
+    private void ProcessSmooth(double delta)
     {
         _updateTimer -= delta;
         if (_updateTimer < 0.0f)
         {
             _trailIdx = (_trailIdx + 1) % _linePoints;
-            _trailPositions[_trailIdx] = GlobalTransform.origin;
+            _trailPositions[_trailIdx] = GlobalTransform.Origin;
             _updateTimer = _lineInterval;
         }
     }

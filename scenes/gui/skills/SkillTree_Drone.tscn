@@ -1,8 +1,8 @@
 [gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://assets/gui/skills/skill_speed.png" type="Texture" id=1]
-[ext_resource path="res://assets/gui/skills/skill_accuracy.png" type="Texture" id=2]
-[ext_resource path="res://assets/gui/skills/skill_microbullets.png" type="Texture" id=3]
+[ext_resource path="res://assets/gui/skills/skill_speed.png" type="Texture2D" id=1]
+[ext_resource path="res://assets/gui/skills/skill_accuracy.png" type="Texture2D" id=2]
+[ext_resource path="res://assets/gui/skills/skill_microbullets.png" type="Texture2D" id=3]
 [ext_resource path="res://assets/data/boids/allies/boid_ally_drone.tres" type="Resource" id=4]
 [ext_resource path="res://scenes/gui/BoidIcon.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scenes/gui/skills/SkillNode.tscn" type="PackedScene" id=6]
@@ -12,13 +12,13 @@
 [ext_resource path="res://assets/data/skills/skill_minor_speed.tres" type="Resource" id=10]
 [ext_resource path="res://assets/data/skills/skill_minor_accuracy.tres" type="Resource" id=11]
 
-[node name="Drone" type="Tabs"]
+[node name="Drone" type="TabBar"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+offset_left = 4.0
+offset_top = 32.0
+offset_right = -4.0
+offset_bottom = -4.0
 
 [node name="ConnectionGraph" type="Control" parent="."]
 anchor_right = 1.0
@@ -30,7 +30,7 @@ anchor_left = 0.474591
 anchor_top = 0.477396
 anchor_right = 0.525408
 anchor_bottom = 0.520032
-margin_bottom = -1.47195
+offset_bottom = -1.47195
 IsRoot = true
 AllyType = ExtResource( 4 )
 Connections = [ NodePath("../Power1"), NodePath("../Speed1"), NodePath("../Accuracy1") ]
@@ -41,9 +41,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -43.0
-margin_top = -40.0
-margin_right = 43.0
+offset_left = -43.0
+offset_top = -40.0
+offset_right = 43.0
 _showProgress = false
 
 [node name="Power1" parent="." instance=ExtResource( 6 )]
@@ -71,7 +71,7 @@ anchor_left = 0.6534
 anchor_top = 0.207975
 anchor_right = 0.704216
 anchor_bottom = 0.250611
-rect_min_size = Vector2( 34, 34 )
+custom_minimum_size = Vector2( 34, 34 )
 icon = ExtResource( 3 )
 AllyType = ExtResource( 4 )
 ResourceSkill = ExtResource( 8 )
@@ -113,7 +113,7 @@ anchor_left = 0.527706
 anchor_top = 0.215038
 anchor_right = 0.578522
 anchor_bottom = 0.257673
-margin_bottom = -1.47197
+offset_bottom = -1.47197
 AllyType = ExtResource( 4 )
 ResourceSkill = ExtResource( 7 )
 Connections = [ NodePath("../Power5"), NodePath("../Power4") ]
@@ -168,7 +168,7 @@ anchor_left = 0.440872
 anchor_top = 0.68179
 anchor_right = 0.491689
 anchor_bottom = 0.724426
-margin_left = 1.52588e-05
+offset_left = 1.52588e-05
 icon = ExtResource( 2 )
 AllyType = ExtResource( 4 )
 ResourceSkill = ExtResource( 11 )

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public class TacticalPauseManager : Singleton<TacticalPauseManager>
+public partial class TacticalPauseManager : Singleton<TacticalPauseManager>
 {
     private Vector2 _dragStart;
     private Vector2 _dragCurrent;
@@ -19,17 +19,17 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
         AddChild(canvas);
         _dragTextureRect = new TextureRect();
         canvas.AddChild(_dragTextureRect);
-        _dragTextureRect.RectPosition = Vector2.Zero;
-        _dragTextureRect.RectSize = Vector2.One * 100.0f;
-        _dragTextureRect.Texture = ResourceLoader.Load<Texture>("res://assets/gui/1px.png");
-        _dragTextureRect.Expand = true;
+        _dragTextureRect.Position = Vector2.Zero;
+        _dragTextureRect.Size = Vector2.One * 100.0f;
+        _dragTextureRect.Texture = ResourceLoader.Load<Texture2D>("res://assets/gui/1px.png");
+        _dragTextureRect.ExpandMode = TextureRect.ExpandModeEnum.FitHeight;
         _dragTextureRect.Visible = false;
         _dragTextureRect.Modulate = new Color(0.0f, 0.0f, 0.0f, 0.5f);
         
         StateMachine_Game.OnGameStateChanged += _OnGameStateChanged;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -59,20 +59,20 @@ public class TacticalPauseManager : Singleton<TacticalPauseManager>
             _dragCurrent = GetViewport().GetMousePosition();
 
             Rect2 dragRect = new Rect2();
-            dragRect.Position = new Vector2(Mathf.Min(_dragCurrent.x, _dragStart.x), Mathf.Min(_dragCurrent.y, _dragStart.y));
-            dragRect.End = new Vector2(Mathf.Max(_dragCurrent.x, _dragStart.x), Mathf.Max(_dragCurrent.y, _dragStart.y));
+            dragRect.Position = new Vector2(Mathf.Min(_dragCurrent.X, _dragStart.X), Mathf.Min(_dragCurrent.Y, _dragStart.Y));
+            dragRect.End = new Vector2(Mathf.Max(_dragCurrent.X, _dragStart.X), Mathf.Max(_dragCurrent.Y, _dragStart.Y));
 
-            _dragTextureRect.RectPosition = dragRect.Position;
-            _dragTextureRect.RectSize = dragRect.End - dragRect.Position;
+            _dragTextureRect.Position = dragRect.Position;
+            _dragTextureRect.Size = dragRect.End - dragRect.Position;
             
             Rect2 worldRect = new Rect2();
             worldRect.Position = GameCamera.Instance.ProjectToZero(dragRect.Position).To2D();
             worldRect.End = GameCamera.Instance.ProjectToZero(dragRect.End).To2D();
             foreach (BoidAllyBase boid in BoidFactory.Instance.AllyBoids)
             {
-                if (boid.GlobalPosition.x > worldRect.Position.x && boid.GlobalPosition.y > worldRect.Position.y
-                                                                 && boid.GlobalPosition.x < worldRect.End.x &&
-                                                                 boid.GlobalPosition.y < worldRect.End.y)
+                if (boid.GlobalPosition.X > worldRect.Position.X && boid.GlobalPosition.Y > worldRect.Position.Y
+                                                                 && boid.GlobalPosition.X < worldRect.End.X &&
+                                                                 boid.GlobalPosition.Y < worldRect.End.Y)
                 {
                     _selectedBoids.Add(boid);
                 }

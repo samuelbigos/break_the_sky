@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Godot;
 
-public class FlowFieldResource : Resource
+public partial class FlowFieldResource : Resource
 {
     [Export] public int X;
     [Export] public int Y;

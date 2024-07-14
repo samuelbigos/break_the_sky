@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/laser_charge.wav-91aef4738dd088bbac66eace2d2ad8c8.sample"
+type="AudioStreamWAV"
+uid="uid://cem2ntsmrfvk6"
+path="res://.godot/imported/laser_charge.wav-91aef4738dd088bbac66eace2d2ad8c8.sample"
 
 [deps]
 
 source_file="res://assets/sfx/laser_charge.wav"
-dest_files=[ "res://.import/laser_charge.wav-91aef4738dd088bbac66eace2d2ad8c8.sample" ]
+dest_files=["res://.godot/imported/laser_charge.wav-91aef4738dd088bbac66eace2d2ad8c8.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

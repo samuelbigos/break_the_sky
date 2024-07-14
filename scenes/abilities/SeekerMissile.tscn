@@ -5,15 +5,15 @@
 [ext_resource path="res://src/abilities/SeekerMissile.cs" type="Script" id=3]
 [ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=4]
 [ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=5]
-[ext_resource path="res://assets/shader/outline_buffer.shader" type="Shader" id=6]
+[ext_resource path="res://assets/shader/outline_buffer.gdshader" type="Shader" id=6]
 [ext_resource path="res://assets/material/bullet.material" type="Material" id=7]
 
-[sub_resource type="CapsuleShape" id=1]
+[sub_resource type="CapsuleShape3D" id=1]
 radius = 0.713931
 
 [sub_resource type="CapsuleMesh" id=2]
 radius = 0.5
-mid_height = 2.5
+height = 2.5
 radial_segments = 8
 rings = 2
 
@@ -21,20 +21,20 @@ rings = 2
 shader = ExtResource( 6 )
 shader_param/u_outline_colour = null
 
-[node name="SeekerMissile" type="Area"]
+[node name="SeekerMissile" type="Area3D"]
 script = ExtResource( 3 )
 MeshPath = NodePath("Mesh")
 LaunchSfxPath = NodePath("SFXLaunch")
 TrailPath = NodePath("Mesh/BoidTrail")
-CollisionShapePath = NodePath("CollisionShape")
+CollisionShapePath = NodePath("CollisionShape3D")
 _maxSpeed = 100.0
 _maxForce = 75.0
 _explodeVfx = ExtResource( 2 )
 
-[node name="CollisionShape" type="CollisionShape" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource( 1 )
 
-[node name="Mesh" type="MeshInstance" parent="."]
+[node name="Mesh" type="MeshInstance3D" parent="."]
 material_override = ExtResource( 7 )
 mesh = SubResource( 2 )
 script = ExtResource( 5 )
@@ -43,7 +43,7 @@ _meshLayers = [ 2 ]
 _meshMaterials = [ SubResource( 3 ) ]
 
 [node name="BoidTrail" parent="Mesh" instance=ExtResource( 1 )]
-transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.00265479, -0.0101357, -2.2351 )
+transform = Transform3D( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.00265479, -0.0101357, -2.2351 )
 _type = 1
 
 [node name="SFXLaunch" type="AudioStreamPlayer2D" parent="."]

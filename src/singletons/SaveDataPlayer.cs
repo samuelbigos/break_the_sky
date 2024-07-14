@@ -6,13 +6,13 @@ using Godot.Collections;
 using ImGuiNET;
 using Array = Godot.Collections.Array;
 
-public class SaveDataPlayer : Saveable
+public partial class SaveDataPlayer : Saveable
 {
     private static SaveDataPlayer _instance;
 
     public static Action<int> OnLevelUp;
 
-    private Godot.Collections.Dictionary<string, object> _defaults = new()
+    private Godot.Collections.Dictionary<string, Variant> _defaults = new()
     {
         { "level", 0 },
         { "initialPlayerBoid", "" },
@@ -28,19 +28,19 @@ public class SaveDataPlayer : Saveable
 
     public static int MaxAllyCount
     {
-        get => Convert.ToInt32(_instance._data["maxAllyCount"]);
+        get => _instance._data["maxAllyCount"].AsInt32();
         set => _instance._data["maxAllyCount"] = value;
     }
     
     public static int SkillPoints
     {
-        get => Convert.ToInt32(_instance._data["skillPoints"]);
+        get => _instance._data["skillPoints"].AsInt32();
         set => _instance._data["skillPoints"] = value;
     }
     
     public static int Experience
     {
-        get => Convert.ToInt32(_instance._data["totalExperience"]);
+        get => _instance._data["totalExperience"].AsInt32();
         set
         {
             _instance._data["totalExperience"] = value;
@@ -48,41 +48,41 @@ public class SaveDataPlayer : Saveable
         }
     }
 
-    public static int Level => Convert.ToInt32(_instance._data["level"]);
-    public static string InitialPlayerBoid => Convert.ToString(_instance._data["initialPlayerBoid"]);
+    public static int Level => _instance._data["level"].AsInt32();
+    public static string InitialPlayerBoid => _instance._data["initialPlayerBoid"].AsString();
 
     public static int MaterialCount
     {
-        get => Convert.ToInt32(_instance._data["materialCount"]);
+        get => _instance._data["materialCount"].AsInt32();
         set => _instance._data["materialCount"] = value;
     }
 
     public static bool HasSeenEnemy(ResourceBoidEnemy enemyData)
     {
-        Dictionary seenEnemies = _instance._data["seenEnemies"] as Dictionary;
+        Dictionary seenEnemies = _instance._data["seenEnemies"].AsGodotDictionary();
         Debug.Assert(seenEnemies != null, nameof(seenEnemies) + " != null");
-        if (!seenEnemies.Contains(enemyData.UniqueID))
+        if (!seenEnemies.ContainsKey(enemyData.UniqueID))
             return false;
         return (bool) seenEnemies[enemyData.UniqueID];
     }
 
     public static void SetSeenEnemy(ResourceBoidEnemy enemyData)
     {
-        Dictionary seenEnemies = _instance._data["seenEnemies"] as Dictionary;
+        Dictionary seenEnemies = _instance._data["seenEnemies"].AsGodotDictionary();
         Debug.Assert(seenEnemies != null, nameof(seenEnemies) + " != null");
         seenEnemies[enemyData.UniqueID] = true;
     }
     
     public static bool IsFabricantUnlocked(ResourceBoidAlly allyData)
     {
-        Array unlockedFabricants = _instance._data["unlockedAllies"] as Array;
+        Array unlockedFabricants = _instance._data["unlockedAllies"].AsGodotArray();
         Debug.Assert(unlockedFabricants != null, nameof(unlockedFabricants) + " != null");
         return unlockedFabricants.Contains(allyData.UniqueID);
     }
     
     public static void UnlockFabricant(ResourceBoidAlly allyData)
     {
-        Array unlockedFabricants = _instance._data["unlockedAllies"] as Array;
+        Array unlockedFabricants = _instance._data["unlockedAllies"].AsGodotArray();
         if (!IsFabricantUnlocked(allyData))
         {
             Debug.Assert(unlockedFabricants != null, nameof(unlockedFabricants) + " != null");
@@ -107,7 +107,7 @@ public class SaveDataPlayer : Saveable
         
         // Dictionary dict = Instance._data["skills"] as Dictionary;
         // List<SkillNodeResource> skills = new();
-        // foreach (object skill in dict[allyType] as Array)
+        // foreach (Variant skill in dict[allyType] as Array)
         // {
         //     skills.Add(skill as SkillNodeResource);
         // }
@@ -135,7 +135,7 @@ public class SaveDataPlayer : Saveable
         {
             if (TotalExpRequiredForLevel(Level + 1) <= Experience)
             {
-                _instance._data["level"] = Convert.ToInt32(_instance._data["level"]) + 1;
+                _instance._data["level"] = _instance._data["level"].AsInt32() + 1;
                 SkillPoints += 1;
                 OnLevelUp?.Invoke(Level);
             }
@@ -169,7 +169,7 @@ public class SaveDataPlayer : Saveable
     {
         foreach (string key in _defaults.Keys)
         {
-            if (!_data.Contains(key))
+            if (!_data.ContainsKey(key))
             {
                 _data[key] = _defaults[key];
 
@@ -178,7 +178,7 @@ public class SaveDataPlayer : Saveable
                 //     foreach (DataAllyBoid boid in Database.AllyBoids.GetAllEntries<DataAllyBoid>())
                 //     {
                 //         Dictionary dict = _data[key] as Dictionary;
-                //         if (dict.Contains(boid.Name))
+                //         if (dict.ContainsKey(boid.Name))
                 //             continue;
                 //         
                 //         dict.Add(boid.Name, new Array());

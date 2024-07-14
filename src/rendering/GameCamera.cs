@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Godot;
 
-public class GameCamera : Camera
+public partial class GameCamera : Camera3D
 {
     public static GameCamera Instance;
 
@@ -19,14 +19,14 @@ public class GameCamera : Camera
 
     public static Action OnPostCameraTransformed;
     
-    public Transform BaseTransform;
+    public Transform3D BaseTransform;
     public Vector2 MousePosition => _cachedMousePos;
 
-    private OpenSimplexNoise _noise = new OpenSimplexNoise();
+    private FastNoiseLite _noise = new FastNoiseLite();
     private float _trauma = 0.0f;
     private float _noiseY = 0.0f;
-    private float _stateTransitionTimer;
-    private Transform _initialTrans;
+    private double _stateTransitionTimer;
+    private Transform3D _initialTrans;
     private Vector2 _cachedMousePos;
     private Vector2 _cachedMousePosOnTacticalPauseEnter;
     
@@ -44,8 +44,8 @@ public class GameCamera : Camera
         Vector2 pos = GetViewport().GetMousePosition();
         Vector3 origin = ProjectRayOrigin(pos);
         Vector3 normal = ProjectRayNormal(pos);
-        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
-        _cachedMousePos = new Vector2(hit.x, hit.z);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.Origin.Y;
+        _cachedMousePos = new Vector2(hit.X, hit.Z);
     }
 
     public Vector3 ProjectToZero(Vector2 screen)
@@ -55,28 +55,28 @@ public class GameCamera : Camera
     
     public Vector3 ProjectToY(Vector2 screen, float y)
     {
-        return ProjectPosition(screen, GlobalTransform.origin.y - y);
+        return ProjectPosition(screen, GlobalTransform.Origin.Y - y);
     }
     
     public Vector2 ScreenPosition(Vector2 screen)
     {
         Vector3 origin = ProjectRayOrigin(screen);
         Vector3 normal = ProjectRayNormal(screen);
-        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.origin.y;
-        return new Vector2(hit.x, hit.z);
+        Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * GlobalTransform.Origin.Y;
+        return new Vector2(hit.X, hit.Z);
     }
     
     public override void _Ready()
     {
         base._Ready();
 
-        _noise = new OpenSimplexNoise();
+        _noise = new FastNoiseLite();
 
-        MaxOffset = MaxOffset * GetViewport().Size;
+        MaxOffset = MaxOffset * DisplayServer.ScreenGetSize();
         GD.Randomize();
         _noise.Seed = (int) GD.Randi();
-        _noise.Period = 4;
-        _noise.Octaves = 2;
+        _noise.Frequency = 0.25f;
+        _noise.FractalOctaves = 2;
 
         _initialTrans = GlobalTransform;
     }
@@ -99,7 +99,7 @@ public class GameCamera : Camera
         Instance = null;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -109,15 +109,15 @@ public class GameCamera : Camera
         delta = TimeSystem.UnscaledDelta;
         
         // for clouds
-        Vector3 basePos = Game.Player.GlobalTransform.origin;
-        basePos.y = GlobalTransform.origin.y;
-        BaseTransform = new Transform(GlobalTransform.basis, basePos);
+        Vector3 basePos = Game.Player.GlobalTransform.Origin;
+        basePos.Y = GlobalTransform.Origin.Y;
+        BaseTransform = new Transform3D(GlobalTransform.Basis, basePos);
 
         // set camera transform based on state/transitions
         _stateTransitionTimer -= delta;
         if (_stateTransitionTimer > 0.0f)
         {
-            float t = Utils.Ease_CubicInOut(_stateTransitionTimer / _stateTransitionTime);
+            float t = (float) Utils.Ease_CubicInOut(_stateTransitionTimer / _stateTransitionTime);
             GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta).InterpolateWith(GetTransform(StateMachine_Game.PrevState, delta), t);
         }
         else
@@ -125,7 +125,7 @@ public class GameCamera : Camera
             GlobalTransform = GetTransform(StateMachine_Game.CurrentState, delta);
         }
 
-        Vector3 zoom = _initialTrans.origin;
+        Vector3 zoom = _initialTrans.Origin;
         if (Input.IsActionJustReleased("zoom_in"))
         {
             zoom += Vector3.Down * 5.0f;
@@ -135,21 +135,21 @@ public class GameCamera : Camera
             zoom += Vector3.Up * 5.0f;
         }
 
-        zoom.y = Mathf.Clamp(zoom.y, _minZoom, _maxZoom);
-        _initialTrans = new Transform(_initialTrans.basis, zoom);
+        zoom.Y = Mathf.Clamp(zoom.Y, _minZoom, _maxZoom);
+        _initialTrans = new Transform3D(_initialTrans.Basis, zoom);
         
         OnPostCameraTransformed?.Invoke();
     }
 
-    private Transform GetTransform(StateMachine_Game.States state, float delta)
+    private Transform3D GetTransform(StateMachine_Game.States state, double delta)
     {
         BoidAllyBase player = Game.Player;
         switch (state)
         {
             case StateMachine_Game.States.TacticalPause:
             {
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin));
-                cameraTransform.origin.y = _tacticalMapHeight;
+                Transform3D cameraTransform = new Transform3D(GlobalTransform.Basis, player.GlobalTransform.Origin);
+                cameraTransform.Origin.Y = _tacticalMapHeight;
 
                 return cameraTransform;
             }
@@ -157,18 +157,18 @@ public class GameCamera : Camera
             {
                 Vector2 cameraMouseOffset = MousePosition - player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.33f;
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin + cameraOffset.To3D()));
-                cameraTransform.origin.y = _initialTrans.origin.y;
+                Transform3D cameraTransform = new Transform3D(GlobalTransform.Basis, player.GlobalTransform.Origin + cameraOffset.To3D());
+                cameraTransform.Origin.Y = _initialTrans.Origin.Y;
                 
                 if (_trauma > 0.0f)
                 {
-                    _trauma = Mathf.Max(_trauma - Decay * delta, 0.0f);
+                    _trauma = (float) Mathf.Max(_trauma - Decay * delta, 0.0f);
                     float amount = Mathf.Pow(_trauma, TraumaPower);
-                    float rot = MaxRoll * amount * _noise.GetNoise2d(_noise.Seed, _noiseY);
+                    float rot = MaxRoll * amount * _noise.GetNoise2D(_noise.Seed, _noiseY);
                     Vector2 offset = new Vector2(0.0f, 0.0f);
-                    offset.x = MaxOffset.x * amount * _noise.GetNoise2d(_noise.Seed * 2.0f, _noiseY);
-                    offset.y = MaxOffset.y * amount * _noise.GetNoise2d(_noise.Seed * 3.0f, _noiseY);
-                    _noiseY += delta * 100.0f;
+                    offset.X = MaxOffset.X * amount * _noise.GetNoise2D(_noise.Seed * 2.0f, _noiseY);
+                    offset.Y = MaxOffset.Y * amount * _noise.GetNoise2D(_noise.Seed * 3.0f, _noiseY);
+                    _noiseY += (float)delta * 100.0f;
         
                     cameraTransform = cameraTransform.Translated(offset.To3D());
                 }
@@ -179,8 +179,8 @@ public class GameCamera : Camera
             {
                 Vector2 cameraMouseOffset = MousePosition - player.GlobalPosition;
                 Vector2 cameraOffset = cameraMouseOffset * 0.1f + Vector2.Right * 30.0f;
-                Transform cameraTransform = new Transform(GlobalTransform.basis, new Vector3(player.GlobalTransform.origin + cameraOffset.To3D()));
-                cameraTransform.origin.y = _initialTrans.origin.y * 0.5f;
+                Transform3D cameraTransform = new Transform3D(GlobalTransform.Basis, player.GlobalTransform.Origin + cameraOffset.To3D());
+                cameraTransform.Origin.Y = _initialTrans.Origin.Y * 0.5f;
 
                 return cameraTransform;
             }

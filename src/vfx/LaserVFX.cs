@@ -1,9 +1,8 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using GodotOnReady.Attributes;
 
-public partial class LaserVFX : Spatial
+public partial class LaserVFX : Node3D
 {
     [Export] public float ChargeTime = 1.0f;
     [Export] public float FireTime = 1.0f;
@@ -15,23 +14,23 @@ public partial class LaserVFX : Spatial
         Firing
     }
     
-    [OnReadyGet] private Particles _centre;
-    [OnReadyGet] private Particles _particles;
-    [OnReadyGet] private Particles _shoot1;
-    [OnReadyGet] private Particles _shoot2;
-    [OnReadyGet] private Particles _shoot3;
-    [OnReadyGet] private MeshInstance _laserMesh;
+    [Export] private GpuParticles3D _centre;
+    [Export] private GpuParticles3D _particles;
+    [Export] private GpuParticles3D _shoot1;
+    [Export] private GpuParticles3D _shoot2;
+    [Export] private GpuParticles3D _shoot3;
+    [Export] private MeshInstance3D _laserMesh;
 
     private State _state;
-    private float _timer;
-    private ParticlesMaterial _centreMat;
-    private ParticlesMaterial _particlesMat;
-    private List<Particles> _shootParticles = new List<Particles>();
+    private double _timer;
+    private ParticleProcessMaterial _centreMat;
+    private ParticleProcessMaterial _particlesMat;
+    private List<GpuParticles3D> _shootParticles = new List<GpuParticles3D>();
 
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
-        _centreMat = _centre.ProcessMaterial as ParticlesMaterial;
-        _particlesMat = _particles.ProcessMaterial as ParticlesMaterial;
+        _centreMat = _centre.ProcessMaterial as ParticleProcessMaterial;
+        _particlesMat = _particles.ProcessMaterial as ParticleProcessMaterial;
         
         _shootParticles.Add(_shoot1);
         _shootParticles.Add(_shoot2);
@@ -40,7 +39,7 @@ public partial class LaserVFX : Spatial
         Reset();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -50,18 +49,20 @@ public partial class LaserVFX : Spatial
         {
             case State.Charging:
             {
-                float t = Mathf.InverseLerp(0.0f, ChargeTime, _timer);
-                _centreMat.Scale = Mathf.Lerp(0.0f, 5.0f, t);
-                _centreMat.ScaleRandom = Mathf.Lerp(0.0f, 1.0f, t);
+                float t = (float)Mathf.InverseLerp(0.0f, ChargeTime, _timer);
+                _centreMat.ScaleMin = Mathf.Lerp(0.0f, 5.0f, t);
+                _centreMat.ScaleMax = Mathf.Lerp(0.0f, 6.0f, t);
                 _particlesMat.EmissionSphereRadius = Mathf.Lerp(1.0f, 5.0f, t);
-                _particlesMat.RadialAccel = Mathf.Lerp(-0.0f, -100.0f, t);
-                _particlesMat.Scale = Mathf.Lerp(0.05f, 0.3f, t);
+                _particlesMat.RadialAccelMin = Mathf.Lerp(-0.0f, -100.0f, t);
+                _particlesMat.RadialAccelMax = _particlesMat.RadialAccelMin;
+                _particlesMat.ScaleMin = Mathf.Lerp(0.05f, 0.3f, t);
+                _particlesMat.ScaleMax = _particlesMat.ScaleMin;
 
                 if (_timer > ChargeTime)
                 {
                     _centre.Visible = false;
                     _particles.Visible = false;
-                    foreach (Particles particle in _shootParticles)
+                    foreach (GpuParticles3D particle in _shootParticles)
                     {
                         particle.Emitting = true;
                         particle.Visible = true;
@@ -74,7 +75,7 @@ public partial class LaserVFX : Spatial
             }
             case State.Firing:
             {
-                float t = Mathf.InverseLerp(0.0f, FireTime, _timer);
+                float t = (float)Mathf.InverseLerp(0.0f, FireTime, _timer);
 
                 float scale = Mathf.Sin(t * Mathf.Pi);
                 _laserMesh.Scale = new Vector3(scale, 1.0f, scale);
@@ -106,7 +107,7 @@ public partial class LaserVFX : Spatial
         _centre.Visible = false;
         _particles.Visible = false;
         _laserMesh.Visible = false;
-        foreach (Particles particle in _shootParticles)
+        foreach (GpuParticles3D particle in _shootParticles)
         {
             particle.Visible = false;
         }

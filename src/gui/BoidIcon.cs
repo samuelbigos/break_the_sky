@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class BoidIcon : Control
+public partial class BoidIcon : Control
 {
     [Export] private NodePath _viewportPath;
     [Export] private NodePath _meshInstancePath;
@@ -12,7 +12,7 @@ public class BoidIcon : Control
 
     public Action<BoidIcon, ResourceBoid> OnPressed;
 
-    private MeshInstance _mesh;
+    private MeshInstance3D _mesh;
     private Button _button;
     private ProgressBar _progress;
     private ResourceBoid _boidData;
@@ -21,11 +21,11 @@ public class BoidIcon : Control
     {
         base._Ready();
 
-        _mesh = GetNode<MeshInstance>(_meshInstancePath);
+        _mesh = GetNode<MeshInstance3D>(_meshInstancePath);
         _button = GetNode<Button>(_buttonPath);
         _progress = GetNode<ProgressBar>(_progressPath);
 
-        _button.Connect("pressed", this, nameof(_OnPressed));
+        _button.Connect("pressed", new Callable(this, nameof(_OnPressed)));
         
         _progress.Visible = _showProgress;
     }
@@ -42,13 +42,13 @@ public class BoidIcon : Control
         _progress.Value = progress;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
         delta = TimeSystem.UnscaledDelta;
         
-        _mesh.RotateY(delta * _rotSpeed);
+        _mesh.RotateY((float)delta * _rotSpeed);
     }
 
     private void _OnPressed()

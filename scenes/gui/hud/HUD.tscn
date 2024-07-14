@@ -1,195 +1,159 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=6 format=3 uid="uid://dnekhyyujsm02"]
 
-[ext_resource path="res://scenes/gui/hud/WarningIndicator.tscn" type="PackedScene" id=1]
-[ext_resource path="res://src/gui/hud/HUD.cs" type="Script" id=2]
-[ext_resource path="res://scenes/gui/skills/SkillTree_Drone.tscn" type="PackedScene" id=3]
-[ext_resource path="res://assets/theme.tres" type="Theme" id=4]
-[ext_resource path="res://scenes/gui/BoidIcon.tscn" type="PackedScene" id=5]
+[ext_resource type="PackedScene" path="res://scenes/gui/hud/WarningIndicator.tscn" id="1"]
+[ext_resource type="Script" path="res://src/gui/hud/HUD.cs" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/gui/skills/SkillTree_Drone.tscn" id="3"]
+[ext_resource type="Theme" uid="uid://dyo3gbjfrx6m2" path="res://assets/theme.tres" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/gui/BoidIcon.tscn" id="5"]
 
-[node name="HUD" type="Spatial"]
-script = ExtResource( 2 )
-OpenSkillTreeButtonPath = NodePath("CanvasLayer/Level/VBoxContainer/Control/OpenResearchButton")
-LevelBarPath = NodePath("CanvasLayer/Level/VBoxContainer/LevelBar")
-ProgressLabelPath = NodePath("CanvasLayer/Level/VBoxContainer/Progress/ProgressLabel")
-LevelLabelPath = NodePath("CanvasLayer/Level/VBoxContainer/Progress/LevelLabel")
-TabUIContainerPath = NodePath("CanvasLayer/TabMenu")
-SkillPointsValuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/HBoxContainer/PointsValue")
-_warningIndicatorScene = ExtResource( 1 )
-_boidIconScene = ExtResource( 5 )
+[node name="HUD" type="Node3D" node_paths=PackedStringArray("_openSkillTreeButton", "_levelBar", "_progressLabel", "_levelLabel", "_tabUIContainer", "_skillPointsValue")]
+script = ExtResource("2")
+_warningIndicatorScene = ExtResource("1")
+_boidIconScene = ExtResource("5")
+_openSkillTreeButton = NodePath("CanvasLayer/Level/VBoxContainer/Control/OpenResearchButton")
+_levelBar = NodePath("CanvasLayer/Level/VBoxContainer/LevelBar")
+_progressLabel = NodePath("CanvasLayer/Level/VBoxContainer/Progress/ProgressLabel")
+_levelLabel = NodePath("CanvasLayer/Level/VBoxContainer/Progress/LevelLabel")
 _materialsValuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow/MaterialsValue")
+_tabUIContainer = NodePath("CanvasLayer/TabMenu/TabContainer")
 _fabicateMenuPath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateMenu")
 _fabricateQueuePath = NodePath("CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateQueue")
+_skillPointsValue = NodePath("CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/HBoxContainer/PointsLabel")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="TabMenu" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = -1
 anchor_left = 0.509
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -0.52002
-margin_top = 36.0
-margin_right = -42.0
-margin_bottom = -39.0
+offset_left = -0.52002
+offset_top = 36.0
+offset_right = -42.0
+offset_bottom = -39.0
 
 [node name="TabContainer" type="TabContainer" parent="CanvasLayer/TabMenu"]
-margin_right = 587.0
-margin_bottom = 645.0
+layout_mode = 2
 
-[node name="Fabricate" type="Tabs" parent="CanvasLayer/TabMenu/TabContainer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+[node name="Fabricate" type="TabBar" parent="CanvasLayer/TabMenu/TabContainer"]
+layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate"]
-margin_right = 40.0
-margin_bottom = 40.0
-custom_constants/margin_right = 10
-custom_constants/margin_top = 10
-custom_constants/margin_left = 10
-custom_constants/margin_bottom = 10
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 182.0
-margin_bottom = 151.0
+layout_mode = 2
 
 [node name="TopRow" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
-margin_right = 172.0
-margin_bottom = 33.0
+layout_mode = 2
 
 [node name="MaterialsLabel" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow"]
-margin_right = 152.0
-margin_bottom = 33.0
-theme = ExtResource( 4 )
+layout_mode = 2
+theme = ExtResource("4")
 text = "Materials:"
 
 [node name="MaterialsValue" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/TopRow"]
-margin_left = 156.0
-margin_right = 172.0
-margin_bottom = 33.0
-theme = ExtResource( 4 )
+layout_mode = 2
+theme = ExtResource("4")
 text = "0"
 
 [node name="FabricateQueue" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
-margin_top = 37.0
-margin_right = 172.0
-margin_bottom = 137.0
+layout_mode = 2
 
 [node name="Spacer" type="Control" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer/FabricateQueue"]
-margin_bottom = 100.0
-rect_min_size = Vector2( 0, 100 )
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
 
 [node name="FabricateMenu" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Fabricate/MarginContainer/VBoxContainer"]
-margin_top = 141.0
-margin_right = 172.0
-margin_bottom = 141.0
+layout_mode = 2
 
-[node name="Research" type="Tabs" parent="CanvasLayer/TabMenu/TabContainer"]
+[node name="Research" type="TabBar" parent="CanvasLayer/TabMenu/TabContainer"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/TabMenu/TabContainer/Research"]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/margin_right = 10
-custom_constants/margin_top = 10
-custom_constants/margin_left = 10
-custom_constants/margin_bottom = 10
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 569.0
-margin_bottom = 599.0
+layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer"]
-margin_right = 559.0
-margin_bottom = 33.0
+layout_mode = 2
 
 [node name="PointsLabel" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/HBoxContainer"]
-margin_right = 108.0
-margin_bottom = 33.0
-theme = ExtResource( 4 )
+layout_mode = 2
+theme = ExtResource("4")
 text = "Points: "
 
 [node name="PointsValue" type="Label" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 112.0
-margin_right = 144.0
-margin_bottom = 33.0
-theme = ExtResource( 4 )
+layout_mode = 2
+theme = ExtResource("4")
 text = "99"
 
 [node name="TabContainer" type="TabContainer" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer"]
-margin_top = 37.0
-margin_right = 559.0
-margin_bottom = 589.0
+layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Drone" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/TabContainer" instance=ExtResource( 3 )]
+[node name="Drone" parent="CanvasLayer/TabMenu/TabContainer/Research/MarginContainer/VBoxContainer/TabContainer" instance=ExtResource("3")]
+layout_mode = 2
 
 [node name="Level" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = -268.5
-margin_top = -88.0
-margin_right = 268.5
-custom_constants/margin_right = 10
-custom_constants/margin_top = 10
-custom_constants/margin_left = 10
-custom_constants/margin_bottom = 10
+offset_left = -268.5
+offset_top = -88.0
+offset_right = 268.5
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Level"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 527.0
-margin_bottom = 82.0
+layout_mode = 2
 
 [node name="Control" type="CenterContainer" parent="CanvasLayer/Level/VBoxContainer"]
-margin_right = 517.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 0, 50 )
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 
 [node name="OpenResearchButton" type="Button" parent="CanvasLayer/Level/VBoxContainer/Control"]
 visible = false
-margin_left = 151.0
-margin_top = 15.0
-margin_right = 366.0
-margin_bottom = 35.0
+layout_mode = 2
 text = "Press [Tab] to spend skill points"
 
 [node name="LevelBar" type="ProgressBar" parent="CanvasLayer/Level/VBoxContainer"]
-margin_top = 54.0
-margin_right = 517.0
-margin_bottom = 68.0
+layout_mode = 2
 max_value = 1.0
 
 [node name="Progress" type="Control" parent="CanvasLayer/Level/VBoxContainer"]
-margin_top = 72.0
-margin_right = 517.0
-margin_bottom = 72.0
+layout_mode = 2
 
 [node name="ProgressLabel" type="Label" parent="CanvasLayer/Level/VBoxContainer/Progress"]
-margin_top = -18.0
-margin_right = 517.0
-margin_bottom = -4.0
+layout_mode = 0
+offset_top = -18.0
+offset_right = 517.0
+offset_bottom = -4.0
 text = "x / x"
 
 [node name="LevelLabel" type="Label" parent="CanvasLayer/Level/VBoxContainer/Progress"]
-margin_top = -18.0
-margin_right = 517.0
-margin_bottom = -4.0
+layout_mode = 0
+offset_top = -18.0
+offset_right = 517.0
+offset_bottom = -4.0
 text = "Level: 0"
-align = 2
 
 [node name="Line2D" type="Line2D" parent="."]

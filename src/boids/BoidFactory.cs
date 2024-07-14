@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Xml;
 using ImGuiNET;
 
-public class BoidFactory : Singleton<BoidFactory>
+public partial class BoidFactory : Singleton<BoidFactory>
 {
     public List<BoidBase> AllBoids => _allBoids;
     public List<BoidBase> DestroyedBoids => _destroyedBoids;
@@ -25,7 +25,7 @@ public class BoidFactory : Singleton<BoidFactory>
         SceneTransitionManager.OnSceneTransitionInitiated += _OnSceneChanged;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
         
@@ -48,7 +48,7 @@ public class BoidFactory : Singleton<BoidFactory>
 
     public BoidEnemyBase CreateEnemyBoid(ResourceBoidEnemy boid, Vector2 pos, Vector2 vel)
     {
-        BoidEnemyBase enemy = boid.Scene.Instance<BoidEnemyBase>();
+        BoidEnemyBase enemy = boid.Scene.Instantiate<BoidEnemyBase>();
         Game.Instance.AddChild(enemy);
         enemy.Init(boid, _OnBoidDestroyed, pos, vel);
         
@@ -64,7 +64,7 @@ public class BoidFactory : Singleton<BoidFactory>
         if (_allyBoids.Count >= SaveDataPlayer.MaxAllyCount)
             return null;
             
-        BoidAllyBase ally = resourceBoid.Scene.Instance<BoidAllyBase>();
+        BoidAllyBase ally = resourceBoid.Scene.Instantiate<BoidAllyBase>();
         Game.Instance.AddChild(ally);
 
         Vector2 pos = Game.Player.GlobalPosition + Utils.RandV2() * 1.0f;

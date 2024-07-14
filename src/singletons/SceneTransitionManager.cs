@@ -1,6 +1,6 @@
 using System;
 
-public class SceneTransitionManager : Singleton<SceneTransitionManager>
+public partial class SceneTransitionManager : Singleton<SceneTransitionManager>
 {
     public static Action OnSceneTransitionInitiated;
 

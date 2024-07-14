@@ -1,25 +1,24 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using GodotOnReady.Attributes;
 
-public partial class BoidTestbed : Spatial
+public partial class BoidTestbed : Node3D
 {
-    [OnReadyGet] private MeshInstance _boidsMesh;
-    [OnReadyGet] private Camera _camera;
+    [Export] private MeshInstance3D _boidsMesh;
+    [Export] private Camera3D _camera;
     
     [Export] private Rect2 _playArea;
     
     private List<int> _boidIds = new();
     private List<int> _obstacleIds = new();
     
-    [OnReady] private void Ready()
+    public override void _Ready()
     {
         // Vector2 screenBounds = GetViewport().Size - Vector2.One * 20.0f;
         // Vector3 origin = _camera.ProjectRayOrigin(screenBounds);
         // Vector3 normal = _camera.ProjectRayNormal(screenBounds);
-        // Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
-        // Rect2 edgeBounds = new Rect2(-hit.x, -hit.z, hit.x * 2.0f, hit.z * 2.0f);
+        // Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.Origin.Y;
+        // Rect2 edgeBounds = new Rect2(-hit.X, -hit.Z, hit.X * 2.0f, hit.Z * 2.0f);
         //
         // edgeBounds = _playArea;
         // SteeringManager.EdgeBounds = _playArea;
@@ -229,7 +228,7 @@ public partial class BoidTestbed : Spatial
         // Engine.TimeScale = 1.0f;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -243,8 +242,8 @@ public partial class BoidTestbed : Spatial
                     Vector2 pos = GetViewport().GetMousePosition();
                     Vector3 origin = _camera.ProjectRayOrigin(pos);
                     Vector3 normal = _camera.ProjectRayNormal(pos);
-                    Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.origin.y;
-                    Vector2 target = new(hit.x, hit.z);
+                    Vector3 hit = origin + normal * (1.0f / Vector3.Down.Dot(normal)) * _camera.GlobalTransform.Origin.Y;
+                    Vector2 target = new(hit.X, hit.Z);
                     boid.Target = target.ToNumerics();
                     //SteeringManager.Instance.SetBoid(boid);
                 }

@@ -1,3 +1,3 @@
-public class BulletBeacon : Bullet
+public partial class BulletBeacon : Bullet
 {
 }

@@ -1,9 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=4 format=3 uid="uid://dxxch43m2c8uj"]
 
-[ext_resource path="res://src/singletons/FabricateManager.cs" type="Script" id=1]
-[ext_resource path="res://assets/data/boids/allies/boid_ally_drone.tres" type="Resource" id=2]
-[ext_resource path="res://assets/data/boids/allies/boid_ally_bomber.tres" type="Resource" id=3]
+[ext_resource type="Script" path="res://src/singletons/FabricateManager.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/boids/allies/boid_ally_drone.tres" id="2"]
+[ext_resource type="Resource" path="res://assets/data/boids/allies/boid_ally_bomber.tres" id="3"]
 
 [node name="FabricateManager" type="Node"]
-script = ExtResource( 1 )
-_fabricantPool = [ ExtResource( 2 ), ExtResource( 3 ) ]
+script = ExtResource("1")
+_fabricantPool = [ExtResource("2"), ExtResource("3")]
