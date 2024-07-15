@@ -1,39 +1,50 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://c04g8x65g2ckj"]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/ships/human_a/a.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://src/boids/enemy/BoidEnemyShieldbearer.cs" type="Script" id=3]
-[ext_resource path="res://assets/data/stats/enemies/stats_enemy_shieldbearer.tres" type="Resource" id=4]
-[ext_resource path="res://scenes/abilities/Forcefield.tscn" type="PackedScene" id=5]
+[ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://s7tuk1ihrje1" path="res://assets/mesh/ships/human_a/a.obj" id="2"]
+[ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyShieldbearer.cs" id="3"]
+[ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_shieldbearer.tres" id="4"]
+[ext_resource type="PackedScene" uid="uid://bewma4exmvawa" path="res://scenes/abilities/Forcefield.tscn" id="5"]
 
-[sub_resource type="CapsuleShape3D" id=1]
-radius = 3.65646
-height = 3.84362
+[sub_resource type="CapsuleShape3D" id="1"]
+radius = 3.16089
+height = 11.3661
 
-[sub_resource type="BoxShape3D" id=2]
-extents = Vector3( 2.91563, 2.75, 5.67688 )
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(5.83126, 5.5, 11.3538)
 
-[node name="BoidEnemyShieldbearer" instance=ExtResource( 1 )]
-script = ExtResource( 3 )
-_behaviours = 4126
-_steeringRadius = 10.0
-MaxVelocity = 50.0
-MaxForce = 50.0
-_baseResourceStats = ExtResource( 4 )
+[node name="BoidEnemyShieldbearer" instance=ExtResource("1")]
+script = ExtResource("3")
+_forcefieldScene = ExtResource("5")
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 100.0
 SeekPlayerOnSpawn = true
-_forcefieldScene = ExtResource( 5 )
+_behaviours = 4126
+_steeringRadius = 10.0
+_mass = 1.0
+MaxVelocity = 50.0
+MinVelocity = 0.0
+MaxForce = 50.0
+FieldOfView = 360.0
+Bank360 = false
+BankingRate = 2.5
+BankingAmount = 2.5
+_hitVfxDuration = 1.0
+_flashVfxDuration = 0.0333333
+_baseResourceStats = ExtResource("4")
+_damageVfxCount = 2
 
 [node name="ShipCollider" parent="." index="0"]
-shape = SubResource( 1 )
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("1")
 
 [node name="RBCollider" parent="." index="1"]
-shape = SubResource( 2 )
+shape = SubResource("2")
 
 [node name="Mesh" parent="." index="2"]
-mesh = ExtResource( 2 )
+mesh = ExtResource("2")
 
 [node name="BoidTrail" parent="Mesh" index="0"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0395321, -0.852419, -6.29935 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0395321, -0.852419, -6.29935)
+_type = 0

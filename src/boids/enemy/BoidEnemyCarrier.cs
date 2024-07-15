@@ -33,6 +33,8 @@ public partial class BoidEnemyCarrier : BoidEnemyBase
 
     public override void _Ready()
     {
+        base._Ready();
+        
         for (int i = 0; i < _turretPaths.Count; i++)
         {
             _turrets.Add(GetNode<Turret>(_turretPaths[i]));

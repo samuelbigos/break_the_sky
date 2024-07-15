@@ -4,14 +4,14 @@
 [ext_resource type="Material" path="res://assets/material/antigrav.tres" id="2"]
 [ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyLancer.cs" id="3"]
 [ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_lancer.tres" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/Bullet.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://bo7b6umg7xy4s" path="res://scenes/abilities/Bullet.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/BoidTrailVFX.tscn" id="6"]
 [ext_resource type="ArrayMesh" uid="uid://1pculj01lmso" path="res://assets/mesh/ships/human_lancer/lancer_antigrav.obj" id="7"]
 [ext_resource type="ArrayMesh" uid="uid://d2irdh4vjjja6" path="res://assets/mesh/ships/human_lancer/lancer_body.obj" id="8"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-radius = 0.61111
-height = 1.22222
+radius = 2.13093
+height = 10.969
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(6.10008, 6.27996, 9.1166)
@@ -33,7 +33,7 @@ MaxForce = 75.0
 _baseResourceStats = ExtResource("4")
 
 [node name="ShipCollider" parent="." index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.583147)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.583147)
 shape = SubResource("1")
 
 [node name="RBCollider" parent="." index="1"]
@@ -48,6 +48,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.711902, -0.852419, -3.9460
 
 [node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource("6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.710839, -0.84196, -3.93529)
+_type = null
 _burstParticlesPath = NodePath("../BoidTrail/Particles")
 
 [node name="Antigrav" type="MeshInstance3D" parent="Mesh" index="2"]

@@ -87,7 +87,7 @@ void sum_hit(inout float o_dent, inout float o_ripple, vec4 hit)
 void vertex()
 {
 	v_cam = (INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-	v_normal = NORMAL;
+	v_normal = normalize(NORMAL);
 	
 	// hit effect
 	float dent = 0.0;
@@ -153,4 +153,9 @@ void fragment()
 	
 	ALBEDO = col;
 	ALPHA = (edge + u_fill) * v_destroy;
+}
+
+void light()
+{
+	
 }

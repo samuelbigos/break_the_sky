@@ -28,25 +28,24 @@
 shading_mode = 0
 vertex_color_use_as_albedo = true
 
-[sub_resource type="PlaneMesh" id="8"]
-size = Vector2(1, 1)
-subdivide_width = 100
-subdivide_depth = 100
-
-[sub_resource type="BoxShape3D" id="15"]
-
 [sub_resource type="QuadMesh" id="7"]
 
-[node name="Game" type="Node3D" node_paths=PackedStringArray("_stateMachine", "_aiSpawningDirector", "_hud", "_sand", "_outlineViewport", "_outlineMesh", "_directionalLight")]
+[sub_resource type="PlaneMesh" id="PlaneMesh_uu1pw"]
+size = Vector2(1000, 1000)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_16com"]
+size = Vector3(1000, 0.1, 1000)
+
+[node name="Game" type="Node3D" node_paths=PackedStringArray("_stateMachine", "_aiSpawningDirector", "_hud", "_outlineViewport", "_outlineMesh", "_directionalLight", "_ground")]
 script = ExtResource("2")
 _stateMachine = NodePath("StateMachine_Game")
 _aiSpawningDirector = NodePath("Singletons/AISpawningDirector")
 _hud = NodePath("HUD")
-_sand = NodePath("Rendering/Ground")
 _outlineViewport = NodePath("OutlineBufferViewport")
 _outlineMesh = NodePath("Outline")
 _outlineShader = ExtResource("2_n1abl")
 _directionalLight = NodePath("DirectionalLight3D")
+_ground = NodePath("Ground")
 _areaRect = Rect2(-500, -500, 500, 500)
 _playerData = ExtResource("2_ibe1j")
 
@@ -58,15 +57,6 @@ script = ExtResource("9")
 [node name="AISpawningDirector" type="Node" parent="Singletons"]
 script = ExtResource("5")
 _enabled = false
-_intensityWavelength = null
-_intensityWavelengthScaling = null
-_intensityAmplitude = null
-_intensityAmplitudeScaling = null
-_intensityOffset = null
-_intensityOffsetScale = null
-_baseBudget = null
-_levelScale = null
-_swarmRampUpTime = null
 _firstEnemy = ExtResource("12")
 _enemyBoidPool = [ExtResource("12"), ExtResource("36"), ExtResource("6"), ExtResource("27"), ExtResource("28"), ExtResource("29"), ExtResource("30")]
 
@@ -89,28 +79,12 @@ script = ExtResource("8")
 _lineSegmentSize = 3.0
 _lineSpeed = 25.0
 
-[node name="Ground" type="MeshInstance3D" parent="Rendering"]
-transform = Transform3D(1000, 0, 0, 0, 1, 0, 0, 0, 1000, 0, -100, 0)
-cast_shadow = 0
-mesh = SubResource("8")
-skeleton = NodePath("../..")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="Rendering/Ground" groups=["ground"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Rendering/Ground/StaticBody3D"]
-transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
-shape = SubResource("15")
-
 [node name="HuskRenderer" type="Node3D" parent="Rendering"]
 script = ExtResource("34")
-_maxChunks = null
-_vertsPerChunk = null
-_indicesPerChunk = null
 _huskMaterial = ExtResource("35")
 
 [node name="GameCamera" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 200, 0)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 150, 0)
 cull_mask = 1047553
 environment = ExtResource("7")
 current = true
@@ -132,10 +106,6 @@ directional_shadow_max_distance = 1000.0
 [node name="HUD" parent="." instance=ExtResource("1")]
 
 [node name="Cursor" parent="." instance=ExtResource("31")]
-BaseRadius = null
-TotalPips = null
-RotSpeed = null
-YFromCamera = null
 
 [node name="Outline" type="MeshInstance3D" parent="."]
 extra_cull_margin = 16384.0
@@ -154,3 +124,12 @@ size = 300.0
 near = 10.0
 far = 1000.0
 script = ExtResource("32")
+
+[node name="Ground" type="StaticBody3D" parent="." groups=["ground"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -100, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_uu1pw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_16com")

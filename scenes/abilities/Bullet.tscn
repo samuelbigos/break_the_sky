@@ -1,31 +1,32 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://bo7b6umg7xy4s"]
 
-[ext_resource path="res://assets/material/bullet.material" type="Material" id=1]
-[ext_resource path="res://assets/shader/outline_buffer.gdshader" type="Shader" id=2]
-[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=3]
-[ext_resource path="res://src/abilities/Bullet.cs" type="Script" id=4]
+[ext_resource type="Material" path="res://assets/material/bullet.material" id="1"]
+[ext_resource type="Shader" path="res://assets/shader/outline_buffer.gdshader" id="2"]
+[ext_resource type="Script" path="res://src/rendering/MultiViewportMeshInstance.cs" id="3"]
+[ext_resource type="Script" path="res://src/abilities/Bullet.cs" id="4"]
 
-[sub_resource type="SphereShape3D" id=1]
+[sub_resource type="SphereShape3D" id="1"]
 
-[sub_resource type="CapsuleMesh" id=2]
+[sub_resource type="CapsuleMesh" id="2"]
 flip_faces = true
 radial_segments = 16
 
-[sub_resource type="ShaderMaterial" id=3]
-shader = ExtResource( 2 )
-shader_param/u_outline_colour = null
+[sub_resource type="ShaderMaterial" id="3"]
+render_priority = 0
+shader = ExtResource("2")
+shader_parameter/u_outline_colour = null
 
-[node name="Bullet" type="Area3D"]
-script = ExtResource( 4 )
-MeshPath = NodePath("Mesh")
+[node name="Bullet" type="Area3D" node_paths=PackedStringArray("_mesh")]
+script = ExtResource("4")
+_mesh = NodePath("Mesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource( 1 )
+shape = SubResource("1")
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
-material_override = ExtResource( 1 )
-mesh = SubResource( 2 )
-script = ExtResource( 3 )
+material_override = ExtResource("1")
+mesh = SubResource("2")
+script = ExtResource("3")
 _numExtraMeshes = 1
-_meshLayers = [ 2 ]
-_meshMaterials = [ SubResource( 3 ) ]
+_meshLayers = [2]
+_meshMaterials = [SubResource("3")]

@@ -1,7 +1,7 @@
 using Godot;
 using Godot.Collections;
 
-[Tool]
+//[Tool]
 public partial class SkillNodeConnectionGraph : Control
 {
     public override void _Process(double delta)

@@ -4,34 +4,44 @@
 [ext_resource type="ArrayMesh" uid="uid://bmsx7pw3xh2cm" path="res://assets/mesh/ships/human_wasp/wasp_body.obj" id="2"]
 [ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyWasp.cs" id="3"]
 [ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_wasp.tres" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/SeekerMissile.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://b6k3w1n4gipeo" path="res://scenes/abilities/SeekerMissile.tscn" id="5"]
 [ext_resource type="ArrayMesh" uid="uid://pp42mlprfmwe" path="res://assets/mesh/ships/human_wasp/wasp_antigrav.obj" id="6"]
 [ext_resource type="Material" path="res://assets/material/antigrav.tres" id="7"]
-[ext_resource type="Material" uid="uid://bqv6wig020okj" path="res://assets/material/boid.material" id="8"]
+[ext_resource type="Material" uid="uid://bhh4lnh1jp4ua" path="res://assets/material/boid.material" id="8"]
 [ext_resource type="ArrayMesh" uid="uid://batqobpvff3hh" path="res://assets/mesh/ships/human_wasp/wasp_turret.obj" id="9"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-radius = 0.96618
-height = 1.93236
+radius = 3.32975
+height = 11.1086
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(8.60994, 6.21706, 11.2669)
 
-[node name="BoidEnemyWasp" instance=ExtResource("1")]
+[node name="BoidEnemyWasp" node_paths=PackedStringArray("_weaponPosition") instance=ExtResource("1")]
 script = ExtResource("3")
-_behaviours = 30
-MaxVelocity = 50.0
-MaxForce = 75.0
-Bank360 = true
 _bulletScene = ExtResource("5")
+_weaponPosition = NodePath("WeaponPosition")
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 100.0
 SeekPlayerOnSpawn = true
+_behaviours = 30
+_steeringRadius = 5.0
+_mass = 1.0
+MaxVelocity = 50.0
+MinVelocity = 0.0
+MaxForce = 75.0
+FieldOfView = 360.0
+Bank360 = true
+BankingRate = 2.5
+BankingAmount = 2.5
+_hitVfxDuration = 1.0
+_flashVfxDuration = 0.0333333
 _baseResourceStats = ExtResource("4")
+_damageVfxCount = 2
 
 [node name="ShipCollider" parent="." index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.724571)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.724571)
 shape = SubResource("1")
 
 [node name="RBCollider" parent="." index="1"]

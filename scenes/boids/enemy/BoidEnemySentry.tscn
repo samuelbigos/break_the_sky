@@ -3,12 +3,12 @@
 [ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
 [ext_resource type="Script" path="res://src/boids/enemy/BoidEnemySentry.cs" id="2"]
 [ext_resource type="ArrayMesh" uid="uid://cf22ejvd7gnaq" path="res://assets/mesh/ships/human_sentry/sentry_body.obj" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/Bullet.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://bo7b6umg7xy4s" path="res://scenes/abilities/Bullet.tscn" id="4"]
 [ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_sentry.tres" id="5"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-radius = 0.313397
-height = 0.626794
+radius = 2.89776
+height = 7.02705
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(7.55908, 6.30734, 7.53996)

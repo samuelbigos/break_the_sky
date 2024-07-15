@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-[Tool]
+//[Tool]
 public partial class ResourceSkillNode : Resource
 {
     [Export] public Texture2D Icon;

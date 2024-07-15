@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Godot;
 using Godot.Collections;
 
-[Tool]
+//[Tool]
 public partial class SkillNode : Button
 {
     [Export] public bool IsRoot;

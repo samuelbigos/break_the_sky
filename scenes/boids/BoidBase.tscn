@@ -4,15 +4,13 @@
 [ext_resource type="PackedScene" path="res://scenes/vfx/BoidTrailVFX.tscn" id="2"]
 [ext_resource type="Material" uid="uid://cyol8qeynxtti" path="res://assets/material/outline_buffer.material" id="3"]
 [ext_resource type="Script" path="res://src/boids/BoidBase.cs" id="4"]
-[ext_resource type="Material" uid="uid://bqv6wig020okj" path="res://assets/material/boid.material" id="5"]
+[ext_resource type="Material" uid="uid://bhh4lnh1jp4ua" path="res://assets/material/boid.material" id="5"]
 [ext_resource type="AudioStream" uid="uid://ddui4eviu1gs3" path="res://assets/sfx/hit1.wav" id="6"]
 [ext_resource type="AudioStream" uid="uid://03krh5nss5ix" path="res://assets/sfx/hit2.wav" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/PickupMaterial.tscn" id="10"]
 [ext_resource type="ArrayMesh" uid="uid://btcbj4xyyer4k" path="res://assets/mesh/ui/selection_circle.obj" id="12"]
 
 [sub_resource type="CapsuleShape3D" id="10"]
-radius = 6.92402
-height = 24.2838
 
 [sub_resource type="BoxShape3D" id="9"]
 size = Vector3(14.1391, 7.58562, 35.518)
@@ -25,7 +23,7 @@ script = ExtResource("4")
 _behaviours = 2159
 _steeringRadius = null
 _mass = null
-MaxVelocity = 250.0
+MaxVelocity = null
 MinVelocity = null
 MaxForce = null
 FieldOfView = null

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bof0moywyxpig"]
 
 [ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/BulletMicro.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://5gwy4c1fa7d0" path="res://scenes/abilities/BulletMicro.tscn" id="2"]
 [ext_resource type="Script" path="res://src/boids/ally/BoidAllyBase.cs" id="4"]
 [ext_resource type="AudioStream" uid="uid://dtqm5aywn5gx5" path="res://assets/sfx/shot_micro.wav" id="5"]
 
@@ -14,6 +14,18 @@ _destroyTrauma = 0.1
 _microBulletScene = ExtResource("2")
 _engageRange = 0.0
 _sfxShootMicro = NodePath("SFXShootMicro")
+_steeringRadius = 5.0
+_mass = 1.0
+MaxVelocity = 500.0
+MinVelocity = 0.0
+MaxForce = 150.0
+FieldOfView = 360.0
+Bank360 = false
+BankingRate = 2.5
+BankingAmount = 2.5
+_hitVfxDuration = 1.0
+_flashVfxDuration = 0.0333333
+_damageVfxCount = 2
 
 [node name="SFXShootMicro" type="AudioStreamPlayer2D" parent="." index="5"]
 stream = ExtResource("5")

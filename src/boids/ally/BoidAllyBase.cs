@@ -63,22 +63,9 @@ public partial class BoidAllyBase : BoidBase
         {
             DoPlayerInput();
         }
-        
-        switch (_aiState)
+        else
         {
-            case AIState.None:
-                SwitchAiState(AIState.Idle);
-                break;
-            case AIState.Stationed:
-                AcquireTarget();
-                break;
-            case AIState.Idle:
-                AcquireTarget();
-                break;
-            case AIState.Engaged:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            DoAIInput();
         }
 
         ProcessMicroturrets(delta);
@@ -118,6 +105,26 @@ public partial class BoidAllyBase : BoidBase
                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.Stop, true);
                 SetSteeringBehaviourEnabled(SteeringManager.Behaviours.DesiredVelocityOverride, false);
             }
+        }
+    }
+
+    private void DoAIInput()
+    {
+        switch (_aiState)
+        {
+            case AIState.None:
+                SwitchAiState(AIState.Idle);
+                break;
+            case AIState.Stationed:
+                AcquireTarget();
+                break;
+            case AIState.Idle:
+                AcquireTarget();
+                break;
+            case AIState.Engaged:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 

@@ -147,7 +147,7 @@ public partial class HUD : Singleton<HUD>
     {
         edgePosition = Vector2.Zero;
         Vector2 screenPos = GameCamera.Instance.UnprojectPosition(boid.GlobalTransform.Origin);
-        Vector2 screen = DisplayServer.ScreenGetSize();
+        Vector2 screen = DisplayServer.WindowGetSize();
 
         if (screenPos.X < 0.0f || screenPos.X > screen.X || screenPos.Y < 0.0f || screenPos.Y > screen.Y)
         {

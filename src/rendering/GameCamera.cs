@@ -72,7 +72,7 @@ public partial class GameCamera : Camera3D
 
         _noise = new FastNoiseLite();
 
-        MaxOffset = MaxOffset * DisplayServer.ScreenGetSize();
+        MaxOffset = MaxOffset * DisplayServer.WindowGetSize();
         GD.Randomize();
         _noise.Seed = (int) GD.Randi();
         _noise.Frequency = 0.25f;

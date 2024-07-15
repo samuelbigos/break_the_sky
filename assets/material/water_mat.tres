@@ -1,8 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=2]
-
-[ext_resource path="res://assets/shader/water.gdshader" type="Shader" id=1]
-
-[resource]
-resource_local_to_scene = true
-shader = ExtResource( 1 )
-shader_param/u_water_col = Color( 0, 0.905882, 1, 1 )

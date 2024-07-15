@@ -34,6 +34,8 @@ public partial class BoidEnemyLaser : BoidEnemyBase
 
     public override void _Ready()
     {
+        base._Ready();
+        
         _laserArea = GetNode<Area3D>(_laserAreaPath);
         _sfxLaserCharge = GetNode<AudioStreamPlayer2D>(_sfxLaserChargeNode);
         _sfxLaserFire = GetNode<AudioStreamPlayer2D>(_sfxLaserFireNode);

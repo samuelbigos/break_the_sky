@@ -1,100 +1,100 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=12 format=3 uid="uid://c4nicrjclsfcr"]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mesh/ships/human_carrier/carrier_antigrav.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://src/boids/enemy/BoidEnemyCarrier.cs" type="Script" id=3]
-[ext_resource path="res://assets/mesh/ships/human_carrier/carrier_body.obj" type="ArrayMesh" id=4]
-[ext_resource path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" type="Resource" id=5]
-[ext_resource path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" type="Resource" id=6]
-[ext_resource path="res://assets/material/antigrav.tres" type="Material" id=7]
-[ext_resource path="res://scenes/abilities/Turret.tscn" type="PackedScene" id=8]
-[ext_resource path="res://assets/flowfields/circle.res" type="Resource" id=9]
-[ext_resource path="res://assets/material/boid.material" type="Material" id=10]
+[ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://cn5ytvtmwqbn4" path="res://assets/mesh/ships/human_carrier/carrier_antigrav.obj" id="2"]
+[ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyCarrier.cs" id="3"]
+[ext_resource type="ArrayMesh" uid="uid://don1ma7vg7ihd" path="res://assets/mesh/ships/human_carrier/carrier_body.obj" id="4"]
+[ext_resource type="Resource" path="res://assets/data/boids/enemies/boid_enemy_shieldbearer.tres" id="5"]
+[ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_carrier.tres" id="6"]
+[ext_resource type="Material" path="res://assets/material/antigrav.tres" id="7"]
+[ext_resource type="PackedScene" uid="uid://cy2t6f8ymh3bd" path="res://scenes/abilities/Turret.tscn" id="8"]
+[ext_resource type="Resource" path="res://assets/flowfields/circle.res" id="9"]
 
-[sub_resource type="CapsuleShape3D" id=1]
-radius = 6.92402
-height = 24.2838
+[sub_resource type="CapsuleShape3D" id="1"]
+radius = 9.79419
+height = 39.3878
 
-[sub_resource type="BoxShape3D" id=2]
-extents = Vector3( 7.06956, 3.79281, 17.759 )
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(14.1391, 7.58562, 35.518)
 
-[node name="BoidEnemyCarrier" instance=ExtResource( 1 )]
-script = ExtResource( 3 )
+[node name="BoidEnemyCarrier" instance=ExtResource("1")]
+script = ExtResource("3")
+_turretPaths = [NodePath("Mesh/Turret1"), NodePath("Mesh/Turret2"), NodePath("Mesh/Turret3"), NodePath("Mesh/Turret4"), NodePath("Mesh/Turret5"), NodePath("Mesh/Turret6")]
+_dronePulseCooldown = 2.0
+_droneSpawnInterval = 1.0
+_dronePulseCount = 10
+_droneSpawnRange = 750.0
+_gunTrackSpeed = 2.0
+_minion = ExtResource("5")
+_minionFlowField = ExtResource("9")
+DestroyTrauma = 0.1
+HitTrauma = 0.05
+EngageRange = 150.0
+SeekPlayerOnSpawn = true
 _behaviours = 0
 _steeringRadius = 25.0
 _mass = 5.0
 MaxVelocity = 25.0
 MinVelocity = 10.0
 MaxForce = 25.0
+FieldOfView = 360.0
 Bank360 = true
 BankingRate = 1.0
 BankingAmount = 1.0
-_baseResourceStats = ExtResource( 6 )
+_hitVfxDuration = 1.0
+_flashVfxDuration = 0.0333333
+_baseResourceStats = ExtResource("6")
 _damageVfxCount = 10
-DestroyTrauma = 0.1
-HitTrauma = 0.05
-EngageRange = 150.0
-_turretPaths = [ NodePath("Mesh/Turret1"), NodePath("Mesh/Turret2"), NodePath("Mesh/Turret3"), NodePath("Mesh/Turret4"), NodePath("Mesh/Turret5"), NodePath("Mesh/Turret6") ]
-_dronePulseCooldown = 2.0
-_droneSpawnInterval = 1.0
-_dronePulseCount = 10
-_droneSpawnRange = 750.0
-_gunTrackSpeed = 2.0
-_minion = ExtResource( 5 )
-_minionFlowField = ExtResource( 9 )
 
 [node name="ShipCollider" parent="." index="0"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.58213 )
-shape = SubResource( 1 )
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.58213)
+shape = SubResource("1")
 
 [node name="RBCollider" parent="." index="1"]
-shape = SubResource( 2 )
+shape = SubResource("2")
 
 [node name="Mesh" parent="." index="2"]
-mesh = ExtResource( 4 )
+mesh = ExtResource("4")
+
+[node name="BoidTrail" parent="Mesh" index="0"]
+_type = 0
 
 [node name="AntiGrav" type="MeshInstance3D" parent="Mesh" index="1"]
-material_override = ExtResource( 7 )
-mesh = ExtResource( 2 )
+material_override = ExtResource("7")
+mesh = ExtResource("2")
 
-[node name="Turret1" parent="Mesh" index="2" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499 )
-material_override = ExtResource( 10 )
+[node name="Turret1" parent="Mesh" index="2" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, -9.53674e-07, 3.83499)
 ClampRangeDeg = 150.0
 
-[node name="Turret2" parent="Mesh" index="3" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499 )
-material_override = ExtResource( 10 )
+[node name="Turret2" parent="Mesh" index="3" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, -9.53674e-07, 3.83499)
 ClampRangeDeg = 150.0
 
-[node name="Turret3" parent="Mesh" index="4" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, 1.02147, -2.97812 )
-material_override = ExtResource( 10 )
+[node name="Turret3" parent="Mesh" index="4" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.68905, 1.02147, -2.97812)
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0
 
-[node name="Turret4" parent="Mesh" index="5" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, 1.01012, -2.97917 )
-material_override = ExtResource( 10 )
+[node name="Turret4" parent="Mesh" index="5" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51253, 1.01012, -2.97917)
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
-[node name="Turret5" parent="Mesh" index="6" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8.73603, -0.578, -7.43053 )
-material_override = ExtResource( 10 )
+[node name="Turret5" parent="Mesh" index="6" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.73603, -0.578, -7.43053)
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = -90.0
 ClampRangeDeg = 150.0
 
-[node name="Turret6" parent="Mesh" index="7" instance=ExtResource( 8 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.95714, -0.577606, -7.64544 )
-material_override = ExtResource( 10 )
+[node name="Turret6" parent="Mesh" index="7" instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.95714, -0.577606, -7.64544)
 skeleton = NodePath("../Turret4")
 ClampOffsetDeg = 90.0
 ClampRangeDeg = 150.0
 
 [node name="SpawnLeft" type="Node3D" parent="." index="5"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.2879, 0, 0)
 
 [node name="SpawnRight" type="Node3D" parent="." index="6"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4215, 0, 0)

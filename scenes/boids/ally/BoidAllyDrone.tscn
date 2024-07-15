@@ -1,8 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://5t13kondfc68"]
+[gd_scene load_steps=15 format=3 uid="uid://5t13kondfc68"]
 
 [ext_resource type="Script" path="res://src/boids/ally/BoidAllyDrone.cs" id="1"]
-[ext_resource type="Material" uid="uid://bqv6wig020okj" path="res://assets/material/boid.material" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/Bullet.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bo7b6umg7xy4s" path="res://scenes/abilities/Bullet.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://bof0moywyxpig" path="res://scenes/boids/ally/BoidAllyBase.tscn" id="4"]
 [ext_resource type="ArrayMesh" uid="uid://bl48vojjao5hb" path="res://assets/mesh/ships/alien_drone_b/alien_drone_b_rotor.obj" id="5"]
 [ext_resource type="Resource" path="res://assets/data/stats/allies/stats_ally_drone.tres" id="6"]
@@ -10,77 +9,47 @@
 [ext_resource type="ArrayMesh" uid="uid://c1e4ibe58p47b" path="res://assets/mesh/ships/alien_drone_b/alien_drone_b_body.obj" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/vfx/BoidTrailVFX.tscn" id="9"]
 [ext_resource type="Shader" path="res://assets/shader/outline_buffer.gdshader" id="10"]
-[ext_resource type="Texture2D" uid="uid://bef2xp7u7rpv7" path="res://assets/textures/boids/diffuse.jpeg" id="11"]
-[ext_resource type="Texture2D" uid="uid://bku0jvhiksuqu" path="res://assets/textures/boids/material.jpeg" id="12"]
-[ext_resource type="Shader" path="res://assets/shader/boid.gdshader" id="13"]
 
-[sub_resource type="CapsuleShape3D" id="10"]
-radius = 0.001
-height = 0.002
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_du13r"]
+radius = 2.0
+height = 8.0
 
 [sub_resource type="BoxShape3D" id="11"]
 size = Vector3(5.98082, 3.42508, 5.35508)
-
-[sub_resource type="ShaderMaterial" id="9"]
-render_priority = 0
-shader = ExtResource("13")
-shader_parameter/albedo = Color(1, 1, 1, 1)
-shader_parameter/specular = 0.5
-shader_parameter/metallic = 0.5
-shader_parameter/roughness = 1.0
-shader_parameter/point_size = 1.0
-shader_parameter/metallic_texture_channel = null
-shader_parameter/uv1_scale = Vector3(1, 1, 1)
-shader_parameter/uv1_offset = Vector3(0, 0, 0)
-shader_parameter/uv2_scale = Vector3(1, 1, 1)
-shader_parameter/uv2_offset = Vector3(0, 0, 0)
-shader_parameter/u_hits = 0
-shader_parameter/u_centre = null
-shader_parameter/u_hit_pos = Vector3(0, 0, 0)
-shader_parameter/u_hit_time = null
-shader_parameter/u_hit_radius = 5.0
-shader_parameter/u_hit_duration = 1.0
-shader_parameter/u_flash_duration = 0.033
-shader_parameter/u_hit_col_0 = null
-shader_parameter/u_hit_col_1 = null
-shader_parameter/u_hit_col_2 = null
-shader_parameter/u_hit_col_3 = null
-shader_parameter/u_hit_col_4 = null
-shader_parameter/texture_albedo = ExtResource("11")
-shader_parameter/texture_metallic = ExtResource("12")
 
 [sub_resource type="ShaderMaterial" id="8"]
 render_priority = 0
 shader = ExtResource("10")
 shader_parameter/u_outline_colour = Color(1, 1, 1, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ims7e"]
+
 [sub_resource type="StandardMaterial3D" id="4"]
 shading_mode = 0
 
 [node name="BoidAllyDrone" node_paths=PackedStringArray("_rotorMesh", "_sfxShoot") instance=ExtResource("4")]
 script = ExtResource("1")
-_behaviours = 534
-MaxVelocity = 75.0
-_engageRange = 50.0
 _bulletScene = ExtResource("3")
 _rotorSpinSpeed = 25.0
+_rotorMesh = NodePath("Mesh/Rotor")
+_sfxShoot = NodePath("SFXShoot")
+_engageRange = 50.0
+_behaviours = 534
 _mass = 0.5
+MaxVelocity = 75.0
 MaxForce = 100.0
 Bank360 = true
 BankingRate = 5.0
 BankingAmount = 1.75
 _baseResourceStats = ExtResource("6")
-_rotorMesh = NodePath("Mesh/Rotor")
-_sfxShoot = NodePath("SFXShoot")
 
 [node name="ShipCollider" parent="." index="0"]
-shape = SubResource("10")
+shape = SubResource("CapsuleShape3D_du13r")
 
 [node name="RBCollider" parent="." index="1"]
 shape = SubResource("11")
 
 [node name="Mesh" parent="." index="2"]
-material_override = SubResource("9")
 mesh = ExtResource("8")
 _meshMaterials = [SubResource("8")]
 
@@ -91,12 +60,12 @@ _lineWidth = 0.33
 
 [node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource("9")]
 transform = Transform3D(0.99883, 0, -0.0483617, 0, 1, 0, 0.0483617, 0, 0.99883, -1.8734, -0.117465, -1.64957)
+_type = null
 _lineInterval = 0.016
 _lineWidth = 0.33
-_type = null
 
 [node name="Rotor" type="MeshInstance3D" parent="Mesh" index="2"]
-material_override = ExtResource("2")
+material_override = SubResource("ShaderMaterial_ims7e")
 mesh = ExtResource("5")
 
 [node name="SFXShoot" type="AudioStreamPlayer2D" parent="." index="6"]

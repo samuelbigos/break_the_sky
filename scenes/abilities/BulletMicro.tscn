@@ -1,14 +1,14 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3 uid="uid://5gwy4c1fa7d0"]
 
-[ext_resource path="res://scenes/abilities/Bullet.tscn" type="PackedScene" id=2]
+[ext_resource type="PackedScene" uid="uid://bo7b6umg7xy4s" path="res://scenes/abilities/Bullet.tscn" id="2"]
 
-[sub_resource type="CapsuleMesh" id=1]
+[sub_resource type="CapsuleMesh" id="1"]
 resource_local_to_scene = true
 radius = 0.25
 radial_segments = 8
 rings = 4
 
-[node name="BulletMicro" instance=ExtResource( 2 )]
+[node name="BulletMicro" instance=ExtResource("2")]
 
 [node name="Mesh" parent="." index="1"]
-mesh = SubResource( 1 )
+mesh = SubResource("1")

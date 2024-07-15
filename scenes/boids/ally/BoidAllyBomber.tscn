@@ -4,17 +4,17 @@
 [ext_resource type="PackedScene" uid="uid://bof0moywyxpig" path="res://scenes/boids/ally/BoidAllyBase.tscn" id="2"]
 [ext_resource type="ArrayMesh" uid="uid://dwuaj5h3tue3x" path="res://assets/mesh/ships/alien_drone_a/alien_drone_a_body.obj" id="3"]
 [ext_resource type="AudioStream" uid="uid://b1gaee7eyhlcu" path="res://assets/sfx/shot2.wav" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/BulletBomber.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://2qmfb3scscws" path="res://scenes/abilities/BulletBomber.tscn" id="6"]
 [ext_resource type="Resource" path="res://assets/data/stats/allies/stats_ally_bomber.tres" id="7"]
 
-[sub_resource type="CapsuleShape3D" id="1"]
-radius = 1.16063
-height = 2.32126
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_l7q3y"]
+radius = 2.17028
+height = 7.5273
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(6.56026, 6.84632, 7.75464)
 
-[node name="BoidAllyBomber" instance=ExtResource("2")]
+[node name="BoidAllyBomber" node_paths=PackedStringArray("_sfxShoot") instance=ExtResource("2")]
 script = ExtResource("1")
 _bulletScene = ExtResource("6")
 _targetAcquireRadius = 300.0
@@ -22,6 +22,7 @@ _resupplyRadius = 50.0
 _shootRange = 75.0
 _shootTargetAlignment = 0.5
 _fleeTime = 0.5
+_sfxShoot = NodePath("SFXShoot")
 _engageRange = 100.0
 _behaviours = 1438
 _mass = 0.5
@@ -34,7 +35,7 @@ _baseResourceStats = ExtResource("7")
 
 [node name="ShipCollider" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.460993)
-shape = SubResource("1")
+shape = SubResource("CapsuleShape3D_l7q3y")
 
 [node name="RBCollider" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.460993)

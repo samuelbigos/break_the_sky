@@ -38,7 +38,7 @@ public partial class FlowFieldCreator : Node3D
     {
         _vectors = new Vector2[(int)_fieldSize.X, (int)_fieldSize.Y];
 
-        Vector2I iSize = DisplayServer.ScreenGetSize();
+        Vector2I iSize = DisplayServer.WindowGetSize();
         Vector2 size = new Vector2(iSize.X, iSize.Y); 
         _cellSize = size.Y / _fieldSize.Y;
         

@@ -9,6 +9,8 @@ public partial class BoidEnemyShieldbearer : BoidEnemyBase
 
     public override void _Ready()
     {
+        base._Ready();
+        
         _forcefield = _forcefieldScene.Instantiate<Forcefield>();
         AddChild(_forcefield);
         _forcefield.Init(Alignment, this, 25.0f, _resourceStats.MaxHealth);

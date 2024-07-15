@@ -103,7 +103,7 @@ public partial class Forcefield : Area3D
             _forcefieldMat.SetShaderParameter($"u_hits", numAddedInShader);
         }
 
-        _activeTimer += delta * 0.1f;
+        _activeTimer += delta;
         
         _forcefieldMat.SetShaderParameter($"u_active_timer", _activeTimer);
         if (_parentBoid != null)

@@ -44,8 +44,3 @@ void fragment()
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
 }
-
-void light()
-{
-	
-}

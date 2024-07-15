@@ -6,20 +6,20 @@
 [ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_floater.tres" id="4"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-radius = 0.313397
-height = 0.626794
+radius = 4.72318
+height = 12.774
 
 [sub_resource type="SphereShape3D" id="2"]
 radius = 4.7346
 
 [node name="BoidEnemyFloater" instance=ExtResource("1")]
 script = ExtResource("2")
-_behaviours = 2062
-MaxVelocity = 50.0
 DestroyTrauma = 0.1
 HitTrauma = 0.05
 EngageRange = 100.0
 SeekPlayerOnSpawn = false
+_behaviours = 2062
+MaxVelocity = 50.0
 MaxForce = 50.0
 _baseResourceStats = ExtResource("4")
 _damageVfxCount = 3
@@ -38,4 +38,3 @@ mesh = ExtResource("3")
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.063448, 0, -0.0634489)
 visible = false
-_type = null

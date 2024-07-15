@@ -27,6 +27,8 @@ public partial class BoidAllyBomber : BoidAllyBase
 
     public override void _Ready()
     {
+        base._Ready();
+        
         Resupply();
     }
 

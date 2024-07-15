@@ -1,90 +1,91 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=17 format=3 uid="uid://cf2mbpwscse6b"]
 
-[ext_resource path="res://scenes/boids/BoidBase.tscn" type="PackedScene" id=1]
-[ext_resource path="res://src/boids/enemy/BoidEnemyLaser.cs" type="Script" id=2]
-[ext_resource path="res://assets/sfx/laser_charge.wav" type="AudioStream" id=3]
-[ext_resource path="res://assets/sfx/laser_fire.wav" type="AudioStream" id=4]
-[ext_resource path="res://assets/mesh/ships/human_laser/laser_turret.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/mesh/ships/human_laser/laser_antigrav.obj" type="ArrayMesh" id=6]
-[ext_resource path="res://assets/mesh/ships/human_laser/laser_body.obj" type="ArrayMesh" id=7]
-[ext_resource path="res://assets/material/spatial_red.material" type="Material" id=8]
-[ext_resource path="res://assets/mesh/ui/warning_zone_line.obj" type="ArrayMesh" id=9]
-[ext_resource path="res://assets/material/antigrav.tres" type="Material" id=10]
-[ext_resource path="res://assets/data/stats/enemies/stats_enemy_laser.tres" type="Resource" id=11]
-[ext_resource path="res://scenes/vfx/LaserVFX.tscn" type="PackedScene" id=12]
-[ext_resource path="res://assets/material/boid.material" type="Material" id=13]
+[ext_resource type="PackedScene" uid="uid://cndgrycgqwr2l" path="res://scenes/boids/BoidBase.tscn" id="1"]
+[ext_resource type="Script" path="res://src/boids/enemy/BoidEnemyLaser.cs" id="2"]
+[ext_resource type="AudioStream" uid="uid://cem2ntsmrfvk6" path="res://assets/sfx/laser_charge.wav" id="3"]
+[ext_resource type="AudioStream" uid="uid://56x8llon7lxg" path="res://assets/sfx/laser_fire.wav" id="4"]
+[ext_resource type="ArrayMesh" uid="uid://7kcdalbkertn" path="res://assets/mesh/ships/human_laser/laser_turret.obj" id="5"]
+[ext_resource type="ArrayMesh" uid="uid://b6bmpracvkqhl" path="res://assets/mesh/ships/human_laser/laser_antigrav.obj" id="6"]
+[ext_resource type="ArrayMesh" uid="uid://x21xnneu3f3g" path="res://assets/mesh/ships/human_laser/laser_body.obj" id="7"]
+[ext_resource type="Material" path="res://assets/material/spatial_red.material" id="8"]
+[ext_resource type="ArrayMesh" uid="uid://c8wfdrxiu4nbt" path="res://assets/mesh/ui/warning_zone_line.obj" id="9"]
+[ext_resource type="Material" path="res://assets/material/antigrav.tres" id="10"]
+[ext_resource type="Resource" path="res://assets/data/stats/enemies/stats_enemy_laser.tres" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/LaserVFX.tscn" id="12"]
+[ext_resource type="Material" uid="uid://bhh4lnh1jp4ua" path="res://assets/material/boid.material" id="13"]
 
-[sub_resource type="CapsuleShape3D" id=2]
-radius = 6.92402
-height = 9.3375
+[sub_resource type="CapsuleShape3D" id="2"]
+radius = 5.63161
+height = 24.9149
 
-[sub_resource type="BoxShape3D" id=3]
-extents = Vector3( 7.06956, 2.8672, 10.7243 )
+[sub_resource type="BoxShape3D" id="3"]
+size = Vector3(14.1391, 5.7344, 21.4486)
 
-[sub_resource type="BoxShape3D" id=1]
-extents = Vector3( 2.5, 5, 250 )
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(5, 10, 500)
 
-[node name="BoidEnemyLaser" instance=ExtResource( 1 )]
-script = ExtResource( 2 )
+[node name="BoidEnemyLaser" instance=ExtResource("1")]
+script = ExtResource("2")
+_sfxLaserChargeNode = NodePath("SFXLaserCharge")
+_sfxLaserFireNode = NodePath("SFXLaserFire")
+_laserAreaPath = NodePath("Mesh/Turret/LaserArea")
+GunTrackSpeed = 2.0
+DestroyTrauma = 0.1
+HitTrauma = 0.05
+EngageRange = 200.0
+SeekPlayerOnSpawn = true
 _behaviours = 14
 _steeringRadius = 15.0
 _mass = 2.5
 MaxVelocity = 25.0
 MaxForce = 25.0
-_baseResourceStats = ExtResource( 11 )
-DestroyTrauma = 0.1
-HitTrauma = 0.05
-EngageRange = 200.0
-LaserWarningMeshPath = NodePath("Mesh/Turret/LaserWarningMesh")
-GunMeshPath = NodePath("Mesh/Turret")
-VfxPath = NodePath("Mesh/Turret/LaserVFX")
-_sfxLaserChargeNode = NodePath("SFXLaserCharge")
-_sfxLaserFireNode = NodePath("SFXLaserFire")
-_laserAreaPath = NodePath("Mesh/Turret/LaserArea")
-GunTrackSpeed = 2.0
+_baseResourceStats = ExtResource("11")
 
 [node name="ShipCollider" parent="." index="0"]
-shape = SubResource( 2 )
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("2")
 
 [node name="RBCollider" parent="." index="1"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811162, 0 )
-shape = SubResource( 3 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811162, 0)
+shape = SubResource("3")
 
 [node name="Mesh" parent="." index="2"]
-mesh = ExtResource( 7 )
+mesh = ExtResource("7")
 
 [node name="AntiGrav" type="MeshInstance3D" parent="Mesh" index="1"]
-material_override = ExtResource( 10 )
-mesh = ExtResource( 6 )
+material_override = ExtResource("10")
+mesh = ExtResource("6")
 skeleton = NodePath("../..")
 
 [node name="Turret" type="MeshInstance3D" parent="Mesh" index="2"]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.28752 )
-material_override = ExtResource( 13 )
-mesh = ExtResource( 5 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.28752)
+material_override = ExtResource("13")
+mesh = ExtResource("5")
 skeleton = NodePath("../..")
 
-[node name="LaserVFX" parent="Mesh/Turret" index="0" instance=ExtResource( 12 )]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479 )
+[node name="LaserVFX" parent="Mesh/Turret" index="0" instance=ExtResource("12")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.196566, 4.40678, 8.67479)
+ChargeTime = null
+FireTime = null
 
 [node name="LaserWarningMesh" type="MeshInstance3D" parent="Mesh/Turret" index="1"]
-transform = Transform3D( -2, 0, -1.74846e-07, 0, 2, 0, 1.74846e-07, 0, -2, 0, 0, 13.5693 )
+transform = Transform3D(-2, 0, -1.74846e-07, 0, 2, 0, 1.74846e-07, 0, -2, 0, 0, 13.5693)
 visible = false
-material_override = ExtResource( 8 )
+material_override = ExtResource("8")
 cast_shadow = 0
-mesh = ExtResource( 9 )
+mesh = ExtResource("9")
 skeleton = NodePath("../../..")
 
 [node name="LaserArea" type="Area3D" parent="Mesh/Turret" index="2" groups=["laser"]]
-transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 250 )
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 250)
 monitoring = false
 monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Mesh/Turret/LaserArea" index="0"]
-shape = SubResource( 1 )
+shape = SubResource("1")
 
 [node name="SFXLaserCharge" type="AudioStreamPlayer2D" parent="." index="5"]
-stream = ExtResource( 3 )
+stream = ExtResource("3")
 
 [node name="SFXLaserFire" type="AudioStreamPlayer2D" parent="." index="6"]
-stream = ExtResource( 4 )
+stream = ExtResource("4")

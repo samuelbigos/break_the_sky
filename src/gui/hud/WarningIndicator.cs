@@ -5,10 +5,9 @@ public partial class WarningIndicator : Node3D
 {
     [Export] private float _flashDistance;
     [Export] private float _flashTime;
-    [Export] private NodePath _meshPath;
+    [Export] private MeshInstance3D _mesh;
+    [Export] private StandardMaterial3D _mat;
     
-    private MeshInstance3D _mesh;
-    private StandardMaterial3D _mat;
     private int _flashState;
     private float _flashingTimer;
     
@@ -18,10 +17,7 @@ public partial class WarningIndicator : Node3D
     {
         base._Ready();
 
-        _mesh = GetNode<MeshInstance3D>(_meshPath);
-        Debug.Assert(_mesh != null);
-        _mat = _mesh.GetSurfaceOverrideMaterial(0) as StandardMaterial3D;
-        Debug.Assert(_mat != null);
+        _mesh.MaterialOverride = _mat;
         _mat.AlbedoColor = ColourManager.Instance.Red;
     }
 

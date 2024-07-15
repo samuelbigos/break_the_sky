@@ -1,53 +1,50 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=11 format=3 uid="uid://b6k3w1n4gipeo"]
 
-[ext_resource path="res://scenes/vfx/BoidTrailVFX.tscn" type="PackedScene" id=1]
-[ext_resource path="res://scenes/vfx/ExplodeVFX.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/abilities/SeekerMissile.cs" type="Script" id=3]
-[ext_resource path="res://assets/sfx/shot2.wav" type="AudioStream" id=4]
-[ext_resource path="res://src/rendering/MultiViewportMeshInstance.cs" type="Script" id=5]
-[ext_resource path="res://assets/shader/outline_buffer.gdshader" type="Shader" id=6]
-[ext_resource path="res://assets/material/bullet.material" type="Material" id=7]
+[ext_resource type="PackedScene" path="res://scenes/vfx/BoidTrailVFX.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/ExplodeVFX.tscn" id="2"]
+[ext_resource type="Script" path="res://src/abilities/SeekerMissile.cs" id="3"]
+[ext_resource type="AudioStream" uid="uid://b1gaee7eyhlcu" path="res://assets/sfx/shot2.wav" id="4"]
+[ext_resource type="Script" path="res://src/rendering/MultiViewportMeshInstance.cs" id="5"]
+[ext_resource type="Shader" path="res://assets/shader/outline_buffer.gdshader" id="6"]
+[ext_resource type="Material" path="res://assets/material/bullet.material" id="7"]
 
-[sub_resource type="CapsuleShape3D" id=1]
+[sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.713931
 
-[sub_resource type="CapsuleMesh" id=2]
-radius = 0.5
+[sub_resource type="CapsuleMesh" id="2"]
 height = 2.5
 radial_segments = 8
 rings = 2
 
-[sub_resource type="ShaderMaterial" id=3]
-shader = ExtResource( 6 )
-shader_param/u_outline_colour = null
+[sub_resource type="ShaderMaterial" id="3"]
+render_priority = 0
+shader = ExtResource("6")
+shader_parameter/u_outline_colour = null
 
-[node name="SeekerMissile" type="Area3D"]
-script = ExtResource( 3 )
-MeshPath = NodePath("Mesh")
-LaunchSfxPath = NodePath("SFXLaunch")
-TrailPath = NodePath("Mesh/BoidTrail")
-CollisionShapePath = NodePath("CollisionShape3D")
-_maxSpeed = 100.0
-_maxForce = 75.0
-_explodeVfx = ExtResource( 2 )
+[node name="SeekerMissile" type="Area3D" node_paths=PackedStringArray("_mesh", "_launchSfx", "_trail", "_collisionShape")]
+script = ExtResource("3")
+_mesh = NodePath("Mesh")
+_launchSfx = NodePath("SFXLaunch")
+_trail = NodePath("Mesh/BoidTrail")
+_collisionShape = NodePath("CollisionShape3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource( 1 )
+shape = SubResource("1")
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
-material_override = ExtResource( 7 )
-mesh = SubResource( 2 )
-script = ExtResource( 5 )
+material_override = ExtResource("7")
+mesh = SubResource("2")
+script = ExtResource("5")
 _numExtraMeshes = 1
-_meshLayers = [ 2 ]
-_meshMaterials = [ SubResource( 3 ) ]
+_meshLayers = [2]
+_meshMaterials = [SubResource("3")]
 
-[node name="BoidTrail" parent="Mesh" instance=ExtResource( 1 )]
-transform = Transform3D( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.00265479, -0.0101357, -2.2351 )
+[node name="BoidTrail" parent="Mesh" instance=ExtResource("1")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.00265479, -0.0101357, -2.2351)
 _type = 1
 
 [node name="SFXLaunch" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource( 4 )
+stream = ExtResource("4")
 volume_db = -20.0
 
-[node name="ParticlesExplode" parent="." instance=ExtResource( 2 )]
+[node name="ParticlesExplode" parent="." instance=ExtResource("2")]

@@ -6,11 +6,11 @@ public partial class Game : Singleton<Game>
     [Export] public StateMachine_Game _stateMachine { get; set; }
     [Export] public AISpawningDirector _aiSpawningDirector { get; set; }
     [Export] private HUD _hud;
-    [Export] private MeshInstance3D _sand;
     [Export] private SubViewport _outlineViewport;
     [Export] private MeshInstance3D _outlineMesh;
     [Export] private ShaderMaterial _outlineShader;
     [Export] private DirectionalLight3D _directionalLight;
+    [Export] private StaticBody3D _ground;
 
     [Export] private Rect2 _areaRect;
     [Export] private ResourceBoidAlly _playerData;
@@ -59,7 +59,7 @@ public partial class Game : Singleton<Game>
 
     private void _OnWindowSizeChanged()
     {
-        _outlineViewport.Size = DisplayServer.ScreenGetSize();
+        _outlineViewport.Size = DisplayServer.WindowGetSize();
     }
 
     public override void _ExitTree()
@@ -71,18 +71,8 @@ public partial class Game : Singleton<Game>
 
     private void OnPostCameraTransformed()
     {
-        // scale and position sand
-        {
-            Vector3 topLeft = GameCamera.Instance.ProjectToY(new Vector2(0.0f, 0.0f), _sand.GlobalTransform.Origin.Y);
-            Vector3 bottomRight = GameCamera.Instance.ProjectToY(DisplayServer.ScreenGetSize(), _sand.GlobalTransform.Origin.Y);
-            _sand.Scale = new Vector3(bottomRight.X - topLeft.X, 1.0f, bottomRight.Z - topLeft.Z);
-            Vector3 pos = GameCamera.Instance.GlobalTransform.Origin;
-            pos.Y = _sand.GlobalTransform.Origin.Y;
-            _sand.GlobalPosition(pos);
-        }
-
         // Keep the shadow max distance at the distance between camera and ground, to maximise shadow resolution.
-        _directionalLight.DirectionalShadowMaxDistance = GameCamera.Instance.GlobalTransform.Origin.Y - _sand.GlobalTransform.Origin.Y;
+        _directionalLight.DirectionalShadowMaxDistance = GameCamera.Instance.GlobalTransform.Origin.Y - _ground.GlobalTransform.Origin.Y;
     }
 
     public void RegisterPickup(PickupMaterial pickup)

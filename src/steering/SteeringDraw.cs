@@ -117,7 +117,7 @@ public partial class SteeringManager
         {
             float flowFieldVisCellSize = 10.0f;
             Vector2 topLeft = GameCamera.Instance.ScreenPosition(Godot.Vector2.Zero).ToNumerics();
-            Vector2 botRight = GameCamera.Instance.ScreenPosition(DisplayServer.ScreenGetSize()).ToNumerics();
+            Vector2 botRight = GameCamera.Instance.ScreenPosition(DisplayServer.WindowGetSize()).ToNumerics();
 
             for (float x = topLeft.X; x < botRight.X; x += flowFieldVisCellSize)
             {
