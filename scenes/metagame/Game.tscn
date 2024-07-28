@@ -57,6 +57,15 @@ script = ExtResource("9")
 [node name="AISpawningDirector" type="Node" parent="Singletons"]
 script = ExtResource("5")
 _enabled = false
+_intensityWavelength = null
+_intensityWavelengthScaling = null
+_intensityAmplitude = null
+_intensityAmplitudeScaling = null
+_intensityOffset = null
+_intensityOffsetScale = null
+_baseBudget = null
+_levelScale = null
+_swarmRampUpTime = null
 _firstEnemy = ExtResource("12")
 _enemyBoidPool = [ExtResource("12"), ExtResource("36"), ExtResource("6"), ExtResource("27"), ExtResource("28"), ExtResource("29"), ExtResource("30")]
 
@@ -81,6 +90,9 @@ _lineSpeed = 25.0
 
 [node name="HuskRenderer" type="Node3D" parent="Rendering"]
 script = ExtResource("34")
+_maxChunks = null
+_vertsPerChunk = null
+_indicesPerChunk = null
 _huskMaterial = ExtResource("35")
 
 [node name="GameCamera" type="Camera3D" parent="."]

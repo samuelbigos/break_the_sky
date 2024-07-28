@@ -472,6 +472,7 @@ public partial class SteeringManager : Singleton<SteeringManager>
         ImGui.Spacing();
         ImGui.Checkbox("Draw", ref _draw);
         ImGui.Checkbox("Draw Separation", ref _drawSeparation);
+        ImGui.Checkbox("Draw Arrive", ref _drawArrive);
         ImGui.Checkbox("Draw Steering", ref _drawSteering);
         ImGui.Checkbox("Draw Velocity", ref _drawVelocity);
         ImGui.Checkbox("Draw Vision", ref _drawVision);

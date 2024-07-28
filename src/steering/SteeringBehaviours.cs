@@ -37,7 +37,7 @@ public partial class SteeringManager
             desired = desired.Rot90() * boid.MaxSpeed * Mathf.Sign(Utils.Rng.Randf() - 0.5f);
         }
 
-        desired.SetMag(limit >= 0.0 ? limit : boid.MaxSpeed);
+        desired.SetMag(limit >= 0.0 ? limit : boid.Velocity.Length() + boid.MaxForce);
 
         Vector2 force = desired - boid.Velocity;
         return force;

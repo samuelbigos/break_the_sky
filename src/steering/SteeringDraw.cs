@@ -9,6 +9,7 @@ public partial class SteeringManager
 {
     private bool _draw = false;
     private bool _drawSeparation = true;
+    private bool _drawArrive = true;
     private bool _drawSteering = true;
     private bool _drawVelocity = true;
     private bool _drawVision = false;
@@ -63,6 +64,13 @@ public partial class SteeringManager
             {
                 Utils.Line(boidPos, boidPos + boid.Velocity.To3D() * 25.0f / boid.MaxSpeed, Colors.Red, ref v, ref i,
                     _vertList, _colList, _indexList);
+            }
+            
+            // arrive radius and deadzone
+            if (_drawArrive)
+            {
+                Utils.Circle(boidPos, 32, boid.ArriveDeadzone, Colors.Green, ref v, ref i, _vertList, _colList, _indexList);
+                Utils.Circle(boidPos, 32, boid.ArriveRadius, Colors.DarkGreen, ref v, ref i, _vertList, _colList, _indexList);
             }
 
             if (_drawSteering)

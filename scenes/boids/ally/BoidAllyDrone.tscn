@@ -37,7 +37,7 @@ _engageRange = 50.0
 _behaviours = 534
 _mass = 0.5
 MaxVelocity = 75.0
-MaxForce = 100.0
+MaxForce = 10.0
 Bank360 = true
 BankingRate = 5.0
 BankingAmount = 1.75
@@ -55,12 +55,12 @@ _meshMaterials = [SubResource("8")]
 
 [node name="BoidTrail" parent="Mesh" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.78836, -0.117465, -1.63363)
+_type = 0
 _lineInterval = 0.016
 _lineWidth = 0.33
 
 [node name="BoidTrail2" parent="Mesh" index="1" instance=ExtResource("9")]
 transform = Transform3D(0.99883, 0, -0.0483617, 0, 1, 0, 0.0483617, 0, 0.99883, -1.8734, -0.117465, -1.64957)
-_type = null
 _lineInterval = 0.016
 _lineWidth = 0.33
 
